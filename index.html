@@ -330,21 +330,6 @@
             top: 0;
             left: 0;
         }
-        /* Image loading skeleton */
-        .product-img .image-skeleton {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, #1A1A1A 25%, #2A2A2A 50%, #1A1A1A 75%);
-            background-size: 200% 100%;
-            animation: skeletonLoading 1.5s infinite;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-        @keyframes skeletonLoading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
         .product-img i { 
             font-size: clamp(40px, 13vw, 70px); 
             color: #D4AF37;
@@ -657,17 +642,6 @@
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
-        
-        /* Loading spinner for products */
-        .products-loading {
-            text-align: center;
-            padding: 60px;
-            color: #D4AF37;
-        }
-        .products-loading i {
-            font-size: 40px;
-            margin-bottom: 15px;
-        }
     </style>
 </head>
 <body>
@@ -698,7 +672,7 @@
 <div class="marquee-wrapper">
     <div class="marquee-line">
         <marquee behavior="scroll" direction="left" scrollamount="4" onmouseover="this.stop();" onmouseout="this.start();">
-            <i class="fas fa-truck"></i> 🚚 FREE SHIPPING WORLDWIDE 🚚 <i class="fas fa-tags"></i> 🏷️ 40% OFF SITEWIDE 🏷️ <i class="fas fa-rupee-sign"></i> 💰 CASH ON DELIVERY AVAILABLE 💰 <i class="fas fa-undo-alt"></i> 🔄 30-DAY EASY RETURNS 🔄
+            <i class="fas fa-truck"></i> 🚚 FREE SHIPPING WORLDWIDE 🚚 <i class="fas fa-tags"></i> 🏷️ 40% OFF SITEWIDE 🏷️ <i class="fas fa-rupee-sign"></i> 💰 CASH ON DELIVERY AVAILABLE 💰 <i class="fas fa-undo-alt"></i> 🔄 15-DAY EASY RETURNS 🔄
         </marquee>
     </div>
     <div class="marquee-line">
@@ -734,12 +708,7 @@
         <div class="section-title"><i class="fas fa-crown"></i> PREMIUM COLLECTION</div>
         <div id="resultCount" style="color:#D4AF37;">0 products</div>
     </div>
-    <div id="productsContainer" class="products-grid">
-        <div class="products-loading">
-            <i class="fas fa-spinner fa-pulse"></i><br>
-            Loading products...
-        </div>
-    </div>
+    <div id="productsContainer" class="products-grid"></div>
 
     <div class="view-more-container">
         <button class="view-more-btn" id="viewMoreBtn">VIEW MORE +</button>
@@ -766,7 +735,7 @@
     <div class="features-grid">
         <div class="feature-premium"><i class="fas fa-money-bill-wave"></i><h4>💰 Cash on Delivery</h4><p>Pay only when you receive</p></div>
         <div class="feature-premium"><i class="fas fa-truck-fast"></i><h4>🚚 Free Express Shipping</h4><p>Free shipping all India</p></div>
-        <div class="feature-premium"><i class="fas fa-undo-alt"></i><h4>🔄 30-Day Easy Returns</h4><p>No questions asked</p></div>
+        <div class="feature-premium"><i class="fas fa-undo-alt"></i><h4>🔄 15-Day Easy Returns</h4><p>No questions asked</p></div>
         <div class="feature-premium"><i class="fas fa-gem"></i><h4>💎 Premium Packing</h4><p>Luxury unboxing</p></div>
         <div class="feature-premium"><i class="fas fa-certificate"></i><h4>🏆 100% Authentic</h4><p>Certified genuine</p></div>
         <div class="feature-premium"><i class="fas fa-headset"></i><h4>🎧 24/7 Support</h4><p>Dedicated team</p></div>
@@ -813,14 +782,13 @@
 
 <script src="firebase-init.js"></script>
 <script>
-    // ========== FIREBASE PRODUCTS LOADING ==========
+    // ========== INSTANT LOAD - NO LOADING INDICATOR ==========
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
     let filteredProducts = [];
     let visibleCount = 8;
     let activeCategory = "all";
-    let isLoading = false;
-
+    
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -830,71 +798,54 @@
             return m;
         });
     }
-
-    // 🔥 Force clear cache and load fresh
-    async function loadProductsFromFirebase() {
-        if (isLoading) return;
-        isLoading = true;
-        
+    
+    // 🔥 INSTANT LOAD - First from cache, then update silently
+    async function loadProductsInstantly() {
         const container = document.getElementById('productsContainer');
-        if (container) {
-            container.innerHTML = '<div class="products-loading"><i class="fas fa-spinner fa-pulse"></i><br>Loading products...</div>';
+        
+        // STEP 1: Load from localStorage immediately (instant)
+        const savedProducts = localStorage.getItem('vedantaProducts');
+        if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
+            try {
+                allProducts = JSON.parse(savedProducts);
+                if (allProducts.length > 0) {
+                    filteredProducts = [...allProducts];
+                    renderProducts();
+                    console.log("Instant load from cache");
+                }
+            } catch(e) {}
         }
         
+        // STEP 2: Fetch fresh from Firebase in background (silent update)
         try {
-            // Force fresh data from Firebase (no cache)
             let cloudProducts = await getAllProducts();
             
             if (cloudProducts && cloudProducts.length > 0) {
                 allProducts = cloudProducts;
-                // Save to localStorage with timestamp
-                localStorage.setItem('vedantaProducts', JSON.stringify({
-                    data: allProducts,
-                    timestamp: Date.now()
-                }));
-            } else {
-                // Check localStorage with timestamp (30 minutes cache)
-                const cached = localStorage.getItem('vedantaProducts');
-                if (cached) {
-                    try {
-                        const parsed = JSON.parse(cached);
-                        if (parsed.data && Array.isArray(parsed.data)) {
-                            allProducts = parsed.data;
-                        } else if (Array.isArray(parsed)) {
-                            allProducts = parsed;
-                        } else {
-                            allProducts = [];
-                        }
-                    } catch(e) {
-                        allProducts = [];
-                    }
-                }
+                localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+                filteredProducts = [...allProducts];
+                renderProducts();
+                console.log("Background update from Firebase");
             }
-            
-            // Default products if nothing exists
-            if (!allProducts || allProducts.length === 0) {
-                allProducts = [
-                    { id: "1", name: "Banarasi Silk Saree", category: "Saree", price: 8999, icon: "fa-female", badge: "Best Seller", images: [] },
-                    { id: "2", name: "Men's Cotton Kurta", category: "Kurta", price: 1299, icon: "fa-male", badge: "Trending", images: [] },
-                    { id: "3", name: "Graphic T-Shirt", category: "TShirt", price: 499, icon: "fa-tshirt", badge: "Sale", images: [] },
-                    { id: "4", name: "Amethyst Crystal", category: "Crystal", price: 2899, icon: "fa-gem", badge: "Healing", images: [] },
-                    { id: "5", name: "Sandalwood Mala", category: "Mala", price: 1299, icon: "fa-hands-praying", badge: "Organic", images: [] }
-                ];
-                localStorage.setItem('vedantaProducts', JSON.stringify({ data: allProducts, timestamp: Date.now() }));
-            }
-            
-            filteredProducts = [...allProducts];
-            renderProducts();
         } catch (error) {
             console.error("Error loading products:", error);
-            if (container) {
-                container.innerHTML = '<div class="products-loading"><i class="fas fa-exclamation-triangle"></i><br>Error loading products. Pull to refresh.</div>';
-            }
-        } finally {
-            isLoading = false;
+        }
+        
+        // Default products if nothing exists
+        if (allProducts.length === 0) {
+            allProducts = [
+                { id: "1", name: "Banarasi Silk Saree", category: "Saree", price: 8999, icon: "fa-female", badge: "Best Seller", images: [] },
+                { id: "2", name: "Men's Cotton Kurta", category: "Kurta", price: 1299, icon: "fa-male", badge: "Trending", images: [] },
+                { id: "3", name: "Graphic T-Shirt", category: "TShirt", price: 499, icon: "fa-tshirt", badge: "Sale", images: [] },
+                { id: "4", name: "Amethyst Crystal", category: "Crystal", price: 2899, icon: "fa-gem", badge: "Healing", images: [] },
+                { id: "5", name: "Sandalwood Mala", category: "Mala", price: 1299, icon: "fa-hands-praying", badge: "Organic", images: [] }
+            ];
+            localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+            filteredProducts = [...allProducts];
+            renderProducts();
         }
     }
-
+    
     function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
     
     function addToCart(product) {
@@ -947,7 +898,7 @@
         toast.style.background = isError ? '#F44336' : '#D4AF37';
         toast.style.color = isError ? 'white' : '#050508';
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        setTimeout(() => toast.classList.remove('show'), 2000);
     }
     
     function buyNowWithLoginCheck(product) {
@@ -957,10 +908,10 @@
             const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1 }];
             localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
             showToastMessage(`💳 Proceeding to checkout with ${product.name}`);
-            setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 500);
+            setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 300);
         } else {
             showToastMessage('🔐 Please login to place order');
-            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 1000);
+            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 800);
         }
     }
     
@@ -977,7 +928,7 @@
             window.location.href = 'secure-checkout.html';
         } else {
             showToastMessage('🔐 Please login to checkout');
-            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 1000);
+            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 800);
         }
     }
     
@@ -1025,10 +976,7 @@
             container.innerHTML += `
                 <div class="product-card" onclick="goToProductDetail('${p.id}')">
                     <div class="product-img">
-                        ${hasImage ? 
-                            `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
-                            `<i class="fas ${p.icon || 'fa-gem'}"></i>`
-                        }
+                        ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
                         <div class="badge-offer">${p.badge || 'New'}</div>
                     </div>
                     <div class="product-info">
@@ -1072,7 +1020,6 @@
         renderProducts();
     }
     
-    // Event Listeners
     document.getElementById('viewMoreBtn')?.addEventListener('click', () => { visibleCount += 8; renderProducts(); });
     document.getElementById('searchInput')?.addEventListener('input', () => renderProducts());
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1088,28 +1035,57 @@
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
     document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWithLoginCheck);
     
-    // 🔥 Force reload on page show (for mobile back button)
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
-            // Page was loaded from cache (back button)
-            loadProductsFromFirebase();
-        }
-    });
+    // Initialize toast message element
+    if (!document.getElementById('toastMsg')) {
+        const toastDiv = document.createElement('div');
+        toastDiv.id = 'toastMsg';
+        toastDiv.className = 'toast';
+        document.body.appendChild(toastDiv);
+    }
     
-    // Load products on page load
-    loadProductsFromFirebase();
+    // 🔥 INSTANT LOAD - No loading indicator
+    loadProductsInstantly();
     updateCartUI();
     
-    // Real-time listener with debounce
-    let refreshTimeout;
+    // Silent background update every 10 seconds (but only if changed)
+    let lastProductCount = 0;
+    setInterval(async () => {
+        try {
+            const cloudProducts = await getAllProducts();
+            if (cloudProducts && cloudProducts.length !== lastProductCount) {
+                lastProductCount = cloudProducts.length;
+                if (cloudProducts.length > 0) {
+                    allProducts = cloudProducts;
+                    localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+                    filteredProducts = [...allProducts];
+                    renderProducts();
+                    console.log("Background update: new products found");
+                }
+            }
+        } catch(e) {}
+    }, 10000);
+    
+    // Real-time listener for new products (only when admin adds)
     if (typeof db !== 'undefined') {
-        db.collection('products').where('status', '==', 'active').onSnapshot(() => {
-            clearTimeout(refreshTimeout);
-            refreshTimeout = setTimeout(() => {
-                loadProductsFromFirebase();
-            }, 500);
+        db.collection('products').where('status', '==', 'active').onSnapshot((snapshot) => {
+            const newProducts = [];
+            snapshot.forEach(doc => newProducts.push({ id: doc.id, ...doc.data() }));
+            if (newProducts.length !== allProducts.length) {
+                allProducts = newProducts;
+                localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+                filteredProducts = [...allProducts];
+                renderProducts();
+                console.log("Real-time update: products changed");
+            }
         });
     }
+    
+    // pageshow event for back button - instant display
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted && allProducts.length > 0) {
+            renderProducts();
+        }
+    });
 </script>
 </body>
-</html>
+</html>s

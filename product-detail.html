@@ -31,32 +31,6 @@
     }
     .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
 
-    .loading-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(5,5,8,0.95);
-      z-index: 10000;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      gap: 20px;
-    }
-    .loading-overlay.show { display: flex; }
-    .loading-spinner {
-      width: 60px;
-      height: 60px;
-      border: 4px solid rgba(212,175,55,0.2);
-      border-top: 4px solid #D4AF37;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-    .loading-text { font-size: 16px; color: #D4AF37; letter-spacing: 2px; }
-
     .floating-cart {
       position: fixed;
       bottom: 100px;
@@ -548,11 +522,6 @@
 </head>
 <body>
 
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="loading-spinner"></div>
-  <div class="loading-text">Loading Product...</div>
-</div>
-
 <div class="floating-cart" id="floatingCart">
   <div class="cart-icon-container">
     <i class="fas fa-shopping-cart"></i>
@@ -594,17 +563,17 @@
   console.log("🔥 Firebase Connected!");
   
   let allProducts = [];
-  let currentProductId = 1;
+  let currentProductId = null;
   let currentProduct = null;
   let quantity = 1;
   let selectedSize = null;
   let currentSlide = 0;
   let slideInterval = null;
   let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+  let isRendered = false;
   
   function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
   
-  // ========== ADD TO CART ==========
   function addToCart(product, qty, size) {
     const existing = cart.find(item => item.id === product.id && item.size === size);
     if (existing) {
@@ -616,7 +585,6 @@
     showToast(`🛍️ ${product.name} added to cart!`);
   }
   
-  // ========== BUY NOW - Direct checkout ==========
   function buyNowDirect(product, qty, size) {
     const tempCart = [{ 
       id: product.id, 
@@ -694,16 +662,28 @@
     });
   }
 
-  function showLoading() {
-    document.getElementById('loadingOverlay').classList.add('show');
+  // ========== 🔥 INSTANT RENDER FROM CACHE FIRST ==========
+  function renderProductFromCache() {
+    // Load from localStorage instantly
+    const savedProducts = localStorage.getItem('vedantaProducts');
+    if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
+      allProducts = JSON.parse(savedProducts);
+    }
+    
+    currentProductId = localStorage.getItem('vedanta_selected_product_id');
+    if (currentProductId === null || currentProductId === 'null') currentProductId = "1";
+    
+    currentProduct = allProducts.find(p => p.id == currentProductId);
+    
+    if (currentProduct) {
+      renderPageContent();
+      isRendered = true;
+      console.log("Instant render from cache");
+    }
   }
   
-  function hideLoading() {
-    document.getElementById('loadingOverlay').classList.remove('show');
-  }
-
-  // ========== 🔥 LOAD PRODUCTS FROM FIREBASE ==========
-  async function loadProductsFromFirebase() {
+  // ========== FETCH FRESH IN BACKGROUND ==========
+  async function fetchFreshData() {
     try {
       const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
       const products = [];
@@ -714,44 +694,32 @@
       if (products.length > 0) {
         allProducts = products;
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-      } else {
-        // Fallback to localStorage
-        const savedProducts = localStorage.getItem('vedantaProducts');
-        if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
-          allProducts = JSON.parse(savedProducts);
+        
+        // Re-render if product changed
+        const newProduct = allProducts.find(p => p.id == currentProductId);
+        if (newProduct && JSON.stringify(newProduct) !== JSON.stringify(currentProduct)) {
+          currentProduct = newProduct;
+          renderPageContent();
+          console.log("Background update - product changed");
         }
       }
     } catch (error) {
-      console.error("Error loading products from Firebase:", error);
-      // Fallback to localStorage
-      const savedProducts = localStorage.getItem('vedantaProducts');
-      if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
-        allProducts = JSON.parse(savedProducts);
-      }
-    }
-    
-    // Ensure all products have required fields
-    allProducts = allProducts.map(p => {
-      if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
-      if (!p.rating) p.rating = 4.5;
-      if (!p.reviewCount) p.reviewCount = Math.floor(Math.random() * 1000) + 100;
-      if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Handcrafted with love and care.";
-      if (!p.sizes) p.sizes = [];
-      if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India", "Eco-friendly"];
-      if (!p.images) p.images = [];
-      return p;
-    });
-    
-    if (allProducts.length === 0) {
-      // Default products if nothing exists
-      allProducts = [
-        { id: "1", name: "Banarasi Silk Saree", category: "Saree", price: 8999, originalPrice: 14999, icon: "fa-female", badge: "Best Seller", rating: 4.9, reviewCount: 1243, fullDesc: "Handwoven Banarasi silk saree with intricate gold zari work. Perfect for weddings and festive occasions.", sizes: ["Free Size"], benefits: ["100% Pure Silk", "Handwoven", "Includes Blouse Piece", "Made in India"], images: [] },
-        { id: "2", name: "Men's Cotton Kurta", category: "Kurta", price: 1299, originalPrice: 2499, icon: "fa-male", badge: "Trending", rating: 4.7, reviewCount: 892, fullDesc: "Premium cotton kurta with chikan embroidery. Breathable fabric, perfect for daily wear.", sizes: ["S", "M", "L", "XL", "XXL"], benefits: ["100% Cotton", "Chikan Embroidery", "Breathable Fabric", "Easy Care"], images: [] },
-        { id: "3", name: "Amethyst Crystal", category: "Crystal", price: 2899, originalPrice: 4999, icon: "fa-gem", badge: "Healing", rating: 4.9, reviewCount: 432, fullDesc: "Natural amethyst crystal geode. Brings positive energy, peace, and clarity.", sizes: [], benefits: ["Natural Crystal", "Healing Properties", "Handcrafted", "Energy Booster"], images: [] }
-      ];
+      console.error("Error fetching products:", error);
     }
   }
-
+  
+  // Ensure all product fields exist
+  function ensureProductFields(p) {
+    if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
+    if (!p.rating) p.rating = 4.5;
+    if (!p.reviewCount) p.reviewCount = Math.floor(Math.random() * 1000) + 100;
+    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Handcrafted with love and care.";
+    if (!p.sizes) p.sizes = [];
+    if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India", "Eco-friendly"];
+    if (!p.images) p.images = [];
+    return p;
+  }
+  
   function setSelectedProductId(id) {
     localStorage.setItem('vedanta_selected_product_id', id);
   }
@@ -764,11 +732,8 @@
   
   function navigateToProduct(productId) {
     if (!productId) return;
-    const targetProduct = allProducts.find(p => p.id == productId);
-    if (!targetProduct) return;
-    showLoading();
     setSelectedProductId(productId);
-    setTimeout(() => { window.location.reload(); }, 300);
+    window.location.reload();
   }
   
   function prevProduct() {
@@ -790,7 +755,7 @@
     let slidesHtml = '';
     if (hasImages) {
       images.forEach((img, idx) => {
-        slidesHtml += `<div class="slide"><img src="${img}" alt="Product image ${idx + 1}"></div>`;
+        slidesHtml += `<div class="slide"><img src="${img}" alt="Product image ${idx + 1}" loading="lazy"></div>`;
       });
     } else {
       slidesHtml = `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
@@ -801,7 +766,7 @@
       images.forEach((img, idx) => {
         thumbnailsHtml += `
           <div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}">
-            <img src="${img}" alt="Thumbnail ${idx + 1}">
+            <img src="${img}" alt="Thumbnail ${idx + 1}" loading="lazy">
           </div>
         `;
       });
@@ -896,7 +861,7 @@
       return `
         <div class="related-card" data-product-id="${p.id}">
           <div class="related-img">
-            ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
+            ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
           </div>
           <div class="related-name">${escapeHtml(p.name)}</div>
           <div class="related-price">₹${p.price.toLocaleString('en-IN')}</div>
@@ -914,25 +879,16 @@
     });
   }
 
-  async function renderPage() {
-    await loadProductsFromFirebase();
+  function renderPageContent() {
+    if (!currentProduct) return;
     
-    currentProductId = getSelectedProductId();
-    currentProduct = allProducts.find(p => p.id == currentProductId) || allProducts[0];
-    if (currentProduct) currentProductId = currentProduct.id;
-    
-    if (!currentProduct) {
-      document.getElementById('app').innerHTML = '<div style="text-align:center; padding:50px;">Product not found</div>';
-      hideLoading();
-      return;
-    }
+    currentProduct = ensureProductFields(currentProduct);
     
     const discountPercent = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
     const reviews = [
       { name: "Priya Sharma", rating: 5, text: "Absolutely stunning product! Worth every penny!", date: "15 Mar 2025", verified: true },
       { name: "Rohan Mehta", rating: 5, text: "Very happy with my purchase. Fast shipping!", date: "10 Mar 2025", verified: true },
-      { name: "Anjali Nair", rating: 4, text: "Good quality product. Customer service was helpful.", date: "5 Mar 2025", verified: false },
-      { name: "Vikram Singh", rating: 5, text: "Amazing! Will definitely buy again.", date: "28 Feb 2025", verified: true }
+      { name: "Anjali Nair", rating: 4, text: "Good quality product. Customer service was helpful.", date: "5 Mar 2025", verified: false }
     ];
     
     const galleryHtml = renderImageSlider();
@@ -953,7 +909,7 @@
       </div>
     ` : '';
     
-    const fullDescText = currentProduct.fullDesc || currentProduct.description || "Premium quality product from Vedanta.";
+    const fullDescText = currentProduct.fullDesc || "Premium quality product from Vedanta.";
     const formattedDesc = escapeHtml(fullDescText).replace(/\n/g, '<br>');
     
     const html = `
@@ -1000,8 +956,14 @@
     
     document.getElementById('app').innerHTML = html;
     
-    setTimeout(() => initSlider(), 100);
-    
+    setTimeout(() => {
+      initSlider();
+      attachProductEvents(hasSizes);
+      renderRelatedProducts();
+    }, 50);
+  }
+  
+  function attachProductEvents(hasSizes) {
     if (hasSizes) {
       const sizeBtns = document.querySelectorAll('.size-btn');
       sizeBtns.forEach(btn => {
@@ -1047,9 +1009,6 @@
         buyNowDirect(currentProduct, qty, selectedSize);
       });
     }
-    
-    renderRelatedProducts();
-    setTimeout(() => hideLoading(), 100);
   }
   
   function attachCartEvents() {
@@ -1068,7 +1027,7 @@
 
   window.scrollTo({ top: 0, behavior: 'instant' });
   document.addEventListener('DOMContentLoaded', () => window.scrollTo({ top: 0, behavior: 'instant' }));
-  window.addEventListener('load', () => { window.scrollTo({ top: 0, behavior: 'instant' }); setTimeout(() => window.scrollTo({ top: 0, behavior: 'instant' }), 50); });
+  window.addEventListener('load', () => { window.scrollTo({ top: 0, behavior: 'instant' }); });
   
   let touchStartX = 0, touchEndX = 0;
   document.body.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
@@ -1078,7 +1037,12 @@
     if (Math.abs(diff) > 40) diff > 0 ? prevProduct() : nextProduct();
   });
   
-  renderPage();
+  // 🔥 STEP 1: Instant render from cache (no waiting)
+  renderProductFromCache();
+  
+  // 🔥 STEP 2: Fetch fresh data in background (silent)
+  fetchFreshData();
+  
   updateCartUI();
   attachCartEvents();
 </script>

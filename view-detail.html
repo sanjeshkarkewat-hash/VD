@@ -67,22 +67,6 @@
             padding: 20px;
         }
         
-        /* Loading State */
-        .loading-state {
-            text-align: center;
-            padding: 60px;
-        }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(212,175,55,0.2);
-            border-top: 4px solid #D4AF37;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 20px;
-        }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        
         /* Order Status Bar */
         .status-bar {
             background: rgba(15,15,22,0.6);
@@ -418,12 +402,7 @@
     <a href="booking.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Bookings</a>
 </div>
 
-<div class="container" id="app">
-    <div class="loading-state">
-        <div class="loading-spinner"></div>
-        <p>Loading order details...</p>
-    </div>
-</div>
+<div class="container" id="app"></div>
 
 <!-- Confirmation Modal -->
 <div class="modal" id="cancelModal">
@@ -470,13 +449,11 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    // Get order ID from URL
     function getOrderIdFromUrl() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('orderId');
     }
     
-    // Get current user
     function getCurrentUser() {
         const user = localStorage.getItem('vedantaUser');
         if (user) {
@@ -489,55 +466,109 @@
         return null;
     }
     
+    // Load products from cache (instant)
+    function loadProductsFromCache() {
+        const cachedProducts = localStorage.getItem('vedantaProducts');
+        if (cachedProducts) {
+            try {
+                const products = JSON.parse(cachedProducts);
+                products.forEach(p => {
+                    productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+                });
+                return true;
+            } catch(e) {}
+        }
+        return false;
+    }
+    
+    // Get cached orders
+    function getCachedOrders() {
+        const cached = localStorage.getItem('vedantaOrders_cache');
+        if (cached) {
+            try {
+                const cacheData = JSON.parse(cached);
+                if (cacheData.orders && cacheData.orders.length > 0) {
+                    return cacheData.orders;
+                }
+            } catch(e) {}
+        }
+        return [];
+    }
+    
+    // 🔥 INSTANT LOAD FROM CACHE
+    function loadOrderFromCache() {
+        const orderId = getOrderIdFromUrl();
+        
+        if (!orderId) {
+            showError("No order ID found");
+            return false;
+        }
+        
+        // Try to get from cached orders
+        const cachedOrders = getCachedOrders();
+        const cachedOrder = cachedOrders.find(o => o.orderId === orderId);
+        
+        if (cachedOrder) {
+            currentOrder = cachedOrder;
+            renderOrderDetails();
+            console.log("✅ Instant load from cache");
+            return true;
+        }
+        
+        return false;
+    }
+    
+    // 🔥 FETCH FRESH IN BACKGROUND
+    async function fetchFreshOrder() {
+        const orderId = getOrderIdFromUrl();
+        
+        if (!orderId) return;
+        
+        try {
+            const doc = await db.collection('orders').doc(orderId).get();
+            
+            if (doc.exists) {
+                const freshOrder = { id: doc.id, ...doc.data() };
+                
+                // Check if order changed
+                if (JSON.stringify(currentOrder) !== JSON.stringify(freshOrder)) {
+                    currentOrder = freshOrder;
+                    renderOrderDetails();
+                    console.log("🔄 Background update - order refreshed");
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching order:", error);
+        }
+    }
+    
     // Load products for images
     async function loadProducts() {
+        // First from cache
+        loadProductsFromCache();
+        
+        // Then fetch fresh
         try {
             const snapshot = await db.collection('products').get();
             snapshot.forEach(doc => {
                 const p = doc.data();
                 productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
             });
+            // Re-render if needed
+            if (currentOrder) {
+                renderOrderDetails();
+            }
         } catch(e) {
             console.log("Error loading products:", e);
         }
     }
     
-    // Load order from Firebase
-    async function loadOrder() {
-        const orderId = getOrderIdFromUrl();
-        currentUser = getCurrentUser();
-        
-        if (!orderId) {
-            showError("No order ID found");
-            return;
-        }
-        
-        console.log("Loading order:", orderId);
-        
-        try {
-            const doc = await db.collection('orders').doc(orderId).get();
-            
-            if (doc.exists) {
-                currentOrder = { id: doc.id, ...doc.data() };
-                console.log("Order found:", currentOrder);
-                renderOrderDetails();
-            } else {
-                showError("Order not found");
-            }
-        } catch (error) {
-            console.error("Error loading order:", error);
-            showError("Failed to load order details");
-        }
-    }
-    
-    // Check if order can be cancelled
     function canCancelOrder() {
         if (!currentOrder) return false;
         const cancellableStatuses = ['pending', 'confirmed', 'processing'];
         return cancellableStatuses.includes(currentOrder.status);
     }
     
-    // Cancel order function
     async function cancelOrder() {
         if (!canCancelOrder()) {
             showToast("This order cannot be cancelled at this stage", true);
@@ -551,16 +582,9 @@
                 updatedAt: new Date().toISOString()
             });
             
-            // Update current order object
             currentOrder.status = 'cancelled';
-            
             showToast("✅ Order cancelled successfully!");
-            
-            // Re-render the page with updated status
             renderOrderDetails();
-            
-            // Also update in booking page cache if needed
-            localStorage.setItem('orderCancelled_' + currentOrder.orderId, 'true');
             
         } catch (error) {
             console.error("Error cancelling order:", error);
@@ -568,7 +592,6 @@
         }
     }
     
-    // Show cancel confirmation modal
     function showCancelConfirmation() {
         if (!canCancelOrder()) {
             showToast("This order cannot be cancelled at this stage", true);
@@ -577,7 +600,6 @@
         document.getElementById('cancelModal').classList.add('show');
     }
     
-    // Hide modal
     function hideModal() {
         document.getElementById('cancelModal').classList.remove('show');
     }
@@ -637,7 +659,6 @@
         const isCancelled = currentOrder.status === 'cancelled';
         const canCancel = canCancelOrder();
         
-        // Items HTML
         const itemsHtml = (currentOrder.items || []).map(item => {
             const productImg = getProductImage(item.id);
             const iconClass = getProductIcon(item.id);
@@ -646,7 +667,7 @@
             return `
                 <div class="order-item">
                     <div class="order-item-img">
-                        ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${iconClass}"></i>`}
+                        ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i class="fas ${iconClass}"></i>`}
                     </div>
                     <div class="order-item-info">
                         <div class="order-item-name">${escapeHtml(item.name)}</div>
@@ -660,7 +681,6 @@
             `;
         }).join('');
         
-        // Status steps HTML (different for cancelled orders)
         let statusHtml = '';
         if (isCancelled) {
             statusHtml = `
@@ -684,7 +704,6 @@
             `;
         }
         
-        // Cancel button HTML (only if cancellable)
         const cancelButtonHtml = canCancel ? `
             <button class="btn-secondary btn-cancel" id="cancelOrderBtn">
                 <i class="fas fa-times-circle"></i> Cancel Order
@@ -700,7 +719,6 @@
         `);
         
         container.innerHTML = `
-            <!-- Status Bar -->
             <div class="status-bar">
                 <div class="card-title">
                     <i class="fas fa-chart-line"></i> Order Status
@@ -708,7 +726,6 @@
                 ${statusHtml}
             </div>
             
-            <!-- Order Info -->
             <div class="info-card">
                 <div class="card-title">
                     <i class="fas fa-receipt"></i> Order Information
@@ -737,7 +754,6 @@
                 ` : ''}
             </div>
             
-            <!-- Customer Info -->
             <div class="info-card">
                 <div class="card-title">
                     <i class="fas fa-user-circle"></i> Customer Details
@@ -756,7 +772,6 @@
                 </div>
             </div>
             
-            <!-- Shipping Info -->
             <div class="info-card">
                 <div class="card-title">
                     <i class="fas fa-map-marker-alt"></i> Shipping Address
@@ -779,7 +794,6 @@
                 </div>
             </div>
             
-            <!-- Order Items -->
             <div class="info-card">
                 <div class="card-title">
                     <i class="fas fa-shopping-bag"></i> Order Items (${currentOrder.items?.length || 0})
@@ -798,7 +812,6 @@
                 </div>
             </div>
             
-            <!-- Action Buttons -->
             <div class="action-buttons">
                 ${cancelButtonHtml}
                 <button class="btn-secondary" onclick="window.location.href='booking.html'">
@@ -810,7 +823,6 @@
             </div>
         `;
         
-        // Add cancel button event listener if it exists
         const cancelBtn = document.getElementById('cancelOrderBtn');
         if (cancelBtn) {
             cancelBtn.addEventListener('click', showCancelConfirmation);
@@ -848,7 +860,6 @@
         await cancelOrder();
     });
     
-    // Close modal when clicking outside
     window.addEventListener('click', (e) => {
         const modal = document.getElementById('cancelModal');
         if (e.target === modal) {
@@ -856,13 +867,30 @@
         }
     });
     
-    // Initialize
-    async function init() {
+    // 🔥 INIT - Instant from cache, then background update
+    (async function init() {
+        // STEP 1: Load products from cache
+        loadProductsFromCache();
+        
+        // STEP 2: Load order from cache (instant)
+        const hasCached = loadOrderFromCache();
+        
+        if (!hasCached) {
+            // Show loading only if no cache
+            document.getElementById('app').innerHTML = `
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading order details...</p>
+                </div>
+            `;
+        }
+        
+        // STEP 3: Fetch fresh products in background
         await loadProducts();
-        await loadOrder();
-    }
-    
-    init();
+        
+        // STEP 4: Fetch fresh order in background
+        await fetchFreshOrder();
+    })();
 </script>
 </body>
 </html>

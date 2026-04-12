@@ -323,11 +323,6 @@
         .nav-item span { font-size: 10px; }
         .nav-item.active, .nav-item:hover { background: rgba(212,175,55,0.2); }
         .nav-item.active i, .nav-item.active span { color: #D4AF37; }
-        .loading-spinner {
-            text-align: center;
-            padding: 60px;
-            color: #D4AF37;
-        }
         @media (min-width: 768px) {
             .bottom-nav { bottom: 20px; padding: 12px 32px; gap: 50px; }
             .nav-item { padding: 6px 20px; }
@@ -357,9 +352,7 @@
     </div>
 </div>
 
-<div class="orders-container" id="ordersContainer">
-    <div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> Loading your bookings...</div>
-</div>
+<div class="orders-container" id="ordersContainer"></div>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
@@ -390,6 +383,7 @@
     let productsMap = new Map();
     let currentFilter = 'all';
     let currentUser = null;
+    let isFirstLoad = true;
     
     function showToastMessage(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -400,7 +394,6 @@
         setTimeout(() => toast.classList.remove('show'), 2500);
     }
     
-    // Get current logged in user
     function getCurrentUser() {
         const user = localStorage.getItem('vedantaUser');
         if (user) {
@@ -413,56 +406,41 @@
         return null;
     }
     
-    // Load products to get images
-    async function loadProducts() {
-        try {
-            const snapshot = await db.collection('products').get();
-            snapshot.forEach(doc => {
-                const p = doc.data();
-                productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
-            });
-        } catch(e) {
-            console.log("Error loading products:", e);
+    // Load products from localStorage (instant)
+    function loadProductsFromCache() {
+        const cachedProducts = localStorage.getItem('vedantaProducts');
+        if (cachedProducts) {
+            try {
+                const products = JSON.parse(cachedProducts);
+                products.forEach(p => {
+                    productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+                });
+                return true;
+            } catch(e) {}
         }
+        return false;
     }
     
-    // Load orders from Firebase for current user
-    async function loadOrdersFromFirebase() {
-        currentUser = getCurrentUser();
-        
-        if (!currentUser || !currentUser.email) {
-            document.getElementById('ordersContainer').innerHTML = `
-                <div class="empty-state">
-                    <i class="fas fa-sign-in-alt"></i>
-                    <h3>Login Required</h3>
-                    <p>Please login to view your bookings.</p>
-                    <button class="shop-now-btn" onclick="window.location.href='profile.html'">
-                        <i class="fas fa-user"></i> Login Now
-                    </button>
-                </div>
-            `;
-            return;
+    // Get orders from localStorage (instant)
+    function getOrdersFromCache() {
+        const cached = localStorage.getItem('vedantaOrders_cache');
+        if (cached) {
+            try {
+                const cacheData = JSON.parse(cached);
+                if (cacheData.orders && cacheData.orders.length > 0) {
+                    return cacheData.orders;
+                }
+            } catch(e) {}
         }
-        
-        try {
-            const snapshot = await db.collection('orders')
-                .where('customerEmail', '==', currentUser.email)
-                .orderBy('orderDate', 'desc')
-                .get();
-            
-            allOrders = [];
-            snapshot.forEach(doc => {
-                const orderData = doc.data();
-                allOrders.push({ id: doc.id, ...orderData });
-            });
-            
-            renderOrders();
-        } catch (error) {
-            console.error("Error loading orders:", error);
-            showToastMessage("Error loading orders", true);
-            allOrders = [];
-            renderOrders();
-        }
+        return [];
+    }
+    
+    // Save orders to localStorage
+    function saveOrdersToCache(orders) {
+        localStorage.setItem('vedantaOrders_cache', JSON.stringify({
+            orders: orders,
+            timestamp: Date.now()
+        }));
     }
     
     function getProductImage(productId) {
@@ -547,7 +525,7 @@
                 <div class="booking-card" data-order-id="${order.orderId}">
                     <div class="product-row">
                         <div class="product-img">
-                            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(mainItem.name)}">` : `<i class="fas ${iconClass}"></i>`}
+                            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(mainItem.name)}" loading="lazy">` : `<i class="fas ${iconClass}"></i>`}
                         </div>
                         <div class="product-details">
                             <div class="product-name">${escapeHtml(mainItem.name)}</div>
@@ -599,23 +577,74 @@
         });
     }
     
-    // Initialize
-    async function init() {
-        await loadProducts();
-        await loadOrdersFromFirebase();
+    // 🔥 MAIN INIT - Super Fast
+    (function init() {
+        currentUser = getCurrentUser();
+        
+        if (!currentUser || !currentUser.email) {
+            document.getElementById('ordersContainer').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>Login Required</h3>
+                    <p>Please login to view your bookings.</p>
+                    <button class="shop-now-btn" onclick="window.location.href='profile.html'">
+                        <i class="fas fa-user"></i> Login Now
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        // STEP 1: Load products from cache (instant)
+        loadProductsFromCache();
+        
+        // STEP 2: Load orders from cache (instant)
+        const cachedOrders = getOrdersFromCache();
+        const userCachedOrders = cachedOrders.filter(o => o.customerEmail === currentUser.email);
+        
+        if (userCachedOrders.length > 0) {
+            allOrders = userCachedOrders;
+            renderOrders();
+            console.log("✅ Instant load from cache:", userCachedOrders.length, "orders");
+        }
+        
+        // STEP 3: Setup real-time listener (will update instantly)
+        db.collection('orders')
+            .where('customerEmail', '==', currentUser.email)
+            .orderBy('orderDate', 'desc')
+            .onSnapshot((snapshot) => {
+                const freshOrders = [];
+                snapshot.forEach(doc => {
+                    freshOrders.push({ id: doc.id, ...doc.data() });
+                });
+                
+                // Check if orders changed
+                if (JSON.stringify(allOrders) !== JSON.stringify(freshOrders)) {
+                    allOrders = freshOrders;
+                    saveOrdersToCache(allOrders);
+                    renderOrders();
+                    console.log("🔄 Real-time update:", freshOrders.length, "orders");
+                    
+                    if (isFirstLoad && freshOrders.length > 0) {
+                        isFirstLoad = false;
+                    }
+                }
+            }, (error) => {
+                console.error("Listener error:", error);
+            });
+        
+        // STEP 4: Initialize filters
         initFilters();
         
-        // Real-time listener for new orders
-        if (currentUser && currentUser.email) {
-            db.collection('orders')
-                .where('customerEmail', '==', currentUser.email)
-                .onSnapshot(() => {
-                    loadOrdersFromFirebase();
-                });
-        }
-    }
-    
-    init();
+        // STEP 5: Fetch fresh products in background
+        db.collection('products').get().then(snapshot => {
+            snapshot.forEach(doc => {
+                const p = doc.data();
+                productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+            });
+            renderOrders(); // Re-render with product images if needed
+        }).catch(e => console.log("Products fetch error:", e));
+    })();
 </script>
 </body>
 </html>
