@@ -6,14 +6,11 @@
     <title>My Bookings - Vedanta</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Space Grotesk', sans-serif;
             background: #050508;
@@ -22,7 +19,6 @@
             padding-bottom: 80px;
             min-height: 100vh;
         }
-
         body::before {
             content: '';
             position: fixed;
@@ -34,8 +30,6 @@
             pointer-events: none;
             z-index: -1;
         }
-
-        /* Header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -66,8 +60,6 @@
             font-weight: 600;
             cursor: pointer;
         }
-
-        /* Page Title */
         .page-title {
             padding: 20px 16px 8px;
             text-align: center;
@@ -85,8 +77,6 @@
             font-size: 13px;
             margin-top: 8px;
         }
-
-        /* Tabs / Filters */
         .tabs-container {
             padding: 16px 16px 8px;
             overflow-x: auto;
@@ -118,16 +108,12 @@
             color: #050508;
             box-shadow: 0 2px 8px rgba(212,175,55,0.3);
         }
-
-        /* Orders Container */
         .orders-container {
             padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 20px;
         }
-
-        /* Booking Card */
         .booking-card {
             background: rgba(15,15,22,0.7);
             backdrop-filter: blur(12px);
@@ -140,8 +126,6 @@
             border-color: rgba(212,175,55,0.5);
             transform: translateY(-2px);
         }
-
-        /* Product row with image and details */
         .product-row {
             display: flex;
             gap: 16px;
@@ -205,13 +189,11 @@
             width: fit-content;
             margin-top: 8px;
         }
-        .status-confirmed { background: rgba(33,150,243,0.15); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
-        .status-upcoming { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
-        .status-completed { background: rgba(76,175,80,0.15); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
+        .status-pending { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
+        .status-processing { background: rgba(33,150,243,0.15); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
+        .status-shipped { background: rgba(156,39,176,0.15); color: #CE93D8; border: 1px solid rgba(156,39,176,0.3); }
+        .status-delivered { background: rgba(76,175,80,0.15); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
         .status-cancelled { background: rgba(244,67,54,0.15); color: #F44336; border: 1px solid rgba(244,67,54,0.3); }
-        .status-processing { background: rgba(156,39,176,0.15); color: #CE93D8; border: 1px solid rgba(156,39,176,0.3); }
-        
-        /* Info grid */
         .info-grid {
             padding: 16px 18px;
             background: rgba(0,0,0,0.2);
@@ -241,8 +223,6 @@
             font-size: 18px;
             font-weight: 800;
         }
-
-        /* Action Buttons - ONLY VIEW DETAILS */
         .card-actions {
             display: flex;
             gap: 12px;
@@ -265,12 +245,10 @@
             transition: 0.2s;
             text-decoration: none;
         }
-        .btn-view:hover, .btn-view:active {
+        .btn-view:hover {
             background: rgba(212,175,55,0.25);
             transform: scale(0.98);
         }
-
-        /* Empty state */
         .empty-state {
             text-align: center;
             padding: 60px 20px;
@@ -298,8 +276,6 @@
             align-items: center;
             gap: 8px;
         }
-
-        /* Toast */
         .toast {
             position: fixed;
             bottom: 90px;
@@ -320,8 +296,6 @@
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
-
-        /* Bottom Nav */
         .bottom-nav {
             position: fixed;
             bottom: 16px;
@@ -349,7 +323,11 @@
         .nav-item span { font-size: 10px; }
         .nav-item.active, .nav-item:hover { background: rgba(212,175,55,0.2); }
         .nav-item.active i, .nav-item.active span { color: #D4AF37; }
-
+        .loading-spinner {
+            text-align: center;
+            padding: 60px;
+            color: #D4AF37;
+        }
         @media (min-width: 768px) {
             .bottom-nav { bottom: 20px; padding: 12px 32px; gap: 50px; }
             .nav-item { padding: 6px 20px; }
@@ -372,112 +350,173 @@
 <div class="tabs-container">
     <div class="tabs">
         <button class="tab-btn active" data-filter="all">All Bookings</button>
-        <button class="tab-btn" data-filter="upcoming">Upcoming</button>
-        <button class="tab-btn" data-filter="completed">Completed</button>
+        <button class="tab-btn" data-filter="pending">Pending</button>
+        <button class="tab-btn" data-filter="processing">Processing</button>
+        <button class="tab-btn" data-filter="delivered">Delivered</button>
         <button class="tab-btn" data-filter="cancelled">Cancelled</button>
     </div>
 </div>
 
-<div class="orders-container" id="ordersContainer"></div>
+<div class="orders-container" id="ordersContainer">
+    <div class="loading-spinner"><i class="fas fa-spinner fa-pulse"></i> Loading your bookings...</div>
+</div>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
-    <div class="nav-item active" onclick="window.location.href='bookings.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
+    <div class="nav-item active" onclick="window.location.href='booking.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
     <div class="nav-item" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-    // -------- LOAD REAL ORDERS FROM LOCALSTORAGE (no dummy orders) --------
+    // ========== 🔥 FIREBASE CONFIGURATION ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
+        authDomain: "vedanta-d0199.firebaseapp.com",
+        projectId: "vedanta-d0199",
+        storageBucket: "vedanta-d0199.firebasestorage.app",
+        messagingSenderId: "761061711987",
+        appId: "1:761061711987:web:d59ff32fd53057c395ca06",
+        measurementId: "G-RQMQZVGK75"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    console.log("🔥 Firebase Connected!");
+    
     let allOrders = [];
-    let productsMap = new Map(); // store product images/icons
-
-    // Load products to get images
-    function loadProducts() {
-        try {
-            const saved = localStorage.getItem('vedantaProducts');
-            if (saved) {
-                const prods = JSON.parse(saved);
-                if (Array.isArray(prods)) {
-                    prods.forEach(p => {
-                        productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
-                    });
-                }
-            }
-        } catch(e) {}
+    let productsMap = new Map();
+    let currentFilter = 'all';
+    let currentUser = null;
+    
+    function showToastMessage(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.background = isError ? '#F44336' : '#D4AF37';
+        toast.style.color = isError ? 'white' : '#050508';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
     }
-
-    function loadOrdersFromStorage() {
-        const stored = localStorage.getItem('vedantaOrders');
-        if (stored) {
+    
+    // Get current logged in user
+    function getCurrentUser() {
+        const user = localStorage.getItem('vedantaUser');
+        if (user) {
             try {
-                const parsed = JSON.parse(stored);
-                if (Array.isArray(parsed)) {
-                    allOrders = parsed;
-                } else {
-                    allOrders = [];
-                }
-            } catch(e) { allOrders = []; }
-        } else {
-            allOrders = [];
+                return JSON.parse(user);
+            } catch(e) {
+                return null;
+            }
         }
-        // NO DEFAULT DATA - strictly user-placed orders only
+        return null;
     }
-
-    // Helper: get product image
+    
+    // Load products to get images
+    async function loadProducts() {
+        try {
+            const snapshot = await db.collection('products').get();
+            snapshot.forEach(doc => {
+                const p = doc.data();
+                productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+            });
+        } catch(e) {
+            console.log("Error loading products:", e);
+        }
+    }
+    
+    // Load orders from Firebase for current user
+    async function loadOrdersFromFirebase() {
+        currentUser = getCurrentUser();
+        
+        if (!currentUser || !currentUser.email) {
+            document.getElementById('ordersContainer').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>Login Required</h3>
+                    <p>Please login to view your bookings.</p>
+                    <button class="shop-now-btn" onclick="window.location.href='profile.html'">
+                        <i class="fas fa-user"></i> Login Now
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        try {
+            const snapshot = await db.collection('orders')
+                .where('customerEmail', '==', currentUser.email)
+                .orderBy('orderDate', 'desc')
+                .get();
+            
+            allOrders = [];
+            snapshot.forEach(doc => {
+                const orderData = doc.data();
+                allOrders.push({ id: doc.id, ...orderData });
+            });
+            
+            renderOrders();
+        } catch (error) {
+            console.error("Error loading orders:", error);
+            showToastMessage("Error loading orders", true);
+            allOrders = [];
+            renderOrders();
+        }
+    }
+    
     function getProductImage(productId) {
         const prod = productsMap.get(productId);
         if (prod && prod.images && prod.images.length > 0) return prod.images[0];
         return null;
     }
+    
     function getProductIcon(productId) {
         const prod = productsMap.get(productId);
         return (prod && prod.icon) ? prod.icon : 'fa-gem';
     }
-
-    // Status style mapping
+    
     function getStatusClass(status) {
         switch(status) {
-            case 'confirmed': return 'status-confirmed';
-            case 'upcoming': return 'status-upcoming';
+            case 'pending': return 'status-pending';
             case 'processing': return 'status-processing';
-            case 'shipped': return 'status-upcoming';
-            case 'delivered': return 'status-completed';
-            case 'completed': return 'status-completed';
+            case 'confirmed': return 'status-processing';
+            case 'shipped': return 'status-shipped';
+            case 'delivered': return 'status-delivered';
             case 'cancelled': return 'status-cancelled';
-            default: return 'status-confirmed';
+            default: return 'status-pending';
         }
     }
+    
     function getStatusLabel(status) {
         const map = {
-            'confirmed': 'Confirmed', 'processing': 'Processing', 'shipped': 'Shipped',
-            'delivered': 'Delivered', 'completed': 'Completed', 'cancelled': 'Cancelled', 'upcoming': 'Upcoming'
+            'pending': 'Pending',
+            'confirmed': 'Confirmed',
+            'processing': 'Processing',
+            'shipped': 'Shipped',
+            'delivered': 'Delivered',
+            'cancelled': 'Cancelled'
         };
-        return map[status] || status;
+        return map[status] || status || 'Pending';
     }
-
-    // Determine filter group: upcoming, completed, cancelled based on status
-    function getFilterGroup(order) {
-        const st = order.status;
-        if (st === 'cancelled') return 'cancelled';
-        if (st === 'delivered' || st === 'completed') return 'completed';
-        if (st === 'confirmed' || st === 'processing' || st === 'shipped' || st === 'upcoming') return 'upcoming';
-        return 'upcoming';
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
-
-    let currentFilter = 'all';
-
+    
     function renderOrders() {
         const container = document.getElementById('ordersContainer');
         if (!container) return;
         
-        loadOrdersFromStorage();
-        loadProducts();
-        
         let filtered = [...allOrders];
         if (currentFilter !== 'all') {
-            filtered = filtered.filter(o => getFilterGroup(o) === currentFilter);
+            filtered = filtered.filter(o => o.status === currentFilter);
         }
         
         if (filtered.length === 0) {
@@ -501,12 +540,8 @@
             const iconClass = getProductIcon(mainItem.id);
             const statusClass = getStatusClass(order.status);
             const statusLabel = getStatusLabel(order.status);
-            
-            // Build dynamic info rows based on order type (travel or product)
-            const priceAmount = order.total || mainItem.price * mainItem.quantity;
-            const eventDate = order.eventDate || order.date?.split(',')[0] || '';
-            const timeSlot = order.timeSlot || '';
-            const checkIn = order.checkIn;
+            const priceAmount = order.total || (mainItem.price * mainItem.quantity);
+            const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-IN') : 'N/A';
             
             container.innerHTML += `
                 <div class="booking-card" data-order-id="${order.orderId}">
@@ -518,7 +553,7 @@
                             <div class="product-name">${escapeHtml(mainItem.name)}</div>
                             <div class="order-meta">
                                 <span><i class="fas fa-hashtag"></i> ${order.orderId}</span>
-                                <span><i class="far fa-calendar-alt"></i> ${order.date?.split(',')[0] || 'N/A'}</span>
+                                <span><i class="far fa-calendar-alt"></i> ${orderDate}</span>
                             </div>
                             <div class="status-badge ${statusClass}">
                                 <i class="fas ${order.status === 'cancelled' ? 'fa-times-circle' : (order.status === 'delivered' ? 'fa-check-circle' : 'fa-clock')}"></i> ${statusLabel}
@@ -527,43 +562,28 @@
                     </div>
                     
                     <div class="info-grid">
-                        ${checkIn ? `
-                            <div class="info-item"><span class="info-label">CHECK-IN</span><span class="info-value">${order.checkIn}</span></div>
-                            <div class="info-item"><span class="info-label">CHECK-OUT</span><span class="info-value">${order.checkOut || '—'}</span></div>
-                            <div class="info-item"><span class="info-label">GUESTS</span><span class="info-value">${order.guests || '2 Adults'}</span></div>
-                        ` : `
-                            ${eventDate ? `<div class="info-item"><span class="info-label">DATE</span><span class="info-value">${eventDate}</span></div>` : ''}
-                            ${timeSlot ? `<div class="info-item"><span class="info-label">TIME</span><span class="info-value">${timeSlot}</span></div>` : ''}
-                            <div class="info-item"><span class="info-label">TOTAL</span><span class="info-value price-highlight">₹${priceAmount.toLocaleString('en-IN')}</span></div>
-                        `}
-                        ${!checkIn && !eventDate ? `<div class="info-item"><span class="info-label">ORDER TOTAL</span><span class="info-value price-highlight">₹${priceAmount.toLocaleString('en-IN')}</span></div>` : ''}
+                        <div class="info-item">
+                            <span class="info-label">TOTAL AMOUNT</span>
+                            <span class="info-value price-highlight">₹${priceAmount.toLocaleString('en-IN')}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">PAYMENT</span>
+                            <span class="info-value">${order.paymentMethod || 'COD'}</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">ITEMS</span>
+                            <span class="info-value">${order.items?.length || 1} item(s)</span>
+                        </div>
                     </div>
                     
                     <div class="card-actions">
-                        <a href="view-detail.html?orderId=${encodeURIComponent(order.orderId)}" class="btn-view">
+                        <a href="view-detail.html?orderId=${order.orderId}" class="btn-view">
                             <i class="fas fa-eye"></i> View Details
                         </a>
                     </div>
                 </div>
             `;
         });
-    }
-    
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
-    }
-    
-    function showToastMessage(msg) {
-        const toast = document.getElementById('toast');
-        toast.innerText = msg;
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
     }
     
     // Filter tabs
@@ -579,14 +599,23 @@
         });
     }
     
-    // Expose global functions
-    window.showToastMessage = showToastMessage;
-    
     // Initialize
-    loadProducts();
-    loadOrdersFromStorage();
-    renderOrders();
-    initFilters();
+    async function init() {
+        await loadProducts();
+        await loadOrdersFromFirebase();
+        initFilters();
+        
+        // Real-time listener for new orders
+        if (currentUser && currentUser.email) {
+            db.collection('orders')
+                .where('customerEmail', '==', currentUser.email)
+                .onSnapshot(() => {
+                    loadOrdersFromFirebase();
+                });
+        }
+    }
+    
+    init();
 </script>
 </body>
 </html>

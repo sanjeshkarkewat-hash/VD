@@ -7,11 +7,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
-    <!-- 🔥 FIREBASE SDKs -->
+    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <!-- EmailJS SDK for OTP -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -162,106 +160,7 @@
         }
         .overlay.show { display: block; }
         
-        /* Login Modal */
-        .login-modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 10000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-        .login-modal.hide {
-            display: none;
-        }
-        .login-card {
-            background: rgba(15,15,22,0.95);
-            border-radius: 32px;
-            padding: 32px;
-            max-width: 400px;
-            width: 90%;
-            text-align: center;
-            border: 1px solid rgba(212,175,55,0.3);
-        }
-        .login-card h2 {
-            font-size: 28px;
-            margin-bottom: 10px;
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .login-card p {
-            color: #888;
-            font-size: 13px;
-            margin-bottom: 25px;
-        }
-        .login-input-group {
-            margin-bottom: 20px;
-        }
-        .login-input-group input {
-            width: 100%;
-            padding: 16px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 20px;
-            color: white;
-            font-size: 16px;
-        }
-        .login-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 14px;
-            border-radius: 30px;
-            font-weight: 700;
-            color: #050508;
-            cursor: pointer;
-            margin-bottom: 15px;
-        }
-        .otp-section {
-            display: none;
-            margin-top: 20px;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        .otp-section.show {
-            display: block;
-        }
-        .otp-input {
-            text-align: center;
-            letter-spacing: 4px;
-            font-size: 20px;
-        }
-        .resend-link {
-            background: none;
-            border: none;
-            color: #D4AF37;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .error-text {
-            color: #F44336;
-            font-size: 12px;
-            margin-top: 10px;
-            display: none;
-        }
-        .error-text.show {
-            display: block;
-        }
-        .countdown {
-            font-size: 12px;
-            color: #888;
-            margin-top: 10px;
-        }
-        
-        /* Marquee Section */
+        /* Marquee */
         .marquee-wrapper {
             background: linear-gradient(90deg, #0A0A12, #1A1005, #0A0A12);
             border-top: 1px solid rgba(212,175,55,0.4);
@@ -431,6 +330,21 @@
             top: 0;
             left: 0;
         }
+        /* Image loading skeleton */
+        .product-img .image-skeleton {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, #1A1A1A 25%, #2A2A2A 50%, #1A1A1A 75%);
+            background-size: 200% 100%;
+            animation: skeletonLoading 1.5s infinite;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        @keyframes skeletonLoading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
         .product-img i { 
             font-size: clamp(40px, 13vw, 70px); 
             color: #D4AF37;
@@ -587,7 +501,7 @@
         .feature-premium h4 { font-size: 16px; margin-bottom: 8px; }
         .feature-premium p { font-size: 11px; color: #AAA; }
         
-        /* Stats Row */
+        /* Stats */
         .stats-premium {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -743,11 +657,22 @@
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
+        
+        /* Loading spinner for products */
+        .products-loading {
+            text-align: center;
+            padding: 60px;
+            color: #D4AF37;
+        }
+        .products-loading i {
+            font-size: 40px;
+            margin-bottom: 15px;
+        }
     </style>
 </head>
 <body>
 
-<!-- PERMANENT FLOATING CART -->
+<!-- FLOATING CART -->
 <div class="floating-cart" id="floatingCart">
     <div class="cart-icon-container">
         <i class="fas fa-shopping-cart"></i>
@@ -809,7 +734,12 @@
         <div class="section-title"><i class="fas fa-crown"></i> PREMIUM COLLECTION</div>
         <div id="resultCount" style="color:#D4AF37;">0 products</div>
     </div>
-    <div id="productsContainer" class="products-grid"></div>
+    <div id="productsContainer" class="products-grid">
+        <div class="products-loading">
+            <i class="fas fa-spinner fa-pulse"></i><br>
+            Loading products...
+        </div>
+    </div>
 
     <div class="view-more-container">
         <button class="view-more-btn" id="viewMoreBtn">VIEW MORE +</button>
@@ -832,7 +762,7 @@
         </div>
     </div>
 
-    <!-- FEATURES GRID -->
+    <!-- FEATURES -->
     <div class="features-grid">
         <div class="feature-premium"><i class="fas fa-money-bill-wave"></i><h4>💰 Cash on Delivery</h4><p>Pay only when you receive</p></div>
         <div class="feature-premium"><i class="fas fa-truck-fast"></i><h4>🚚 Free Express Shipping</h4><p>Free shipping all India</p></div>
@@ -881,29 +811,16 @@
     <div class="nav-item" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
 </div>
 
-<!-- 🔥 FIREBASE INITIALIZATION -->
 <script src="firebase-init.js"></script>
-
 <script>
-    // ========== 🔥 FIREBASE & EMAILJS CONFIG ==========
-    const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
-    const EMAILJS_SERVICE_ID = "service_6ucrgd9";
-    const EMAILJS_TEMPLATE_ID = "template_kniixfj";
-    
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-    console.log("✅ EmailJS initialized");
-    
+    // ========== FIREBASE PRODUCTS LOADING ==========
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
     let filteredProducts = [];
     let visibleCount = 8;
     let activeCategory = "all";
-    let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
-    
-    // Pending action after login
-    let pendingAction = null;
-    let pendingProduct = null;
-    
+    let isLoading = false;
+
     function escapeHtml(str) {
         if (!str) return '';
         return String(str).replace(/[&<>]/g, function(m) {
@@ -913,189 +830,71 @@
             return m;
         });
     }
-    
-    // ========== LOGIN MODAL FUNCTIONS ==========
-    let generatedOTP = null;
-    let otpEmail = null;
-    let countdownInterval = null;
-    let resendCooldown = false;
-    
-    async function sendOTP(email) {
-        try {
-            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            otpEmail = email;
-            console.log(`OTP for ${email}: ${generatedOTP}`);
-            
-            const templateParams = {
-                to_email: email,
-                otp_code: generatedOTP,
-                app_name: "Vedanta",
-                expiry_time: "5 minutes"
-            };
-            
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-            showToastMessage(`✅ OTP sent to ${email}`);
-            return true;
-        } catch (error) {
-            console.error("EmailJS Error:", error);
-            showToastMessage("❌ Failed to send OTP", true);
-            return false;
-        }
-    }
-    
-    function showToastMessage(msg, isError = false) {
-        const toast = document.getElementById('toastMsg');
-        if (toast) {
-            toast.innerText = msg;
-            toast.style.background = isError ? '#F44336' : '#D4AF37';
-            toast.style.color = isError ? 'white' : '#050508';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 3000);
-        }
-    }
-    
-    function startCountdown(seconds) {
-        const countdownEl = document.getElementById('modalCountdown');
-        if (!countdownEl) return;
-        
-        let remaining = seconds;
-        countdownEl.style.display = 'block';
-        countdownEl.innerHTML = `Resend available in ${remaining}s`;
-        
-        if (countdownInterval) clearInterval(countdownInterval);
-        
-        countdownInterval = setInterval(() => {
-            remaining--;
-            if (remaining <= 0) {
-                clearInterval(countdownInterval);
-                countdownEl.style.display = 'none';
-                resendCooldown = false;
-            } else {
-                countdownEl.innerHTML = `Resend available in ${remaining}s`;
-            }
-        }, 1000);
-    }
-    
-    function showLoginModal(callback, product = null) {
-        pendingAction = callback;
-        pendingProduct = product;
-        
-        const modalHTML = `
-            <div class="login-modal" id="loginModal">
-                <div class="login-card">
-                    <h2>VEDANTA</h2>
-                    <p>Login to continue</p>
-                    <div class="login-input-group">
-                        <input type="email" id="loginEmail" placeholder="Enter your email">
-                    </div>
-                    <button class="login-btn" id="sendOtpBtn">Send OTP</button>
-                    <div class="otp-section" id="otpSection">
-                        <div class="login-input-group">
-                            <input type="text" id="otpCode" class="otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
-                        </div>
-                        <button class="login-btn" id="verifyOtpBtn">Verify & Login</button>
-                        <button class="resend-link" id="resendOtpBtn">Resend OTP</button>
-                        <div id="modalCountdown" class="countdown" style="display:none;"></div>
-                    </div>
-                    <div class="error-text" id="modalErrorMsg"></div>
-                </div>
-            </div>
-        `;
-        
-        document.body.insertAdjacentHTML('beforeend', modalHTML);
-        
-        let currentEmail = '';
-        
-        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
-            const email = document.getElementById('loginEmail').value.trim();
-            if (!email || !email.includes('@')) {
-                document.getElementById('modalErrorMsg').innerText = '❌ Please enter valid email';
-                document.getElementById('modalErrorMsg').classList.add('show');
-                return;
-            }
-            currentEmail = email;
-            const success = await sendOTP(email);
-            if (success) {
-                document.getElementById('otpSection').classList.add('show');
-                document.getElementById('modalErrorMsg').classList.remove('show');
-                startCountdown(30);
-            }
-        });
-        
-        document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
-            const otp = document.getElementById('otpCode').value.trim();
-            if (!otp || otp.length !== 6) {
-                document.getElementById('modalErrorMsg').innerText = '❌ Enter valid 6-digit OTP';
-                document.getElementById('modalErrorMsg').classList.add('show');
-                return;
-            }
-            
-            if (otp === generatedOTP) {
-                const userData = {
-                    uid: `user_${Date.now()}`,
-                    email: currentEmail,
-                    name: currentEmail.split('@')[0],
-                    joinDate: new Date().toISOString()
-                };
-                localStorage.setItem('vedantaUser', JSON.stringify(userData));
-                currentUser = userData;
-                document.getElementById('loginModal').remove();
-                showToastMessage('✅ Login successful!');
-                
-                if (pendingAction) {
-                    pendingAction(pendingProduct);
-                }
-            } else {
-                document.getElementById('modalErrorMsg').innerText = '❌ Invalid OTP. Please try again.';
-                document.getElementById('modalErrorMsg').classList.add('show');
-            }
-        });
-        
-        document.getElementById('resendOtpBtn').addEventListener('click', async () => {
-            if (resendCooldown) {
-                showToastMessage('⏳ Please wait 30 seconds before resending', true);
-                return;
-            }
-            resendCooldown = true;
-            await sendOTP(currentEmail);
-            startCountdown(30);
-        });
-    }
-    
-    // ========== PRODUCT FUNCTIONS ==========
+
+    // 🔥 Force clear cache and load fresh
     async function loadProductsFromFirebase() {
+        if (isLoading) return;
+        isLoading = true;
+        
         const container = document.getElementById('productsContainer');
         if (container) {
-            container.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Loading products from cloud...</div>';
+            container.innerHTML = '<div class="products-loading"><i class="fas fa-spinner fa-pulse"></i><br>Loading products...</div>';
         }
         
-        let cloudProducts = await getAllProducts();
-        
-        if (cloudProducts && cloudProducts.length > 0) {
-            allProducts = cloudProducts;
-            localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-        } else {
-            const savedProducts = localStorage.getItem('vedantaProducts');
-            if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
-                allProducts = JSON.parse(savedProducts);
+        try {
+            // Force fresh data from Firebase (no cache)
+            let cloudProducts = await getAllProducts();
+            
+            if (cloudProducts && cloudProducts.length > 0) {
+                allProducts = cloudProducts;
+                // Save to localStorage with timestamp
+                localStorage.setItem('vedantaProducts', JSON.stringify({
+                    data: allProducts,
+                    timestamp: Date.now()
+                }));
+            } else {
+                // Check localStorage with timestamp (30 minutes cache)
+                const cached = localStorage.getItem('vedantaProducts');
+                if (cached) {
+                    try {
+                        const parsed = JSON.parse(cached);
+                        if (parsed.data && Array.isArray(parsed.data)) {
+                            allProducts = parsed.data;
+                        } else if (Array.isArray(parsed)) {
+                            allProducts = parsed;
+                        } else {
+                            allProducts = [];
+                        }
+                    } catch(e) {
+                        allProducts = [];
+                    }
+                }
             }
+            
+            // Default products if nothing exists
+            if (!allProducts || allProducts.length === 0) {
+                allProducts = [
+                    { id: "1", name: "Banarasi Silk Saree", category: "Saree", price: 8999, icon: "fa-female", badge: "Best Seller", images: [] },
+                    { id: "2", name: "Men's Cotton Kurta", category: "Kurta", price: 1299, icon: "fa-male", badge: "Trending", images: [] },
+                    { id: "3", name: "Graphic T-Shirt", category: "TShirt", price: 499, icon: "fa-tshirt", badge: "Sale", images: [] },
+                    { id: "4", name: "Amethyst Crystal", category: "Crystal", price: 2899, icon: "fa-gem", badge: "Healing", images: [] },
+                    { id: "5", name: "Sandalwood Mala", category: "Mala", price: 1299, icon: "fa-hands-praying", badge: "Organic", images: [] }
+                ];
+                localStorage.setItem('vedantaProducts', JSON.stringify({ data: allProducts, timestamp: Date.now() }));
+            }
+            
+            filteredProducts = [...allProducts];
+            renderProducts();
+        } catch (error) {
+            console.error("Error loading products:", error);
+            if (container) {
+                container.innerHTML = '<div class="products-loading"><i class="fas fa-exclamation-triangle"></i><br>Error loading products. Pull to refresh.</div>';
+            }
+        } finally {
+            isLoading = false;
         }
-        
-        if (allProducts.length === 0) {
-            allProducts = [
-                { id: "1", name: "Banarasi Silk Saree", category: "Saree", price: 8999, icon: "fa-female", badge: "Best Seller", images: [] },
-                { id: "2", name: "Men's Cotton Kurta", category: "Kurta", price: 1299, icon: "fa-male", badge: "Trending", images: [] },
-                { id: "3", name: "Graphic T-Shirt", category: "TShirt", price: 499, icon: "fa-tshirt", badge: "Sale", images: [] },
-                { id: "4", name: "Amethyst Crystal", category: "Crystal", price: 2899, icon: "fa-gem", badge: "Healing", images: [] },
-                { id: "5", name: "Sandalwood Mala", category: "Mala", price: 1299, icon: "fa-hands-praying", badge: "Organic", images: [] }
-            ];
-            localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-        }
-        
-        filteredProducts = [...allProducts];
-        renderProducts();
     }
-    
+
     function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
     
     function addToCart(product) {
@@ -1136,6 +935,52 @@
         if (cartTotalSpan) cartTotalSpan.innerText = `₹${total}`;
     }
     
+    function showToastMessage(msg, isError = false) {
+        let toast = document.getElementById('toastMsg');
+        if (!toast) {
+            toast = document.createElement('div');
+            toast.id = 'toastMsg';
+            toast.className = 'toast';
+            document.body.appendChild(toast);
+        }
+        toast.innerText = msg;
+        toast.style.background = isError ? '#F44336' : '#D4AF37';
+        toast.style.color = isError ? 'white' : '#050508';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    function buyNowWithLoginCheck(product) {
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        
+        if (currentUser && currentUser.email) {
+            const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1 }];
+            localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+            showToastMessage(`💳 Proceeding to checkout with ${product.name}`);
+            setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 500);
+        } else {
+            showToastMessage('🔐 Please login to place order');
+            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 1000);
+        }
+    }
+    
+    function checkoutWithLoginCheck() {
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+        
+        if (currentCart.length === 0) {
+            showToastMessage('🛒 Cart is empty!', true);
+            return;
+        }
+        
+        if (currentUser && currentUser.email) {
+            window.location.href = 'secure-checkout.html';
+        } else {
+            showToastMessage('🔐 Please login to checkout');
+            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 1000);
+        }
+    }
+    
     function openCart() {
         document.getElementById('cartSidebar').classList.add('open');
         document.getElementById('cartOverlay').classList.add('show');
@@ -1149,57 +994,6 @@
     function goToProductDetail(productId) {
         localStorage.setItem('vedanta_selected_product_id', productId);
         window.location.href = `product-detail.html`;
-    }
-    
-    // ========== BUY NOW WITH LOGIN CHECK ==========
-    function buyNowWithLoginCheck(product) {
-        if (currentUser && currentUser.email) {
-            // Already logged in - proceed to checkout
-            const tempCart = [{ 
-                id: product.id, 
-                name: product.name, 
-                price: product.price, 
-                quantity: 1,
-                icon: product.icon
-            }];
-            localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-            showToastMessage(`💳 Proceeding to checkout with ${product.name}`);
-            setTimeout(() => {
-                window.location.href = 'secure-checkout.html';
-            }, 500);
-        } else {
-            // Not logged in - show login modal
-            showLoginModal((prod) => {
-                const tempCart = [{ 
-                    id: prod.id, 
-                    name: prod.name, 
-                    price: prod.price, 
-                    quantity: 1,
-                    icon: prod.icon
-                }];
-                localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-                showToastMessage(`💳 Proceeding to checkout with ${prod.name}`);
-                setTimeout(() => {
-                    window.location.href = 'secure-checkout.html';
-                }, 500);
-            }, product);
-        }
-    }
-    
-    // ========== CHECKOUT WITH LOGIN CHECK ==========
-    function checkoutWithLoginCheck() {
-        if (cart.length === 0) {
-            showToastMessage('🛒 Cart is empty!', true);
-            return;
-        }
-        
-        if (currentUser && currentUser.email) {
-            window.location.href = 'secure-checkout.html';
-        } else {
-            showLoginModal(() => {
-                window.location.href = 'secure-checkout.html';
-            });
-        }
     }
     
     function renderProducts() {
@@ -1231,7 +1025,10 @@
             container.innerHTML += `
                 <div class="product-card" onclick="goToProductDetail('${p.id}')">
                     <div class="product-img">
-                        ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
+                        ${hasImage ? 
+                            `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
+                            `<i class="fas ${p.icon || 'fa-gem'}"></i>`
+                        }
                         <div class="badge-offer">${p.badge || 'New'}</div>
                     </div>
                     <div class="product-info">
@@ -1275,6 +1072,7 @@
         renderProducts();
     }
     
+    // Event Listeners
     document.getElementById('viewMoreBtn')?.addEventListener('click', () => { visibleCount += 8; renderProducts(); });
     document.getElementById('searchInput')?.addEventListener('input', () => renderProducts());
     document.querySelectorAll('.filter-btn').forEach(btn => {
@@ -1290,18 +1088,26 @@
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
     document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWithLoginCheck);
     
-    // Add toast element
-    const toastDiv = document.createElement('div');
-    toastDiv.id = 'toastMsg';
-    toastDiv.className = 'toast';
-    document.body.appendChild(toastDiv);
+    // 🔥 Force reload on page show (for mobile back button)
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (window.performance && window.performance.navigation.type === 2)) {
+            // Page was loaded from cache (back button)
+            loadProductsFromFirebase();
+        }
+    });
     
+    // Load products on page load
     loadProductsFromFirebase();
     updateCartUI();
     
+    // Real-time listener with debounce
+    let refreshTimeout;
     if (typeof db !== 'undefined') {
         db.collection('products').where('status', '==', 'active').onSnapshot(() => {
-            loadProductsFromFirebase();
+            clearTimeout(refreshTimeout);
+            refreshTimeout = setTimeout(() => {
+                loadProductsFromFirebase();
+            }, 500);
         });
     }
 </script>
