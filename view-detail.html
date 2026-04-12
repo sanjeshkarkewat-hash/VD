@@ -1,0 +1,353 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Order Details - Vedanta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; padding-bottom: 40px; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%); pointer-events: none; z-index: -1; }
+        
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 16px; border-bottom: 1px solid rgba(212,175,55,0.3); background: rgba(5,5,8,0.95); position: sticky; top: 0; z-index: 100; }
+        .logo h1 { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 8px 16px; border-radius: 40px; color: #D4AF37; font-size: 13px; font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; }
+        
+        .container { max-width: 600px; margin: 0 auto; padding: 20px 16px; }
+        
+        .order-header-card { background: rgba(15,15,22,0.7); backdrop-filter: blur(12px); border-radius: 28px; padding: 20px; margin-bottom: 20px; border: 1px solid rgba(212,175,55,0.2); text-align: center; }
+        .order-id-large { font-size: 14px; color: #D4AF37; margin-bottom: 8px; }
+        .order-date-large { font-size: 12px; color: #888; margin-bottom: 12px; }
+        .status-badge-large { display: inline-flex; align-items: center; gap: 8px; padding: 6px 18px; border-radius: 40px; font-size: 13px; font-weight: 600; }
+        .status-confirmed { background: rgba(33,150,243,0.15); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
+        .status-processing { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
+        .status-shipped { background: rgba(33,150,243,0.15); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
+        .status-delivered { background: rgba(76,175,80,0.15); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
+        .status-cancelled { background: rgba(244,67,54,0.15); color: #F44336; border: 1px solid rgba(244,67,54,0.3); }
+        
+        .section-card { background: rgba(15,15,22,0.6); backdrop-filter: blur(10px); border-radius: 24px; margin-bottom: 20px; overflow: hidden; border: 1px solid rgba(212,175,55,0.15); }
+        .section-title { padding: 16px 18px; font-size: 16px; font-weight: 700; border-bottom: 1px solid rgba(255,255,255,0.06); display: flex; align-items: center; gap: 10px; color: #D4AF37; }
+        
+        .product-item-detail { display: flex; gap: 16px; padding: 16px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .product-img-detail { width: 80px; height: 80px; background: #0E0E14; border-radius: 20px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .product-img-detail img { width: 100%; height: 100%; object-fit: cover; }
+        .product-img-detail i { font-size: 38px; color: #D4AF37; }
+        .product-info-detail { flex: 1; }
+        .product-name-detail { font-size: 16px; font-weight: 700; margin-bottom: 6px; }
+        .product-price-detail { font-size: 16px; font-weight: 700; color: #D4AF37; }
+        .product-quantity { font-size: 12px; color: #888; margin-top: 4px; }
+        
+        .info-row { display: flex; justify-content: space-between; padding: 14px 18px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .info-label { color: #aaa; font-size: 13px; }
+        .info-value { font-weight: 600; color: #fff; text-align: right; }
+        .total-row { background: rgba(212,175,55,0.08); border-bottom: none; }
+        .total-row .info-value { color: #D4AF37; font-size: 20px; }
+        
+        .timeline-container { padding: 18px; }
+        .timeline-steps { display: flex; justify-content: space-between; position: relative; margin: 20px 0; }
+        .timeline-steps::before { content: ''; position: absolute; top: 20px; left: 10%; right: 10%; height: 2px; background: rgba(255,255,255,0.1); z-index: 0; }
+        .step { text-align: center; position: relative; z-index: 1; flex: 1; }
+        .step-icon { width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 8px; }
+        .step.active .step-icon { background: #D4AF37; color: #050508; box-shadow: 0 0 15px rgba(212,175,55,0.5); }
+        .step.completed .step-icon { background: #4CAF50; color: white; }
+        .step-label { font-size: 10px; color: #888; }
+        .step.active .step-label { color: #D4AF37; font-weight: 600; }
+        
+        .address-box { padding: 16px 18px; }
+        .address-line { font-size: 13px; color: #ccc; line-height: 1.5; margin-top: 8px; }
+        
+        .action-buttons { display: flex; gap: 12px; margin-top: 10px; margin-bottom: 20px; }
+        .btn-cancel { flex: 1; background: rgba(244,67,54,0.15); border: 1px solid rgba(244,67,54,0.4); border-radius: 50px; padding: 14px; font-weight: 700; font-size: 14px; color: #F44336; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-cancel.disabled { opacity: 0.5; cursor: not-allowed; pointer-events: none; }
+        .btn-home { flex: 1; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.2); border-radius: 50px; padding: 14px; font-weight: 700; font-size: 14px; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        
+        .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; }
+        .toast.show { display: block; animation: fadeInOut 2s ease; }
+        @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 15% { opacity: 1; } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
+        .loading { text-align: center; padding: 60px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo"><h1>VEDANTA</h1></div>
+    <div class="back-btn" onclick="goBackToBooking()">
+        <i class="fas fa-arrow-left"></i> Back
+    </div>
+</div>
+
+<div class="container" id="orderDetailContainer">
+    <div class="loading">
+        <i class="fas fa-spinner fa-pulse"></i> Loading order details...
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // Product images mapping
+    let productsMap = new Map();
+
+    function loadProducts() {
+        try {
+            const saved = localStorage.getItem('vedantaProducts');
+            if (saved) {
+                const prods = JSON.parse(saved);
+                if (Array.isArray(prods)) {
+                    prods.forEach(p => {
+                        productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem' });
+                    });
+                }
+            }
+        } catch(e) {}
+    }
+
+    function getProductImage(productId) {
+        const prod = productsMap.get(productId);
+        if (prod && prod.images && prod.images.length > 0) return prod.images[0];
+        return null;
+    }
+
+    function getProductIcon(productId) {
+        const prod = productsMap.get(productId);
+        return (prod && prod.icon) ? prod.icon : 'fa-gem';
+    }
+
+    function getStatusClass(status) {
+        switch(status) {
+            case 'confirmed': return 'status-confirmed';
+            case 'processing': return 'status-processing';
+            case 'shipped': return 'status-shipped';
+            case 'delivered': return 'status-delivered';
+            case 'cancelled': return 'status-cancelled';
+            default: return 'status-confirmed';
+        }
+    }
+
+    function getStatusLabel(status) {
+        const map = { 'confirmed': 'Confirmed', 'processing': 'Processing', 'shipped': 'Shipped', 'delivered': 'Delivered', 'cancelled': 'Cancelled' };
+        return map[status] || status;
+    }
+
+    function canCancelOrder(status) {
+        return status === 'confirmed';
+    }
+
+    function getStepIndex(status) {
+        switch(status) {
+            case 'confirmed': return 0;
+            case 'processing': return 1;
+            case 'shipped': return 2;
+            case 'delivered': return 3;
+            default: return 0;
+        }
+    }
+
+    function renderTimeline(currentStatus) {
+        const steps = [
+            { name: 'Order Placed', key: 'confirmed' },
+            { name: 'Processing', key: 'processing' },
+            { name: 'Shipped', key: 'shipped' },
+            { name: 'Delivered', key: 'delivered' }
+        ];
+        
+        if (currentStatus === 'cancelled') {
+            return `<div style="text-align:center; padding:20px; color:#F44336;"><i class="fas fa-ban"></i> Order has been cancelled</div>`;
+        }
+        
+        let currentStep = getStepIndex(currentStatus);
+        return `
+            <div class="timeline-steps">
+                ${steps.map((step, idx) => `
+                    <div class="step ${idx <= currentStep ? (idx === currentStep ? 'active' : 'completed') : ''}">
+                        <div class="step-icon"><i class="fas ${idx <= currentStep ? (idx === currentStep ? 'fa-circle' : 'fa-check') : 'fa-clock'}"></i></div>
+                        <div class="step-label">${step.name}</div>
+                    </div>
+                `).join('')}
+            </div>
+        `;
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2500);
+    }
+
+    function goBackToBooking() {
+        window.location.href = 'booking.html';
+    }
+
+    function cancelOrderFromDetail(orderId) {
+        let orders = [];
+        try {
+            const stored = localStorage.getItem('vedantaOrders');
+            if (stored) {
+                orders = JSON.parse(stored);
+            }
+        } catch(e) {}
+        
+        const orderIndex = orders.findIndex(o => o.orderId === orderId);
+        if (orderIndex === -1) {
+            showToast('❌ Order not found');
+            return;
+        }
+        
+        const order = orders[orderIndex];
+        
+        if (order.status !== 'confirmed') {
+            if (order.status === 'processing') showToast('❌ Order is processing. Cannot cancel now.');
+            else if (order.status === 'shipped') showToast('❌ Order shipped. Cannot cancel.');
+            else if (order.status === 'delivered') showToast('❌ Order already delivered.');
+            else if (order.status === 'cancelled') showToast('⚠️ Order already cancelled');
+            return;
+        }
+        
+        if (confirm(`⚠️ Cancel order #${orderId}?`)) {
+            orders[orderIndex].status = 'cancelled';
+            localStorage.setItem('vedantaOrders', JSON.stringify(orders));
+            showToast(`✅ Order #${orderId} cancelled!`);
+            setTimeout(() => { renderOrderDetail(); }, 500);
+        }
+    }
+
+    function renderOrderDetail() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const orderId = urlParams.get('orderId');
+        
+        const container = document.getElementById('orderDetailContainer');
+        
+        if (!orderId) {
+            container.innerHTML = `<div class="section-card" style="text-align:center; padding:40px;"><h3>Order Not Found</h3><button class="btn-home" style="margin-top:20px;" onclick="goBackToBooking()">Back</button></div>`;
+            return;
+        }
+        
+        let orders = [];
+        try {
+            const stored = localStorage.getItem('vedantaOrders');
+            if (stored) {
+                orders = JSON.parse(stored);
+            }
+        } catch(e) {}
+        
+        const order = orders.find(o => o.orderId === orderId);
+        
+        if (!order) {
+            container.innerHTML = `<div class="section-card" style="text-align:center; padding:40px;"><h3>Order Not Found</h3><p>Order #${orderId} does not exist</p><button class="btn-home" style="margin-top:20px;" onclick="goBackToBooking()">Back to Bookings</button></div>`;
+            return;
+        }
+        
+        loadProducts();
+        
+        const statusClass = getStatusClass(order.status);
+        const statusLabel = getStatusLabel(order.status);
+        const isCancelled = order.status === 'cancelled';
+        const isDelivered = order.status === 'delivered';
+        const cancelEnabled = canCancelOrder(order.status);
+        
+        let itemsHtml = '';
+        if (order.items && order.items.length > 0) {
+            itemsHtml = order.items.map(item => {
+                const productImg = getProductImage(item.id);
+                const iconClass = getProductIcon(item.id);
+                return `
+                    <div class="product-item-detail">
+                        <div class="product-img-detail">
+                            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${iconClass}"></i>`}
+                        </div>
+                        <div class="product-info-detail">
+                            <div class="product-name-detail">${escapeHtml(item.name)}</div>
+                            <div class="product-price-detail">₹${(item.price || 0).toLocaleString('en-IN')}</div>
+                            <div class="product-quantity">Quantity: ${item.quantity || 1} | Size: ${item.size || 'Standard'}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div class="product-price-detail">₹${((item.price || 0) * (item.quantity || 1)).toLocaleString('en-IN')}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } else {
+            itemsHtml = `<div style="padding: 20px; text-align: center; color: #888;">No items found</div>`;
+        }
+        
+        const address = order.customer?.address || 'Not provided';
+        const city = order.customer?.city || '';
+        const pincode = order.customer?.pincode || '';
+        const fullAddress = `${address}, ${city} ${pincode}`.trim().replace(/,$/, '');
+        const paymentMethod = order.paymentMethod || 'Cash on Delivery';
+        const trackingId = order.trackingId || `TRK${order.orderId.slice(-8)}`;
+        
+        const deliveryMessage = isDelivered ? `<div style="margin-top:12px; padding:10px; background:rgba(76,175,80,0.1); border-radius:16px;"><i class="fas fa-check-circle" style="color:#4CAF50;"></i> Order successfully delivered!</div>` : '';
+        
+        container.innerHTML = `
+            <div class="order-header-card">
+                <div class="order-id-large">ORDER #${order.orderId}</div>
+                <div class="order-date-large">Placed on ${order.date || 'N/A'}</div>
+                <div class="status-badge-large ${statusClass}">
+                    <i class="fas ${isCancelled ? 'fa-times-circle' : (isDelivered ? 'fa-check-circle' : 'fa-clock')}"></i> ${statusLabel}
+                </div>
+                ${deliveryMessage}
+            </div>
+            
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-shopping-bag"></i> Order Items</div>
+                ${itemsHtml}
+            </div>
+            
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-receipt"></i> Payment Summary</div>
+                <div class="info-row"><span class="info-label">Payment Method</span><span class="info-value">${paymentMethod}</span></div>
+                <div class="info-row total-row"><span class="info-label">Total Amount</span><span class="info-value">₹${(order.total || 0).toLocaleString('en-IN')}</span></div>
+            </div>
+            
+            ${!isCancelled ? `
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-chart-line"></i> Order Tracking</div>
+                <div class="timeline-container">
+                    ${renderTimeline(order.status)}
+                    <div style="margin-top:16px;"><span style="font-size:12px; color:#888;"><i class="fas fa-truck"></i> Tracking ID: ${trackingId}</span></div>
+                </div>
+            </div>
+            ` : `
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-ban"></i> Order Status</div>
+                <div style="padding:20px; text-align:center; color:#F44336;"><i class="fas fa-times-circle" style="font-size:32px;"></i><p>This order has been cancelled.</p></div>
+            </div>
+            `}
+            
+            <div class="section-card">
+                <div class="section-title"><i class="fas fa-map-marker-alt"></i> Delivery Address</div>
+                <div class="address-box">
+                    <div style="font-weight:600;">${escapeHtml(order.customer?.fullName || order.customer?.name || 'Guest')}</div>
+                    <div class="address-line">${fullAddress || 'No address provided'}</div>
+                    <div class="address-line"><i class="fas fa-phone-alt"></i> ${order.customer?.phone || 'N/A'}</div>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                ${cancelEnabled ? `<button class="btn-cancel" onclick="cancelOrderFromDetail('${order.orderId}')"><i class="fas fa-times-circle"></i> Cancel Order</button>` : (isCancelled ? `<button class="btn-cancel disabled" disabled>Already Cancelled</button>` : (order.status === 'processing' ? `<button class="btn-cancel disabled" disabled><i class="fas fa-spinner"></i> Cannot Cancel (Processing)</button>` : (order.status === 'shipped' ? `<button class="btn-cancel disabled" disabled><i class="fas fa-truck"></i> Cannot Cancel (Shipped)</button>` : (order.status === 'delivered' ? `<button class="btn-cancel disabled" disabled><i class="fas fa-check-circle"></i> Order Delivered</button>` : ''))))}
+                <button class="btn-home" onclick="goBackToBooking()"><i class="fas fa-arrow-left"></i> Back to Bookings</button>
+            </div>
+        `;
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    window.goBackToBooking = goBackToBooking;
+    window.cancelOrderFromDetail = cancelOrderFromDetail;
+    
+    renderOrderDetail();
+</script>
+</body>
+</html>

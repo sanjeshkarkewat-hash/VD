@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Login - Vedanta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #050508;
+            color: #FFFFFF;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.1), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            background: rgba(5,5,8,0.95);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo h1 {
+            font-size: 22px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .back-btn {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.3);
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .profile-container { max-width: 500px; margin: 0 auto; padding: 20px 16px; padding-bottom: 80px; }
+        .animated-logo { text-align: center; margin-bottom: 30px; animation: logoFloat 3s ease-in-out infinite; }
+        @keyframes logoFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+        .logo-glow {
+            font-size: 42px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #F5D742, #FF8C00);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 3s linear infinite;
+            display: inline-block;
+        }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        .logo-sub { font-size: 12px; color: #888; margin-top: 5px; }
+        .card {
+            background: rgba(15,15,22,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 28px 24px;
+            border: 1px solid rgba(212,175,55,0.2);
+            margin-bottom: 20px;
+        }
+        .login-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
+        .login-subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
+        .email-input-group { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .email-input-group input {
+            flex: 1;
+            padding: 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 16px;
+            font-family: inherit;
+        }
+        .email-input-group input:focus { outline: none; border-color: #D4AF37; }
+        .send-otp-btn {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 0 24px;
+            border-radius: 20px;
+            font-weight: 700;
+            color: #050508;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .otp-group { margin-bottom: 20px; display: none; }
+        .otp-group.show { display: block; animation: fadeIn 0.3s ease; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        .otp-input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 4px;
+            font-weight: 600;
+        }
+        .verify-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 16px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 16px;
+            color: #050508;
+            cursor: pointer;
+            margin-top: 12px;
+        }
+        .resend-otp { text-align: center; margin-top: 12px; }
+        .resend-otp button { background: none; border: none; color: #D4AF37; font-size: 12px; cursor: pointer; }
+        .benefits-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+        .benefits-list { display: flex; flex-direction: column; gap: 12px; }
+        .benefit-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 20px; }
+        .benefit-item i { font-size: 24px; color: #D4AF37; }
+        .benefit-item div h4 { font-size: 14px; margin-bottom: 4px; }
+        .benefit-item div p { font-size: 11px; color: #888; }
+        .profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+        .profile-avatar { width: 70px; height: 70px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .profile-avatar i { font-size: 36px; color: #050508; }
+        .profile-info h3 { font-size: 20px; margin-bottom: 4px; }
+        .profile-info p { font-size: 13px; color: #888; }
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+        .stat-card { background: rgba(0,0,0,0.3); padding: 14px; border-radius: 20px; text-align: center; }
+        .stat-number { font-size: 22px; font-weight: 800; color: #D4AF37; }
+        .stat-label { font-size: 11px; color: #888; }
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .menu-left { display: flex; align-items: center; gap: 14px; }
+        .menu-left i { font-size: 20px; color: #D4AF37; }
+        .logout-btn {
+            width: 100%;
+            background: rgba(244,67,54,0.15);
+            border: 1px solid rgba(244,67,54,0.3);
+            padding: 14px;
+            border-radius: 30px;
+            font-weight: 600;
+            color: #F44336;
+            cursor: pointer;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 10000;
+            font-size: 12px;
+            display: none;
+        }
+        .toast.show { display: block; animation: fadeInOut 2s ease; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 60px;
+            padding: 8px 20px;
+            display: flex;
+            gap: 30px;
+            z-index: 1000;
+            border: 1px solid rgba(212,175,55,0.5);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            padding: 5px 14px;
+            border-radius: 50px;
+        }
+        .nav-item i { font-size: 20px; color: #ccc; }
+        .nav-item span { font-size: 10px; }
+        .nav-item.active, .nav-item:hover { background: rgba(212,175,55,0.2); }
+        .nav-item.active i, .nav-item.active span { color: #D4AF37; }
+        .loader {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #050508;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .setup-info {
+            background: rgba(212,175,55,0.1);
+            border-radius: 16px;
+            padding: 12px;
+            margin-top: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #D4AF37;
+        }
+        .countdown {
+            font-size: 12px;
+            color: #888;
+            margin-top: 8px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo"><h1>VEDANTA</h1></div>
+    <div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div>
+</div>
+
+<div class="profile-container" id="profileContainer"></div>
+
+<div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
+    <div class="nav-item" onclick="window.location.href='booking.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
+    <div class="nav-item active" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    // ========== 🔥 FIREBASE CONFIGURATION ==========
+    const firebaseConfig = {
+        apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
+        authDomain: "vedanta-d0199.firebaseapp.com",
+        projectId: "vedanta-d0199",
+        storageBucket: "vedanta-d0199.firebasestorage.app",
+        messagingSenderId: "761061711987",
+        appId: "1:761061711987:web:d59ff32fd53057c395ca06",
+        measurementId: "G-RQMQZVGK75"
+    };
+    
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    console.log("🔥 Firebase Connected!");
+    
+    // ==================== 🔐 EMAILJS CONFIGURATION ====================
+    const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
+    const EMAILJS_SERVICE_ID = "service_6ucrgd9";
+    const EMAILJS_TEMPLATE_ID = "template_kniixfj";
+    
+    // Initialize EmailJS
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    console.log("✅ EmailJS initialized");
+    
+    let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
+    let generatedOTP = null;
+    let otpEmail = null;
+    let countdownInterval = null;
+    let resendCooldown = false;
+    let userOrders = [];
+    
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.background = isError ? '#F44336' : '#D4AF37';
+        toast.style.color = isError ? 'white' : '#050508';
+        toast.classList.add('show');
+        setTimeout(() => {
+            toast.classList.remove('show');
+        }, 3000);
+    }
+    
+    // ========== 🔥 LOAD USER ORDERS FROM FIREBASE ==========
+    async function loadUserOrdersFromFirebase(email) {
+        if (!email) return [];
+        try {
+            const snapshot = await db.collection('orders')
+                .where('customerEmail', '==', email)
+                .orderBy('orderDate', 'desc')
+                .get();
+            
+            const orders = [];
+            snapshot.forEach(doc => {
+                orders.push({ id: doc.id, ...doc.data() });
+            });
+            return orders;
+        } catch (error) {
+            console.error("Error loading orders from Firebase:", error);
+            return [];
+        }
+    }
+    
+    // ✅ REAL EMAIL SEND USING EMAILJS
+    async function sendEmailOTP(email) {
+        try {
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            otpEmail = email;
+            
+            console.log(`Generated OTP for ${email}: ${generatedOTP}`);
+            
+            const templateParams = {
+                to_email: email,
+                otp_code: generatedOTP,
+                app_name: "Vedanta",       
+                expiry_time: "5 minutes"   
+            };
+            
+            console.log("Sending email via EmailJS...");
+            
+            const response = await emailjs.send(
+                EMAILJS_SERVICE_ID,
+                EMAILJS_TEMPLATE_ID,
+                templateParams
+            );
+            
+            console.log("✅ Email sent successfully!", response);
+            showToast(`✅ OTP sent to ${email}. Please check your inbox.`);
+            return { success: true };
+            
+        } catch (error) {
+            console.error("❌ EmailJS Error:", error);
+            
+            if (error.text === "Invalid service ID") {
+                showToast("❌ Invalid Service ID. Please check your EmailJS service configuration.", true);
+            } else if (error.text === "Invalid template ID") {
+                showToast("❌ Invalid Template ID. Please check your EmailJS template configuration.", true);
+            } else if (error.text === "Unauthorized") {
+                showToast("❌ Invalid Public Key. Please check your EmailJS API key.", true);
+            } else {
+                showToast(`❌ Failed to send OTP: ${error.text || error.message}`, true);
+            }
+            return { success: false };
+        }
+    }
+    
+    // ✅ Verify OTP
+    async function verifyEmailOTP(enteredOTP) {
+        if (!generatedOTP) {
+            showToast("❌ Please request OTP first", true);
+            return false;
+        }
+        
+        if (enteredOTP === generatedOTP) {
+            const userData = {
+                uid: `email_${Date.now()}`,
+                email: otpEmail,
+                name: otpEmail.split('@')[0],
+                joinDate: new Date().toISOString(),
+                phone: ''
+            };
+            
+            localStorage.setItem('vedantaUser', JSON.stringify(userData));
+            currentUser = userData;
+            
+            showToast("✅ Login successful! Welcome to Vedanta!");
+            renderProfilePage();
+            return true;
+        } else {
+            showToast("❌ Invalid OTP. Please try again.", true);
+            return false;
+        }
+    }
+    
+    // ✅ Resend OTP with cooldown
+    async function resendEmailOTP(email) {
+        if (resendCooldown) {
+            showToast("⏳ Please wait 30 seconds before resending", true);
+            return false;
+        }
+        
+        if (!email) {
+            showToast("❌ Please enter email first", true);
+            return false;
+        }
+        
+        resendCooldown = true;
+        startCountdown(30);
+        
+        return await sendEmailOTP(email);
+    }
+    
+    function startCountdown(seconds) {
+        const countdownEl = document.getElementById('countdown');
+        if (!countdownEl) return;
+        
+        let remaining = seconds;
+        countdownEl.style.display = 'block';
+        countdownEl.innerHTML = `Resend available in ${remaining}s`;
+        
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                countdownEl.style.display = 'none';
+                resendCooldown = false;
+            } else {
+                countdownEl.innerHTML = `Resend available in ${remaining}s`;
+            }
+        }, 1000);
+    }
+    
+    // ✅ Render Login Page
+    function renderLoginPage() {
+        const container = document.getElementById('profileContainer');
+        container.innerHTML = `
+            <div class="animated-logo">
+                <div class="logo-glow">VEDANTA</div>
+                <div class="logo-sub">✦ WHERE SOUL MEETS LUXURY ✦</div>
+            </div>
+            
+            <div class="card">
+                <div class="login-title">🔐 Email OTP Login</div>
+                <div class="login-subtitle">Enter your email to receive OTP</div>
+                <div class="email-input-group">
+                    <input type="email" id="emailInput" placeholder="Enter your email" value="">
+                    <button class="send-otp-btn" id="sendOtpBtn">Send OTP</button>
+                </div>
+                <div class="otp-group" id="otpGroup">
+                    <input type="text" id="otpInput" class="otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
+                    <button class="verify-btn" id="verifyBtn">Verify & Login</button>
+                    <div class="resend-otp"><button id="resendOtpBtn">Resend OTP</button></div>
+                    <div id="countdown" class="countdown" style="display:none"></div>
+                </div>
+                <div class="setup-info">
+                    <i class="fas fa-envelope"></i> OTP will be sent to your email inbox
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="benefits-title"><i class="fas fa-crown"></i> Membership Benefits</div>
+                <div class="benefits-list">
+                    <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>Exclusive Discounts</h4><p>Get 10% off on your first order</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Priority Shipping</h4><p>Free express shipping on orders above ₹2999</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-gift"></i><div><h4>Birthday Surprise</h4><p>Special gift & discount on your birthday month</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-star"></i><div><h4>Early Access</h4><p>Get early access to new collections & sales</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-headset"></i><div><h4>Priority Support</h4><p>24/7 dedicated customer support</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>Earn coins on every purchase</p></div></div>
+                </div>
+            </div>
+        `;
+
+        let currentEmail = '';
+
+        document.getElementById('sendOtpBtn')?.addEventListener('click', async () => {
+            const email = document.getElementById('emailInput').value.trim();
+            if (!email || !email.includes('@')) {
+                showToast('❌ Please enter a valid email address', true);
+                return;
+            }
+            
+            const btn = document.getElementById('sendOtpBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span>Sending...';
+            
+            currentEmail = email;
+            const result = await sendEmailOTP(email);
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Send OTP';
+            
+            if (result.success) {
+                document.getElementById('otpGroup').classList.add('show');
+                startCountdown(30);
+            }
+        });
+
+        document.getElementById('verifyBtn')?.addEventListener('click', async () => {
+            const otp = document.getElementById('otpInput').value.trim();
+            if (!otp) { showToast('❌ Please enter OTP', true); return; }
+            if (otp.length !== 6) { showToast('❌ OTP must be 6 digits', true); return; }
+            
+            const btn = document.getElementById('verifyBtn');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span>Verifying...';
+            
+            await verifyEmailOTP(otp);
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Verify & Login';
+        });
+
+        document.getElementById('resendOtpBtn')?.addEventListener('click', async () => {
+            if (!currentEmail) {
+                const email = document.getElementById('emailInput').value.trim();
+                if (!email || !email.includes('@')) {
+                    showToast('❌ Please enter valid email first', true);
+                    return;
+                }
+                currentEmail = email;
+            }
+            
+            const btn = document.getElementById('resendOtpBtn');
+            btn.disabled = true;
+            btn.innerHTML = 'Sending...';
+            
+            await resendEmailOTP(currentEmail);
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Resend OTP';
+        });
+    }
+
+    // ✅ Render Profile Page with Firebase Orders
+    async function renderProfilePage() {
+        const container = document.getElementById('profileContainer');
+        
+        // Load orders from Firebase
+        if (currentUser && currentUser.email) {
+            userOrders = await loadUserOrdersFromFirebase(currentUser.email);
+        }
+        
+        const totalSpent = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+        const pendingOrders = userOrders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+        const completedOrders = userOrders.filter(o => o.status === 'delivered').length;
+
+        container.innerHTML = `
+            <div class="card">
+                <div class="profile-header">
+                    <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                    <div class="profile-info">
+                        <h3>${currentUser.name || 'Valued Customer'}</h3>
+                        <p><i class="fas fa-envelope"></i> ${currentUser.email || 'No email'}</p>
+                        <p><i class="fas fa-calendar"></i> Member since ${new Date(currentUser.joinDate).toLocaleDateString('en-IN')}</p>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-number">${userOrders.length}</div><div class="stat-label">Total Orders</div></div>
+                    <div class="stat-card"><div class="stat-number">${pendingOrders}</div><div class="stat-label">Active Orders</div></div>
+                    <div class="stat-card"><div class="stat-number">${Math.floor(totalSpent / 100)}</div><div class="stat-label">Vedanta Coins</div></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="benefits-title"><i class="fas fa-gem"></i> Member Benefits</div>
+                <div class="benefits-list">
+                    <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>10% OFF on Next Order</h4><p>Use code: WELCOME10</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Express Shipping</h4><p>On all orders above ₹2999</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>${Math.floor(totalSpent / 100)} coins earned (1 coin = ₹1)</p></div></div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="menu-item" onclick="window.location.href='booking.html'">
+                    <div class="menu-left"><i class="fas fa-box"></i><span>My Orders (${userOrders.length})</span></div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="menu-item" onclick="showToast('📍 Address book coming soon')">
+                    <div class="menu-left"><i class="fas fa-map-marker-alt"></i><span>Saved Addresses</span></div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="menu-item" onclick="showToast('💳 Payment methods coming soon')">
+                    <div class="menu-left"><i class="fas fa-credit-card"></i><span>Payment Methods</span></div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        `;
+        
+        document.getElementById('logoutBtn')?.addEventListener('click', () => {
+            localStorage.removeItem('vedantaUser');
+            currentUser = null;
+            generatedOTP = null;
+            otpEmail = null;
+            userOrders = [];
+            if (countdownInterval) clearInterval(countdownInterval);
+            showToast('👋 Logged out successfully');
+            renderLoginPage();
+        });
+    }
+
+    // Check if already logged in
+    if (currentUser && currentUser.email) {
+        renderProfilePage();
+    } else {
+        renderLoginPage();
+    }
+</script>
+</body>
+</html>

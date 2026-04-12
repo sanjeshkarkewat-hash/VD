@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Order Success - Vedanta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Space Grotesk', sans-serif;
+      background: #050508;
+      color: #FFFFFF;
+      overflow-x: hidden;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.15), transparent 70%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 1000;
+    }
+
+    .success-container {
+      width: 100%;
+      max-width: 550px;
+      margin: 40px 20px;
+      padding: 40px 30px;
+      background: rgba(15,15,22,0.75);
+      backdrop-filter: blur(20px);
+      border-radius: 48px;
+      border: 1px solid rgba(212,175,55,0.3);
+      text-align: center;
+      animation: fadeInUp 0.6s ease-out;
+      position: relative;
+      z-index: 10;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Animated Checkmark */
+    .checkmark-wrapper {
+      margin-bottom: 30px;
+    }
+    .checkmark-circle {
+      width: 100px;
+      height: 100px;
+      margin: 0 auto;
+      position: relative;
+    }
+    .checkmark-circle svg {
+      width: 100px;
+      height: 100px;
+    }
+    .circle-bg {
+      fill: none;
+      stroke: rgba(212,175,55,0.3);
+      stroke-width: 3;
+    }
+    .circle-path {
+      fill: none;
+      stroke: #4CAF50;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 283;
+      stroke-dashoffset: 283;
+      animation: drawCircle 0.8s ease-out forwards;
+    }
+    .checkmark-path {
+      fill: none;
+      stroke: #4CAF50;
+      stroke-width: 3;
+      stroke-linecap: round;
+      stroke-dasharray: 50;
+      stroke-dashoffset: 50;
+      animation: drawCheck 0.5s ease-out 0.5s forwards;
+    }
+    @keyframes drawCircle {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes drawCheck {
+      to { stroke-dashoffset: 0; }
+    }
+
+    /* Success Icon Fallback */
+    .success-icon {
+      width: 90px;
+      height: 90px;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 25px;
+      animation: pulse 0.8s ease-in-out, bounce 0.6s ease-out;
+    }
+    .success-icon i {
+      font-size: 50px;
+      color: white;
+    }
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 0; }
+      50% { transform: scale(1.1); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .success-title {
+      font-size: 32px;
+      font-weight: 800;
+      background: linear-gradient(135deg, #4CAF50, #8BC34A);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 12px;
+    }
+
+    .success-message {
+      color: #CCCCCC;
+      font-size: 16px;
+      margin-bottom: 30px;
+      line-height: 1.5;
+    }
+
+    /* Order Details Card */
+    .order-details {
+      background: rgba(0,0,0,0.4);
+      border-radius: 28px;
+      padding: 20px;
+      margin: 20px 0;
+      text-align: left;
+      border: 1px solid rgba(212,175,55,0.15);
+    }
+    .order-details h3 {
+      color: #D4AF37;
+      font-size: 18px;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .order-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+      font-size: 14px;
+    }
+    .order-row:last-child {
+      border-bottom: none;
+    }
+    .order-label {
+      color: #888;
+    }
+    .order-value {
+      color: #FFFFFF;
+      font-weight: 500;
+    }
+    .order-total {
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 2px solid rgba(212,175,55,0.3);
+      font-size: 18px;
+      font-weight: 700;
+    }
+    .order-total .order-value {
+      color: #D4AF37;
+    }
+
+    /* Shipping Info */
+    .shipping-info {
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 15px 0;
+    }
+    .shipping-info h4 {
+      color: #D4AF37;
+      font-size: 14px;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .shipping-text {
+      font-size: 13px;
+      color: #CCCCCC;
+      line-height: 1.5;
+    }
+
+    /* Buttons */
+    .action-buttons {
+      display: flex;
+      gap: 15px;
+      margin-top: 30px;
+      flex-wrap: wrap;
+    }
+    .home-btn {
+      flex: 1;
+      background: linear-gradient(135deg, #D4AF37, #FF8C00);
+      border: none;
+      padding: 14px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #050508;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: 0.3s;
+    }
+    .home-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 25px rgba(212,175,55,0.5);
+    }
+    .orders-btn {
+      flex: 1;
+      background: rgba(212,175,55,0.15);
+      border: 1px solid rgba(212,175,55,0.5);
+      padding: 14px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 16px;
+      color: #D4AF37;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: 0.3s;
+    }
+    .orders-btn:hover {
+      background: rgba(212,175,55,0.3);
+    }
+
+    /* Fireworks effect */
+    .sparkle {
+      position: absolute;
+      pointer-events: none;
+      animation: sparkleFly 1s ease-out forwards;
+    }
+    @keyframes sparkleFly {
+      0% {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0) translateY(-100px);
+      }
+    }
+
+    @media (max-width: 550px) {
+      .success-container {
+        margin: 20px 16px;
+        padding: 30px 20px;
+      }
+      .success-title {
+        font-size: 26px;
+      }
+      .action-buttons {
+        flex-direction: column;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="confetti-canvas"></canvas>
+
+<div class="success-container">
+  <!-- Animated Checkmark -->
+  <div class="checkmark-wrapper">
+    <div class="success-icon" id="successIcon">
+      <i class="fas fa-check"></i>
+    </div>
+  </div>
+
+  <h1 class="success-title">ORDER SUCCESSFUL! 🎉</h1>
+  <p class="success-message">Thank you for shopping with Vedanta. Your order has been confirmed and will be shipped soon.</p>
+
+  <div class="order-details" id="orderDetails">
+    <div style="text-align: center; padding: 20px;">
+      <i class="fas fa-spinner fa-pulse"></i> Loading order details...
+    </div>
+  </div>
+
+  <div class="action-buttons">
+    <button class="home-btn" id="homeBtn">
+      <i class="fas fa-home"></i> Back to Home
+    </button>
+    <button class="orders-btn" id="trackBtn">
+      <i class="fas fa-truck"></i> Track Order
+    </button>
+  </div>
+</div>
+
+<script>
+  // ========== 🔥 FIREBASE CONFIGURATION ==========
+  const firebaseConfig = {
+    apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
+    authDomain: "vedanta-d0199.firebaseapp.com",
+    projectId: "vedanta-d0199",
+    storageBucket: "vedanta-d0199.firebasestorage.app",
+    messagingSenderId: "761061711987",
+    appId: "1:761061711987:web:d59ff32fd53057c395ca06",
+    measurementId: "G-RQMQZVGK75"
+  };
+  
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  console.log("🔥 Firebase Connected!");
+  
+  let orderData = null;
+  
+  // Get the last order from Firebase or localStorage
+  async function getLastOrder() {
+    // First try to get from localStorage (immediate after checkout)
+    let localOrder = JSON.parse(localStorage.getItem('lastOrder'));
+    
+    if (localOrder && localOrder.orderId) {
+      // Verify if this order exists in Firebase
+      try {
+        const doc = await db.collection('orders').doc(localOrder.orderId).get();
+        if (doc.exists) {
+          orderData = { id: doc.id, ...doc.data() };
+          console.log("✅ Order found in Firebase:", orderData.orderId);
+          renderOrderDetails();
+          startConfetti();
+          setTimeout(() => createSparkles(), 300);
+          clearCart();
+          return;
+        }
+      } catch(e) {
+        console.log("Firebase check failed, using local order");
+      }
+      
+      // Use local order as fallback
+      orderData = localOrder;
+      renderOrderDetails();
+      startConfetti();
+      setTimeout(() => createSparkles(), 300);
+      clearCart();
+      return;
+    }
+    
+    // If no order in localStorage, try to get most recent order from Firebase for this user
+    const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+    if (currentUser && currentUser.email) {
+      try {
+        const snapshot = await db.collection('orders')
+          .where('customerEmail', '==', currentUser.email)
+          .orderBy('orderDate', 'desc')
+          .limit(1)
+          .get();
+        
+        if (!snapshot.empty) {
+          snapshot.forEach(doc => {
+            orderData = { id: doc.id, ...doc.data() };
+          });
+          console.log("✅ Found recent order from Firebase:", orderData.orderId);
+          renderOrderDetails();
+          startConfetti();
+          setTimeout(() => createSparkles(), 300);
+          clearCart();
+          return;
+        }
+      } catch(e) {
+        console.log("Error fetching from Firebase:", e);
+      }
+    }
+    
+    // Fallback: create from cart
+    let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+    if (cart.length > 0) {
+      const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+      const gst = Math.round(subtotal * 0.05);
+      const grandTotal = subtotal + gst;
+      orderData = {
+        orderId: 'ORD' + Date.now(),
+        orderDate: new Date().toISOString(),
+        date: new Date().toLocaleString(),
+        items: cart,
+        subtotal: subtotal,
+        gst: gst,
+        total: grandTotal,
+        paymentMethod: 'Cash on Delivery',
+        customerName: "Valued Customer",
+        customerPhone: "XXXXXXXXXX",
+        status: 'pending'
+      };
+      renderOrderDetails();
+      startConfetti();
+      setTimeout(() => createSparkles(), 300);
+      clearCart();
+    } else {
+      document.getElementById('orderDetails').innerHTML = `
+        <div style="text-align: center; padding: 20px;">
+          <i class="fas fa-exclamation-triangle" style="color: #FF9800; font-size: 40px;"></i>
+          <p style="margin-top: 15px;">No order found. <a href="index.html" style="color: #D4AF37;">Continue Shopping</a></p>
+        </div>
+      `;
+    }
+  }
+  
+  // Render order details from Firebase order data
+  function renderOrderDetails() {
+    const container = document.getElementById('orderDetails');
+    if (!container || !orderData) return;
+    
+    // Calculate GST if not present
+    const subtotal = orderData.subtotal || orderData.total || 0;
+    const gst = orderData.gst || Math.round(subtotal * 0.05);
+    const total = orderData.total || subtotal + gst;
+    const items = orderData.items || [];
+    const orderDate = orderData.orderDate ? new Date(orderData.orderDate).toLocaleString() : (orderData.date || new Date().toLocaleString());
+    const orderId = orderData.orderId || orderData.id || 'ORD' + Date.now();
+    const paymentMethod = orderData.paymentMethod || 'Cash on Delivery';
+    const customerName = orderData.customerName || orderData.customer?.fullName || 'Valued Customer';
+    
+    const itemsHtml = items.map(item => `
+      <div class="order-row">
+        <span class="order-label">${item.name} x ${item.quantity}</span>
+        <span class="order-value">₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+      </div>
+    `).join('');
+    
+    container.innerHTML = `
+      <h3><i class="fas fa-receipt"></i> Order Summary</h3>
+      ${itemsHtml || '<div class="order-row"><span class="order-label">No items</span><span class="order-value">₹0</span></div>'}
+      <div class="order-row">
+        <span class="order-label">Subtotal</span>
+        <span class="order-value">₹${subtotal.toLocaleString('en-IN')}</span>
+      </div>
+      <div class="order-row">
+        <span class="order-label">GST (5%)</span>
+        <span class="order-value">₹${gst.toLocaleString('en-IN')}</span>
+      </div>
+      <div class="order-row order-total">
+        <span class="order-label">Total Amount</span>
+        <span class="order-value">₹${total.toLocaleString('en-IN')}</span>
+      </div>
+      <div class="shipping-info">
+        <h4><i class="fas fa-truck-fast"></i> Order Information</h4>
+        <div class="shipping-text">
+          <strong>Order ID:</strong> ${orderId}<br>
+          <strong>Customer:</strong> ${customerName}<br>
+          <strong>Order Date:</strong> ${orderDate}<br>
+          <strong>Payment Method:</strong> ${paymentMethod}<br>
+          <strong>Status:</strong> <span style="color: #FF9800;">Processing</span>
+        </div>
+      </div>
+      <div style="text-align: center; margin-top: 15px; padding: 10px; background: rgba(76,175,80,0.1); border-radius: 16px;">
+        <i class="fas fa-envelope" style="color: #4CAF50;"></i> Order confirmation will be sent to your email
+      </div>
+    `;
+  }
+  
+  // Confetti Effect
+  function startConfetti() {
+    const canvas = document.getElementById('confetti-canvas');
+    const ctx = canvas.getContext('2d');
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    
+    const particles = [];
+    const colors = ['#D4AF37', '#FF8C00', '#4CAF50', '#FFD700', '#FF4500', '#FFFFFF'];
+    
+    for (let i = 0; i < 150; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height - canvas.height,
+        size: Math.random() * 8 + 3,
+        color: colors[Math.floor(Math.random() * colors.length)],
+        speedX: (Math.random() - 0.5) * 3,
+        speedY: Math.random() * 5 + 3,
+        rotation: Math.random() * 360,
+        rotationSpeed: (Math.random() - 0.5) * 10
+      });
+    }
+    
+    function animateConfetti() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      let stillActive = false;
+      
+      for (let i = 0; i < particles.length; i++) {
+        const p = particles[i];
+        p.x += p.speedX;
+        p.y += p.speedY;
+        p.rotation += p.rotationSpeed;
+        
+        if (p.y < canvas.height + 50) {
+          stillActive = true;
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate(p.rotation * Math.PI / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        }
+      }
+      
+      if (stillActive) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
+    }
+    
+    animateConfetti();
+  }
+  
+  // Create sparkles around the success icon
+  function createSparkles() {
+    const icon = document.getElementById('successIcon');
+    if (!icon) return;
+    
+    for (let i = 0; i < 30; i++) {
+      const sparkle = document.createElement('div');
+      sparkle.className = 'sparkle';
+      sparkle.innerHTML = '<i class="fas fa-star" style="color: #D4AF37; font-size: 12px;"></i>';
+      sparkle.style.position = 'absolute';
+      sparkle.style.left = icon.offsetLeft + icon.offsetWidth / 2 + 'px';
+      sparkle.style.top = icon.offsetTop + icon.offsetHeight / 2 + 'px';
+      const angle = Math.random() * Math.PI * 2;
+      const distance = Math.random() * 80 + 20;
+      sparkle.style.transform = `translate(${Math.cos(angle) * distance}px, ${Math.sin(angle) * distance}px)`;
+      sparkle.style.opacity = '1';
+      sparkle.style.transition = 'all 0.8s ease-out';
+      document.body.appendChild(sparkle);
+      
+      setTimeout(() => {
+        sparkle.style.opacity = '0';
+        sparkle.style.transform += ' scale(0)';
+        setTimeout(() => sparkle.remove(), 800);
+      }, 50);
+    }
+  }
+  
+  // Clear cart after successful order
+  function clearCart() {
+    localStorage.setItem('vedantaCart', JSON.stringify([]));
+    // Also remove lastOrder to prevent showing same order again
+    // But keep it for this page render
+    setTimeout(() => {
+      localStorage.removeItem('lastOrder');
+    }, 5000);
+  }
+  
+  // Button actions
+  document.getElementById('homeBtn')?.addEventListener('click', () => {
+    window.location.href = 'index.html';
+  });
+  
+  document.getElementById('trackBtn')?.addEventListener('click', () => {
+    const orderId = orderData?.orderId || orderData?.id || 'Unknown';
+    alert(`🔍 Track Order ID: ${orderId}\n\nWe'll send tracking details to your registered phone number soon.\n\nYou can also check your order status in the Bookings section.`);
+    window.location.href = 'booking.html';
+  });
+  
+  // Resize confetti canvas
+  window.addEventListener('resize', () => {
+    const canvas = document.getElementById('confetti-canvas');
+    if (canvas) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+  });
+  
+  // Page load - get order from Firebase
+  getLastOrder();
+</script>
+</body>
+</html>

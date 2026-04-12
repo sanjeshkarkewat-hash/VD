@@ -1,0 +1,1309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>VEDANTA | Spiritual Luxury</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    
+    <!-- 🔥 FIREBASE SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <!-- EmailJS SDK for OTP -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+    
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #050508;
+            color: #FFFFFF;
+            overflow-x: hidden;
+            padding-bottom: 95px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
+        
+        /* Floating Cart */
+        .floating-cart {
+            position: fixed;
+            bottom: 100px;
+            left: 16px;
+            z-index: 1001;
+            cursor: pointer;
+        }
+        .cart-icon-container {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            width: 55px;
+            height: 55px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            box-shadow: 0 0 20px rgba(212,175,55,0.5);
+            transition: transform 0.3s;
+        }
+        .cart-icon-container:hover { transform: scale(1.05); }
+        .cart-icon-container i { font-size: 26px; color: #050508; }
+        .cart-count {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            background: #FF4500;
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 85%;
+            max-width: 380px;
+            height: 100%;
+            background: rgba(10,10,18,0.98);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            transition: 0.3s;
+            border-right: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-sidebar.open { left: 0; }
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-header h3 { font-size: 20px; color: #D4AF37; }
+        .close-cart {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .cart-item-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .cart-item-info p { color: #D4AF37; font-weight: bold; font-size: 14px; }
+        .cart-item-remove {
+            background: rgba(255,69,0,0.2);
+            border: none;
+            color: #FF4500;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(212,175,55,0.3);
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .empty-cart { text-align: center; padding: 40px; color: #888; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1999;
+            display: none;
+        }
+        .overlay.show { display: block; }
+        
+        /* Login Modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 10000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .login-modal.hide {
+            display: none;
+        }
+        .login-card {
+            background: rgba(15,15,22,0.95);
+            border-radius: 32px;
+            padding: 32px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+        .login-card h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .login-card p {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 25px;
+        }
+        .login-input-group {
+            margin-bottom: 20px;
+        }
+        .login-input-group input {
+            width: 100%;
+            padding: 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 20px;
+            color: white;
+            font-size: 16px;
+        }
+        .login-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 14px;
+            border-radius: 30px;
+            font-weight: 700;
+            color: #050508;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+        .otp-section {
+            display: none;
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .otp-section.show {
+            display: block;
+        }
+        .otp-input {
+            text-align: center;
+            letter-spacing: 4px;
+            font-size: 20px;
+        }
+        .resend-link {
+            background: none;
+            border: none;
+            color: #D4AF37;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .error-text {
+            color: #F44336;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        .error-text.show {
+            display: block;
+        }
+        .countdown {
+            font-size: 12px;
+            color: #888;
+            margin-top: 10px;
+        }
+        
+        /* Marquee Section */
+        .marquee-wrapper {
+            background: linear-gradient(90deg, #0A0A12, #1A1005, #0A0A12);
+            border-top: 1px solid rgba(212,175,55,0.4);
+            border-bottom: 1px solid rgba(212,175,55,0.4);
+            padding: 12px 0;
+        }
+        .marquee-line {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 6px 0;
+        }
+        .marquee-line marquee {
+            font-size: 13px;
+            font-weight: 600;
+            color: #FFD966;
+        }
+        .marquee-line i { margin: 0 12px; color: #D4AF37; }
+        
+        /* Hero Banner */
+        .hero-banner {
+            min-height: 35vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            margin: 20px 0 16px;
+        }
+        .animated-logo {
+            animation: logoGlow 2s ease-in-out infinite, logoFloat 3s ease-in-out infinite;
+            display: inline-block;
+        }
+        @keyframes logoGlow {
+            0% { text-shadow: 0 0 5px #D4AF37, 0 0 10px #FF8C00; transform: scale(1); }
+            50% { text-shadow: 0 0 30px #FFD700, 0 0 50px #FF4500; transform: scale(1.05); }
+            100% { text-shadow: 0 0 5px #D4AF37, 0 0 10px #FF8C00; transform: scale(1); }
+        }
+        @keyframes logoFloat {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        .banner-logo {
+            font-size: 55px;
+            font-weight: 800;
+            letter-spacing: -2px;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #F5D742, #FF8C00);
+            background-size: 300% auto;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: gradientShift 3s linear infinite;
+        }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
+        .banner-tag { font-size: 10px; letter-spacing: 3px; color: #D4AF37; margin-top: 8px; }
+        @media (min-width: 768px) {
+            .hero-banner { min-height: 45vh; }
+            .banner-logo { font-size: 100px; letter-spacing: -3px; }
+            .banner-tag { font-size: 16px; letter-spacing: 6px; }
+        }
+        
+        /* Search Box */
+        .search-box {
+            max-width: 90%;
+            margin: 16px auto;
+            position: relative;
+        }
+        .search-box i {
+            position: absolute;
+            left: 16px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 16px;
+            color: #D4AF37;
+        }
+        #searchInput {
+            width: 100%;
+            padding: 14px 16px 14px 44px;
+            font-size: 15px;
+            background: rgba(20,20,30,0.9);
+            backdrop-filter: blur(12px);
+            border: 1.5px solid rgba(212,175,55,0.4);
+            border-radius: 50px;
+            color: white;
+        }
+        
+        /* Filter Buttons */
+        .filter-section {
+            margin: 16px 0;
+            overflow-x: auto;
+            white-space: nowrap;
+            padding: 8px 12px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .filter-buttons { display: inline-flex; gap: 8px; }
+        .filter-btn {
+            background: rgba(20,20,30,0.8);
+            border: 1px solid rgba(212,175,55,0.3);
+            padding: 8px 16px;
+            border-radius: 40px;
+            color: #DDD;
+            font-weight: 600;
+            font-size: 12px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .filter-btn:hover, .filter-btn.active {
+            background: #D4AF37;
+            color: #050508;
+            border-color: #D4AF37;
+        }
+        
+        /* Section Header */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            flex-wrap: wrap;
+            padding: 0 12px;
+            margin: 24px 0 16px;
+        }
+        .section-title { font-size: 22px; font-weight: 700; }
+        .section-title i { font-size: 20px; margin-right: 6px; }
+        #resultCount { font-size: 12px; color: #D4AF37; }
+        
+        /* Products Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            padding: 0 8px;
+            margin: 16px 0;
+        }
+        @media (min-width: 1024px) {
+            .products-grid { grid-template-columns: repeat(4, 1fr); gap: 25px; padding: 0 24px; }
+        }
+        
+        .product-card {
+            background: rgba(15,15,22,0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(212,175,55,0.25);
+            transition: 0.35s;
+            cursor: pointer;
+        }
+        .product-card:hover {
+            transform: translateY(-5px);
+            border-color: #FF8C00;
+            box-shadow: 0 15px 25px -10px rgba(255,140,0,0.3);
+        }
+        .product-img {
+            position: relative;
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #0E0E14;
+            overflow: hidden;
+        }
+        .product-img img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+        .product-img i { 
+            font-size: clamp(40px, 13vw, 70px); 
+            color: #D4AF37;
+            position: relative;
+            z-index: 1;
+        }
+        .badge-offer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #FF4500;
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-weight: 800;
+            font-size: 9px;
+            z-index: 2;
+        }
+        .product-info { padding: 10px; }
+        .product-title { font-size: 13px; font-weight: 700; line-height: 1.3; margin-bottom: 3px; }
+        .product-category { font-size: 9px; color: #FFB347; margin-bottom: 4px; }
+        .product-price { font-size: 14px; font-weight: 800; color: #D4AF37; margin-bottom: 8px; }
+        
+        .product-buttons { display: flex; flex-direction: column; gap: 6px; margin-top: auto; }
+        .buynow-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
+            border: none;
+            padding: 7px;
+            border-radius: 35px;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        .cart-btn {
+            width: 100%;
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.5);
+            padding: 7px;
+            border-radius: 35px;
+            font-weight: 700;
+            color: #D4AF37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            cursor: pointer;
+            font-size: 10px;
+        }
+        
+        .view-more-container { text-align: center; margin: 30px 0; }
+        .view-more-btn {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 12px 32px;
+            border-radius: 50px;
+            font-weight: 800;
+            font-size: 14px;
+            color: #050508;
+            cursor: pointer;
+        }
+        
+        /* About Section */
+        .about-premium {
+            margin: 50px 0 30px;
+            background: linear-gradient(135deg, #0A0A12, #0F0F18);
+            padding: 40px 20px;
+            border-top: 1px solid rgba(212,175,55,0.3);
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+        }
+        .about-premium h2 {
+            font-size: 28px;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .about-premium h2 span {
+            color: #D4AF37;
+            border-bottom: 3px solid #D4AF37;
+            padding-bottom: 5px;
+        }
+        .about-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (min-width: 992px) {
+            .about-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .about-card {
+            background: rgba(0,0,0,0.4);
+            border-radius: 32px;
+            padding: 28px;
+            border: 1px solid rgba(212,175,55,0.2);
+            transition: transform 0.3s;
+        }
+        .about-card:hover { transform: translateY(-5px); border-color: #D4AF37; }
+        .about-card h3 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            color: #D4AF37;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .about-card h3 i { font-size: 28px; }
+        .about-card p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #CCCCCC;
+            margin-bottom: 20px;
+        }
+        
+        /* Features Grid */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 30px 0;
+        }
+        @media (min-width: 768px) {
+            .features-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .feature-premium {
+            background: linear-gradient(135deg, rgba(212,175,55,0.1), rgba(255,140,0,0.05));
+            border-radius: 24px;
+            padding: 20px 12px;
+            text-align: center;
+            transition: all 0.3s;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .feature-premium:hover {
+            transform: translateY(-5px);
+            border-color: #D4AF37;
+            box-shadow: 0 10px 25px -5px rgba(212,175,55,0.2);
+        }
+        .feature-premium i {
+            font-size: 36px;
+            color: #D4AF37;
+            margin-bottom: 12px;
+            display: inline-block;
+            animation: iconPulse 2s infinite;
+        }
+        @keyframes iconPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+            100% { transform: scale(1); }
+        }
+        .feature-premium h4 { font-size: 16px; margin-bottom: 8px; }
+        .feature-premium p { font-size: 11px; color: #AAA; }
+        
+        /* Stats Row */
+        .stats-premium {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin: 40px 0 30px;
+            text-align: center;
+        }
+        @media (min-width: 768px) {
+            .stats-premium { grid-template-columns: repeat(4, 1fr); }
+        }
+        .stat-premium-item {
+            background: rgba(0,0,0,0.3);
+            padding: 20px;
+            border-radius: 28px;
+        }
+        .stat-premium-item i { font-size: 32px; color: #D4AF37; margin-bottom: 10px; }
+        .stat-number-premium {
+            font-size: 32px;
+            font-weight: 800;
+            color: #FFD966;
+        }
+        .stat-label-premium { font-size: 13px; color: #AAA; margin-top: 5px; }
+        
+        /* Reviews */
+        .reviews-premium {
+            margin: 50px 0;
+        }
+        .reviews-premium h2 {
+            text-align: center;
+            font-size: 28px;
+            margin-bottom: 30px;
+        }
+        .reviews-grid {
+            display: grid;
+            grid-template-columns: repeat(1, 1fr);
+            gap: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 16px;
+        }
+        @media (min-width: 768px) {
+            .reviews-grid { grid-template-columns: repeat(3, 1fr); }
+        }
+        .review-premium-card {
+            background: rgba(255,255,255,0.03);
+            border-radius: 28px;
+            padding: 24px;
+            border: 1px solid rgba(212,175,55,0.2);
+            transition: 0.3s;
+        }
+        .review-premium-card:hover { border-color: #D4AF37; }
+        .review-stars { color: #FFB800; margin-bottom: 15px; font-size: 14px; }
+        .review-text { font-size: 14px; line-height: 1.6; color: #DDD; margin-bottom: 15px; font-style: italic; }
+        .review-author { display: flex; align-items: center; gap: 12px; }
+        .review-author i { font-size: 40px; color: #D4AF37; }
+        .review-author h4 { font-size: 14px; }
+        .review-author p { font-size: 11px; color: #888; }
+        
+        /* Footer */
+        .footer-premium {
+            background: #0A0A12;
+            padding: 40px 20px 20px;
+            border-top: 1px solid rgba(212,175,55,0.2);
+            margin-top: 40px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 30px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        @media (min-width: 768px) {
+            .footer-grid { grid-template-columns: repeat(4, 1fr); }
+        }
+        .footer-col h4 {
+            color: #D4AF37;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .footer-col p, .footer-col a {
+            color: #AAA;
+            font-size: 12px;
+            line-height: 1.8;
+            text-decoration: none;
+            display: block;
+        }
+        .footer-col a:hover { color: #D4AF37; }
+        .social-icons {
+            display: flex;
+            gap: 15px;
+            margin-top: 15px;
+        }
+        .social-icons i {
+            font-size: 20px;
+            color: #D4AF37;
+            cursor: pointer;
+        }
+        .copyright {
+            text-align: center;
+            padding-top: 30px;
+            margin-top: 30px;
+            border-top: 1px solid rgba(255,255,255,0.05);
+            font-size: 11px;
+            color: #666;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 16px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 60px;
+            padding: 8px 20px;
+            display: flex;
+            gap: 30px;
+            z-index: 1000;
+            border: 1px solid rgba(212,175,55,0.5);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            cursor: pointer;
+            padding: 5px 14px;
+            border-radius: 50px;
+        }
+        .nav-item i { font-size: 20px; color: #ccc; }
+        .nav-item span { font-size: 10px; }
+        .nav-item.active, .nav-item:hover { background: rgba(212,175,55,0.2); }
+        .nav-item.active i, .nav-item.active span { color: #D4AF37; }
+        
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 10000;
+            font-size: 12px;
+            display: none;
+        }
+        .toast.show { display: block; animation: fadeInOut 2s ease; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+    </style>
+</head>
+<body>
+
+<!-- PERMANENT FLOATING CART -->
+<div class="floating-cart" id="floatingCart">
+    <div class="cart-icon-container">
+        <i class="fas fa-shopping-cart"></i>
+        <span class="cart-count" id="cartCount">0</span>
+    </div>
+</div>
+
+<!-- CART SIDEBAR -->
+<div class="overlay" id="cartOverlay"></div>
+<div class="cart-sidebar" id="cartSidebar">
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+        <button class="close-cart" id="closeCartBtn">&times;</button>
+    </div>
+    <div class="cart-items" id="cartItems"><div class="empty-cart">🛒 Your cart is empty</div></div>
+    <div class="cart-footer">
+        <div class="cart-total"><span>Total:</span><span id="cartTotal">₹0</span></div>
+        <button class="checkout-btn" id="checkoutBtn">💰 Proceed to Checkout</button>
+    </div>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrapper">
+    <div class="marquee-line">
+        <marquee behavior="scroll" direction="left" scrollamount="4" onmouseover="this.stop();" onmouseout="this.start();">
+            <i class="fas fa-truck"></i> 🚚 FREE SHIPPING WORLDWIDE 🚚 <i class="fas fa-tags"></i> 🏷️ 40% OFF SITEWIDE 🏷️ <i class="fas fa-rupee-sign"></i> 💰 CASH ON DELIVERY AVAILABLE 💰 <i class="fas fa-undo-alt"></i> 🔄 30-DAY EASY RETURNS 🔄
+        </marquee>
+    </div>
+    <div class="marquee-line">
+        <marquee behavior="scroll" direction="right" scrollamount="4" onmouseover="this.stop();" onmouseout="this.start();">
+            <i class="fas fa-gem"></i> ✨ PREMIUM QUALITY ✨ <i class="fas fa-certificate"></i> 🏆 100% AUTHENTIC PRODUCTS 🏆 <i class="fas fa-gift"></i> 🎁 FREE GIFT WRAPPING ON ORDERS ABOVE ₹5000 🎁 <i class="fas fa-star"></i> ⭐ RATED 4.9/5 BY 50,000+ CUSTOMERS ⭐
+        </marquee>
+    </div>
+</div>
+
+<div class="container">
+    <div class="hero-banner">
+        <div class="animated-logo"><div class="banner-logo">VEDANTA</div></div>
+        <div class="banner-tag">✦ WHERE SOUL MEETS LUXURY ✦</div>
+    </div>
+
+    <div class="search-box">
+        <i class="fas fa-search"></i>
+        <input type="text" id="searchInput" placeholder="Search products...">
+    </div>
+
+    <div class="filter-section">
+        <div class="filter-buttons" id="filterButtons">
+            <button class="filter-btn active" data-cat="all">🔥 ALL</button>
+            <button class="filter-btn" data-cat="Saree">🥻 SAREE</button>
+            <button class="filter-btn" data-cat="Kurta">🧥 KURTA</button>
+            <button class="filter-btn" data-cat="TShirt">👕 T-SHIRT</button>
+            <button class="filter-btn" data-cat="Crystal">🔮 CRYSTAL</button>
+            <button class="filter-btn" data-cat="Mala">📿 MALA</button>
+        </div>
+    </div>
+
+    <div class="section-header">
+        <div class="section-title"><i class="fas fa-crown"></i> PREMIUM COLLECTION</div>
+        <div id="resultCount" style="color:#D4AF37;">0 products</div>
+    </div>
+    <div id="productsContainer" class="products-grid"></div>
+
+    <div class="view-more-container">
+        <button class="view-more-btn" id="viewMoreBtn">VIEW MORE +</button>
+    </div>
+
+    <!-- ABOUT SECTION -->
+    <div class="about-premium">
+        <h2>About <span>VEDANTA</span></h2>
+        <div class="about-grid">
+            <div class="about-card">
+                <h3><i class="fas fa-mandolin"></i> Our Story</h3>
+                <p>Founded in 2020, Vedanta emerged from a deep desire to bridge the gap between ancient Indian spiritual traditions and modern luxury. What started as a small collective of 5 master artisans in Varanasi has now grown into a global community of over 200 skilled craftspeople from India, Nepal, and Tibet.</p>
+                <p>Every product at Vedanta tells a story - of devotion, of craftsmanship passed down through generations, and of the sacred energy that transforms ordinary materials into spiritual treasures.</p>
+            </div>
+            <div class="about-card">
+                <h3><i class="fas fa-hand-sparkles"></i> Our Mission & Vision</h3>
+                <p>Our mission is to preserve and celebrate traditional Indian craftsmanship while making spiritual luxury accessible to the modern world. We work directly with artisans, ensuring fair wages, ethical sourcing, and sustainable practices.</p>
+                <p><strong>Vision:</strong> To become the world's most trusted destination for authentic spiritual products, where every purchase supports traditional artisans and brings positive energy into your life.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FEATURES GRID -->
+    <div class="features-grid">
+        <div class="feature-premium"><i class="fas fa-money-bill-wave"></i><h4>💰 Cash on Delivery</h4><p>Pay only when you receive</p></div>
+        <div class="feature-premium"><i class="fas fa-truck-fast"></i><h4>🚚 Free Express Shipping</h4><p>Free shipping all India</p></div>
+        <div class="feature-premium"><i class="fas fa-undo-alt"></i><h4>🔄 30-Day Easy Returns</h4><p>No questions asked</p></div>
+        <div class="feature-premium"><i class="fas fa-gem"></i><h4>💎 Premium Packing</h4><p>Luxury unboxing</p></div>
+        <div class="feature-premium"><i class="fas fa-certificate"></i><h4>🏆 100% Authentic</h4><p>Certified genuine</p></div>
+        <div class="feature-premium"><i class="fas fa-headset"></i><h4>🎧 24/7 Support</h4><p>Dedicated team</p></div>
+        <div class="feature-premium"><i class="fas fa-gift"></i><h4>🎁 Free Gift Wrapping</h4><p>On orders above ₹5000</p></div>
+        <div class="feature-premium"><i class="fas fa-shield-alt"></i><h4>🛡️ Secure Payments</h4><p>100% secure</p></div>
+    </div>
+
+    <!-- STATS -->
+    <div class="stats-premium">
+        <div class="stat-premium-item"><i class="fas fa-smile"></i><div class="stat-number-premium">50,000+</div><div class="stat-label-premium">Happy Customers</div></div>
+        <div class="stat-premium-item"><i class="fas fa-map-marker-alt"></i><div class="stat-number-premium">28</div><div class="stat-label-premium">Countries Served</div></div>
+        <div class="stat-premium-item"><i class="fas fa-award"></i><div class="stat-number-premium">#1</div><div class="stat-label-premium">Luxury Spiritual Store</div></div>
+        <div class="stat-premium-item"><i class="fas fa-calendar-alt"></i><div class="stat-number-premium">4+</div><div class="stat-label-premium">Years of Excellence</div></div>
+    </div>
+
+    <!-- REVIEWS -->
+    <div class="reviews-premium">
+        <h2>What Our <span style="color:#D4AF37;">Customers Say</span></h2>
+        <div class="reviews-grid">
+            <div class="review-premium-card"><div class="review-stars">★★★★★</div><div class="review-text">"Absolutely love my purchase! Quality is exceptional and packaging was luxurious."</div><div class="review-author"><i class="fas fa-user-circle"></i><div><h4>Priya Sharma</h4><p>Mumbai</p></div></div></div>
+            <div class="review-premium-card"><div class="review-stars">★★★★★</div><div class="review-text">"The crystal I ordered arrived in perfect condition. Highly recommend Vedanta!"</div><div class="review-author"><i class="fas fa-user-circle"></i><div><h4>Rahul Mehta</h4><p>Delhi</p></div></div></div>
+            <div class="review-premium-card"><div class="review-stars">★★★★★</div><div class="review-text">"Fast shipping and beautiful products. Thank you Vedanta team!"</div><div class="review-author"><i class="fas fa-user-circle"></i><div><h4>Anjali Nair</h4><p>Bangalore</p></div></div></div>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<div class="footer-premium">
+    <div class="footer-grid">
+        <div class="footer-col"><h4>VEDANTA</h4><p>Where soul meets luxury. Bringing authentic spiritual products from India to the world since 2020.</p><div class="social-icons"><i class="fab fa-instagram"></i><i class="fab fa-facebook"></i><i class="fab fa-youtube"></i><i class="fab fa-twitter"></i></div></div>
+        <div class="footer-col"><h4>Quick Links</h4><a href="#">About Us</a><a href="#">Contact Us</a><a href="#">FAQs</a><a href="#">Blog</a></div>
+        <div class="footer-col"><h4>Policies</h4><a href="#">Privacy Policy</a><a href="#">Terms & Conditions</a><a href="#">Return Policy</a><a href="#">Shipping Policy</a></div>
+        <div class="footer-col"><h4>Contact</h4><p><i class="fas fa-envelope"></i> hello@vedanta.com</p><p><i class="fas fa-phone"></i> +91 98765 43210</p><p><i class="fas fa-map-marker-alt"></i> Jaipur, India</p></div>
+    </div>
+    <div class="copyright">© 2024 VEDANTA | Premium Spiritual Luxury. All rights reserved.</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<div class="bottom-nav">
+    <div class="nav-item active" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
+    <div class="nav-item" onclick="window.location.href='booking.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
+    <div class="nav-item" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
+</div>
+
+<!-- 🔥 FIREBASE INITIALIZATION -->
+<script src="firebase-init.js"></script>
+
+<script>
+    // ========== 🔥 FIREBASE & EMAILJS CONFIG ==========
+    const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
+    const EMAILJS_SERVICE_ID = "service_6ucrgd9";
+    const EMAILJS_TEMPLATE_ID = "template_kniixfj";
+    
+    emailjs.init(EMAILJS_PUBLIC_KEY);
+    console.log("✅ EmailJS initialized");
+    
+    let allProducts = [];
+    let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+    let filteredProducts = [];
+    let visibleCount = 8;
+    let activeCategory = "all";
+    let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
+    
+    // Pending action after login
+    let pendingAction = null;
+    let pendingProduct = null;
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+    
+    // ========== LOGIN MODAL FUNCTIONS ==========
+    let generatedOTP = null;
+    let otpEmail = null;
+    let countdownInterval = null;
+    let resendCooldown = false;
+    
+    async function sendOTP(email) {
+        try {
+            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
+            otpEmail = email;
+            console.log(`OTP for ${email}: ${generatedOTP}`);
+            
+            const templateParams = {
+                to_email: email,
+                otp_code: generatedOTP,
+                app_name: "Vedanta",
+                expiry_time: "5 minutes"
+            };
+            
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+            showToastMessage(`✅ OTP sent to ${email}`);
+            return true;
+        } catch (error) {
+            console.error("EmailJS Error:", error);
+            showToastMessage("❌ Failed to send OTP", true);
+            return false;
+        }
+    }
+    
+    function showToastMessage(msg, isError = false) {
+        const toast = document.getElementById('toastMsg');
+        if (toast) {
+            toast.innerText = msg;
+            toast.style.background = isError ? '#F44336' : '#D4AF37';
+            toast.style.color = isError ? 'white' : '#050508';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 3000);
+        }
+    }
+    
+    function startCountdown(seconds) {
+        const countdownEl = document.getElementById('modalCountdown');
+        if (!countdownEl) return;
+        
+        let remaining = seconds;
+        countdownEl.style.display = 'block';
+        countdownEl.innerHTML = `Resend available in ${remaining}s`;
+        
+        if (countdownInterval) clearInterval(countdownInterval);
+        
+        countdownInterval = setInterval(() => {
+            remaining--;
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                countdownEl.style.display = 'none';
+                resendCooldown = false;
+            } else {
+                countdownEl.innerHTML = `Resend available in ${remaining}s`;
+            }
+        }, 1000);
+    }
+    
+    function showLoginModal(callback, product = null) {
+        pendingAction = callback;
+        pendingProduct = product;
+        
+        const modalHTML = `
+            <div class="login-modal" id="loginModal">
+                <div class="login-card">
+                    <h2>VEDANTA</h2>
+                    <p>Login to continue</p>
+                    <div class="login-input-group">
+                        <input type="email" id="loginEmail" placeholder="Enter your email">
+                    </div>
+                    <button class="login-btn" id="sendOtpBtn">Send OTP</button>
+                    <div class="otp-section" id="otpSection">
+                        <div class="login-input-group">
+                            <input type="text" id="otpCode" class="otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
+                        </div>
+                        <button class="login-btn" id="verifyOtpBtn">Verify & Login</button>
+                        <button class="resend-link" id="resendOtpBtn">Resend OTP</button>
+                        <div id="modalCountdown" class="countdown" style="display:none;"></div>
+                    </div>
+                    <div class="error-text" id="modalErrorMsg"></div>
+                </div>
+            </div>
+        `;
+        
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        let currentEmail = '';
+        
+        document.getElementById('sendOtpBtn').addEventListener('click', async () => {
+            const email = document.getElementById('loginEmail').value.trim();
+            if (!email || !email.includes('@')) {
+                document.getElementById('modalErrorMsg').innerText = '❌ Please enter valid email';
+                document.getElementById('modalErrorMsg').classList.add('show');
+                return;
+            }
+            currentEmail = email;
+            const success = await sendOTP(email);
+            if (success) {
+                document.getElementById('otpSection').classList.add('show');
+                document.getElementById('modalErrorMsg').classList.remove('show');
+                startCountdown(30);
+            }
+        });
+        
+        document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
+            const otp = document.getElementById('otpCode').value.trim();
+            if (!otp || otp.length !== 6) {
+                document.getElementById('modalErrorMsg').innerText = '❌ Enter valid 6-digit OTP';
+                document.getElementById('modalErrorMsg').classList.add('show');
+                return;
+            }
+            
+            if (otp === generatedOTP) {
+                const userData = {
+                    uid: `user_${Date.now()}`,
+                    email: currentEmail,
+                    name: currentEmail.split('@')[0],
+                    joinDate: new Date().toISOString()
+                };
+                localStorage.setItem('vedantaUser', JSON.stringify(userData));
+                currentUser = userData;
+                document.getElementById('loginModal').remove();
+                showToastMessage('✅ Login successful!');
+                
+                if (pendingAction) {
+                    pendingAction(pendingProduct);
+                }
+            } else {
+                document.getElementById('modalErrorMsg').innerText = '❌ Invalid OTP. Please try again.';
+                document.getElementById('modalErrorMsg').classList.add('show');
+            }
+        });
+        
+        document.getElementById('resendOtpBtn').addEventListener('click', async () => {
+            if (resendCooldown) {
+                showToastMessage('⏳ Please wait 30 seconds before resending', true);
+                return;
+            }
+            resendCooldown = true;
+            await sendOTP(currentEmail);
+            startCountdown(30);
+        });
+    }
+    
+    // ========== PRODUCT FUNCTIONS ==========
+    async function loadProductsFromFirebase() {
+        const container = document.getElementById('productsContainer');
+        if (container) {
+            container.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i> Loading products from cloud...</div>';
+        }
+        
+        let cloudProducts = await getAllProducts();
+        
+        if (cloudProducts && cloudProducts.length > 0) {
+            allProducts = cloudProducts;
+            localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+        } else {
+            const savedProducts = localStorage.getItem('vedantaProducts');
+            if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
+                allProducts = JSON.parse(savedProducts);
+            }
+        }
+        
+        if (allProducts.length === 0) {
+            allProducts = [
+                { id: "1", name: "Banarasi Silk Saree", category: "Saree", price: 8999, icon: "fa-female", badge: "Best Seller", images: [] },
+                { id: "2", name: "Men's Cotton Kurta", category: "Kurta", price: 1299, icon: "fa-male", badge: "Trending", images: [] },
+                { id: "3", name: "Graphic T-Shirt", category: "TShirt", price: 499, icon: "fa-tshirt", badge: "Sale", images: [] },
+                { id: "4", name: "Amethyst Crystal", category: "Crystal", price: 2899, icon: "fa-gem", badge: "Healing", images: [] },
+                { id: "5", name: "Sandalwood Mala", category: "Mala", price: 1299, icon: "fa-hands-praying", badge: "Organic", images: [] }
+            ];
+            localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+        }
+        
+        filteredProducts = [...allProducts];
+        renderProducts();
+    }
+    
+    function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
+    
+    function addToCart(product) {
+        const existing = cart.find(item => item.id == product.id);
+        if (existing) existing.quantity++;
+        else cart.push({ ...product, quantity: 1 });
+        saveCart();
+        showToastMessage(`🛍️ ${product.name} added!`);
+    }
+    
+    function removeFromCart(productId) {
+        cart = cart.filter(item => item.id != productId);
+        saveCart();
+    }
+    
+    function updateCartUI() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        const cartCountEl = document.getElementById('cartCount');
+        if (cartCountEl) cartCountEl.innerText = totalItems;
+        
+        const cartItemsDiv = document.getElementById('cartItems');
+        const cartTotalSpan = document.getElementById('cartTotal');
+        if (cart.length === 0) {
+            if (cartItemsDiv) cartItemsDiv.innerHTML = '<div class="empty-cart">🛒 Your cart is empty</div>';
+            if (cartTotalSpan) cartTotalSpan.innerText = '₹0';
+            return;
+        }
+        let total = 0;
+        cartItemsDiv.innerHTML = '';
+        cart.forEach(item => {
+            const itemTotal = item.price * item.quantity;
+            total += itemTotal;
+            cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)}</h4><p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div><button class="cart-item-remove" data-id="${item.id}">Remove</button></div>`;
+        });
+        cartItemsDiv.querySelectorAll('.cart-item-remove').forEach(btn => {
+            btn.addEventListener('click', () => removeFromCart(btn.dataset.id));
+        });
+        if (cartTotalSpan) cartTotalSpan.innerText = `₹${total}`;
+    }
+    
+    function openCart() {
+        document.getElementById('cartSidebar').classList.add('open');
+        document.getElementById('cartOverlay').classList.add('show');
+    }
+    
+    function closeCart() {
+        document.getElementById('cartSidebar').classList.remove('open');
+        document.getElementById('cartOverlay').classList.remove('show');
+    }
+    
+    function goToProductDetail(productId) {
+        localStorage.setItem('vedanta_selected_product_id', productId);
+        window.location.href = `product-detail.html`;
+    }
+    
+    // ========== BUY NOW WITH LOGIN CHECK ==========
+    function buyNowWithLoginCheck(product) {
+        if (currentUser && currentUser.email) {
+            // Already logged in - proceed to checkout
+            const tempCart = [{ 
+                id: product.id, 
+                name: product.name, 
+                price: product.price, 
+                quantity: 1,
+                icon: product.icon
+            }];
+            localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+            showToastMessage(`💳 Proceeding to checkout with ${product.name}`);
+            setTimeout(() => {
+                window.location.href = 'secure-checkout.html';
+            }, 500);
+        } else {
+            // Not logged in - show login modal
+            showLoginModal((prod) => {
+                const tempCart = [{ 
+                    id: prod.id, 
+                    name: prod.name, 
+                    price: prod.price, 
+                    quantity: 1,
+                    icon: prod.icon
+                }];
+                localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+                showToastMessage(`💳 Proceeding to checkout with ${prod.name}`);
+                setTimeout(() => {
+                    window.location.href = 'secure-checkout.html';
+                }, 500);
+            }, product);
+        }
+    }
+    
+    // ========== CHECKOUT WITH LOGIN CHECK ==========
+    function checkoutWithLoginCheck() {
+        if (cart.length === 0) {
+            showToastMessage('🛒 Cart is empty!', true);
+            return;
+        }
+        
+        if (currentUser && currentUser.email) {
+            window.location.href = 'secure-checkout.html';
+        } else {
+            showLoginModal(() => {
+                window.location.href = 'secure-checkout.html';
+            });
+        }
+    }
+    
+    function renderProducts() {
+        const container = document.getElementById('productsContainer');
+        const resultSpan = document.getElementById('resultCount');
+        if (!container) return;
+        
+        let filtered = [...filteredProducts];
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        if (searchTerm) {
+            filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm));
+        }
+        if (activeCategory !== 'all') {
+            filtered = filtered.filter(p => p.category === activeCategory);
+        }
+        
+        const toShow = filtered.slice(0, visibleCount);
+        if (toShow.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:40px;"><i class="fas fa-search"></i><br>No products found ✨</div>`;
+            if (resultSpan) resultSpan.innerText = '0';
+            return;
+        }
+        
+        container.innerHTML = '';
+        toShow.forEach(p => {
+            const hasImage = p.images && p.images.length > 0;
+            const firstImage = hasImage ? p.images[0] : null;
+            
+            container.innerHTML += `
+                <div class="product-card" onclick="goToProductDetail('${p.id}')">
+                    <div class="product-img">
+                        ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
+                        <div class="badge-offer">${p.badge || 'New'}</div>
+                    </div>
+                    <div class="product-info">
+                        <div class="product-title">${escapeHtml(p.name)}</div>
+                        <div class="product-category">${p.category || 'General'}</div>
+                        <div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
+                        <div class="product-buttons">
+                            <button class="buynow-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fas fa-bolt"></i> BUY NOW</button>
+                            <button class="cart-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fa-regular fa-bag-shopping"></i> ADD</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        if (resultSpan) resultSpan.innerText = filtered.length;
+        
+        document.querySelectorAll('.cart-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                addToCart({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) });
+            });
+        });
+        
+        document.querySelectorAll('.buynow-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                buyNowWithLoginCheck({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) });
+            });
+        });
+        
+        const viewMoreBtn = document.getElementById('viewMoreBtn');
+        if (viewMoreBtn) {
+            viewMoreBtn.style.display = visibleCount >= filtered.length ? 'none' : 'inline-block';
+        }
+    }
+    
+    function filterByCategory(category) {
+        activeCategory = category;
+        visibleCount = 8;
+        renderProducts();
+    }
+    
+    document.getElementById('viewMoreBtn')?.addEventListener('click', () => { visibleCount += 8; renderProducts(); });
+    document.getElementById('searchInput')?.addEventListener('input', () => renderProducts());
+    document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            filterByCategory(btn.getAttribute('data-cat'));
+        });
+    });
+    
+    document.getElementById('floatingCart')?.addEventListener('click', openCart);
+    document.getElementById('closeCartBtn')?.addEventListener('click', closeCart);
+    document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
+    document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWithLoginCheck);
+    
+    // Add toast element
+    const toastDiv = document.createElement('div');
+    toastDiv.id = 'toastMsg';
+    toastDiv.className = 'toast';
+    document.body.appendChild(toastDiv);
+    
+    loadProductsFromFirebase();
+    updateCartUI();
+    
+    if (typeof db !== 'undefined') {
+        db.collection('products').where('status', '==', 'active').onSnapshot(() => {
+            loadProductsFromFirebase();
+        });
+    }
+</script>
+</body>
+</html>
