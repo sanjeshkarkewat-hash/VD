@@ -229,7 +229,7 @@
       border-radius: 50%;
     }
 
-    /* UPI Apps List - Single Column Layout */
+    /* UPI Apps List - Now Single Column Layout (One per row) */
     .upi-apps {
       display: none;
       flex-direction: column;
@@ -255,7 +255,7 @@
     }
     .upi-app:hover {
       border-color: #D4AF37;
-      background: rgba(212,175,55,0.15);
+      background: rgba(212,175,55,0.1);
       transform: translateX(5px);
     }
     .upi-app img {
@@ -279,6 +279,46 @@
     .upi-app:hover .upi-app-arrow {
       opacity: 1;
       transform: translateX(3px);
+    }
+
+    /* UPI ID Input */
+    .upi-id-section {
+      display: none;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .upi-id-section.show {
+      display: block;
+    }
+    .upi-id-input {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .upi-id-input input {
+      flex: 1;
+      padding: 14px;
+      background: rgba(0,0,0,0.5);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 16px;
+      color: white;
+      font-size: 14px;
+      min-width: 180px;
+    }
+    .pay-now-btn {
+      background: linear-gradient(135deg, #D4AF37, #FF8C00);
+      border: none;
+      padding: 14px 24px;
+      border-radius: 16px;
+      font-weight: 700;
+      color: #050508;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .pay-now-btn:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 12px rgba(212,175,55,0.4);
     }
 
     /* COD Section */
@@ -346,6 +386,11 @@
       overflow: hidden;
       flex-shrink: 0;
     }
+    .order-item-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
     .order-item-img i {
       font-size: 32px;
       color: #D4AF37;
@@ -356,6 +401,15 @@
     .order-item-info h4 {
       font-size: 15px;
       margin-bottom: 5px;
+    }
+    .order-item-size {
+      display: inline-block;
+      background: rgba(212,175,55,0.15);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 11px;
+      color: #D4AF37;
+      margin-top: 4px;
     }
     .order-item-info p {
       font-size: 12px;
@@ -421,7 +475,11 @@
       100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
     }
     
+    /* Responsive adjustments */
     @media (max-width: 550px) {
+      .upi-id-input {
+        flex-direction: column;
+      }
       .toast {
         white-space: normal;
         text-align: center;
@@ -521,7 +579,7 @@
             <div class="radio-circle"></div>
           </div>
           
-          <!-- UPI Apps List - Single Column, Direct Redirect on Click -->
+          <!-- UPI Apps List - Now One Per Row (Single Column) -->
           <div class="upi-apps" id="upiApps">
             <div class="upi-app" data-app="gpay">
               <img src="images/gpay.png" alt="Google Pay" onerror="this.src='https://via.placeholder.com/44?text=GPay'">
@@ -543,6 +601,17 @@
               <span>Amazon Pay</span>
               <i class="fas fa-chevron-right upi-app-arrow"></i>
             </div>
+          </div>
+          
+          <!-- UPI ID Section -->
+          <div class="upi-id-section" id="upiIdSection">
+            <div class="upi-id-input">
+              <input type="text" id="upiId" placeholder="Enter UPI ID (e.g., name@okhdfcbank)">
+              <button class="pay-now-btn" id="payNowBtn">Pay Now</button>
+            </div>
+            <p style="font-size: 11px; color: #888; margin-top: 8px;">
+              <i class="fas fa-shield-alt"></i> Secure payment via UPI
+            </p>
           </div>
 
           <!-- COD Details Section -->
@@ -609,8 +678,15 @@
   const db = firebase.firestore();
   console.log("🔥 Firebase Connected!");
   
+  // YOUR UPI ID (as provided by you)
+  const MERCHANT_UPI_ID = "sanjeshkarking32@oksbi";
+  const MERCHANT_NAME = "VEDANTA";
+  
   let cart = [];
   let cartTotal = 0;
+  let selectedApp = null;
+  let selectedPaymentMethod = null;
+  let isProcessing = false;
   
   // Check if user is logged in
   const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
@@ -660,7 +736,7 @@
     document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
     document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
     
-    // Update COD details
+    // Update COD details text dynamically after each render
     const codDetailsDiv = document.getElementById('codDetails');
     if (codDetailsDiv) {
       codDetailsDiv.innerHTML = `
@@ -751,6 +827,8 @@
   // ========== COD ORDER ==========
   async function saveOrderCOD() {
     if (!validateForm()) return;
+    if (isProcessing) return;
+    isProcessing = true;
     
     const btn = document.getElementById('placeOrderCodBtn');
     if (btn) {
@@ -773,64 +851,35 @@
         btn.innerHTML = 'Place Order (COD)';
       }
     }
+    isProcessing = false;
   }
   
-  // ========== DIRECT UPI PAYMENT REDIRECT WITH TOTAL AMOUNT ==========
-  // This function redirects the user directly to the selected UPI app with the exact total amount
-  function redirectToUpiAppForPayment(app, amount) {
-    // Fixed merchant VPA (you can change this to your actual business UPI ID)
-    const payeeVpa = 'vedanta@okhdfcbank';
-    const payeeName = 'VEDANTA';
+  // ========== DIRECT UPI REDIRECT WITH YOUR UPI ID ==========
+  // This redirects user to selected UPI app with YOUR UPI ID (sanjeshkarking32@oksbi)
+  // Order is NOT saved automatically - user must complete payment in app
+  function redirectToUpiAppForPayment(app) {
+    const amount = cartTotal;
+    const payeeVpa = MERCHANT_UPI_ID;  // YOUR UPI ID
+    const payeeName = MERCHANT_NAME;
     const transactionNote = `Vedanta Order ${Date.now()}`;
     const currency = 'INR';
     
-    let upiIntentUrl = '';
-    
-    // Build UPI intent URL for each app - these are standard deeplinks
-    switch(app) {
-      case 'gpay':
-        upiIntentUrl = `gpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-        break;
-      case 'phonepe':
-        upiIntentUrl = `phonepe://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-        break;
-      case 'paytm':
-        upiIntentUrl = `paytmmp://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-        break;
-      case 'amazon':
-        upiIntentUrl = `amazonpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-        break;
-      default:
-        // Fallback to standard UPI intent
-        upiIntentUrl = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+    let upiIntent = '';
+    if (app === 'gpay') {
+      upiIntent = `gpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+    } else if (app === 'phonepe') {
+      upiIntent = `phonepe://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+    } else if (app === 'paytm') {
+      upiIntent = `paytmmp://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+    } else if (app === 'amazon') {
+      upiIntent = `amazonpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+    } else {
+      // Fallback standard UPI intent
+      upiIntent = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
     }
     
-    // Try to redirect to the app
-    window.location.href = upiIntentUrl;
-    
-    // Fallback: If app is not installed, redirect to web fallback after a short delay
-    setTimeout(() => {
-      // If still on the same page after 2 seconds, app likely not installed
-      // Redirect to a web payment page or show a message
-      window.location.href = `https://www.google.com/search?q=upi+payment&am=${amount}&pa=${payeeVpa}`;
-    }, 1500);
-    
-    return true;
-  }
-  
-  // ========== PROCESS ONLINE PAYMENT WITH DIRECT REDIRECT ==========
-  async function processDirectUpiPayment(appName) {
-    // First validate all shipping details
-    if (!validateForm()) return false;
-    
-    // Show processing toast
-    showToast(`🔄 Redirecting to ${appName} for payment of ₹${cartTotal.toLocaleString()}...`);
-    
-    // Generate a temporary order ID for tracking
-    const tempOrderId = 'TEMP' + Date.now();
-    
-    // Store order details temporarily in session storage for after payment
-    const orderPendingData = {
+    // Store order details temporarily in sessionStorage
+    const pendingOrder = {
       cart: cart,
       cartTotal: cartTotal,
       customerDetails: {
@@ -842,81 +891,138 @@
         state: document.getElementById('state').value,
         pincode: document.getElementById('pincode').value
       },
-      paymentMethod: 'ONLINE',
-      appName: appName,
-      tempOrderId: tempOrderId,
-      timestamp: new Date().toISOString()
+      timestamp: Date.now()
     };
+    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(pendingOrder));
     
-    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(orderPendingData));
+    // Redirect to UPI app
+    window.location.href = upiIntent;
     
-    // Direct redirect to UPI app with exact amount
-    redirectToUpiAppForPayment(appName, cartTotal);
-    
-    // After redirect, we rely on the success page to capture return
-    // But we also set a timer to save order after payment simulation (for demo)
-    setTimeout(async () => {
-      // This will run if user returns to the page after payment
-      const pending = sessionStorage.getItem('pendingVedantaOrder');
-      if (pending) {
-        const orderData = JSON.parse(pending);
-        // Save order as paid
-        const result = await saveOrderToFirebase('paid', 'ONLINE', 'TXN' + Date.now());
-        if (result.success) {
-          sessionStorage.removeItem('pendingVedantaOrder');
-          localStorage.removeItem('vedantaCart');
-          showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
-          setTimeout(() => {
-            window.location.href = 'order-success.html';
-          }, 1500);
-        }
-      }
-    }, 8000);
+    // Fallback if app not installed
+    setTimeout(() => {
+      showToast('⚠️ If app didn\'t open, please complete payment manually using UPI ID: ' + MERCHANT_UPI_ID, false);
+    }, 2000);
     
     return true;
+  }
+  
+  // ========== PROCESS ONLINE PAYMENT ==========
+  async function processOnlinePayment() {
+    if (!validateForm()) return false;
+    if (isProcessing) return false;
+    
+    isProcessing = true;
+    
+    // Store pending order data before redirect
+    const pendingOrder = {
+      cart: cart,
+      cartTotal: cartTotal,
+      customerDetails: {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim() || currentUser.email,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        pincode: document.getElementById('pincode').value
+      },
+      timestamp: Date.now()
+    };
+    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(pendingOrder));
+    
+    showToast(`🔄 Redirecting to ${selectedApp.toUpperCase()} for payment of ₹${cartTotal.toLocaleString()}...`);
+    
+    // Redirect to UPI app with YOUR UPI ID
+    redirectToUpiAppForPayment(selectedApp);
+    
+    isProcessing = false;
+    return true;
+  }
+  
+  // Check if returning from payment (for session restoration)
+  function checkForPendingOrder() {
+    const pending = sessionStorage.getItem('pendingVedantaOrder');
+    if (pending && cart.length > 0) {
+      // User might have returned after payment
+      // We don't auto-save - they need to confirm payment manually
+      // But we show a helpful message
+      setTimeout(() => {
+        showToast('💡 Did you complete the payment? Click on your selected UPI app again to confirm order.', false);
+      }, 1000);
+    }
   }
   
   // ========== EVENT LISTENERS ==========
   const codOption = document.getElementById('codOption');
   const upiOption = document.getElementById('upiOption');
   const upiApps = document.getElementById('upiApps');
+  const upiIdSection = document.getElementById('upiIdSection');
   const codDetails = document.getElementById('codDetails');
+  const payNowBtn = document.getElementById('payNowBtn');
   
   codOption?.addEventListener('click', () => {
     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
     codOption.classList.add('selected');
+    selectedPaymentMethod = 'cod';
     upiApps.classList.remove('show');
+    upiIdSection.classList.remove('show');
     codDetails.classList.add('show');
   });
   
   upiOption?.addEventListener('click', () => {
     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
     upiOption.classList.add('selected');
+    selectedPaymentMethod = 'upi';
     codDetails.classList.remove('show');
     upiApps.classList.add('show');
   });
   
-  // Direct redirect on UPI app click - no extra steps, just redirect with total amount
+  // For UPI app clicks - redirects to app with YOUR UPI ID
   document.querySelectorAll('.upi-app').forEach(app => {
-    app.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const selectedAppName = app.getAttribute('data-app');
-      let displayName = '';
-      switch(selectedAppName) {
-        case 'gpay': displayName = 'Google Pay'; break;
-        case 'phonepe': displayName = 'PhonePe'; break;
-        case 'paytm': displayName = 'Paytm'; break;
-        case 'amazon': displayName = 'Amazon Pay'; break;
-        default: displayName = 'UPI App';
-      }
-      
+    app.addEventListener('click', () => {
       // Highlight selected app
       document.querySelectorAll('.upi-app').forEach(a => a.style.background = 'rgba(0,0,0,0.3)');
       app.style.background = 'rgba(212,175,55,0.2)';
+      selectedApp = app.getAttribute('data-app');
       
-      // Direct payment redirect with total amount
-      processDirectUpiPayment(selectedAppName);
+      // Hide UPI ID section if visible
+      upiIdSection.classList.remove('show');
+      
+      // Process payment - redirect to UPI app
+      processOnlinePayment();
     });
+  });
+  
+  // For manual UPI ID entry
+  payNowBtn?.addEventListener('click', () => {
+    const upiId = document.getElementById('upiId')?.value.trim();
+    if (!upiId) {
+      showToast('❌ Please enter UPI ID', true);
+      return;
+    }
+    selectedApp = 'other';
+    showToast(`🔄 Redirecting for payment of ₹${cartTotal.toLocaleString()}...`);
+    
+    // Store pending order
+    const pendingOrder = {
+      cart: cart,
+      cartTotal: cartTotal,
+      customerDetails: {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim() || currentUser.email,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        pincode: document.getElementById('pincode').value
+      },
+      timestamp: Date.now()
+    };
+    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(pendingOrder));
+    
+    // Redirect with entered UPI ID as payee
+    const upiIntent = `upi://pay?pa=${upiId}&pn=${MERCHANT_NAME}&am=${cartTotal}&cu=INR&tn=Vedanta Order ${Date.now()}`;
+    window.location.href = upiIntent;
   });
   
   document.getElementById('getLocationBtn')?.addEventListener('click', () => {
@@ -953,6 +1059,7 @@
   }
   
   loadCart();
+  checkForPendingOrder();
 </script>
 </body>
 </html>
