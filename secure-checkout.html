@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="hi">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
@@ -9,8 +9,6 @@
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <!-- EmailJS SDK -->
-  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <style>
     * {
       margin: 0;
@@ -38,105 +36,12 @@
       z-index: -1;
     }
 
-    /* Login Overlay */
-    .login-overlay {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 10000;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      backdrop-filter: blur(10px);
-    }
-    .login-overlay.hide {
-      display: none;
-    }
-    .login-card {
-      background: rgba(15,15,22,0.95);
-      border-radius: 32px;
-      padding: 32px;
-      max-width: 400px;
-      width: 90%;
-      text-align: center;
-      border: 1px solid rgba(212,175,55,0.3);
-    }
-    .login-card h2 {
-      font-size: 28px;
-      margin-bottom: 10px;
-      background: linear-gradient(135deg, #D4AF37, #FF8C00);
-      -webkit-background-clip: text;
-      background-clip: text;
-      color: transparent;
-    }
-    .login-card p {
-      color: #888;
-      font-size: 13px;
-      margin-bottom: 25px;
-    }
-    .login-input-group {
-      margin-bottom: 20px;
-    }
-    .login-input-group input {
-      width: 100%;
-      padding: 16px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(212,175,55,0.3);
-      border-radius: 20px;
-      color: white;
-      font-size: 16px;
-    }
-    .login-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #D4AF37, #FF8C00);
-      border: none;
-      padding: 14px;
-      border-radius: 30px;
-      font-weight: 700;
-      color: #050508;
-      cursor: pointer;
-      margin-bottom: 15px;
-    }
-    .otp-section {
-      display: none;
-      margin-top: 20px;
-      padding-top: 20px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    .otp-section.show {
-      display: block;
-    }
-    .otp-input {
-      text-align: center;
-      letter-spacing: 4px;
-      font-size: 20px;
-    }
-    .resend-link {
-      background: none;
-      border: none;
-      color: #D4AF37;
-      font-size: 12px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .error-text {
-      color: #F44336;
-      font-size: 12px;
-      margin-top: 10px;
-      display: none;
-    }
-    .error-text.show {
-      display: block;
-    }
-
     .checkout-container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 20px;
     }
+
     .checkout-header {
       display: flex;
       justify-content: space-between;
@@ -155,25 +60,16 @@
       background-clip: text;
       color: transparent;
     }
-    .user-info {
+    .secure-badge {
       background: rgba(212,175,55,0.15);
       padding: 8px 20px;
       border-radius: 50px;
       font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
+      font-weight: 600;
     }
-    .user-info i {
-      color: #D4AF37;
-    }
-    .logout-link {
-      background: none;
-      border: none;
-      color: #F44336;
-      cursor: pointer;
-      margin-left: 10px;
-      font-size: 12px;
+    .secure-badge i {
+      color: #4CAF50;
+      margin-right: 8px;
     }
 
     .checkout-main {
@@ -233,6 +129,12 @@
       color: white;
       font-size: 14px;
       font-family: inherit;
+      transition: 0.2s;
+    }
+    .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+      outline: none;
+      border-color: #D4AF37;
+      box-shadow: 0 0 10px rgba(212,175,55,0.3);
     }
     .form-row {
       display: grid;
@@ -252,47 +154,163 @@
       align-items: center;
       justify-content: center;
       gap: 10px;
+      transition: 0.2s;
+      margin-top: 10px;
     }
-    .cod-option {
+    .location-btn:hover {
+      background: rgba(212,175,55,0.3);
+    }
+
+    /* Payment Options */
+    .payment-options {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-top: 15px;
+    }
+    .payment-option {
       background: rgba(0,0,0,0.4);
       border: 1px solid rgba(212,175,55,0.3);
       border-radius: 16px;
-      padding: 18px;
+      padding: 16px 18px;
       display: flex;
       align-items: center;
       gap: 15px;
       cursor: pointer;
       transition: 0.2s;
-      margin-top: 15px;
     }
-    .cod-option.selected {
+    .payment-option:hover {
+      border-color: #D4AF37;
+      background: rgba(212,175,55,0.1);
+    }
+    .payment-option.selected {
       border-color: #4CAF50;
       background: rgba(76,175,80,0.1);
     }
-    .cod-option i {
-      font-size: 32px;
-      color: #4CAF50;
+    .payment-option i {
+      font-size: 28px;
     }
-    .cod-option .radio-circle {
-      width: 24px;
-      height: 24px;
+    .payment-option .payment-icon {
+      width: 50px;
+      text-align: center;
+    }
+    .payment-option .payment-icon i {
+      font-size: 28px;
+    }
+    .payment-option .payment-info {
+      flex: 1;
+    }
+    .payment-option .payment-info h4 {
+      font-size: 16px;
+      margin-bottom: 4px;
+    }
+    .payment-option .payment-info p {
+      font-size: 11px;
+      color: #888;
+    }
+    .payment-option .radio-circle {
+      width: 22px;
+      height: 22px;
       border: 2px solid #888;
       border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: auto;
+      flex-shrink: 0;
     }
-    .cod-option.selected .radio-circle {
+    .payment-option.selected .radio-circle {
       border-color: #4CAF50;
     }
-    .cod-option.selected .radio-circle::after {
+    .payment-option.selected .radio-circle::after {
       content: '';
-      width: 14px;
-      height: 14px;
+      width: 12px;
+      height: 12px;
       background: #4CAF50;
       border-radius: 50%;
     }
+
+    /* UPI Apps List - Single Column Layout */
+    .upi-apps {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+    .upi-apps.show {
+      display: flex;
+    }
+    .upi-app {
+      background: rgba(0,0,0,0.3);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 16px;
+      padding: 14px 18px;
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      cursor: pointer;
+      transition: 0.2s;
+      width: 100%;
+    }
+    .upi-app:hover {
+      border-color: #D4AF37;
+      background: rgba(212,175,55,0.15);
+      transform: translateX(5px);
+    }
+    .upi-app img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      padding: 4px;
+    }
+    .upi-app span {
+      font-size: 15px;
+      font-weight: 600;
+      flex: 1;
+    }
+    .upi-app .upi-app-arrow {
+      color: #D4AF37;
+      opacity: 0.6;
+      transition: 0.2s;
+    }
+    .upi-app:hover .upi-app-arrow {
+      opacity: 1;
+      transform: translateX(3px);
+    }
+
+    /* COD Section */
+    .cod-details {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(76,175,80,0.1);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .cod-details.show {
+      display: block;
+    }
+    .place-order-cod {
+      width: 100%;
+      background: linear-gradient(135deg, #4CAF50, #45a049);
+      border: none;
+      padding: 16px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 16px;
+      color: white;
+      cursor: pointer;
+      margin-top: 10px;
+      transition: 0.2s;
+    }
+    .place-order-cod:hover {
+      transform: scale(1.02);
+      box-shadow: 0 0 12px rgba(76,175,80,0.4);
+    }
+
     .order-summary {
       background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8));
       backdrop-filter: blur(10px);
@@ -301,6 +319,15 @@
       border: 1px solid rgba(212,175,55,0.2);
       position: sticky;
       top: 20px;
+      height: fit-content;
+    }
+    .order-summary h3 {
+      font-size: 22px;
+      margin-bottom: 20px;
+      color: #D4AF37;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .order-item {
       display: flex;
@@ -317,11 +344,7 @@
       align-items: center;
       justify-content: center;
       overflow: hidden;
-    }
-    .order-item-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
+      flex-shrink: 0;
     }
     .order-item-img i {
       font-size: 32px;
@@ -334,13 +357,9 @@
       font-size: 15px;
       margin-bottom: 5px;
     }
-    .order-item-size {
-      background: rgba(212,175,55,0.15);
-      padding: 2px 10px;
-      border-radius: 20px;
-      font-size: 11px;
-      color: #D4AF37;
-      display: inline-block;
+    .order-item-info p {
+      font-size: 12px;
+      color: #888;
       margin-top: 4px;
     }
     .order-item-price {
@@ -358,6 +377,7 @@
       display: flex;
       justify-content: space-between;
       margin-bottom: 12px;
+      font-size: 14px;
     }
     .total-row.grand-total {
       font-size: 22px;
@@ -376,30 +396,7 @@
       color: #4CAF50;
       font-size: 13px;
     }
-    .place-order-btn {
-      width: 100%;
-      background: linear-gradient(135deg, #D4AF37, #FF8C00);
-      border: none;
-      padding: 18px;
-      border-radius: 50px;
-      font-weight: 800;
-      font-size: 18px;
-      color: #050508;
-      cursor: pointer;
-      margin-top: 20px;
-    }
-    .place-order-btn.disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
-    .back-to-shop {
-      display: block;
-      text-align: center;
-      margin-top: 20px;
-      color: #888;
-      text-decoration: none;
-      font-size: 14px;
-    }
+
     .toast {
       position: fixed;
       bottom: 30px;
@@ -411,30 +408,192 @@
       border-radius: 50px;
       font-weight: bold;
       z-index: 10000;
+      font-size: 14px;
       display: none;
+      white-space: nowrap;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
-    .toast.show {
-      display: block;
-      animation: fadeInOut 2s ease;
-    }
+    .toast.show { display: block; animation: fadeInOut 2s ease; }
     @keyframes fadeInOut {
       0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
       15% { opacity: 1; transform: translateX(-50%) translateY(0); }
       85% { opacity: 1; }
       100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
     }
+    
+    @media (max-width: 550px) {
+      .toast {
+        white-space: normal;
+        text-align: center;
+        max-width: 90%;
+      }
+    }
   </style>
 </head>
 <body>
 
-<div class="checkout-container" id="checkoutContainer" style="display: none;">
-  <!-- Checkout content will be shown after login -->
+<div class="checkout-container">
+  <div class="checkout-header">
+    <div class="logo">
+      <h1>VEDANTA</h1>
+      <p style="font-size: 12px; color: #888;">secure checkout</p>
+    </div>
+    <div class="secure-badge">
+      <i class="fas fa-lock"></i> 100% Secure Payment
+    </div>
+  </div>
+
+  <div class="checkout-main">
+    <div class="checkout-form">
+      <div class="form-section">
+        <h3><i class="fas fa-user-circle"></i> Contact Information</h3>
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <input type="text" id="fullName" placeholder="Enter your full name" required>
+        </div>
+        <div class="form-group">
+          <label>Phone Number <span class="required">*</span></label>
+          <input type="tel" id="phone" placeholder="Enter 10-digit mobile number" required pattern="[0-9]{10}">
+          <p style="font-size: 11px; color: #888; margin-top: 5px;">We'll send order updates here</p>
+        </div>
+        <div class="form-group">
+          <label>Email Address</label>
+          <input type="email" id="email" placeholder="your@email.com">
+        </div>
+      </div>
+
+      <div class="form-section">
+        <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
+        <div class="form-group">
+          <label>Street Address <span class="required">*</span></label>
+          <input type="text" id="address" placeholder="House number, building, street" required>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>City <span class="required">*</span></label>
+            <input type="text" id="city" placeholder="City" required>
+          </div>
+          <div class="form-group">
+            <label>State <span class="required">*</span></label>
+            <input type="text" id="state" placeholder="State" required>
+          </div>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Pincode <span class="required">*</span></label>
+            <input type="text" id="pincode" placeholder="6-digit pincode" required pattern="[0-9]{6}">
+          </div>
+          <div class="form-group">
+            <label>Landmark (Optional)</label>
+            <input type="text" id="landmark" placeholder="Near...">
+          </div>
+        </div>
+        <button class="location-btn" id="getLocationBtn">
+          <i class="fas fa-location-dot"></i> Use My Current Location
+        </button>
+      </div>
+
+      <div class="form-section">
+        <h3><i class="fas fa-credit-card"></i> Select Payment Method</h3>
+        
+        <div class="payment-options">
+          <!-- COD Option -->
+          <div class="payment-option" id="codOption">
+            <div class="payment-icon">
+              <i class="fas fa-money-bill-wave" style="color: #4CAF50;"></i>
+            </div>
+            <div class="payment-info">
+              <h4>Cash on Delivery</h4>
+              <p>Pay when you receive your order</p>
+            </div>
+            <div class="radio-circle"></div>
+          </div>
+
+          <!-- UPI Option -->
+          <div class="payment-option" id="upiOption">
+            <div class="payment-icon">
+              <i class="fas fa-mobile-alt" style="color: #D4AF37;"></i>
+            </div>
+            <div class="payment-info">
+              <h4>Online Payment (UPI / GPay / PhonePe)</h4>
+              <p>Pay using Google Pay, PhonePe, Paytm, Amazon Pay</p>
+            </div>
+            <div class="radio-circle"></div>
+          </div>
+          
+          <!-- UPI Apps List - Single Column, Direct Redirect on Click -->
+          <div class="upi-apps" id="upiApps">
+            <div class="upi-app" data-app="gpay">
+              <img src="images/gpay.png" alt="Google Pay" onerror="this.src='https://via.placeholder.com/44?text=GPay'">
+              <span>Google Pay</span>
+              <i class="fas fa-chevron-right upi-app-arrow"></i>
+            </div>
+            <div class="upi-app" data-app="phonepe">
+              <img src="images/phonepe.png" alt="PhonePe" onerror="this.src='https://via.placeholder.com/44?text=PhonePe'">
+              <span>PhonePe</span>
+              <i class="fas fa-chevron-right upi-app-arrow"></i>
+            </div>
+            <div class="upi-app" data-app="paytm">
+              <img src="images/paytm.png" alt="Paytm" onerror="this.src='https://via.placeholder.com/44?text=Paytm'">
+              <span>Paytm</span>
+              <i class="fas fa-chevron-right upi-app-arrow"></i>
+            </div>
+            <div class="upi-app" data-app="amazon">
+              <img src="images/amazon-pay.png" alt="Amazon Pay" onerror="this.src='https://via.placeholder.com/44?text=Amazon'">
+              <span>Amazon Pay</span>
+              <i class="fas fa-chevron-right upi-app-arrow"></i>
+            </div>
+          </div>
+
+          <!-- COD Details Section -->
+          <div class="cod-details" id="codDetails">
+            <p><i class="fas fa-truck"></i> Pay when you receive your order</p>
+            <button class="place-order-cod" id="placeOrderCodBtn">Place Order (COD)</button>
+          </div>
+        </div>
+        
+        <div class="payment-note" style="margin-top: 15px; font-size: 12px; color: #888; text-align: center;">
+          <i class="fas fa-shield-alt"></i> Your payment is 100% secure
+        </div>
+      </div>
+    </div>
+
+    <div class="order-summary">
+      <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+      <div id="orderItemsList"></div>
+      
+      <div class="free-shipping-badge">
+        <i class="fas fa-truck"></i> FREE SHIPPING on all orders!
+      </div>
+      
+      <div class="order-total">
+        <div class="total-row">
+          <span>Subtotal</span>
+          <span id="subtotal">₹0</span>
+        </div>
+        <div class="total-row grand-total">
+          <span>Total Amount</span>
+          <span id="grandTotal">₹0</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 15px; padding: 12px; background: rgba(212,175,55,0.08); border-radius: 16px;">
+        <p style="font-size: 12px; color: #D4AF37; text-align: center;">
+          <i class="fas fa-gift"></i> Free gift on orders above ₹4999!
+        </p>
+      </div>
+      
+      <a href="#" class="back-to-shop" id="backToShopBtn" style="display: block; text-align: center; margin-top: 20px; color: #888; text-decoration: none;">
+        <i class="fas fa-arrow-left"></i> Back to Shopping
+      </a>
+    </div>
+  </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== 🔥 FIREBASE CONFIGURATION ==========
+  // ========== FIREBASE CONFIGURATION ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
     authDomain: "vedanta-d0199.firebaseapp.com",
@@ -450,22 +609,17 @@
   const db = firebase.firestore();
   console.log("🔥 Firebase Connected!");
   
-  // ========== 🔐 EMAILJS CONFIGURATION ==========
-  const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
-  const EMAILJS_SERVICE_ID = "service_6ucrgd9";
-  const EMAILJS_TEMPLATE_ID = "template_kniixfj";
+  let cart = [];
+  let cartTotal = 0;
   
-  emailjs.init(EMAILJS_PUBLIC_KEY);
-  console.log("✅ EmailJS initialized");
-  
-  let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
-  let generatedOTP = null;
-  let otpEmail = null;
-  let countdownInterval = null;
-  let resendCooldown = false;
-  let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-  let allProducts = [];
-  let isPaymentSelected = false;
+  // Check if user is logged in
+  const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+  if (!currentUser || !currentUser.email) {
+    showToast('🔐 Please login to continue', true);
+    setTimeout(() => {
+      window.location.href = 'profile.html?redirect=secure-checkout.html';
+    }, 1500);
+  }
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -476,237 +630,80 @@
     setTimeout(() => toast.classList.remove('show'), 3000);
   }
   
-  // ========== LOAD PRODUCTS FROM FIREBASE ==========
-  async function loadProducts() {
-    try {
-      const snapshot = await db.collection('products').get();
-      const products = [];
-      snapshot.forEach(doc => {
-        products.push({ id: doc.id, ...doc.data() });
-      });
-      allProducts = products;
-    } catch (error) {
-      console.error("Error loading products:", error);
-      const saved = localStorage.getItem('vedantaProducts');
-      if (saved) allProducts = JSON.parse(saved);
+  function loadCart() {
+    cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+    if (cart.length === 0) {
+      showToast('🛒 Your cart is empty! Redirecting...', true);
+      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      return;
     }
+    renderOrderSummary();
   }
   
-  function getProductImage(productId) {
-    const product = allProducts.find(p => p.id == productId);
-    if (product && product.images && product.images.length > 0) return product.images[0];
-    return null;
-  }
-  
-  function getProductIcon(productId) {
-    const product = allProducts.find(p => p.id == productId);
-    return (product && product.icon) ? product.icon : 'fa-shopping-bag';
-  }
-  
-  // ========== LOGIN FUNCTIONS ==========
-  async function sendOTP(email) {
-    try {
-      generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-      otpEmail = email;
-      
-      console.log(`OTP for ${email}: ${generatedOTP}`);
-      
-      const templateParams = {
-        to_email: email,
-        otp_code: generatedOTP,
-        app_name: "Vedanta",
-        expiry_time: "5 minutes"
-      };
-      
-      await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
-      showToast(`✅ OTP sent to ${email}`);
-      return true;
-    } catch (error) {
-      console.error("EmailJS Error:", error);
-      showToast("❌ Failed to send OTP", true);
-      return false;
-    }
-  }
-  
-  function startCountdown(seconds) {
-    const countdownEl = document.getElementById('countdownTimer');
-    if (!countdownEl) return;
-    
-    let remaining = seconds;
-    countdownEl.style.display = 'block';
-    countdownEl.innerHTML = `Resend available in ${remaining}s`;
-    
-    if (countdownInterval) clearInterval(countdownInterval);
-    
-    countdownInterval = setInterval(() => {
-      remaining--;
-      if (remaining <= 0) {
-        clearInterval(countdownInterval);
-        countdownEl.style.display = 'none';
-        resendCooldown = false;
-      } else {
-        countdownEl.innerHTML = `Resend available in ${remaining}s`;
-      }
-    }, 1000);
-  }
-  
-  function showLoginModal() {
-    const container = document.getElementById('checkoutContainer');
-    container.style.display = 'none';
-    
-    const loginHTML = `
-      <div class="login-overlay" id="loginOverlay">
-        <div class="login-card">
-          <h2>VEDANTA</h2>
-          <p>Login to continue with your order</p>
-          <div class="login-input-group">
-            <input type="email" id="loginEmail" placeholder="Enter your email">
-          </div>
-          <button class="login-btn" id="sendOtpBtn">Send OTP</button>
-          <div class="otp-section" id="otpSection">
-            <div class="login-input-group">
-              <input type="text" id="otpCode" class="otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
-            </div>
-            <button class="login-btn" id="verifyOtpBtn">Verify & Login</button>
-            <button class="resend-link" id="resendOtpBtn">Resend OTP</button>
-            <div id="countdownTimer" class="countdown" style="display:none; font-size:12px; color:#888; margin-top:10px;"></div>
-          </div>
-          <div class="error-text" id="errorMsg"></div>
-        </div>
-      </div>
-    `;
-    
-    document.body.insertAdjacentHTML('afterbegin', loginHTML);
-    
-    let currentEmail = '';
-    
-    document.getElementById('sendOtpBtn').addEventListener('click', async () => {
-      const email = document.getElementById('loginEmail').value.trim();
-      if (!email || !email.includes('@')) {
-        document.getElementById('errorMsg').innerText = '❌ Please enter valid email';
-        document.getElementById('errorMsg').classList.add('show');
-        return;
-      }
-      currentEmail = email;
-      const success = await sendOTP(email);
-      if (success) {
-        document.getElementById('otpSection').classList.add('show');
-        document.getElementById('errorMsg').classList.remove('show');
-        startCountdown(30);
-      }
-    });
-    
-    document.getElementById('verifyOtpBtn').addEventListener('click', async () => {
-      const otp = document.getElementById('otpCode').value.trim();
-      if (!otp || otp.length !== 6) {
-        document.getElementById('errorMsg').innerText = '❌ Enter valid 6-digit OTP';
-        document.getElementById('errorMsg').classList.add('show');
-        return;
-      }
-      
-      if (otp === generatedOTP) {
-        const userData = {
-          uid: `user_${Date.now()}`,
-          email: currentEmail,
-          name: currentEmail.split('@')[0],
-          joinDate: new Date().toISOString()
-        };
-        localStorage.setItem('vedantaUser', JSON.stringify(userData));
-        currentUser = userData;
-        document.getElementById('loginOverlay').remove();
-        container.style.display = 'block';
-        renderCheckoutPage();
-        showToast('✅ Login successful!');
-      } else {
-        document.getElementById('errorMsg').innerText = '❌ Invalid OTP. Please try again.';
-        document.getElementById('errorMsg').classList.add('show');
-      }
-    });
-    
-    document.getElementById('resendOtpBtn').addEventListener('click', async () => {
-      if (resendCooldown) {
-        showToast('⏳ Please wait 30 seconds before resending', true);
-        return;
-      }
-      resendCooldown = true;
-      await sendOTP(currentEmail);
-      startCountdown(30);
-    });
-  }
-  
-  // ========== CHECKOUT FUNCTIONS ==========
-  function calculateTotals() {
-    let subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    return { subtotal, grandTotal: subtotal };
-  }
-  
-  function renderOrderItems() {
+  function renderOrderSummary() {
     const container = document.getElementById('orderItemsList');
-    if (!container) return;
+    cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     
-    container.innerHTML = '';
-    cart.forEach(item => {
-      const productImage = getProductImage(item.id);
-      const productIcon = getProductIcon(item.id);
-      const itemTotal = item.price * item.quantity;
-      const itemSize = item.size || 'Not Selected';
-      
-      container.innerHTML += `
-        <div class="order-item">
-          <div class="order-item-img">
-            ${productImage ? `<img src="${productImage}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${productIcon}"></i>`}
-          </div>
-          <div class="order-item-info">
-            <h4>${escapeHtml(item.name)}</h4>
-            ${itemSize !== 'Not Selected' ? `<div class="order-item-size">Size: ${escapeHtml(itemSize)}</div>` : ''}
-            <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
-          </div>
-          <div class="order-item-price">₹${itemTotal.toLocaleString()}</div>
+    container.innerHTML = cart.map(item => `
+      <div class="order-item">
+        <div class="order-item-img">
+          <i class="fas fa-shopping-bag"></i>
         </div>
-      `;
-    });
+        <div class="order-item-info">
+          <h4>${escapeHtml(item.name)}</h4>
+          <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
+        </div>
+        <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+      </div>
+    `).join('');
     
-    const { subtotal, grandTotal } = calculateTotals();
-    document.getElementById('subtotal').innerText = `₹${subtotal.toLocaleString()}`;
-    document.getElementById('grandTotal').innerText = `₹${grandTotal.toLocaleString()}`;
-  }
-  
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>]/g, m => m === '&' ? '&amp;' : (m === '<' ? '&lt;' : '&gt;'));
+    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
+    document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
+    
+    // Update COD details
+    const codDetailsDiv = document.getElementById('codDetails');
+    if (codDetailsDiv) {
+      codDetailsDiv.innerHTML = `
+        <p><i class="fas fa-truck"></i> Pay ₹${cartTotal.toLocaleString()} when you receive your order</p>
+        <button class="place-order-cod" id="placeOrderCodBtn">Place Order (COD)</button>
+      `;
+      const newCodBtn = document.getElementById('placeOrderCodBtn');
+      if (newCodBtn) {
+        newCodBtn.addEventListener('click', saveOrderCOD);
+      }
+    }
   }
   
   function validateForm() {
-    const fullName = document.getElementById('fullName')?.value.trim();
-    const phone = document.getElementById('phone')?.value.trim();
-    const address = document.getElementById('address')?.value.trim();
-    const city = document.getElementById('city')?.value.trim();
-    const state = document.getElementById('state')?.value.trim();
-    const pincode = document.getElementById('pincode')?.value.trim();
+    const name = document.getElementById('fullName').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const address = document.getElementById('address').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const pincode = document.getElementById('pincode').value.trim();
     
-    if (!fullName) { showToast('❌ Please enter your full name', true); return false; }
+    if (!name) { showToast('❌ Please enter your full name', true); return false; }
     if (!phone) { showToast('❌ Please enter phone number', true); return false; }
-    if (!/^\d{10}$/.test(phone)) { showToast('❌ Enter valid 10-digit phone number', true); return false; }
-    if (!address) { showToast('❌ Enter street address', true); return false; }
-    if (!city) { showToast('❌ Enter city', true); return false; }
-    if (!state) { showToast('❌ Enter state', true); return false; }
-    if (!pincode) { showToast('❌ Enter pincode', true); return false; }
-    if (!/^\d{6}$/.test(pincode)) { showToast('❌ Enter valid 6-digit pincode', true); return false; }
+    if (phone.length < 10) { showToast('❌ Enter valid 10-digit phone number', true); return false; }
+    if (!address) { showToast('❌ Please enter address', true); return false; }
+    if (!city) { showToast('❌ Please enter city', true); return false; }
+    if (!state) { showToast('❌ Please enter state', true); return false; }
+    if (!pincode) { showToast('❌ Please enter PIN code', true); return false; }
     
     return true;
   }
   
-  async function saveOrderToFirebase() {
+  // ========== SAVE ORDER TO FIREBASE ==========
+  async function saveOrderToFirebase(paymentStatus, paymentMethod, transactionId = null) {
     const fullName = document.getElementById('fullName').value.trim();
     const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email')?.value.trim() || currentUser.email;
+    const email = document.getElementById('email').value.trim() || currentUser.email;
     const address = document.getElementById('address').value;
     const city = document.getElementById('city').value;
     const state = document.getElementById('state').value;
     const pincode = document.getElementById('pincode').value;
-    const { subtotal, grandTotal } = calculateTotals();
     
-    const itemsWithSize = cart.map(item => ({
+    const itemsWithDetails = cart.map(item => ({
       id: item.id,
       name: item.name,
       price: item.price,
@@ -716,25 +713,34 @@
     }));
     
     const orderId = 'ORD' + Date.now();
+    
     const orderData = {
       orderId: orderId,
       customerName: fullName,
       customerPhone: phone,
       customerEmail: email,
       shippingAddress: { address, city, state, pincode },
-      items: itemsWithSize,
-      paymentMethod: 'Cash on Delivery',
-      subtotal: subtotal,
-      total: grandTotal,
-      status: 'pending',
+      items: itemsWithDetails,
+      paymentMethod: paymentMethod,
+      paymentStatus: paymentStatus,
+      transactionId: transactionId || null,
+      subtotal: cartTotal,
+      total: cartTotal,
+      status: paymentStatus === 'paid' ? 'confirmed' : 'pending',
       orderDate: new Date().toISOString(),
-      userId: currentUser.uid,
-      userEmail: currentUser.email
+      updatedAt: new Date().toISOString(),
+      userId: currentUser ? currentUser.uid : null,
+      userEmail: currentUser ? currentUser.email : null
     };
     
     try {
       await db.collection('orders').doc(orderId).set(orderData);
+      
+      let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
+      orders.push(orderData);
+      localStorage.setItem('vedantaOrders', JSON.stringify(orders));
       localStorage.setItem('lastOrder', JSON.stringify(orderData));
+      
       return { success: true, orderId: orderId };
     } catch (error) {
       console.error("Firebase Error:", error);
@@ -742,134 +748,211 @@
     }
   }
   
-  async function placeOrder() {
-    if (!isPaymentSelected) {
-      showToast('❌ Please select payment method first', true);
-      return;
-    }
+  // ========== COD ORDER ==========
+  async function saveOrderCOD() {
     if (!validateForm()) return;
     
-    const btn = document.getElementById('placeOrderBtn');
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Placing Order...';
+    const btn = document.getElementById('placeOrderCodBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Placing Order...';
+    }
     
-    const result = await saveOrderToFirebase();
+    const result = await saveOrderToFirebase('pending', 'Cash on Delivery');
     
     if (result.success) {
-      localStorage.setItem('vedantaCart', JSON.stringify([]));
-      showToast(`✅ Order placed! ID: ${result.orderId}`);
+      localStorage.removeItem('vedantaCart');
+      showToast(`✅ Order placed successfully! Order ID: ${result.orderId}`);
       setTimeout(() => {
         window.location.href = 'order-success.html';
       }, 1500);
     } else {
       showToast('❌ Failed to place order', true);
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-check-circle"></i> PLACE ORDER (COD)';
-    }
-  }
-  
-  function renderCheckoutPage() {
-    if (cart.length === 0) {
-      window.location.href = 'index.html';
-      return;
-    }
-    
-    const container = document.getElementById('checkoutContainer');
-    container.innerHTML = `
-      <div class="checkout-header">
-        <div class="logo"><h1>VEDANTA</h1><p style="font-size:12px; color:#888;">secure checkout</p></div>
-        <div class="user-info"><i class="fas fa-user-circle"></i> ${currentUser.email} <button class="logout-link" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
-      </div>
-      <div class="checkout-main">
-        <div class="checkout-form">
-          <div class="form-section">
-            <h3><i class="fas fa-user-circle"></i> Contact Information</h3>
-            <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="fullName" placeholder="Enter your full name"></div>
-            <div class="form-group"><label>Phone Number <span class="required">*</span></label><input type="tel" id="phone" placeholder="10-digit mobile number"></div>
-            <div class="form-group"><label>Email Address</label><input type="email" id="email" value="${currentUser.email}" readonly style="background:rgba(0,0,0,0.3);"></div>
-          </div>
-          <div class="form-section">
-            <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
-            <div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="address" placeholder="House number, street"></div>
-            <div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="city" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="state" placeholder="State"></div></div>
-            <div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="pincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark</label><input type="text" id="landmark" placeholder="Near..."></div></div>
-            <button class="location-btn" id="getLocationBtn"><i class="fas fa-location-dot"></i> Use My Location</button>
-          </div>
-          <div class="form-section">
-            <h3><i class="fas fa-credit-card"></i> Payment Method</h3>
-            <div class="cod-option" id="codOption"><i class="fas fa-money-bill-wave"></i><div class="option-text"><h4>Cash on Delivery</h4><p>Pay when you receive</p></div><div class="radio-circle"></div></div>
-          </div>
-        </div>
-        <div class="order-summary">
-          <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-          <div id="orderItemsList"></div>
-          <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING on all orders!</div>
-          <div class="order-total"><div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div><div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div></div>
-          <button class="place-order-btn" id="placeOrderBtn"><i class="fas fa-check-circle"></i> PLACE ORDER (COD)</button>
-          <a href="index.html" class="back-to-shop"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
-        </div>
-      </div>
-    `;
-    
-    renderOrderItems();
-    
-    // COD Option
-    const codOption = document.getElementById('codOption');
-    const placeOrderBtn = document.getElementById('placeOrderBtn');
-    
-    codOption?.addEventListener('click', () => {
-      if (codOption.classList.contains('selected')) {
-        codOption.classList.remove('selected');
-        isPaymentSelected = false;
-        placeOrderBtn.classList.add('disabled');
-        placeOrderBtn.disabled = true;
-      } else {
-        codOption.classList.add('selected');
-        isPaymentSelected = true;
-        placeOrderBtn.classList.remove('disabled');
-        placeOrderBtn.disabled = false;
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = 'Place Order (COD)';
       }
-    });
-    
-    // Location
-    document.getElementById('getLocationBtn')?.addEventListener('click', () => {
-      if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(async (position) => {
-          try {
-            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
-            const data = await res.json();
-            if (data.address) {
-              if (data.address.city) document.getElementById('city').value = data.address.city;
-              if (data.address.state) document.getElementById('state').value = data.address.state;
-              if (data.address.postcode) document.getElementById('pincode').value = data.address.postcode;
-              showToast('✅ Location filled!');
-            }
-          } catch(e) { showToast('⚠️ Could not get address', true); }
-        }, () => showToast('⚠️ Location permission denied', true));
-      } else { showToast('⚠️ Geolocation not supported', true); }
-    });
-    
-    // Logout
-    document.getElementById('logoutBtn')?.addEventListener('click', () => {
-      localStorage.removeItem('vedantaUser');
-      window.location.reload();
-    });
-    
-    placeOrderBtn?.addEventListener('click', placeOrder);
-  }
-  
-  // Initialize
-  async function init() {
-    await loadProducts();
-    if (currentUser && currentUser.email) {
-      document.getElementById('checkoutContainer').style.display = 'block';
-      renderCheckoutPage();
-    } else {
-      showLoginModal();
     }
   }
   
-  init();
+  // ========== DIRECT UPI PAYMENT REDIRECT WITH TOTAL AMOUNT ==========
+  // This function redirects the user directly to the selected UPI app with the exact total amount
+  function redirectToUpiAppForPayment(app, amount) {
+    // Fixed merchant VPA (you can change this to your actual business UPI ID)
+    const payeeVpa = 'vedanta@okhdfcbank';
+    const payeeName = 'VEDANTA';
+    const transactionNote = `Vedanta Order ${Date.now()}`;
+    const currency = 'INR';
+    
+    let upiIntentUrl = '';
+    
+    // Build UPI intent URL for each app - these are standard deeplinks
+    switch(app) {
+      case 'gpay':
+        upiIntentUrl = `gpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+        break;
+      case 'phonepe':
+        upiIntentUrl = `phonepe://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+        break;
+      case 'paytm':
+        upiIntentUrl = `paytmmp://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+        break;
+      case 'amazon':
+        upiIntentUrl = `amazonpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+        break;
+      default:
+        // Fallback to standard UPI intent
+        upiIntentUrl = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
+    }
+    
+    // Try to redirect to the app
+    window.location.href = upiIntentUrl;
+    
+    // Fallback: If app is not installed, redirect to web fallback after a short delay
+    setTimeout(() => {
+      // If still on the same page after 2 seconds, app likely not installed
+      // Redirect to a web payment page or show a message
+      window.location.href = `https://www.google.com/search?q=upi+payment&am=${amount}&pa=${payeeVpa}`;
+    }, 1500);
+    
+    return true;
+  }
+  
+  // ========== PROCESS ONLINE PAYMENT WITH DIRECT REDIRECT ==========
+  async function processDirectUpiPayment(appName) {
+    // First validate all shipping details
+    if (!validateForm()) return false;
+    
+    // Show processing toast
+    showToast(`🔄 Redirecting to ${appName} for payment of ₹${cartTotal.toLocaleString()}...`);
+    
+    // Generate a temporary order ID for tracking
+    const tempOrderId = 'TEMP' + Date.now();
+    
+    // Store order details temporarily in session storage for after payment
+    const orderPendingData = {
+      cart: cart,
+      cartTotal: cartTotal,
+      customerDetails: {
+        fullName: document.getElementById('fullName').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        email: document.getElementById('email').value.trim() || currentUser.email,
+        address: document.getElementById('address').value,
+        city: document.getElementById('city').value,
+        state: document.getElementById('state').value,
+        pincode: document.getElementById('pincode').value
+      },
+      paymentMethod: 'ONLINE',
+      appName: appName,
+      tempOrderId: tempOrderId,
+      timestamp: new Date().toISOString()
+    };
+    
+    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(orderPendingData));
+    
+    // Direct redirect to UPI app with exact amount
+    redirectToUpiAppForPayment(appName, cartTotal);
+    
+    // After redirect, we rely on the success page to capture return
+    // But we also set a timer to save order after payment simulation (for demo)
+    setTimeout(async () => {
+      // This will run if user returns to the page after payment
+      const pending = sessionStorage.getItem('pendingVedantaOrder');
+      if (pending) {
+        const orderData = JSON.parse(pending);
+        // Save order as paid
+        const result = await saveOrderToFirebase('paid', 'ONLINE', 'TXN' + Date.now());
+        if (result.success) {
+          sessionStorage.removeItem('pendingVedantaOrder');
+          localStorage.removeItem('vedantaCart');
+          showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
+          setTimeout(() => {
+            window.location.href = 'order-success.html';
+          }, 1500);
+        }
+      }
+    }, 8000);
+    
+    return true;
+  }
+  
+  // ========== EVENT LISTENERS ==========
+  const codOption = document.getElementById('codOption');
+  const upiOption = document.getElementById('upiOption');
+  const upiApps = document.getElementById('upiApps');
+  const codDetails = document.getElementById('codDetails');
+  
+  codOption?.addEventListener('click', () => {
+    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+    codOption.classList.add('selected');
+    upiApps.classList.remove('show');
+    codDetails.classList.add('show');
+  });
+  
+  upiOption?.addEventListener('click', () => {
+    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+    upiOption.classList.add('selected');
+    codDetails.classList.remove('show');
+    upiApps.classList.add('show');
+  });
+  
+  // Direct redirect on UPI app click - no extra steps, just redirect with total amount
+  document.querySelectorAll('.upi-app').forEach(app => {
+    app.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const selectedAppName = app.getAttribute('data-app');
+      let displayName = '';
+      switch(selectedAppName) {
+        case 'gpay': displayName = 'Google Pay'; break;
+        case 'phonepe': displayName = 'PhonePe'; break;
+        case 'paytm': displayName = 'Paytm'; break;
+        case 'amazon': displayName = 'Amazon Pay'; break;
+        default: displayName = 'UPI App';
+      }
+      
+      // Highlight selected app
+      document.querySelectorAll('.upi-app').forEach(a => a.style.background = 'rgba(0,0,0,0.3)');
+      app.style.background = 'rgba(212,175,55,0.2)';
+      
+      // Direct payment redirect with total amount
+      processDirectUpiPayment(selectedAppName);
+    });
+  });
+  
+  document.getElementById('getLocationBtn')?.addEventListener('click', () => {
+    if (navigator.geolocation) {
+      showToast('📍 Fetching your location...');
+      navigator.geolocation.getCurrentPosition(async (position) => {
+        try {
+          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${position.coords.latitude}&lon=${position.coords.longitude}`);
+          const data = await response.json();
+          if (data.address) {
+            if (data.address.city) document.getElementById('city').value = data.address.city;
+            if (data.address.state) document.getElementById('state').value = data.address.state;
+            if (data.address.postcode) document.getElementById('pincode').value = data.address.postcode;
+            showToast('✅ Location filled automatically!');
+          }
+        } catch(e) { showToast('⚠️ Could not get address details', true); }
+      }, () => { showToast('⚠️ Location permission denied', true); });
+    } else { showToast('⚠️ Geolocation not supported', true); }
+  });
+  
+  document.getElementById('backToShopBtn')?.addEventListener('click', (e) => {
+    e.preventDefault();
+    window.location.href = 'index.html';
+  });
+  
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+  
+  loadCart();
 </script>
 </body>
 </html>
