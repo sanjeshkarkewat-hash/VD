@@ -59,12 +59,90 @@
             font-size: 13px;
             font-weight: 600;
             cursor: pointer;
+            transition: 0.2s;
+        }
+        .back-btn:hover {
+            background: rgba(212,175,55,0.25);
         }
         
         .container {
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+        }
+        
+        /* Skeleton Loading */
+        .skeleton-card {
+            background: rgba(15,15,22,0.6);
+            border-radius: 28px;
+            padding: 24px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(212,175,55,0.1);
+        }
+        .skeleton-title {
+            height: 24px;
+            width: 40%;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        .skeleton-line {
+            height: 14px;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+            margin: 12px 0;
+        }
+        .skeleton-steps {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+        .skeleton-step {
+            flex: 1;
+            text-align: center;
+        }
+        .skeleton-step-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 50%;
+            margin: 0 auto 10px;
+        }
+        .skeleton-step-label {
+            height: 10px;
+            width: 50px;
+            margin: 0 auto;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 4px;
+        }
+        .skeleton-item {
+            display: flex;
+            gap: 15px;
+            padding: 15px 0;
+        }
+        .skeleton-img {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 16px;
+            flex-shrink: 0;
+        }
+        .skeleton-text {
+            flex: 1;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
         }
         
         .status-bar {
@@ -106,6 +184,7 @@
             justify-content: center;
             margin: 0 auto 10px;
             border: 2px solid rgba(212,175,55,0.3);
+            transition: all 0.3s ease;
         }
         .step.completed .step-icon {
             background: #4CAF50;
@@ -132,6 +211,11 @@
             padding: 24px;
             margin-bottom: 20px;
             border: 1px solid rgba(212,175,55,0.2);
+            transition: transform 0.2s;
+        }
+        .info-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(212,175,55,0.4);
         }
         .card-title {
             font-size: 18px;
@@ -166,12 +250,6 @@
             color: #D4AF37;
             font-weight: 700;
         }
-        .price-strike {
-            text-decoration: line-through;
-            color: #888;
-            font-size: 12px;
-            margin-left: 8px;
-        }
         .discount-badge {
             background: #4CAF50;
             color: white;
@@ -179,14 +257,21 @@
             border-radius: 20px;
             font-size: 11px;
             margin-left: 8px;
+            display: inline-block;
         }
         
-        /* Order Items */
         .order-item {
             display: flex;
             gap: 15px;
             padding: 15px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
+            transition: background 0.2s;
+        }
+        .order-item:hover {
+            background: rgba(212,175,55,0.05);
+            border-radius: 16px;
+            padding-left: 10px;
+            padding-right: 10px;
         }
         .order-item-img {
             width: 80px;
@@ -286,7 +371,6 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
         
-        /* Combo Offer Card */
         .offer-card {
             background: rgba(76,175,80,0.1);
             border: 1px solid rgba(76,175,80,0.3);
@@ -319,6 +403,11 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(212,175,55,0.3);
         }
         .btn-secondary {
             flex: 1;
@@ -334,11 +423,19 @@
             align-items: center;
             justify-content: center;
             gap: 8px;
+            transition: all 0.2s;
+        }
+        .btn-secondary:hover {
+            background: rgba(212,175,55,0.25);
+            transform: translateY(-2px);
         }
         .btn-cancel {
             background: rgba(244,67,54,0.15);
             border: 1px solid rgba(244,67,54,0.5);
             color: #F44336;
+        }
+        .btn-cancel:hover {
+            background: rgba(244,67,54,0.25);
         }
         
         .modal {
@@ -363,12 +460,24 @@
             width: 90%;
             text-align: center;
             border: 1px solid rgba(212,175,55,0.3);
+            animation: modalSlideIn 0.3s ease;
+        }
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .modal-content i { font-size: 60px; color: #F44336; margin-bottom: 20px; }
         .modal-content h3 { font-size: 24px; margin-bottom: 10px; }
         .modal-content p { color: #888; font-size: 14px; margin-bottom: 25px; }
         .modal-buttons { display: flex; gap: 15px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; transition: transform 0.2s; }
+        .modal-btn:hover { transform: scale(0.98); }
         .modal-confirm { background: #F44336; color: white; }
         .modal-cancel { background: rgba(255,255,255,0.1); color: white; }
         
@@ -384,8 +493,9 @@
             font-weight: bold;
             z-index: 10000;
             display: none;
+            animation: fadeInOut 2s ease;
         }
-        .toast.show { display: block; animation: fadeInOut 2s ease; }
+        .toast.show { display: block; }
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -413,7 +523,36 @@
     <a href="booking.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Bookings</a>
 </div>
 
-<div class="container" id="app"></div>
+<div class="container" id="app">
+    <!-- Skeleton Loaders - Shows instantly -->
+    <div class="skeleton-card">
+        <div class="skeleton-title"></div>
+        <div class="skeleton-steps">
+            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
+            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
+            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
+            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
+            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
+        </div>
+    </div>
+    <div class="skeleton-card">
+        <div class="skeleton-title" style="width: 30%;"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+    </div>
+    <div class="skeleton-card">
+        <div class="skeleton-title" style="width: 35%;"></div>
+        <div class="skeleton-item">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text"><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 50%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
+        </div>
+        <div class="skeleton-item">
+            <div class="skeleton-img"></div>
+            <div class="skeleton-text"><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 50%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
+        </div>
+    </div>
+</div>
 
 <div class="modal" id="cancelModal">
     <div class="modal-content">
@@ -443,8 +582,13 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
+    // Enable offline persistence for faster subsequent loads
+    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+        console.log("Persistence (non-critical):", err);
+    });
+    
     let currentOrder = null;
-    let productsMap = new Map(); // Store product details including colors, sizes, combos
+    let productsCache = new Map();
     
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -452,7 +596,7 @@
         toast.style.background = isError ? '#F44336' : '#D4AF37';
         toast.style.color = isError ? 'white' : '#050508';
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 3000);
+        setTimeout(() => toast.classList.remove('show'), 2500);
     }
     
     function getOrderIdFromUrl() {
@@ -460,13 +604,28 @@
         return urlParams.get('orderId');
     }
     
-    // Load products from Firebase (for colors, sizes, combos)
-    async function loadProductsFromFirebase() {
+    // Load products from cache or Firebase
+    async function loadProductsFast() {
+        // Check sessionStorage cache first
+        const cached = sessionStorage.getItem('vedanta_products_cache');
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (parsed && Date.now() - parsed.timestamp < 3600000) { // 1 hour cache
+                    productsCache = new Map(parsed.data);
+                    console.log("✅ Products from cache:", productsCache.size);
+                    return;
+                }
+            } catch(e) {}
+        }
+        
+        // If not cached, fetch from Firebase
         try {
             const snapshot = await db.collection('products').get();
+            const productsArray = [];
             snapshot.forEach(doc => {
                 const p = doc.data();
-                productsMap.set(p.id, {
+                productsCache.set(p.id, {
                     name: p.name,
                     images: p.images || [],
                     icon: p.icon || 'fa-gem',
@@ -477,45 +636,78 @@
                     price: p.price,
                     comparePrice: p.comparePrice
                 });
+                productsArray.push([p.id, {
+                    name: p.name, images: p.images || [], icon: p.icon || 'fa-gem',
+                    sizes: p.sizes || [], colors: p.colors || [], combos: p.combos || [],
+                    bulkDiscounts: p.bulkDiscounts || {}, price: p.price, comparePrice: p.comparePrice
+                }]);
             });
-            console.log("✅ Products loaded:", productsMap.size);
+            
+            // Cache in sessionStorage
+            sessionStorage.setItem('vedanta_products_cache', JSON.stringify({
+                timestamp: Date.now(),
+                data: productsArray
+            }));
+            console.log("✅ Products from Firestore:", productsCache.size);
         } catch(e) {
-            console.log("Error loading products:", e);
+            console.log("Products fetch error:", e);
         }
     }
     
-    // Get cached orders
-    function getCachedOrders() {
-        const cached = localStorage.getItem('vedantaOrders_cache');
-        if (cached) {
+    // Get order from cache or Firebase
+    async function loadOrderFast() {
+        const orderId = getOrderIdFromUrl();
+        if (!orderId) {
+            showError("No order ID found");
+            return false;
+        }
+        
+        // Try to get from sessionStorage first (cached from booking page)
+        const cachedOrders = sessionStorage.getItem('vedanta_orders_fast');
+        if (cachedOrders) {
             try {
-                const cacheData = JSON.parse(cached);
-                if (cacheData.orders && cacheData.orders.length > 0) {
-                    return cacheData.orders;
+                const orders = JSON.parse(cachedOrders);
+                const cachedOrder = orders.find(o => (o.orderId === orderId || o.id === orderId));
+                if (cachedOrder) {
+                    currentOrder = cachedOrder;
+                    return true;
                 }
             } catch(e) {}
         }
-        return [];
-    }
-    
-    function loadOrderFromCache() {
-        const orderId = getOrderIdFromUrl();
-        if (!orderId) { showError("No order ID found"); return false; }
         
-        const cachedOrders = getCachedOrders();
-        const cachedOrder = cachedOrders.find(o => o.orderId === orderId);
-        
-        if (cachedOrder) {
-            currentOrder = cachedOrder;
-            renderOrderDetails();
-            return true;
+        // Try localStorage backup
+        const localOrders = localStorage.getItem('vedantaOrders_cache');
+        if (localOrders) {
+            try {
+                const cacheData = JSON.parse(localOrders);
+                if (cacheData.orders) {
+                    const cachedOrder = cacheData.orders.find(o => (o.orderId === orderId || o.id === orderId));
+                    if (cachedOrder) {
+                        currentOrder = cachedOrder;
+                        return true;
+                    }
+                }
+            } catch(e) {}
         }
+        
+        // Finally fetch from Firebase
+        try {
+            const doc = await db.collection('orders').doc(orderId).get();
+            if (doc.exists) {
+                currentOrder = { id: doc.id, ...doc.data() };
+                return true;
+            }
+        } catch (error) {
+            console.error("Error fetching order:", error);
+        }
+        
         return false;
     }
     
-    async function fetchFreshOrder() {
+    // Update from Firebase in background (real-time)
+    async function updateOrderFromFirebase() {
         const orderId = getOrderIdFromUrl();
-        if (!orderId) return;
+        if (!orderId || !currentOrder) return;
         
         try {
             const doc = await db.collection('orders').doc(orderId).get();
@@ -527,8 +719,31 @@
                 }
             }
         } catch (error) {
-            console.error("Error fetching order:", error);
+            console.error("Background update error:", error);
         }
+    }
+    
+    // Set up real-time listener for status updates
+    function setupRealtimeListener() {
+        const orderId = getOrderIdFromUrl();
+        if (!orderId) return;
+        
+        db.collection('orders').doc(orderId).onSnapshot((doc) => {
+            if (doc.exists) {
+                const updatedOrder = { id: doc.id, ...doc.data() };
+                if (JSON.stringify(currentOrder) !== JSON.stringify(updatedOrder)) {
+                    currentOrder = updatedOrder;
+                    renderOrderDetails();
+                    if (updatedOrder.status === 'cancelled') {
+                        showToast("Order status updated: Cancelled");
+                    } else if (updatedOrder.status === 'shipped') {
+                        showToast("🎉 Great news! Your order has been shipped!");
+                    } else if (updatedOrder.status === 'delivered') {
+                        showToast("✅ Order delivered! Thank you for shopping with Vedanta!");
+                    }
+                }
+            }
+        });
     }
     
     function canCancelOrder() {
@@ -570,13 +785,13 @@
     }
     
     function getProductImage(productId) {
-        const prod = productsMap.get(productId);
+        const prod = productsCache.get(productId);
         if (prod && prod.images && prod.images.length > 0) return prod.images[0];
         return null;
     }
     
     function getProductDetails(productId) {
-        return productsMap.get(productId) || { sizes: [], colors: [], combos: [] };
+        return productsCache.get(productId) || { sizes: [], colors: [], combos: [] };
     }
     
     function getStatusLabel(status) {
@@ -614,15 +829,10 @@
             const productDetails = getProductDetails(item.id);
             const iconClass = productDetails.icon || 'fa-gem';
             
-            // Calculate discount if compare price exists
-            const hasDiscount = productDetails.comparePrice && productDetails.comparePrice > item.price;
-            const discountPercent = hasDiscount ? Math.round(((productDetails.comparePrice - item.price) / productDetails.comparePrice) * 100) : 0;
+            // Get selected size and color
+            const selectedSize = item.size || item.selectedSize || '';
+            const selectedColor = item.color || item.selectedColor || '';
             
-            // Get selected size and color from order item
-            const selectedSize = item.size || (item.selectedSize) || '';
-            const selectedColor = item.color || (item.selectedColor) || '';
-            
-            // Find color code from product's colors array
             let colorCode = '#D4AF37';
             if (selectedColor && productDetails.colors) {
                 const colorObj = productDetails.colors.find(c => c.name === selectedColor || c === selectedColor);
@@ -642,11 +852,9 @@
                             ${selectedSize ? `<span class="size-badge"><i class="fas fa-tshirt"></i> Size: ${escapeHtml(selectedSize)}</span>` : ''}
                             ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background: ${colorCode};"></span> Color: ${escapeHtml(selectedColor)}</span>` : ''}
                         </div>
-                        ${hasDiscount ? `<div class="discount-badge">${discountPercent}% OFF</div>` : ''}
                         <div class="order-item-qty">Quantity: ${item.quantity}</div>
                     </div>
                     <div class="order-item-price">
-                        ${hasDiscount ? `<div class="original-price">₹${(productDetails.comparePrice * item.quantity).toLocaleString('en-IN')}</div>` : ''}
                         <div class="final-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                     </div>
                 </div>
@@ -664,7 +872,6 @@
                 </div>`).join('')}</div>`;
         }
         
-        // Check if any combo offer was applied
         const hasComboOffer = currentOrder.comboApplied || (currentOrder.items && currentOrder.items.length > 1);
         
         const cancelButtonHtml = canCancel ? `
@@ -752,18 +959,32 @@
         });
     }
     
+    // Event listeners
     document.getElementById('modalCancelBtn')?.addEventListener('click', hideModal);
     document.getElementById('modalConfirmBtn')?.addEventListener('click', async () => { hideModal(); await cancelOrder(); });
     window.addEventListener('click', (e) => { if (e.target === document.getElementById('cancelModal')) hideModal(); });
     
+    // Main initialization - FAST parallel loading
     (async function init() {
-        document.getElementById('app').innerHTML = `<div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-pulse" style="font-size: 40px; color: #D4AF37;"></i><p>Loading order details...</p></div>`;
+        // Load products and order in parallel
+        const [_, orderLoaded] = await Promise.all([
+            loadProductsFast(),
+            loadOrderFast()
+        ]);
         
-        await loadProductsFromFirebase();
-        const hasCached = loadOrderFromCache();
-        await fetchFreshOrder();
+        if (!orderLoaded || !currentOrder) {
+            showError("Order not found");
+            return;
+        }
         
-        if (!currentOrder) showError("Order not found");
+        // Render immediately with cached data
+        renderOrderDetails();
+        
+        // Then update from Firebase in background (for latest status)
+        await updateOrderFromFirebase();
+        
+        // Set up real-time listener for live status updates
+        setupRealtimeListener();
     })();
 </script>
 </body>
