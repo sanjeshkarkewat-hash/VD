@@ -33,7 +33,7 @@
         }
         .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
         
-        /* Floating Cart */
+        /* Floating Cart - Left Side */
         .floating-cart {
             position: fixed;
             bottom: 100px;
@@ -71,120 +71,10 @@
             justify-content: center;
         }
         
-        /* Cart Sidebar */
-        .cart-sidebar {
-            position: fixed;
-            top: 0;
-            left: -100%;
-            width: 85%;
-            max-width: 380px;
-            height: 100%;
-            background: rgba(10,10,18,0.98);
-            backdrop-filter: blur(20px);
-            z-index: 2000;
-            transition: 0.3s;
-            border-right: 1px solid rgba(212,175,55,0.3);
-            display: flex;
-            flex-direction: column;
-        }
-        .cart-sidebar.open { left: 0; }
-        .cart-header {
-            padding: 20px;
-            border-bottom: 1px solid rgba(212,175,55,0.3);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .cart-header h3 { font-size: 20px; color: #D4AF37; }
-        .close-cart {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-        }
-        .cart-items {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px;
-        }
-        .cart-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-        .cart-item-info h4 { font-size: 14px; margin-bottom: 4px; }
-        .cart-item-info p { color: #D4AF37; font-weight: bold; font-size: 14px; }
-        .cart-item-actions {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .cart-qty-btn {
-            background: rgba(212,175,55,0.2);
-            border: 1px solid rgba(212,175,55,0.3);
-            width: 28px;
-            height: 28px;
-            border-radius: 8px;
-            cursor: pointer;
-            color: #D4AF37;
-            font-size: 14px;
-        }
-        .cart-qty {
-            font-size: 14px;
-            font-weight: bold;
-            min-width: 20px;
-            text-align: center;
-        }
-        .cart-item-remove {
-            background: rgba(255,69,0,0.2);
-            border: none;
-            color: #FF4500;
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            cursor: pointer;
-        }
-        .cart-footer {
-            padding: 20px;
-            border-top: 1px solid rgba(212,175,55,0.3);
-        }
-        .cart-total {
-            display: flex;
-            justify-content: space-between;
-            font-size: 18px;
-            font-weight: bold;
-            margin-bottom: 16px;
-        }
-        .checkout-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 14px;
-            border-radius: 50px;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .empty-cart { text-align: center; padding: 40px; color: #888; }
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.7);
-            z-index: 1999;
-            display: none;
-        }
-        .overlay.show { display: block; }
-        
-        /* ========== AI CUSTOMER SUPPORT CHATBOT ========== */
+        /* ========== AI CUSTOMER SUPPORT CHATBOT - RIGHT SIDE SAME HEIGHT ========== */
         .chatbot-btn {
             position: fixed;
-            bottom: 20px;
+            bottom: 100px;
             right: 16px;
             width: 55px;
             height: 55px;
@@ -209,7 +99,7 @@
         
         .chatbot-window {
             position: fixed;
-            bottom: 85px;
+            bottom: 170px;
             right: 16px;
             width: 380px;
             max-width: calc(100vw - 32px);
@@ -359,10 +249,117 @@
             30% { transform: translateY(-6px); opacity: 1; }
         }
         
-        /* Hide input area - only options based */
-        .chat-input-area {
+        .chat-input-area { display: none; }
+        
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            left: -100%;
+            width: 85%;
+            max-width: 380px;
+            height: 100%;
+            background: rgba(10,10,18,0.98);
+            backdrop-filter: blur(20px);
+            z-index: 2000;
+            transition: 0.3s;
+            border-right: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            flex-direction: column;
+        }
+        .cart-sidebar.open { left: 0; }
+        .cart-header {
+            padding: 20px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-header h3 { font-size: 20px; color: #D4AF37; }
+        .close-cart {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 28px;
+            cursor: pointer;
+        }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+        }
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .cart-item-info h4 { font-size: 14px; margin-bottom: 4px; }
+        .cart-item-info p { color: #D4AF37; font-weight: bold; font-size: 14px; }
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-qty-btn {
+            background: rgba(212,175,55,0.2);
+            border: 1px solid rgba(212,175,55,0.3);
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            cursor: pointer;
+            color: #D4AF37;
+            font-size: 14px;
+        }
+        .cart-qty {
+            font-size: 14px;
+            font-weight: bold;
+            min-width: 20px;
+            text-align: center;
+        }
+        .cart-item-remove {
+            background: rgba(255,69,0,0.2);
+            border: none;
+            color: #FF4500;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .cart-footer {
+            padding: 20px;
+            border-top: 1px solid rgba(212,175,55,0.3);
+        }
+        .cart-total {
+            display: flex;
+            justify-content: space-between;
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 16px;
+        }
+        .checkout-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .empty-cart { text-align: center; padding: 40px; color: #888; }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.7);
+            z-index: 1999;
             display: none;
         }
+        .overlay.show { display: block; }
         
         /* Marquee */
         .marquee-wrapper {
@@ -850,12 +847,24 @@
 </head>
 <body>
 
-<!-- FLOATING CART -->
+<!-- FLOATING CART - LEFT SIDE -->
 <div class="floating-cart" id="floatingCart">
     <div class="cart-icon-container">
         <i class="fas fa-shopping-cart"></i>
         <span class="cart-count" id="cartCount">0</span>
     </div>
+</div>
+
+<!-- ========== AI CUSTOMER SUPPORT CHATBOT - RIGHT SIDE SAME HEIGHT ========== -->
+<div class="chatbot-btn" id="chatbotBtn">
+    <i class="fas fa-headset"></i>
+</div>
+<div class="chatbot-window" id="chatbotWindow">
+    <div class="chat-header">
+        <h4><i class="fas fa-robot"></i> VEDANTA Support AI</h4>
+        <i class="fas fa-times" id="closeChatBtn"></i>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
 </div>
 
 <!-- CART SIDEBAR -->
@@ -870,19 +879,6 @@
         <div class="cart-total"><span>Total:</span><span id="cartTotal">₹0</span></div>
         <button class="checkout-btn" id="checkoutBtn">💰 Proceed to Checkout</button>
     </div>
-</div>
-
-<!-- ========== AI CUSTOMER SUPPORT CHATBOT (ONLY OPTIONS BASED) ========== -->
-<div class="chatbot-btn" id="chatbotBtn">
-    <i class="fas fa-headset"></i>
-</div>
-<div class="chatbot-window" id="chatbotWindow">
-    <div class="chat-header">
-        <h4><i class="fas fa-robot"></i> VEDANTA Support AI</h4>
-        <i class="fas fa-times" id="closeChatBtn"></i>
-    </div>
-    <div class="chat-messages" id="chatMessages"></div>
-    <!-- No input area - only options based -->
 </div>
 
 <!-- MARQUEE -->
@@ -997,6 +993,8 @@
     <div class="nav-item" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
 </div>
 
+<div class="toast" id="toastMsg"></div>
+
 <script>
     // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
@@ -1017,7 +1015,6 @@
     let visibleCount = 8;
     let activeCategory = "all";
     let currentLanguage = "english";
-    let lastUserQuestion = "";
     
     function escapeHtml(str) {
         if (!str) return '';
@@ -1517,7 +1514,6 @@ Questions? Ask us!`
     function handleOptionClick(e) {
         const option = e.target.getAttribute('data-option');
         const selectedText = e.target.innerText;
-        lastUserQuestion = selectedText;
         
         addMessage(selectedText, true);
         
@@ -1579,6 +1575,11 @@ Questions? Ask us!`
             }
         }
     }
+    
+    // Make functions global
+    window.goBackToMenu = goBackToMenu;
+    window.setLanguage = setLanguage;
+    window.goToProductDetail = goToProductDetail;
     
     // ========== CART FUNCTIONS ==========
     function saveCart() { 
@@ -1675,16 +1676,15 @@ Questions? Ask us!`
     function showToastMessage(msg, isError = false) {
         let toast = document.getElementById('toastMsg');
         if (!toast) {
-            toast = document.createElement('div');
-            toast.id = 'toastMsg';
-            toast.className = 'toast';
-            document.body.appendChild(toast);
+            toast = document.getElementById('toastMsg');
         }
-        toast.innerText = msg;
-        toast.style.background = isError ? '#F44336' : '#D4AF37';
-        toast.style.color = isError ? 'white' : '#050508';
-        toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2000);
+        if (toast) {
+            toast.innerText = msg;
+            toast.style.background = isError ? '#F44336' : '#D4AF37';
+            toast.style.color = isError ? 'white' : '#050508';
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
     }
     
     function buyNowWithLoginCheck(product) {
@@ -1696,7 +1696,7 @@ Questions? Ask us!`
             setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 300);
         } else {
             showToastMessage('🔐 Please login to place order');
-            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 800);
+            setTimeout(() => { window.location.href = 'profile.html'; }, 800);
         }
     }
     
@@ -1711,7 +1711,7 @@ Questions? Ask us!`
             window.location.href = 'secure-checkout.html';
         } else {
             showToastMessage('🔐 Please login to checkout');
-            setTimeout(() => { window.location.href = 'profile.html?redirect=secure-checkout.html'; }, 800);
+            setTimeout(() => { window.location.href = 'profile.html'; }, 800);
         }
     }
     
@@ -1865,12 +1865,6 @@ Questions? Ask us!`
         renderProducts();
     }
     
-    // Make functions global
-    window.goBackToMenu = goBackToMenu;
-    window.setLanguage = setLanguage;
-    window.goToProductDetail = goToProductDetail;
-    window.addToCart = addToCart;
-    
     // Event Listeners
     document.getElementById('viewMoreBtn')?.addEventListener('click', () => { visibleCount += 8; renderProducts(); });
     document.getElementById('searchInput')?.addEventListener('input', () => renderProducts());
@@ -1892,13 +1886,6 @@ Questions? Ask us!`
     document.getElementById('closeChatBtn')?.addEventListener('click', toggleChatbot);
     
     // Initialize
-    if (!document.getElementById('toastMsg')) {
-        const toastDiv = document.createElement('div');
-        toastDiv.id = 'toastMsg';
-        toastDiv.className = 'toast';
-        document.body.appendChild(toastDiv);
-    }
-    
     loadProductsInstantly();
     updateCartUI();
     
