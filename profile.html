@@ -19,6 +19,7 @@
             color: #FFFFFF;
             overflow-x: hidden;
             min-height: 100vh;
+            padding-bottom: 80px;
         }
         body::before {
             content: '';
@@ -31,19 +32,22 @@
             pointer-events: none;
             z-index: -1;
         }
+        
+        /* Mobile header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px;
+            padding: 12px 16px;
             border-bottom: 1px solid rgba(212,175,55,0.3);
-            background: rgba(5,5,8,0.95);
+            background: rgba(5,5,8,0.98);
+            backdrop-filter: blur(10px);
             position: sticky;
             top: 0;
             z-index: 100;
         }
         .logo h1 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00);
             -webkit-background-clip: text;
@@ -53,19 +57,27 @@
         .back-btn {
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.3);
-            padding: 8px 16px;
+            padding: 6px 14px;
             border-radius: 40px;
             color: #D4AF37;
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .profile-container { max-width: 500px; margin: 0 auto; padding: 20px 16px; padding-bottom: 80px; }
-        .animated-logo { text-align: center; margin-bottom: 30px; animation: logoFloat 3s ease-in-out infinite; }
-        @keyframes logoFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-8px); } 100% { transform: translateY(0px); } }
+        .back-btn i { font-size: 11px; }
+        
+        /* Mobile container */
+        .profile-container { max-width: 500px; margin: 0 auto; padding: 16px 12px; padding-bottom: 20px; }
+        
+        /* Mobile animated logo */
+        .animated-logo { text-align: center; margin-bottom: 24px; animation: logoFloat 3s ease-in-out infinite; }
+        @keyframes logoFloat { 0% { transform: translateY(0px); } 50% { transform: translateY(-5px); } 100% { transform: translateY(0px); } }
         .logo-glow {
-            font-size: 42px;
+            font-size: 32px;
             font-weight: 800;
             background: linear-gradient(135deg, #FFF8E7, #D4AF37, #F5D742, #FF8C00);
             background-size: 300% auto;
@@ -76,101 +88,126 @@
             display: inline-block;
         }
         @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-        .logo-sub { font-size: 12px; color: #888; margin-top: 5px; }
+        .logo-sub { font-size: 10px; color: #888; margin-top: 5px; letter-spacing: 1px; }
+        
+        /* Mobile cards */
         .card {
-            background: rgba(15,15,22,0.6);
+            background: rgba(15,15,22,0.7);
             backdrop-filter: blur(10px);
-            border-radius: 32px;
-            padding: 28px 24px;
+            border-radius: 24px;
+            padding: 20px 16px;
             border: 1px solid rgba(212,175,55,0.2);
-            margin-bottom: 20px;
+            margin-bottom: 12px;
         }
-        .login-title { font-size: 24px; font-weight: 700; text-align: center; margin-bottom: 8px; }
-        .login-subtitle { text-align: center; color: #888; font-size: 13px; margin-bottom: 28px; }
-        .email-input-group { display: flex; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
+        .login-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
+        .login-subtitle { text-align: center; color: #888; font-size: 11px; margin-bottom: 20px; }
+        
+        /* Mobile email input */
+        .email-input-group { display: flex; gap: 10px; margin-bottom: 16px; flex-direction: column; }
         .email-input-group input {
-            flex: 1;
-            padding: 16px;
+            width: 100%;
+            padding: 14px;
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 20px;
+            border-radius: 18px;
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             font-family: inherit;
+            -webkit-appearance: none;
         }
         .email-input-group input:focus { outline: none; border-color: #D4AF37; }
         .send-otp-btn {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             border: none;
-            padding: 0 24px;
-            border-radius: 20px;
+            padding: 14px;
+            border-radius: 18px;
             font-weight: 700;
             color: #050508;
             cursor: pointer;
             font-size: 14px;
+            width: 100%;
         }
-        .otp-group { margin-bottom: 20px; display: none; }
+        
+        /* Mobile OTP group */
+        .otp-group { margin-bottom: 16px; display: none; }
         .otp-group.show { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
         .otp-input {
             width: 100%;
-            padding: 16px;
+            padding: 14px;
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 20px;
+            border-radius: 18px;
             color: white;
-            font-size: 16px;
+            font-size: 18px;
             text-align: center;
-            letter-spacing: 4px;
+            letter-spacing: 6px;
             font-weight: 600;
+            -webkit-appearance: none;
         }
         .verify-btn {
             width: 100%;
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             border: none;
-            padding: 16px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 16px;
+            padding: 14px;
+            border-radius: 18px;
+            font-weight: 700;
+            font-size: 14px;
             color: #050508;
             cursor: pointer;
             margin-top: 12px;
         }
-        .resend-otp { text-align: center; margin-top: 12px; }
-        .resend-otp button { background: none; border: none; color: #D4AF37; font-size: 12px; cursor: pointer; }
-        .benefits-title { font-size: 18px; font-weight: 700; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-        .benefits-list { display: flex; flex-direction: column; gap: 12px; }
-        .benefit-item { display: flex; align-items: center; gap: 12px; padding: 12px; background: rgba(0,0,0,0.3); border-radius: 20px; }
-        .benefit-item i { font-size: 24px; color: #D4AF37; }
-        .benefit-item div h4 { font-size: 14px; margin-bottom: 4px; }
-        .benefit-item div p { font-size: 11px; color: #888; }
-        .profile-header { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
-        .profile-avatar { width: 70px; height: 70px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
-        .profile-avatar i { font-size: 36px; color: #050508; }
-        .profile-info h3 { font-size: 20px; margin-bottom: 4px; }
-        .profile-info p { font-size: 13px; color: #888; }
-        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
-        .stat-card { background: rgba(0,0,0,0.3); padding: 14px; border-radius: 20px; text-align: center; }
-        .stat-number { font-size: 22px; font-weight: 800; color: #D4AF37; }
-        .stat-label { font-size: 11px; color: #888; }
-        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 16px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
-        .menu-left { display: flex; align-items: center; gap: 14px; }
-        .menu-left i { font-size: 20px; color: #D4AF37; }
+        .resend-otp { text-align: center; margin-top: 10px; }
+        .resend-otp button { background: none; border: none; color: #D4AF37; font-size: 12px; cursor: pointer; padding: 8px; }
+        
+        /* Mobile benefits */
+        .benefits-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+        .benefits-list { display: flex; flex-direction: column; gap: 8px; }
+        .benefit-item { display: flex; align-items: center; gap: 10px; padding: 10px; background: rgba(0,0,0,0.3); border-radius: 16px; }
+        .benefit-item i { font-size: 18px; color: #D4AF37; min-width: 28px; }
+        .benefit-item div h4 { font-size: 12px; margin-bottom: 2px; }
+        .benefit-item div p { font-size: 10px; color: #888; }
+        
+        /* Mobile profile */
+        .profile-header { display: flex; align-items: center; gap: 14px; margin-bottom: 0; }
+        .profile-avatar { width: 55px; height: 55px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .profile-avatar i { font-size: 28px; color: #050508; }
+        .profile-info h3 { font-size: 16px; margin-bottom: 3px; }
+        .profile-info p { font-size: 11px; color: #888; margin: 2px 0; }
+        
+        /* Mobile stats */
+        .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 0; }
+        .stat-card { background: rgba(0,0,0,0.3); padding: 10px; border-radius: 16px; text-align: center; }
+        .stat-number { font-size: 18px; font-weight: 800; color: #D4AF37; }
+        .stat-label { font-size: 10px; color: #888; margin-top: 3px; }
+        
+        /* Mobile menu */
+        .menu-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); cursor: pointer; }
+        .menu-left { display: flex; align-items: center; gap: 12px; }
+        .menu-left i { font-size: 16px; color: #D4AF37; width: 24px; }
+        .menu-left span { font-size: 13px; }
+        .menu-item i.fa-chevron-right { font-size: 12px; color: #666; }
+        
+        /* Mobile logout button */
         .logout-btn {
             width: 100%;
-            background: rgba(244,67,54,0.15);
+            background: rgba(244,67,54,0.12);
             border: 1px solid rgba(244,67,54,0.3);
-            padding: 14px;
-            border-radius: 30px;
+            padding: 12px;
+            border-radius: 18px;
             font-weight: 600;
+            font-size: 13px;
             color: #F44336;
             cursor: pointer;
-            margin-top: 20px;
+            margin-top: 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
         }
+        .logout-btn:active { transform: scale(0.97); }
+        
+        /* Mobile toast */
         .toast {
             position: fixed;
             bottom: 80px;
@@ -178,12 +215,16 @@
             transform: translateX(-50%);
             background: #D4AF37;
             color: #050508;
-            padding: 10px 20px;
+            padding: 10px 18px;
             border-radius: 50px;
             font-weight: bold;
             z-index: 10000;
-            font-size: 12px;
+            font-size: 11px;
             display: none;
+            white-space: nowrap;
+            max-width: 90%;
+            white-space: normal;
+            text-align: center;
         }
         .toast.show { display: block; animation: fadeInOut 2s ease; }
         @keyframes fadeInOut {
@@ -191,59 +232,90 @@
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
+        
+        /* Mobile bottom nav */
         .bottom-nav {
             position: fixed;
-            bottom: 16px;
+            bottom: 12px;
             left: 50%;
             transform: translateX(-50%);
-            background: rgba(0,0,0,0.92);
+            background: rgba(0,0,0,0.95);
             backdrop-filter: blur(20px);
-            border-radius: 60px;
-            padding: 8px 20px;
+            border-radius: 50px;
+            padding: 6px 16px;
             display: flex;
-            gap: 30px;
+            gap: 20px;
             z-index: 1000;
-            border: 1px solid rgba(212,175,55,0.5);
+            border: 1px solid rgba(212,175,55,0.4);
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3px;
+            gap: 2px;
             cursor: pointer;
-            padding: 5px 14px;
-            border-radius: 50px;
+            padding: 6px 12px;
+            border-radius: 40px;
+            transition: 0.2s;
         }
-        .nav-item i { font-size: 20px; color: #ccc; }
-        .nav-item span { font-size: 10px; }
-        .nav-item.active, .nav-item:hover { background: rgba(212,175,55,0.2); }
+        .nav-item i { font-size: 18px; color: #ccc; }
+        .nav-item span { font-size: 9px; color: #ccc; }
+        .nav-item.active, .nav-item:active { background: rgba(212,175,55,0.2); }
         .nav-item.active i, .nav-item.active span { color: #D4AF37; }
+        
+        /* Mobile loader */
         .loader {
             display: inline-block;
-            width: 16px;
-            height: 16px;
+            width: 14px;
+            height: 14px;
             border: 2px solid #050508;
             border-top-color: transparent;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin-right: 8px;
+            margin-right: 6px;
+            vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
+        
         button:disabled { opacity: 0.6; cursor: not-allowed; }
         .setup-info {
-            background: rgba(212,175,55,0.1);
-            border-radius: 16px;
-            padding: 12px;
-            margin-top: 16px;
+            background: rgba(212,175,55,0.08);
+            border-radius: 14px;
+            padding: 10px;
+            margin-top: 12px;
             text-align: center;
-            font-size: 12px;
+            font-size: 10px;
             color: #D4AF37;
         }
         .countdown {
-            font-size: 12px;
+            font-size: 11px;
             color: #888;
             margin-top: 8px;
             text-align: center;
+        }
+        
+        /* Touch feedback */
+        button, .menu-item, .nav-item, .back-btn {
+            cursor: pointer;
+            transition: transform 0.05s;
+        }
+        button:active, .menu-item:active, .nav-item:active, .back-btn:active {
+            transform: scale(0.97);
+        }
+        
+        /* Hide number input spinners */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        @media (min-width: 768px) {
+            .profile-container { padding: 20px; }
+            .email-input-group { flex-direction: row; }
+            .send-otp-btn { width: auto; padding: 0 24px; }
+            .bottom-nav { gap: 40px; padding: 8px 28px; }
+            .nav-item { padding: 8px 20px; }
         }
     </style>
 </head>
@@ -254,7 +326,13 @@
     <div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div>
 </div>
 
-<div class="profile-container" id="profileContainer"></div>
+<div class="profile-container" id="profileContainer">
+    <!-- Content will be rendered here -->
+    <div style="text-align: center; padding: 40px;">
+        <div class="loader" style="border-color: #D4AF37; border-top-color: transparent;"></div>
+        <p style="margin-top: 12px; font-size: 12px; color: #888;">Loading...</p>
+    </div>
+</div>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
@@ -276,19 +354,16 @@
         measurementId: "G-RQMQZVGK75"
     };
     
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    console.log("🔥 Firebase Connected!");
+    db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Persistence:", err));
     
     // ==================== 🔐 EMAILJS CONFIGURATION ====================
     const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
     const EMAILJS_SERVICE_ID = "service_6ucrgd9";
     const EMAILJS_TEMPLATE_ID = "template_kniixfj";
     
-    // Initialize EmailJS
     emailjs.init(EMAILJS_PUBLIC_KEY);
-    console.log("✅ EmailJS initialized");
     
     let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
     let generatedOTP = null;
@@ -303,47 +378,61 @@
         toast.style.background = isError ? '#F44336' : '#D4AF37';
         toast.style.color = isError ? 'white' : '#050508';
         toast.classList.add('show');
-        setTimeout(() => {
-            toast.classList.remove('show');
-        }, 3000);
+        setTimeout(() => toast.classList.remove('show'), 2500);
     }
     
-    // ========== 🔥 LOAD USER ORDERS FROM FIREBASE ==========
+    // Load user orders from Firebase (cached)
     async function loadUserOrdersFromFirebase(email) {
         if (!email) return [];
+        
+        // Check cache first
+        const cached = sessionStorage.getItem(`vedanta_orders_${email}`);
+        if (cached) {
+            try {
+                const parsed = JSON.parse(cached);
+                if (Date.now() - parsed.timestamp < 300000) { // 5 min cache
+                    return parsed.orders;
+                }
+            } catch(e) {}
+        }
+        
         try {
             const snapshot = await db.collection('orders')
                 .where('customerEmail', '==', email)
                 .orderBy('orderDate', 'desc')
+                .limit(20)
                 .get();
             
             const orders = [];
             snapshot.forEach(doc => {
                 orders.push({ id: doc.id, ...doc.data() });
             });
+            
+            // Cache orders
+            sessionStorage.setItem(`vedanta_orders_${email}`, JSON.stringify({
+                timestamp: Date.now(),
+                orders: orders
+            }));
+            
             return orders;
         } catch (error) {
-            console.error("Error loading orders from Firebase:", error);
+            console.error("Error loading orders:", error);
             return [];
         }
     }
     
-    // ✅ REAL EMAIL SEND USING EMAILJS
+    // Send OTP via EmailJS
     async function sendEmailOTP(email) {
         try {
             generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
             otpEmail = email;
             
-            console.log(`Generated OTP for ${email}: ${generatedOTP}`);
-            
             const templateParams = {
                 to_email: email,
                 otp_code: generatedOTP,
-                app_name: "Vedanta",       
-                expiry_time: "5 minutes"   
+                app_name: "Vedanta",
+                expiry_time: "5 minutes"
             };
-            
-            console.log("Sending email via EmailJS...");
             
             const response = await emailjs.send(
                 EMAILJS_SERVICE_ID,
@@ -351,27 +440,17 @@
                 templateParams
             );
             
-            console.log("✅ Email sent successfully!", response);
-            showToast(`✅ OTP sent to ${email}. Please check your inbox.`);
+            showToast(`✅ OTP sent to ${email}`);
             return { success: true };
             
         } catch (error) {
-            console.error("❌ EmailJS Error:", error);
-            
-            if (error.text === "Invalid service ID") {
-                showToast("❌ Invalid Service ID. Please check your EmailJS service configuration.", true);
-            } else if (error.text === "Invalid template ID") {
-                showToast("❌ Invalid Template ID. Please check your EmailJS template configuration.", true);
-            } else if (error.text === "Unauthorized") {
-                showToast("❌ Invalid Public Key. Please check your EmailJS API key.", true);
-            } else {
-                showToast(`❌ Failed to send OTP: ${error.text || error.message}`, true);
-            }
+            console.error("EmailJS Error:", error);
+            showToast(`❌ Failed to send OTP. Please try again.`, true);
             return { success: false };
         }
     }
     
-    // ✅ Verify OTP
+    // Verify OTP
     async function verifyEmailOTP(enteredOTP) {
         if (!generatedOTP) {
             showToast("❌ Please request OTP first", true);
@@ -390,8 +469,8 @@
             localStorage.setItem('vedantaUser', JSON.stringify(userData));
             currentUser = userData;
             
-            showToast("✅ Login successful! Welcome to Vedanta!");
-            renderProfilePage();
+            showToast("✅ Login successful! Welcome!");
+            await renderProfilePage();
             return true;
         } else {
             showToast("❌ Invalid OTP. Please try again.", true);
@@ -399,10 +478,10 @@
         }
     }
     
-    // ✅ Resend OTP with cooldown
+    // Resend OTP with cooldown
     async function resendEmailOTP(email) {
         if (resendCooldown) {
-            showToast("⏳ Please wait 30 seconds before resending", true);
+            showToast("⏳ Please wait 30 seconds", true);
             return false;
         }
         
@@ -413,7 +492,6 @@
         
         resendCooldown = true;
         startCountdown(30);
-        
         return await sendEmailOTP(email);
     }
     
@@ -439,7 +517,7 @@
         }, 1000);
     }
     
-    // ✅ Render Login Page
+    // Render Login Page (Mobile Optimized)
     function renderLoginPage() {
         const container = document.getElementById('profileContainer');
         container.innerHTML = `
@@ -451,16 +529,19 @@
             <div class="card">
                 <div class="login-title">🔐 Email OTP Login</div>
                 <div class="login-subtitle">Enter your email to receive OTP</div>
+                
                 <div class="email-input-group">
-                    <input type="email" id="emailInput" placeholder="Enter your email" value="">
+                    <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email">
                     <button class="send-otp-btn" id="sendOtpBtn">Send OTP</button>
                 </div>
+                
                 <div class="otp-group" id="otpGroup">
-                    <input type="text" id="otpInput" class="otp-input" placeholder="Enter 6-digit OTP" maxlength="6">
+                    <input type="tel" id="otpInput" class="otp-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*">
                     <button class="verify-btn" id="verifyBtn">Verify & Login</button>
                     <div class="resend-otp"><button id="resendOtpBtn">Resend OTP</button></div>
                     <div id="countdown" class="countdown" style="display:none"></div>
                 </div>
+                
                 <div class="setup-info">
                     <i class="fas fa-envelope"></i> OTP will be sent to your email inbox
                 </div>
@@ -469,11 +550,10 @@
             <div class="card">
                 <div class="benefits-title"><i class="fas fa-crown"></i> Membership Benefits</div>
                 <div class="benefits-list">
-                    <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>Exclusive Discounts</h4><p>Get 10% off on your first order</p></div></div>
-                    <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Priority Shipping</h4><p>Free express shipping on orders above ₹2999</p></div></div>
-                    <div class="benefit-item"><i class="fas fa-gift"></i><div><h4>Birthday Surprise</h4><p>Special gift & discount on your birthday month</p></div></div>
-                    <div class="benefit-item"><i class="fas fa-star"></i><div><h4>Early Access</h4><p>Get early access to new collections & sales</p></div></div>
-                    <div class="benefit-item"><i class="fas fa-headset"></i><div><h4>Priority Support</h4><p>24/7 dedicated customer support</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>Exclusive Discounts</h4><p>10% off on first order</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Priority Shipping</h4><p>On orders above ₹2999</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-gift"></i><div><h4>Birthday Surprise</h4><p>Special gift on your birthday</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-star"></i><div><h4>Early Access</h4><p>To new collections & sales</p></div></div>
                     <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>Earn coins on every purchase</p></div></div>
                 </div>
             </div>
@@ -484,7 +564,7 @@
         document.getElementById('sendOtpBtn')?.addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
             if (!email || !email.includes('@')) {
-                showToast('❌ Please enter a valid email address', true);
+                showToast('❌ Please enter a valid email', true);
                 return;
             }
             
@@ -507,7 +587,7 @@
         document.getElementById('verifyBtn')?.addEventListener('click', async () => {
             const otp = document.getElementById('otpInput').value.trim();
             if (!otp) { showToast('❌ Please enter OTP', true); return; }
-            if (otp.length !== 6) { showToast('❌ OTP must be 6 digits', true); return; }
+            if (otp.length !== 6) { showToast('❌ Enter 6-digit OTP', true); return; }
             
             const btn = document.getElementById('verifyBtn');
             btn.disabled = true;
@@ -523,7 +603,7 @@
             if (!currentEmail) {
                 const email = document.getElementById('emailInput').value.trim();
                 if (!email || !email.includes('@')) {
-                    showToast('❌ Please enter valid email first', true);
+                    showToast('❌ Enter valid email first', true);
                     return;
                 }
                 currentEmail = email;
@@ -538,13 +618,21 @@
             btn.disabled = false;
             btn.innerHTML = 'Resend OTP';
         });
+        
+        // Auto-focus email input on mobile
+        setTimeout(() => {
+            document.getElementById('emailInput')?.focus();
+        }, 100);
     }
-
-    // ✅ Render Profile Page with Firebase Orders
+    
+    // Render Profile Page (Mobile Optimized)
     async function renderProfilePage() {
         const container = document.getElementById('profileContainer');
         
-        // Load orders from Firebase
+        // Show loading state
+        container.innerHTML = `<div style="text-align: center; padding: 40px;"><div class="loader" style="border-color: #D4AF37; border-top-color: transparent;"></div><p style="margin-top: 12px; font-size: 12px;">Loading profile...</p></div>`;
+        
+        // Load orders
         if (currentUser && currentUser.email) {
             userOrders = await loadUserOrdersFromFirebase(currentUser.email);
         }
@@ -552,43 +640,47 @@
         const totalSpent = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
         const pendingOrders = userOrders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
         const completedOrders = userOrders.filter(o => o.status === 'delivered').length;
+        const joinDate = currentUser.joinDate ? new Date(currentUser.joinDate).toLocaleDateString('en-IN') : 'Today';
 
         container.innerHTML = `
             <div class="card">
                 <div class="profile-header">
                     <div class="profile-avatar"><i class="fas fa-user"></i></div>
                     <div class="profile-info">
-                        <h3>${currentUser.name || 'Valued Customer'}</h3>
-                        <p><i class="fas fa-envelope"></i> ${currentUser.email || 'No email'}</p>
-                        <p><i class="fas fa-calendar"></i> Member since ${new Date(currentUser.joinDate).toLocaleDateString('en-IN')}</p>
+                        <h3>${escapeHtml(currentUser.name || 'Valued Customer')}</h3>
+                        <p><i class="fas fa-envelope"></i> ${escapeHtml(currentUser.email || 'No email')}</p>
+                        <p><i class="fas fa-calendar"></i> Joined ${joinDate}</p>
                     </div>
                 </div>
             </div>
+            
             <div class="card">
                 <div class="stats-grid">
-                    <div class="stat-card"><div class="stat-number">${userOrders.length}</div><div class="stat-label">Total Orders</div></div>
-                    <div class="stat-card"><div class="stat-number">${pendingOrders}</div><div class="stat-label">Active Orders</div></div>
-                    <div class="stat-card"><div class="stat-number">${Math.floor(totalSpent / 100)}</div><div class="stat-label">Vedanta Coins</div></div>
+                    <div class="stat-card"><div class="stat-number">${userOrders.length}</div><div class="stat-label">Orders</div></div>
+                    <div class="stat-card"><div class="stat-number">${pendingOrders}</div><div class="stat-label">Active</div></div>
+                    <div class="stat-card"><div class="stat-number">${Math.floor(totalSpent / 100)}</div><div class="stat-label">Coins</div></div>
                 </div>
             </div>
+            
             <div class="card">
                 <div class="benefits-title"><i class="fas fa-gem"></i> Member Benefits</div>
                 <div class="benefits-list">
                     <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>10% OFF on Next Order</h4><p>Use code: WELCOME10</p></div></div>
                     <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Express Shipping</h4><p>On all orders above ₹2999</p></div></div>
-                    <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>${Math.floor(totalSpent / 100)} coins earned (1 coin = ₹1)</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>${Math.floor(totalSpent / 100)} coins = ₹${Math.floor(totalSpent / 100)} value</p></div></div>
                 </div>
             </div>
+            
             <div class="card">
                 <div class="menu-item" onclick="window.location.href='booking.html'">
                     <div class="menu-left"><i class="fas fa-box"></i><span>My Orders (${userOrders.length})</span></div>
                     <i class="fas fa-chevron-right"></i>
                 </div>
-                <div class="menu-item" onclick="showToast('📍 Address book coming soon')">
+                <div class="menu-item" onclick="showToast('📍 Coming soon')">
                     <div class="menu-left"><i class="fas fa-map-marker-alt"></i><span>Saved Addresses</span></div>
                     <i class="fas fa-chevron-right"></i>
                 </div>
-                <div class="menu-item" onclick="showToast('💳 Payment methods coming soon')">
+                <div class="menu-item" onclick="showToast('💳 Coming soon')">
                     <div class="menu-left"><i class="fas fa-credit-card"></i><span>Payment Methods</span></div>
                     <i class="fas fa-chevron-right"></i>
                 </div>
@@ -607,8 +699,13 @@
             renderLoginPage();
         });
     }
-
-    // Check if already logged in
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
+    }
+    
+    // Initialize
     if (currentUser && currentUser.email) {
         renderProfilePage();
     } else {
