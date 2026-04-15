@@ -67,7 +67,6 @@
             padding: 20px;
         }
         
-        /* Order Status Bar */
         .status-bar {
             background: rgba(15,15,22,0.6);
             border-radius: 28px;
@@ -127,7 +126,6 @@
         .step.completed .step-label { color: #4CAF50; }
         .step.active .step-label { color: #D4AF37; font-weight: 600; }
         
-        /* Order Info Card */
         .info-card {
             background: rgba(15,15,22,0.6);
             border-radius: 28px;
@@ -168,6 +166,20 @@
             color: #D4AF37;
             font-weight: 700;
         }
+        .price-strike {
+            text-decoration: line-through;
+            color: #888;
+            font-size: 12px;
+            margin-left: 8px;
+        }
+        .discount-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 11px;
+            margin-left: 8px;
+        }
         
         /* Order Items */
         .order-item {
@@ -177,8 +189,8 @@
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
         .order-item-img {
-            width: 70px;
-            height: 70px;
+            width: 80px;
+            height: 80px;
             background: #0E0E14;
             border-radius: 16px;
             display: flex;
@@ -204,19 +216,50 @@
             font-weight: 600;
             margin-bottom: 5px;
         }
-        .order-item-size {
-            display: inline-block;
+        .item-attributes {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin: 8px 0;
+        }
+        .size-badge {
             background: rgba(212,175,55,0.15);
-            padding: 2px 10px;
+            padding: 3px 10px;
             border-radius: 20px;
             font-size: 11px;
             color: #D4AF37;
-            margin-top: 4px;
+        }
+        .color-dot-small {
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 4px;
+            vertical-align: middle;
+        }
+        .color-badge {
+            background: rgba(212,175,55,0.15);
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            color: #D4AF37;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
         }
         .order-item-price {
+            text-align: right;
+            min-width: 100px;
+        }
+        .original-price {
+            font-size: 12px;
+            color: #888;
+            text-decoration: line-through;
+        }
+        .final-price {
             font-weight: 700;
             color: #D4AF37;
-            text-align: right;
+            font-size: 16px;
         }
         .order-item-qty {
             font-size: 12px;
@@ -224,7 +267,6 @@
             margin-top: 4px;
         }
         
-        /* Total Section */
         .total-section {
             margin-top: 15px;
             padding-top: 15px;
@@ -244,7 +286,19 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
         
-        /* Action Buttons */
+        /* Combo Offer Card */
+        .offer-card {
+            background: rgba(76,175,80,0.1);
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 16px;
+            padding: 12px 15px;
+            margin: 10px 0;
+        }
+        .offer-card i {
+            color: #4CAF50;
+            margin-right: 8px;
+        }
+        
         .action-buttons {
             display: flex;
             gap: 15px;
@@ -286,16 +340,7 @@
             border: 1px solid rgba(244,67,54,0.5);
             color: #F44336;
         }
-        .btn-cancel:hover {
-            background: rgba(244,67,54,0.3);
-        }
-        .btn-cancel.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            pointer-events: none;
-        }
         
-        /* Confirmation Modal */
         .modal {
             display: none;
             position: fixed;
@@ -308,9 +353,7 @@
             align-items: center;
             justify-content: center;
         }
-        .modal.show {
-            display: flex;
-        }
+        .modal.show { display: flex; }
         .modal-content {
             background: rgba(15,15,22,0.95);
             backdrop-filter: blur(15px);
@@ -321,40 +364,13 @@
             text-align: center;
             border: 1px solid rgba(212,175,55,0.3);
         }
-        .modal-content i {
-            font-size: 60px;
-            color: #F44336;
-            margin-bottom: 20px;
-        }
-        .modal-content h3 {
-            font-size: 24px;
-            margin-bottom: 10px;
-        }
-        .modal-content p {
-            color: #888;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-        }
-        .modal-btn {
-            flex: 1;
-            padding: 12px;
-            border-radius: 30px;
-            font-weight: 700;
-            cursor: pointer;
-            border: none;
-        }
-        .modal-confirm {
-            background: #F44336;
-            color: white;
-        }
-        .modal-cancel {
-            background: rgba(255,255,255,0.1);
-            color: white;
-        }
+        .modal-content i { font-size: 60px; color: #F44336; margin-bottom: 20px; }
+        .modal-content h3 { font-size: 24px; margin-bottom: 10px; }
+        .modal-content p { color: #888; font-size: 14px; margin-bottom: 25px; }
+        .modal-buttons { display: flex; gap: 15px; }
+        .modal-btn { flex: 1; padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; }
+        .modal-confirm { background: #F44336; color: white; }
+        .modal-cancel { background: rgba(255,255,255,0.1); color: white; }
         
         .toast {
             position: fixed;
@@ -376,15 +392,8 @@
             100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
         }
         
-        .error-state {
-            text-align: center;
-            padding: 60px 20px;
-        }
-        .error-state i {
-            font-size: 60px;
-            color: #F44336;
-            margin-bottom: 20px;
-        }
+        .error-state { text-align: center; padding: 60px 20px; }
+        .error-state i { font-size: 60px; color: #F44336; margin-bottom: 20px; }
         
         @media (max-width: 600px) {
             .container { padding: 16px; }
@@ -392,6 +401,8 @@
             .status-steps::before { display: none; }
             .step { flex: auto; min-width: 80px; }
             .action-buttons { flex-direction: column; }
+            .order-item { flex-wrap: wrap; }
+            .order-item-price { text-align: left; margin-top: 5px; }
         }
     </style>
 </head>
@@ -404,7 +415,6 @@
 
 <div class="container" id="app"></div>
 
-<!-- Confirmation Modal -->
 <div class="modal" id="cancelModal">
     <div class="modal-content">
         <i class="fas fa-exclamation-triangle"></i>
@@ -420,25 +430,21 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    // ========== 🔥 FIREBASE CONFIGURATION ==========
+    // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
         authDomain: "vedanta-d0199.firebaseapp.com",
         projectId: "vedanta-d0199",
         storageBucket: "vedanta-d0199.firebasestorage.app",
         messagingSenderId: "761061711987",
-        appId: "1:761061711987:web:d59ff32fd53057c395ca06",
-        measurementId: "G-RQMQZVGK75"
+        appId: "1:761061711987:web:d59ff32fd53057c395ca06"
     };
     
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    console.log("🔥 Firebase Connected!");
     
     let currentOrder = null;
-    let productsMap = new Map();
-    let currentUser = null;
+    let productsMap = new Map(); // Store product details including colors, sizes, combos
     
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -454,31 +460,28 @@
         return urlParams.get('orderId');
     }
     
-    function getCurrentUser() {
-        const user = localStorage.getItem('vedantaUser');
-        if (user) {
-            try {
-                return JSON.parse(user);
-            } catch(e) {
-                return null;
-            }
-        }
-        return null;
-    }
-    
-    // Load products from cache (instant)
-    function loadProductsFromCache() {
-        const cachedProducts = localStorage.getItem('vedantaProducts');
-        if (cachedProducts) {
-            try {
-                const products = JSON.parse(cachedProducts);
-                products.forEach(p => {
-                    productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+    // Load products from Firebase (for colors, sizes, combos)
+    async function loadProductsFromFirebase() {
+        try {
+            const snapshot = await db.collection('products').get();
+            snapshot.forEach(doc => {
+                const p = doc.data();
+                productsMap.set(p.id, {
+                    name: p.name,
+                    images: p.images || [],
+                    icon: p.icon || 'fa-gem',
+                    sizes: p.sizes || [],
+                    colors: p.colors || [],
+                    combos: p.combos || [],
+                    bulkDiscounts: p.bulkDiscounts || {},
+                    price: p.price,
+                    comparePrice: p.comparePrice
                 });
-                return true;
-            } catch(e) {}
+            });
+            console.log("✅ Products loaded:", productsMap.size);
+        } catch(e) {
+            console.log("Error loading products:", e);
         }
-        return false;
     }
     
     // Get cached orders
@@ -495,71 +498,36 @@
         return [];
     }
     
-    // 🔥 INSTANT LOAD FROM CACHE
     function loadOrderFromCache() {
         const orderId = getOrderIdFromUrl();
+        if (!orderId) { showError("No order ID found"); return false; }
         
-        if (!orderId) {
-            showError("No order ID found");
-            return false;
-        }
-        
-        // Try to get from cached orders
         const cachedOrders = getCachedOrders();
         const cachedOrder = cachedOrders.find(o => o.orderId === orderId);
         
         if (cachedOrder) {
             currentOrder = cachedOrder;
             renderOrderDetails();
-            console.log("✅ Instant load from cache");
             return true;
         }
-        
         return false;
     }
     
-    // 🔥 FETCH FRESH IN BACKGROUND
     async function fetchFreshOrder() {
         const orderId = getOrderIdFromUrl();
-        
         if (!orderId) return;
         
         try {
             const doc = await db.collection('orders').doc(orderId).get();
-            
             if (doc.exists) {
                 const freshOrder = { id: doc.id, ...doc.data() };
-                
-                // Check if order changed
                 if (JSON.stringify(currentOrder) !== JSON.stringify(freshOrder)) {
                     currentOrder = freshOrder;
                     renderOrderDetails();
-                    console.log("🔄 Background update - order refreshed");
                 }
             }
         } catch (error) {
             console.error("Error fetching order:", error);
-        }
-    }
-    
-    // Load products for images
-    async function loadProducts() {
-        // First from cache
-        loadProductsFromCache();
-        
-        // Then fetch fresh
-        try {
-            const snapshot = await db.collection('products').get();
-            snapshot.forEach(doc => {
-                const p = doc.data();
-                productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
-            });
-            // Re-render if needed
-            if (currentOrder) {
-                renderOrderDetails();
-            }
-        } catch(e) {
-            console.log("Error loading products:", e);
         }
     }
     
@@ -581,14 +549,11 @@
                 cancelledAt: new Date().toISOString(),
                 updatedAt: new Date().toISOString()
             });
-            
             currentOrder.status = 'cancelled';
             showToast("✅ Order cancelled successfully!");
             renderOrderDetails();
-            
         } catch (error) {
-            console.error("Error cancelling order:", error);
-            showToast("❌ Failed to cancel order. Please try again.", true);
+            showToast("❌ Failed to cancel order", true);
         }
     }
     
@@ -610,43 +575,28 @@
         return null;
     }
     
-    function getProductIcon(productId) {
-        const prod = productsMap.get(productId);
-        return (prod && prod.icon) ? prod.icon : 'fa-gem';
+    function getProductDetails(productId) {
+        return productsMap.get(productId) || { sizes: [], colors: [], combos: [] };
     }
     
     function getStatusLabel(status) {
         const map = {
-            'pending': 'Pending',
-            'confirmed': 'Confirmed',
-            'processing': 'Processing',
-            'shipped': 'Shipped',
-            'delivered': 'Delivered',
-            'cancelled': 'Cancelled'
+            'pending': 'Pending', 'confirmed': 'Confirmed', 'processing': 'Processing',
+            'shipped': 'Shipped', 'delivered': 'Delivered', 'cancelled': 'Cancelled'
         };
         return map[status] || status || 'Pending';
     }
     
     function getStatusStep(status) {
         const steps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
-        
         if (status === 'cancelled') {
-            return steps.map(step => ({
-                name: step,
-                label: getStatusLabel(step),
-                completed: false,
-                active: false
-            }));
+            return steps.map(step => ({ name: step, label: getStatusLabel(step), completed: false, active: false }));
         }
-        
         const currentIndex = steps.indexOf(status);
         const completedStatuses = steps.slice(0, currentIndex + 1);
-        
         return steps.map((step, index) => ({
-            name: step,
-            label: getStatusLabel(step),
-            completed: completedStatuses.includes(step),
-            active: step === status
+            name: step, label: getStatusLabel(step),
+            completed: completedStatuses.includes(step), active: step === status
         }));
     }
     
@@ -661,8 +611,25 @@
         
         const itemsHtml = (currentOrder.items || []).map(item => {
             const productImg = getProductImage(item.id);
-            const iconClass = getProductIcon(item.id);
-            const itemSize = item.size || 'Not Selected';
+            const productDetails = getProductDetails(item.id);
+            const iconClass = productDetails.icon || 'fa-gem';
+            
+            // Calculate discount if compare price exists
+            const hasDiscount = productDetails.comparePrice && productDetails.comparePrice > item.price;
+            const discountPercent = hasDiscount ? Math.round(((productDetails.comparePrice - item.price) / productDetails.comparePrice) * 100) : 0;
+            
+            // Get selected size and color from order item
+            const selectedSize = item.size || (item.selectedSize) || '';
+            const selectedColor = item.color || (item.selectedColor) || '';
+            
+            // Find color code from product's colors array
+            let colorCode = '#D4AF37';
+            if (selectedColor && productDetails.colors) {
+                const colorObj = productDetails.colors.find(c => c.name === selectedColor || c === selectedColor);
+                if (colorObj) {
+                    colorCode = colorObj.code || (typeof colorObj === 'object' ? colorObj.code : '#D4AF37');
+                }
+            }
             
             return `
                 <div class="order-item">
@@ -671,11 +638,16 @@
                     </div>
                     <div class="order-item-info">
                         <div class="order-item-name">${escapeHtml(item.name)}</div>
-                        ${itemSize !== 'Not Selected' ? `<div class="order-item-size"><i class="fas fa-tshirt"></i> Size: ${escapeHtml(itemSize)}</div>` : ''}
+                        <div class="item-attributes">
+                            ${selectedSize ? `<span class="size-badge"><i class="fas fa-tshirt"></i> Size: ${escapeHtml(selectedSize)}</span>` : ''}
+                            ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background: ${colorCode};"></span> Color: ${escapeHtml(selectedColor)}</span>` : ''}
+                        </div>
+                        ${hasDiscount ? `<div class="discount-badge">${discountPercent}% OFF</div>` : ''}
                         <div class="order-item-qty">Quantity: ${item.quantity}</div>
                     </div>
                     <div class="order-item-price">
-                        ₹${(item.price * item.quantity).toLocaleString('en-IN')}
+                        ${hasDiscount ? `<div class="original-price">₹${(productDetails.comparePrice * item.quantity).toLocaleString('en-IN')}</div>` : ''}
+                        <div class="final-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
                     </div>
                 </div>
             `;
@@ -683,26 +655,17 @@
         
         let statusHtml = '';
         if (isCancelled) {
-            statusHtml = `
-                <div style="text-align: center; padding: 20px;">
-                    <i class="fas fa-times-circle" style="font-size: 48px; color: #F44336;"></i>
-                    <p style="margin-top: 10px; color: #F44336; font-weight: 600;">Order Cancelled</p>
-                </div>
-            `;
+            statusHtml = `<div style="text-align: center; padding: 20px;"><i class="fas fa-times-circle" style="font-size: 48px; color: #F44336;"></i><p style="margin-top: 10px; color: #F44336; font-weight: 600;">Order Cancelled</p></div>`;
         } else {
-            statusHtml = `
-                <div class="status-steps">
-                    ${statusSteps.map(step => `
-                        <div class="step ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}">
-                            <div class="step-icon">
-                                <i class="fas ${step.name === 'pending' ? 'fa-clock' : (step.name === 'confirmed' ? 'fa-check' : (step.name === 'processing' ? 'fa-cogs' : (step.name === 'shipped' ? 'fa-truck' : 'fa-check-circle')))}"></i>
-                            </div>
-                            <div class="step-label">${step.label}</div>
-                        </div>
-                    `).join('')}
-                </div>
-            `;
+            statusHtml = `<div class="status-steps">${statusSteps.map(step => `
+                <div class="step ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}">
+                    <div class="step-icon"><i class="fas ${step.name === 'pending' ? 'fa-clock' : (step.name === 'confirmed' ? 'fa-check' : (step.name === 'processing' ? 'fa-cogs' : (step.name === 'shipped' ? 'fa-truck' : 'fa-check-circle')))}"></i></div>
+                    <div class="step-label">${step.label}</div>
+                </div>`).join('')}</div>`;
         }
+        
+        // Check if any combo offer was applied
+        const hasComboOffer = currentOrder.comboApplied || (currentOrder.items && currentOrder.items.length > 1);
         
         const cancelButtonHtml = canCancel ? `
             <button class="btn-secondary btn-cancel" id="cancelOrderBtn">
@@ -712,135 +675,71 @@
             <div style="text-align: center; padding: 10px; background: rgba(244,67,54,0.1); border-radius: 16px;">
                 <i class="fas fa-ban"></i> This order has been cancelled
             </div>
-        ` : `
-            <div style="text-align: center; padding: 10px; background: rgba(255,152,0,0.1); border-radius: 16px;">
-                <i class="fas fa-truck"></i> Order cannot be cancelled at this stage
-            </div>
-        `);
+        ` : ``);
         
         container.innerHTML = `
             <div class="status-bar">
-                <div class="card-title">
-                    <i class="fas fa-chart-line"></i> Order Status
-                </div>
+                <div class="card-title"><i class="fas fa-chart-line"></i> Order Status</div>
                 ${statusHtml}
             </div>
             
             <div class="info-card">
-                <div class="card-title">
-                    <i class="fas fa-receipt"></i> Order Information
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Order ID</span>
-                    <span class="info-value">${currentOrder.orderId || currentOrder.id}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Order Date</span>
-                    <span class="info-value">${orderDate}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Payment Method</span>
-                    <span class="info-value">${currentOrder.paymentMethod || 'Cash on Delivery'}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Order Status</span>
-                    <span class="info-value price-highlight" style="color: ${isCancelled ? '#F44336' : '#D4AF37'}">${getStatusLabel(currentOrder.status)}</span>
-                </div>
-                ${currentOrder.cancelledAt ? `
-                <div class="info-row">
-                    <span class="info-label">Cancelled On</span>
-                    <span class="info-value">${new Date(currentOrder.cancelledAt).toLocaleString()}</span>
-                </div>
-                ` : ''}
+                <div class="card-title"><i class="fas fa-receipt"></i> Order Information</div>
+                <div class="info-row"><span class="info-label">Order ID</span><span class="info-value">${currentOrder.orderId || currentOrder.id}</span></div>
+                <div class="info-row"><span class="info-label">Order Date</span><span class="info-value">${orderDate}</span></div>
+                <div class="info-row"><span class="info-label">Payment Method</span><span class="info-value">${currentOrder.paymentMethod || 'Cash on Delivery'}</span></div>
+                <div class="info-row"><span class="info-label">Order Status</span><span class="info-value price-highlight" style="color: ${isCancelled ? '#F44336' : '#D4AF37'}">${getStatusLabel(currentOrder.status)}</span></div>
+                ${currentOrder.cancelledAt ? `<div class="info-row"><span class="info-label">Cancelled On</span><span class="info-value">${new Date(currentOrder.cancelledAt).toLocaleString()}</span></div>` : ''}
             </div>
             
             <div class="info-card">
-                <div class="card-title">
-                    <i class="fas fa-user-circle"></i> Customer Details
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Full Name</span>
-                    <span class="info-value">${escapeHtml(currentOrder.customerName || 'Guest')}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Email Address</span>
-                    <span class="info-value">${escapeHtml(currentOrder.customerEmail || 'N/A')}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Phone Number</span>
-                    <span class="info-value">${escapeHtml(currentOrder.customerPhone || 'N/A')}</span>
-                </div>
+                <div class="card-title"><i class="fas fa-user-circle"></i> Customer Details</div>
+                <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${escapeHtml(currentOrder.customerName || 'Guest')}</span></div>
+                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${escapeHtml(currentOrder.customerEmail || 'N/A')}</span></div>
+                <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${escapeHtml(currentOrder.customerPhone || 'N/A')}</span></div>
             </div>
             
             <div class="info-card">
-                <div class="card-title">
-                    <i class="fas fa-map-marker-alt"></i> Shipping Address
-                </div>
-                <div class="info-row">
-                    <span class="info-label">Address</span>
-                    <span class="info-value">${escapeHtml(currentOrder.shippingAddress?.address || 'N/A')}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">City</span>
-                    <span class="info-value">${escapeHtml(currentOrder.shippingAddress?.city || 'N/A')}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">State</span>
-                    <span class="info-value">${escapeHtml(currentOrder.shippingAddress?.state || 'N/A')}</span>
-                </div>
-                <div class="info-row">
-                    <span class="info-label">PIN Code</span>
-                    <span class="info-value">${escapeHtml(currentOrder.shippingAddress?.pincode || 'N/A')}</span>
-                </div>
+                <div class="card-title"><i class="fas fa-map-marker-alt"></i> Shipping Address</div>
+                <div class="info-row"><span class="info-label">Address</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.address || 'N/A')}</span></div>
+                <div class="info-row"><span class="info-label">City</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.city || 'N/A')}</span></div>
+                <div class="info-row"><span class="info-label">State</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.state || 'N/A')}</span></div>
+                <div class="info-row"><span class="info-label">PIN Code</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.pincode || 'N/A')}</span></div>
             </div>
             
+            ${hasComboOffer ? `
+            <div class="offer-card">
+                <i class="fas fa-gift"></i> <strong>Special Offer Applied!</strong>
+                <span style="font-size: 12px; margin-left: 8px;">You saved extra on this combo purchase!</span>
+            </div>
+            ` : ''}
+            
             <div class="info-card">
-                <div class="card-title">
-                    <i class="fas fa-shopping-bag"></i> Order Items (${currentOrder.items?.length || 0})
-                </div>
+                <div class="card-title"><i class="fas fa-shopping-bag"></i> Order Items (${currentOrder.items?.length || 0})</div>
                 ${itemsHtml || '<div class="info-row"><span class="info-label">No items found</span></div>'}
                 
                 <div class="total-section">
-                    <div class="total-row">
-                        <span>Subtotal</span>
-                        <span>₹${(currentOrder.subtotal || currentOrder.total || 0).toLocaleString('en-IN')}</span>
-                    </div>
-                    <div class="total-row grand-total">
-                        <span>Total Amount</span>
-                        <span>₹${(currentOrder.total || 0).toLocaleString('en-IN')}</span>
-                    </div>
+                    <div class="total-row"><span>Subtotal</span><span>₹${(currentOrder.subtotal || currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
+                    ${currentOrder.discount ? `<div class="total-row"><span>Discount</span><span style="color: #4CAF50;">-₹${currentOrder.discount.toLocaleString('en-IN')}</span></div>` : ''}
+                    ${currentOrder.shippingCharge ? `<div class="total-row"><span>Shipping</span><span>₹${currentOrder.shippingCharge.toLocaleString('en-IN')}</span></div>` : '<div class="total-row"><span>Shipping</span><span style="color: #4CAF50;">FREE</span></div>'}
+                    <div class="total-row grand-total"><span>Total Amount</span><span>₹${(currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
                 </div>
             </div>
             
             <div class="action-buttons">
                 ${cancelButtonHtml}
-                <button class="btn-secondary" onclick="window.location.href='booking.html'">
-                    <i class="fas fa-arrow-left"></i> All Orders
-                </button>
-                <button class="btn-primary" onclick="window.location.href='index.html'">
-                    <i class="fas fa-shopping-cart"></i> Continue Shopping
-                </button>
+                <button class="btn-secondary" onclick="window.location.href='booking.html'"><i class="fas fa-arrow-left"></i> All Orders</button>
+                <button class="btn-primary" onclick="window.location.href='index.html'"><i class="fas fa-shopping-cart"></i> Continue Shopping</button>
             </div>
         `;
         
         const cancelBtn = document.getElementById('cancelOrderBtn');
-        if (cancelBtn) {
-            cancelBtn.addEventListener('click', showCancelConfirmation);
-        }
+        if (cancelBtn) cancelBtn.addEventListener('click', showCancelConfirmation);
     }
     
     function showError(message) {
         const container = document.getElementById('app');
-        container.innerHTML = `
-            <div class="error-state">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>${message}</h3>
-                <p style="color: #888; margin-top: 10px;">The order you're looking for could not be found.</p>
-                <button class="btn-primary" onclick="window.location.href='booking.html'" style="margin-top: 20px;">
-                    <i class="fas fa-arrow-left"></i> Back to Bookings
-                </button>
-            </div>
-        `;
+        container.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><h3>${message}</h3><p style="color: #888; margin-top: 10px;">The order you're looking for could not be found.</p><button class="btn-primary" onclick="window.location.href='booking.html'" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Back to Bookings</button></div>`;
     }
     
     function escapeHtml(str) {
@@ -853,43 +752,18 @@
         });
     }
     
-    // Modal event listeners
     document.getElementById('modalCancelBtn')?.addEventListener('click', hideModal);
-    document.getElementById('modalConfirmBtn')?.addEventListener('click', async () => {
-        hideModal();
-        await cancelOrder();
-    });
+    document.getElementById('modalConfirmBtn')?.addEventListener('click', async () => { hideModal(); await cancelOrder(); });
+    window.addEventListener('click', (e) => { if (e.target === document.getElementById('cancelModal')) hideModal(); });
     
-    window.addEventListener('click', (e) => {
-        const modal = document.getElementById('cancelModal');
-        if (e.target === modal) {
-            hideModal();
-        }
-    });
-    
-    // 🔥 INIT - Instant from cache, then background update
     (async function init() {
-        // STEP 1: Load products from cache
-        loadProductsFromCache();
+        document.getElementById('app').innerHTML = `<div style="text-align: center; padding: 60px;"><i class="fas fa-spinner fa-pulse" style="font-size: 40px; color: #D4AF37;"></i><p>Loading order details...</p></div>`;
         
-        // STEP 2: Load order from cache (instant)
+        await loadProductsFromFirebase();
         const hasCached = loadOrderFromCache();
-        
-        if (!hasCached) {
-            // Show loading only if no cache
-            document.getElementById('app').innerHTML = `
-                <div class="loading-state">
-                    <div class="loading-spinner"></div>
-                    <p>Loading order details...</p>
-                </div>
-            `;
-        }
-        
-        // STEP 3: Fetch fresh products in background
-        await loadProducts();
-        
-        // STEP 4: Fetch fresh order in background
         await fetchFreshOrder();
+        
+        if (!currentOrder) showError("Order not found");
     })();
 </script>
 </body>

@@ -31,6 +31,33 @@
     }
     .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
 
+    /* Premium Animations */
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes slideInRight {
+      from { opacity: 0; transform: translateX(-20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes pulseGlow {
+      0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); transform: scale(1); }
+      50% { box-shadow: 0 0 0 8px rgba(212,175,55,0.2); transform: scale(1.02); }
+      100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); transform: scale(1); }
+    }
+    @keyframes comboSelect {
+      0% { transform: scale(1); border-color: rgba(212,175,55,0.3); }
+      50% { transform: scale(1.02); border-color: #D4AF37; }
+      100% { transform: scale(1); border-color: #D4AF37; }
+    }
+    @keyframes comboUnselect {
+      0% { transform: scale(1); border-color: #D4AF37; }
+      50% { transform: scale(0.98); border-color: rgba(212,175,55,0.5); }
+      100% { transform: scale(1); border-color: rgba(212,175,55,0.3); }
+    }
+    .animate-fade-up { animation: fadeInUp 0.5s ease forwards; }
+    .animate-slide { animation: slideInRight 0.4s ease forwards; }
+
     .floating-cart {
       position: fixed;
       bottom: 100px;
@@ -111,6 +138,26 @@
     }
     .cart-item-info h4 { font-size: 14px; margin-bottom: 4px; }
     .cart-item-info p { color: #D4AF37; font-weight: bold; font-size: 14px; }
+    .cart-item-actions {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cart-qty-btn {
+      background: rgba(212,175,55,0.2);
+      border: 1px solid rgba(212,175,55,0.3);
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      cursor: pointer;
+      color: #D4AF37;
+    }
+    .cart-qty {
+      font-size: 14px;
+      font-weight: bold;
+      min-width: 20px;
+      text-align: center;
+    }
     .cart-item-remove {
       background: rgba(255,69,0,0.2);
       border: none;
@@ -286,6 +333,7 @@
       background: rgba(255,255,255,0.3);
       border-radius: 50%;
       cursor: pointer;
+      transition: 0.3s;
     }
     .dot.active {
       background: #D4AF37;
@@ -298,6 +346,7 @@
       padding: 20px;
       margin: 16px;
       border-radius: 28px;
+      animation: fadeInUp 0.6s ease;
     }
     .product-brand { color: #D4AF37; font-size: 12px; letter-spacing: 2px; margin-bottom: 8px; }
     .product-name { font-size: 24px; font-weight: 700; margin-bottom: 12px; }
@@ -309,6 +358,7 @@
     .original-price { font-size: 18px; color: #888; text-decoration: line-through; margin-left: 10px; }
     .discount { background: #FF4500; padding: 4px 10px; border-radius: 25px; font-size: 12px; font-weight: 600; margin-left: 10px; }
     
+    /* Size Section - Fixed Text Color */
     .size-section {
       margin: 16px 0 20px 0;
       background: rgba(0,0,0,0.3);
@@ -338,6 +388,7 @@
       font-weight: 600;
       cursor: pointer;
       transition: 0.2s;
+      color: #FFFFFF;
     }
     .size-btn:hover, .size-btn.active {
       background: #D4AF37;
@@ -345,6 +396,201 @@
       border-color: #D4AF37;
     }
     
+    /* Color Section with Color Dots */
+    .color-section {
+      margin: 16px 0 20px 0;
+      background: rgba(0,0,0,0.3);
+      border-radius: 16px;
+      padding: 12px;
+    }
+    .color-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: #D4AF37;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .color-options {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+    .color-btn {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      cursor: pointer;
+      transition: 0.2s;
+      padding: 5px;
+      border-radius: 12px;
+    }
+    .color-btn.active {
+      background: rgba(212,175,55,0.2);
+      transform: scale(1.05);
+    }
+    .color-circle {
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.3);
+      transition: 0.2s;
+    }
+    .color-btn.active .color-circle {
+      border-color: #D4AF37;
+      transform: scale(1.1);
+      box-shadow: 0 0 15px rgba(212,175,55,0.6);
+    }
+    .color-name {
+      font-size: 11px;
+      color: #888;
+    }
+    .color-btn.active .color-name {
+      color: #D4AF37;
+      font-weight: 600;
+    }
+
+    /* Premium Combo Section */
+    .combo-section {
+      margin: 16px 0;
+      background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(212,175,55,0.1));
+      border-radius: 24px;
+      padding: 20px;
+      border: 1px solid rgba(76,175,80,0.3);
+      animation: fadeInUp 0.5s ease;
+    }
+    .combo-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #4CAF50;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .combo-title i {
+      animation: pulseGlow 1.5s infinite;
+    }
+    .combo-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .combo-item {
+      background: rgba(0,0,0,0.4);
+      border-radius: 20px;
+      padding: 16px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border: 2px solid rgba(212,175,55,0.2);
+      position: relative;
+      overflow: hidden;
+    }
+    .combo-item::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
+      transition: left 0.5s ease;
+    }
+    .combo-item:hover::before {
+      left: 100%;
+    }
+    .combo-item:hover {
+      transform: translateX(8px);
+      border-color: #4CAF50;
+      background: rgba(76,175,80,0.15);
+    }
+    .combo-item.selected {
+      border-color: #D4AF37;
+      background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(76,175,80,0.15));
+      animation: comboSelect 0.4s ease;
+      box-shadow: 0 0 20px rgba(212,175,55,0.3);
+    }
+    .combo-item.unselecting {
+      animation: comboUnselect 0.3s ease;
+    }
+    .combo-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+    .combo-quantity {
+      font-size: 20px;
+      font-weight: 800;
+      color: #4CAF50;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .combo-quantity i {
+      font-size: 22px;
+    }
+    .combo-save {
+      font-size: 12px;
+      color: #FFB800;
+      background: rgba(255,184,0,0.15);
+      padding: 2px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      width: fit-content;
+    }
+    .combo-price {
+      text-align: right;
+    }
+    .combo-price .price-big {
+      font-size: 24px;
+      font-weight: 800;
+      color: #D4AF37;
+    }
+    .combo-price .price-small {
+      font-size: 12px;
+      color: #888;
+    }
+    .combo-price .per-piece {
+      font-size: 11px;
+      color: #4CAF50;
+      margin-top: 4px;
+    }
+    .combo-select-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: rgba(212,175,55,0.2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-left: 15px;
+      transition: 0.2s;
+    }
+    .combo-item.selected .combo-select-icon {
+      background: #4CAF50;
+      animation: pulseGlow 0.5s ease;
+    }
+    .combo-select-icon i {
+      font-size: 16px;
+      color: white;
+    }
+    .combo-badge {
+      position: absolute;
+      top: -8px;
+      right: 20px;
+      background: #FF4500;
+      color: white;
+      font-size: 10px;
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-weight: bold;
+    }
+
     .product-detail-section {
       margin: 20px 0;
       background: rgba(0,0,0,0.3);
@@ -546,439 +792,317 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== 🔥 FIREBASE CONFIGURATION ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
     authDomain: "vedanta-d0199.firebaseapp.com",
     projectId: "vedanta-d0199",
     storageBucket: "vedanta-d0199.firebasestorage.app",
     messagingSenderId: "761061711987",
-    appId: "1:761061711987:web:d59ff32fd53057c395ca06",
-    measurementId: "G-RQMQZVGK75"
+    appId: "1:761061711987:web:d59ff32fd53057c395ca06"
   };
   
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  console.log("🔥 Firebase Connected!");
   
   let allProducts = [];
   let currentProductId = null;
   let currentProduct = null;
   let quantity = 1;
   let selectedSize = null;
+  let selectedColor = null;
+  let selectedCombo = null;
   let currentSlide = 0;
   let slideInterval = null;
   let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-  let isRendered = false;
   
   function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
   
-  function addToCart(product, qty, size) {
-    const existing = cart.find(item => item.id === product.id && item.size === size);
-    if (existing) {
-      existing.quantity += qty;
+  function addToCart(product, qty, size, color, combo = null) {
+    let finalPrice = product.price;
+    let comboInfo = null;
+    if (combo) {
+      finalPrice = combo.price / combo.quantity;
+      comboInfo = `${combo.quantity} for ₹${combo.price}`;
+      qty = combo.quantity;
+    }
+    const existingIndex = cart.findIndex(item => item.id === product.id && item.size === size && item.color === color && item.combo === comboInfo);
+    if (existingIndex !== -1) {
+      cart[existingIndex].quantity += qty;
     } else {
-      cart.push({ id: product.id, name: product.name, price: product.price, quantity: qty, size: size || 'Default' });
+      cart.push({ id: product.id, name: product.name, price: finalPrice, quantity: qty, size: size || 'Default', color: color || '', combo: comboInfo });
     }
     saveCart();
-    showToast(`🛍️ ${product.name} added to cart!`);
+    showToast(combo ? `🎉 ${combo.quantity} items for ₹${combo.price} added!` : `🛍️ ${product.name} added!`);
   }
   
-  function buyNowDirect(product, qty, size) {
-    const tempCart = [{ 
-      id: product.id, 
-      name: product.name, 
-      price: product.price, 
-      quantity: qty, 
-      size: size || 'Default' 
-    }];
-    localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-    showToast(`💳 Proceeding to checkout with ${product.name}`);
-    setTimeout(() => {
-      window.location.href = 'secure-checkout.html';
-    }, 500);
-  }
-  
-  function removeFromCart(productId) {
-    cart = cart.filter(item => item.id !== productId);
+  function updateCartQuantity(index, newQuantity) {
+    if (newQuantity < 1) cart.splice(index, 1);
+    else cart[index].quantity = newQuantity;
     saveCart();
+  }
+  
+  function removeFromCart(index) { cart.splice(index, 1); saveCart(); }
+  
+  function buyNowDirect(product, qty, size, color, combo = null) {
+    let finalPrice = product.price;
+    let finalQty = qty;
+    let comboInfo = null;
+    if (combo) {
+      finalPrice = combo.price / combo.quantity;
+      comboInfo = `${combo.quantity} for ₹${combo.price}`;
+      finalQty = combo.quantity;
+    }
+    const tempCart = [{ id: product.id, name: product.name, price: finalPrice, quantity: finalQty, size: size || 'Default', color: color || '', combo: comboInfo }];
+    localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+    showToast(`💳 Proceeding to checkout`);
+    setTimeout(() => window.location.href = 'secure-checkout.html', 500);
   }
   
   function updateCartUI() {
-    const cartCountSpan = document.getElementById('cartCount');
+    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const cartCountEl = document.getElementById('cartCount');
+    if (cartCountEl) cartCountEl.innerText = totalItems;
     const cartItemsDiv = document.getElementById('cartItems');
     const cartTotalSpan = document.getElementById('cartTotal');
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
-    if (cartCountSpan) cartCountSpan.innerText = totalItems;
-    if (!cartItemsDiv) return;
     if (cart.length === 0) {
-      cartItemsDiv.innerHTML = '<div class="empty-cart">🛒 Your cart is empty</div>';
+      if (cartItemsDiv) cartItemsDiv.innerHTML = '<div class="empty-cart">🛒 Your cart is empty</div>';
       if (cartTotalSpan) cartTotalSpan.innerText = '₹0';
       return;
     }
     let total = 0;
     cartItemsDiv.innerHTML = '';
-    cart.forEach(item => {
+    cart.forEach((item, idx) => {
       const itemTotal = item.price * item.quantity;
       total += itemTotal;
-      cartItemsDiv.innerHTML += `
-        <div class="cart-item">
-          <div class="cart-item-info"><h4>${escapeHtml(item.name)} ${item.size ? `(${item.size})` : ''}</h4><p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div>
-          <button class="cart-item-remove" data-id="${item.id}">Remove</button>
-        </div>
-      `;
+      cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)} ${item.size ? `(${item.size})` : ''} ${item.color ? `- ${item.color}` : ''} ${item.combo ? `<span style="color:#4CAF50;">[${item.combo}]</span>` : ''}</h4><p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`;
+    });
+    cartItemsDiv.querySelectorAll('.cart-qty-btn').forEach(btn => {
+      btn.addEventListener('click', (e) => { e.stopPropagation(); const idx = parseInt(btn.dataset.index); const action = btn.dataset.action; if (action === 'incr') updateCartQuantity(idx, cart[idx].quantity + 1); else if (action === 'decr') updateCartQuantity(idx, cart[idx].quantity - 1); });
     });
     cartItemsDiv.querySelectorAll('.cart-item-remove').forEach(btn => {
-      btn.addEventListener('click', () => removeFromCart(parseInt(btn.dataset.id)));
+      btn.addEventListener('click', (e) => { e.stopPropagation(); removeFromCart(parseInt(btn.dataset.index)); });
     });
     if (cartTotalSpan) cartTotalSpan.innerText = `₹${total}`;
   }
   
-  function openCart() {
-    document.getElementById('cartSidebar').classList.add('open');
-    document.getElementById('cartOverlay').classList.add('show');
-  }
+  function openCart() { document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.add('show'); }
+  function closeCart() { document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('show'); }
+  function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m)); }
   
-  function closeCart() {
-    document.getElementById('cartSidebar').classList.remove('open');
-    document.getElementById('cartOverlay').classList.remove('show');
-  }
-  
-  function showToast(msg) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
-  }
-
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
-  // ========== 🔥 INSTANT RENDER FROM CACHE FIRST ==========
   function renderProductFromCache() {
-    // Load from localStorage instantly
     const savedProducts = localStorage.getItem('vedantaProducts');
-    if (savedProducts && savedProducts !== '[]' && savedProducts !== 'null') {
-      allProducts = JSON.parse(savedProducts);
-    }
-    
-    currentProductId = localStorage.getItem('vedanta_selected_product_id');
-    if (currentProductId === null || currentProductId === 'null') currentProductId = "1";
-    
+    if (savedProducts && savedProducts !== '[]') allProducts = JSON.parse(savedProducts);
+    currentProductId = localStorage.getItem('vedanta_selected_product_id') || "1";
     currentProduct = allProducts.find(p => p.id == currentProductId);
-    
-    if (currentProduct) {
-      renderPageContent();
-      isRendered = true;
-      console.log("Instant render from cache");
-    }
+    if (currentProduct) { renderPageContent(); console.log("Instant render from cache"); }
   }
   
-  // ========== FETCH FRESH IN BACKGROUND ==========
   async function fetchFreshData() {
     try {
-      const snapshot = await db.collection('products').orderBy('createdAt', 'desc').get();
+      const snapshot = await db.collection('products').get();
       const products = [];
-      snapshot.forEach(doc => {
-        products.push({ id: doc.id, ...doc.data() });
-      });
-      
+      snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
       if (products.length > 0) {
         allProducts = products;
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-        
-        // Re-render if product changed
         const newProduct = allProducts.find(p => p.id == currentProductId);
-        if (newProduct && JSON.stringify(newProduct) !== JSON.stringify(currentProduct)) {
-          currentProduct = newProduct;
-          renderPageContent();
-          console.log("Background update - product changed");
-        }
+        if (newProduct && JSON.stringify(newProduct) !== JSON.stringify(currentProduct)) { currentProduct = newProduct; renderPageContent(); }
       }
-    } catch (error) {
-      console.error("Error fetching products:", error);
-    }
+    } catch (error) { console.error(error); }
   }
   
-  // Ensure all product fields exist
   function ensureProductFields(p) {
     if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
     if (!p.rating) p.rating = 4.5;
-    if (!p.reviewCount) p.reviewCount = Math.floor(Math.random() * 1000) + 100;
-    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Handcrafted with love and care.";
+    if (!p.reviewCount) p.reviewCount = 500;
+    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta.";
     if (!p.sizes) p.sizes = [];
-    if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India", "Eco-friendly"];
+    if (!p.colors) p.colors = [];
+    if (!p.combos) p.combos = [];
+    if (!p.bulkDiscounts) p.bulkDiscounts = {};
+    if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India"];
     if (!p.images) p.images = [];
     return p;
   }
   
-  function setSelectedProductId(id) {
-    localStorage.setItem('vedanta_selected_product_id', id);
-  }
-  
-  function getSelectedProductId() {
-    let storedId = localStorage.getItem('vedanta_selected_product_id');
-    if (storedId === null || storedId === 'null') return "1";
-    return storedId;
-  }
-  
-  function navigateToProduct(productId) {
-    if (!productId) return;
-    setSelectedProductId(productId);
-    window.location.reload();
-  }
-  
-  function prevProduct() {
-    let currentIndex = allProducts.findIndex(p => p.id == currentProductId);
-    let newIndex = currentIndex > 0 ? currentIndex - 1 : allProducts.length - 1;
-    navigateToProduct(allProducts[newIndex].id);
-  }
-  
-  function nextProduct() {
-    let currentIndex = allProducts.findIndex(p => p.id == currentProductId);
-    let newIndex = currentIndex < allProducts.length - 1 ? currentIndex + 1 : 0;
-    navigateToProduct(allProducts[newIndex].id);
-  }
+  function setSelectedProductId(id) { localStorage.setItem('vedanta_selected_product_id', id); }
+  function navigateToProduct(productId) { if (!productId) return; setSelectedProductId(productId); window.location.reload(); }
+  function prevProduct() { let idx = allProducts.findIndex(p => p.id == currentProductId); navigateToProduct(allProducts[idx > 0 ? idx - 1 : allProducts.length - 1].id); }
+  function nextProduct() { let idx = allProducts.findIndex(p => p.id == currentProductId); navigateToProduct(allProducts[idx < allProducts.length - 1 ? idx + 1 : 0].id); }
   
   function renderImageSlider() {
     const images = currentProduct.images || [];
     const hasImages = images.length > 0;
-    
-    let slidesHtml = '';
-    if (hasImages) {
-      images.forEach((img, idx) => {
-        slidesHtml += `<div class="slide"><img src="${img}" alt="Product image ${idx + 1}" loading="lazy"></div>`;
-      });
-    } else {
-      slidesHtml = `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
-    }
-    
-    let thumbnailsHtml = '';
-    if (hasImages) {
-      images.forEach((img, idx) => {
-        thumbnailsHtml += `
-          <div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}">
-            <img src="${img}" alt="Thumbnail ${idx + 1}" loading="lazy">
-          </div>
-        `;
-      });
-    } else {
-      thumbnailsHtml = `
-        <div class="thumbnail active" data-icon="${currentProduct.icon || 'fa-gem'}"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>
-        <div class="thumbnail" data-icon="fa-gem"><i class="fas fa-gem"></i></div>
-        <div class="thumbnail" data-icon="fa-crown"><i class="fas fa-crown"></i></div>
-      `;
-    }
-    
-    let dotsHtml = '';
-    if (hasImages && images.length > 1) {
-      for (let i = 0; i < images.length; i++) {
-        dotsHtml += `<div class="dot ${i === currentSlide ? 'active' : ''}" data-dot-index="${i}"></div>`;
-      }
-    }
-    
-    return `
-      <div class="product-gallery">
-        <div class="main-image-container">
-          <div class="badge">${currentProduct.badge || 'New'}</div>
-          <div class="main-image-slider" id="imageSlider" style="transform: translateX(-${currentSlide * 100}%);">
-            ${slidesHtml}
-          </div>
-          ${hasImages && images.length > 1 ? `
-            <button class="slider-btn slider-prev" id="prevSlide"><i class="fas fa-chevron-left"></i></button>
-            <button class="slider-btn slider-next" id="nextSlide"><i class="fas fa-chevron-right"></i></button>
-          ` : ''}
-        </div>
-        <div class="thumbnail-list" id="thumbnailList">
-          ${thumbnailsHtml}
-        </div>
-        ${dotsHtml ? `<div class="dots-container" id="dotsContainer">${dotsHtml}</div>` : ''}
-      </div>
-    `;
+    let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
+    let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
+    let dotsHtml = hasImages && images.length > 1 ? images.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-dot-index="${i}"></div>`).join('') : '';
+    return `<div class="product-gallery"><div class="main-image-container"><div class="badge">${currentProduct.badge || 'New'}</div><div class="main-image-slider" id="imageSlider" style="transform: translateX(-${currentSlide * 100}%);">${slidesHtml}</div>${hasImages && images.length > 1 ? `<button class="slider-btn slider-prev" id="prevSlide"><i class="fas fa-chevron-left"></i></button><button class="slider-btn slider-next" id="nextSlide"><i class="fas fa-chevron-right"></i></button>` : ''}</div><div class="thumbnail-list" id="thumbnailList">${thumbnailsHtml}</div>${dotsHtml ? `<div class="dots-container" id="dotsContainer">${dotsHtml}</div>` : ''}</div>`;
   }
-
+  
   function initSlider() {
     const images = currentProduct.images || [];
-    const hasImages = images.length > 0;
-    const totalSlides = hasImages ? images.length : 1;
-    if (!hasImages || totalSlides <= 1) return;
-    
+    const totalSlides = images.length || 1;
+    if (images.length <= 1) return;
     const slider = document.getElementById('imageSlider');
     const prevBtn = document.getElementById('prevSlide');
     const nextBtn = document.getElementById('nextSlide');
     const thumbnails = document.querySelectorAll('.thumbnail');
     const dots = document.querySelectorAll('.dot');
-    
-    function updateSlider(index) {
-      if (index < 0) index = totalSlides - 1;
-      if (index >= totalSlides) index = 0;
-      currentSlide = index;
-      if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-      thumbnails.forEach((thumb, i) => {
-        if (i === currentSlide) thumb.classList.add('active');
-        else thumb.classList.remove('active');
-      });
-      dots.forEach((dot, i) => {
-        if (i === currentSlide) dot.classList.add('active');
-        else dot.classList.remove('active');
-      });
-    }
-    
+    function updateSlider(index) { if (index < 0) index = totalSlides - 1; if (index >= totalSlides) index = 0; currentSlide = index; if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`; thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active')); dots.forEach((d, i) => i === currentSlide ? d.classList.add('active') : d.classList.remove('active')); }
     prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
     nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
-    thumbnails.forEach((thumb, idx) => thumb.addEventListener('click', () => updateSlider(idx)));
-    dots.forEach((dot, idx) => dot.addEventListener('click', () => updateSlider(idx)));
-    
+    thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
+    dots.forEach((d, i) => d.addEventListener('click', () => updateSlider(i)));
     if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
-    
-    const gallery = document.querySelector('.product-gallery');
-    gallery?.addEventListener('mouseenter', () => { if (slideInterval) clearInterval(slideInterval); });
-    gallery?.addEventListener('mouseleave', () => { slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000); });
+    document.querySelector('.product-gallery')?.addEventListener('mouseenter', () => clearInterval(slideInterval));
+    document.querySelector('.product-gallery')?.addEventListener('mouseleave', () => { slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000); });
   }
-
+  
+  // Color render with actual color dots
+  function renderColors() {
+    const colors = currentProduct.colors || [];
+    if (colors.length === 0) return '';
+    
+    return `<div class="color-section">
+      <div class="color-title"><i class="fas fa-palette"></i> Select Color:</div>
+      <div class="color-options" id="colorOptions">
+        ${colors.map(color => {
+          const colorName = typeof color === 'object' ? color.name : color;
+          let colorCode = '#D4AF37';
+          if (typeof color === 'object' && color.code) {
+            colorCode = color.code;
+          } else {
+            const colorMap = {
+              'Red': '#FF0000', 'Blue': '#2196F3', 'Green': '#4CAF50',
+              'Black': '#000000', 'White': '#FFFFFF', 'Yellow': '#FFEB3B',
+              'Purple': '#9C27B0', 'Pink': '#FF69B4', 'Orange': '#FF9800',
+              'Brown': '#795548', 'Gold': '#D4AF37', 'Silver': '#C0C0C0',
+              'Maroon': '#800000', 'Navy': '#000080', 'Teal': '#008080'
+            };
+            colorCode = colorMap[colorName] || '#D4AF37';
+          }
+          return `<div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}">
+            <div class="color-circle" style="background: ${colorCode};"></div>
+            <span class="color-name">${colorName}</span>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  }
+  
+  // Premium Combo Offers with Select/Unselect
+  function renderComboOffers() {
+    const combos = currentProduct.combos || [];
+    if (combos.length === 0) return '';
+    
+    return `<div class="combo-section">
+      <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS <span style="font-size:12px;">(Click to select/unselect)</span></div>
+      <div class="combo-list" id="comboList">
+        ${combos.map((combo, idx) => {
+          const savePercent = Math.round(((combo.quantity * currentProduct.price) - combo.price) / (combo.quantity * currentProduct.price) * 100);
+          const saveAmount = (combo.quantity * currentProduct.price) - combo.price;
+          const isSelected = selectedCombo && selectedCombo.quantity === combo.quantity && selectedCombo.price === combo.price;
+          return `<div class="combo-item ${isSelected ? 'selected' : ''}" data-combo-index="${idx}" data-combo-qty="${combo.quantity}" data-combo-price="${combo.price}">
+            <div class="combo-item-info">
+              <div class="combo-quantity"><i class="fas fa-boxes"></i> Buy ${combo.quantity} Items</div>
+              <div class="combo-save">🔥 Save ${savePercent}% (₹${saveAmount} off)</div>
+            </div>
+            <div class="combo-price">
+              <div class="price-big">₹${combo.price}</div>
+              <div class="per-piece">₹${Math.round(combo.price / combo.quantity)} per piece</div>
+            </div>
+            <div class="combo-select-icon"><i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}"></i></div>
+            <div class="combo-badge">BEST VALUE</div>
+          </div>`;
+        }).join('')}
+      </div>
+      <div class="offer-tag" style="margin-top:12px; background:rgba(212,175,55,0.1);"><i class="fas fa-info-circle"></i> Click any combo to select/unselect. Selected combo will be applied on checkout!</div>
+    </div>`;
+  }
+  
+  function attachComboEvents() {
+    const comboItems = document.querySelectorAll('.combo-item');
+    comboItems.forEach(combo => {
+      combo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const comboQty = parseInt(combo.getAttribute('data-combo-qty'));
+        const comboPrice = parseInt(combo.getAttribute('data-combo-price'));
+        
+        if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
+          selectedCombo = null;
+          combo.classList.add('unselecting');
+          setTimeout(() => {
+            combo.classList.remove('selected', 'unselecting');
+            const icon = combo.querySelector('.combo-select-icon i');
+            if (icon) icon.className = 'fas fa-plus-circle';
+          }, 300);
+          showToast(`✨ Combo offer removed! Regular price applied.`);
+        } else {
+          comboItems.forEach(c => {
+            c.classList.remove('selected');
+            const icon = c.querySelector('.combo-select-icon i');
+            if (icon) icon.className = 'fas fa-plus-circle';
+          });
+          combo.classList.add('selected');
+          const icon = combo.querySelector('.combo-select-icon i');
+          if (icon) icon.className = 'fas fa-check-circle';
+          selectedCombo = { quantity: comboQty, price: comboPrice };
+          showToast(`🎉 Combo selected! ${comboQty} items for ₹${comboPrice}. Click "ADD TO CART" or "BUY NOW"!`);
+        }
+      });
+    });
+  }
+  
+  function attachColorEvents() {
+    const colorBtns = document.querySelectorAll('.color-btn');
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedColor = btn.getAttribute('data-color');
+      });
+    });
+    if (colorBtns.length > 0 && !selectedColor) { colorBtns[0].classList.add('active'); selectedColor = colorBtns[0].getAttribute('data-color'); }
+  }
+  
   function renderRelatedProducts() {
     const related = allProducts.filter(p => p.category === currentProduct.category && p.id != currentProduct.id).slice(0, 4);
     const container = document.getElementById('relatedProducts');
     if (!container) return;
-    
-    if (related.length === 0) {
-      container.innerHTML = '<p style="color:#888; text-align:center; padding:20px;">No related products found.</p>';
-      return;
-    }
-    
+    if (related.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No related products</p>'; return; }
     container.innerHTML = related.map(p => {
       const hasImage = p.images && p.images.length > 0;
-      const firstImage = hasImage ? p.images[0] : null;
-      return `
-        <div class="related-card" data-product-id="${p.id}">
-          <div class="related-img">
-            ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
-          </div>
-          <div class="related-name">${escapeHtml(p.name)}</div>
-          <div class="related-price">₹${p.price.toLocaleString('en-IN')}</div>
-          <div style="font-size: 11px; color: #888; margin-top: 4px;">${p.rating || 4.5} ★</div>
-        </div>
-      `;
+      return `<div class="related-card" data-product-id="${p.id}"><div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div><div class="related-name">${escapeHtml(p.name)}</div><div class="related-price">₹${p.price.toLocaleString()}</div></div>`;
     }).join('');
-    
-    document.querySelectorAll('.related-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const prodId = card.getAttribute('data-product-id');
-        if (prodId && prodId != currentProductId) navigateToProduct(prodId);
-      });
-    });
+    document.querySelectorAll('.related-card').forEach(card => card.addEventListener('click', () => navigateToProduct(card.dataset.productId)));
   }
-
+  
   function renderPageContent() {
     if (!currentProduct) return;
-    
     currentProduct = ensureProductFields(currentProduct);
-    
     const discountPercent = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
-    const reviews = [
-      { name: "Priya Sharma", rating: 5, text: "Absolutely stunning product! Worth every penny!", date: "15 Mar 2025", verified: true },
-      { name: "Rohan Mehta", rating: 5, text: "Very happy with my purchase. Fast shipping!", date: "10 Mar 2025", verified: true },
-      { name: "Anjali Nair", rating: 4, text: "Good quality product. Customer service was helpful.", date: "5 Mar 2025", verified: false }
-    ];
-    
+    const reviews = [{ name: "Priya Sharma", rating: 5, text: "Absolutely stunning!", date: "15 Mar 2025", verified: true }];
     const galleryHtml = renderImageSlider();
+    const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
+    const sizeHtml = hasSizes ? `<div class="size-section"><div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div><div class="size-options" id="sizeOptions">${currentProduct.sizes.map(size => `<button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}</div></div>` : '';
+    const colorsHtml = renderColors();
+    const combosHtml = renderComboOffers();
+    const benefitsHtml = `<div class="features-list">${currentProduct.benefits.map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}</div>`;
     
-    const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0 && !(currentProduct.sizes.length === 1 && currentProduct.sizes[0] === "Free Size");
-    const sizeHtml = hasSizes ? `
-      <div class="size-section">
-        <div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div>
-        <div class="size-options" id="sizeOptions">
-          ${currentProduct.sizes.map(size => `<button class="size-btn" data-size="${size}">${size}</button>`).join('')}
-        </div>
-      </div>
-    ` : '';
-    
-    const benefitsHtml = currentProduct.benefits && currentProduct.benefits.length > 0 ? `
-      <div class="features-list">
-        ${currentProduct.benefits.map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}
-      </div>
-    ` : '';
-    
-    const fullDescText = currentProduct.fullDesc || "Premium quality product from Vedanta.";
-    const formattedDesc = escapeHtml(fullDescText).replace(/\n/g, '<br>');
-    
-    const html = `
-      <div class="header">
-        <div class="logo"><h1>VEDANTA</h1></div>
-        <div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div>
-      </div>
-      <div class="swipe-indicator">
-        <span><i class="fas fa-arrow-left"></i> Swipe → Previous</span>
-        <span><i class="fas fa-arrow-right"></i> Swipe ← Next</span>
-      </div>
-      ${galleryHtml}
-      <div class="product-info">
-        <div class="product-brand">VEDANTA EXCLUSIVE</div>
-        <div class="product-name">${escapeHtml(currentProduct.name)}</div>
-        <div class="rating"><div class="stars">${'★'.repeat(Math.floor(currentProduct.rating))}${'☆'.repeat(5 - Math.floor(currentProduct.rating))}</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div>
-        <div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString('en-IN')}</span><span class="original-price">₹${currentProduct.originalPrice.toLocaleString('en-IN')}</span><span class="discount">${discountPercent}% OFF</span></div>
-        
-        ${sizeHtml}
-        
-        <div class="product-detail-section">
-          <div class="detail-title">
-            <i class="fas fa-align-left"></i> Product Details
-          </div>
-          <div class="full-description">
-            ${formattedDesc}
-          </div>
-        </div>
-        
-        ${benefitsHtml}
-        
-        <div class="offer-tag"><i class="fas fa-tags"></i> Limited Time Deal • Free Shipping + COD Available</div>
-        <div class="quantity-selector"><button class="qty-btn" id="qtyMinus">-</button><input type="text" class="qty-input" id="qtyInput" value="1" readonly><button class="qty-btn" id="qtyPlus">+</button></div>
-        <div class="action-buttons">
-          <button class="add-cart-btn" id="addToCartBtn"><i class="fa-regular fa-bag-shopping"></i> ADD TO CART</button>
-          <button class="buy-btn" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
-        </div>
-      </div>
-      <div class="section-title"><span></span> You May Also Like</div>
-      <div class="related-products" id="relatedProducts"></div>
-      <div class="section-title"><span></span> Customer Reviews</div>
-      <div class="reviews-section">${reviews.map(r => `<div class="review-card"><div class="reviewer"><i class="fas fa-user-circle" style="color:#D4AF37;"></i> ${escapeHtml(r.name)} ${r.verified ? '<span style="background:rgba(76,175,80,0.15); padding:2px 8px; border-radius:20px; font-size:9px; color:#4CAF50;">Verified</span>' : ''}</div><div class="review-stars-small">${'★'.repeat(r.rating)}${'☆'.repeat(5 - r.rating)}</div><div class="review-text">"${escapeHtml(r.text)}"</div><div class="review-date">${r.date}</div></div>`).join('')}</div>
-    `;
+    const html = `<div class="header"><div class="logo"><h1>VEDANTA</h1></div><div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div></div><div class="swipe-indicator"><span><i class="fas fa-arrow-left"></i> Swipe → Previous</span><span><i class="fas fa-arrow-right"></i> Swipe ← Next</span></div>${galleryHtml}<div class="product-info"><div class="product-brand">VEDANTA EXCLUSIVE</div><div class="product-name">${escapeHtml(currentProduct.name)}</div><div class="rating"><div class="stars">★★★★★</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div><div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString()}</span><span class="original-price">₹${currentProduct.originalPrice.toLocaleString()}</span><span class="discount">${discountPercent}% OFF</span></div>${sizeHtml}${colorsHtml}${combosHtml}<div class="product-detail-section"><div class="detail-title"><i class="fas fa-align-left"></i> Product Details</div><div class="full-description">${escapeHtml(currentProduct.fullDesc)}</div></div>${benefitsHtml}<div class="offer-tag"><i class="fas fa-tags"></i> Free Shipping • COD Available • Easy Returns</div><div class="quantity-selector"><button class="qty-btn" id="qtyMinus">-</button><input type="text" class="qty-input" id="qtyInput" value="1" readonly><button class="qty-btn" id="qtyPlus">+</button></div><div class="action-buttons"><button class="add-cart-btn" id="addToCartBtn"><i class="fa-regular fa-bag-shopping"></i> ADD TO CART</button><button class="buy-btn" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button></div></div><div class="section-title"><span></span> You May Also Like</div><div class="related-products" id="relatedProducts"></div><div class="section-title"><span></span> Customer Reviews</div><div class="reviews-section">${reviews.map(r => `<div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> ${r.name} ${r.verified ? '<span style="color:#4CAF50;">✓ Verified</span>' : ''}</div><div class="review-stars-small">★★★★★</div><div class="review-text">"${r.text}"</div><div class="review-date">${r.date}</div></div>`).join('')}</div>`;
     
     document.getElementById('app').innerHTML = html;
-    
-    setTimeout(() => {
-      initSlider();
-      attachProductEvents(hasSizes);
-      renderRelatedProducts();
-    }, 50);
+    setTimeout(() => { initSlider(); attachProductEvents(hasSizes); attachComboEvents(); renderRelatedProducts(); attachColorEvents(); }, 50);
   }
   
   function attachProductEvents(hasSizes) {
     if (hasSizes) {
       const sizeBtns = document.querySelectorAll('.size-btn');
-      sizeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          sizeBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          selectedSize = btn.getAttribute('data-size');
-        });
-      });
-      if (sizeBtns.length > 0) {
-        sizeBtns[0].classList.add('active');
-        selectedSize = sizeBtns[0].getAttribute('data-size');
-      }
+      sizeBtns.forEach(btn => { btn.addEventListener('click', () => { sizeBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedSize = btn.dataset.size; }); });
+      if (sizeBtns.length > 0 && !selectedSize) { sizeBtns[0].classList.add('active'); selectedSize = sizeBtns[0].dataset.size; }
     }
-    
     let qty = 1;
     const qtyMinus = document.getElementById('qtyMinus');
     const qtyPlus = document.getElementById('qtyPlus');
@@ -987,62 +1111,24 @@
       qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyInput.value = qty; } });
       qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
     }
-    
-    const addBtn = document.getElementById('addToCartBtn');
-    if (addBtn) {
-      addBtn.addEventListener('click', () => {
-        if (hasSizes && !selectedSize) {
-          showToast('❌ Please select a size first');
-          return;
-        }
-        addToCart(currentProduct, qty, selectedSize);
-      });
-    }
-    
-    const buyBtn = document.getElementById('buyNowBtn');
-    if (buyBtn) {
-      buyBtn.addEventListener('click', () => {
-        if (hasSizes && !selectedSize) {
-          showToast('❌ Please select a size first');
-          return;
-        }
-        buyNowDirect(currentProduct, qty, selectedSize);
-      });
-    }
+    document.getElementById('addToCartBtn')?.addEventListener('click', () => { addToCart(currentProduct, qty, selectedSize, selectedColor, selectedCombo); if (selectedCombo) selectedCombo = null; });
+    document.getElementById('buyNowBtn')?.addEventListener('click', () => { buyNowDirect(currentProduct, qty, selectedSize, selectedColor, selectedCombo); });
   }
   
   function attachCartEvents() {
-    const floatingCart = document.getElementById('floatingCart');
-    const closeCartBtn = document.getElementById('closeCartBtn');
-    const cartOverlay = document.getElementById('cartOverlay');
-    const checkoutBtn = document.getElementById('checkoutBtn');
-    if (floatingCart) floatingCart.addEventListener('click', openCart);
-    if (closeCartBtn) closeCartBtn.addEventListener('click', closeCart);
-    if (cartOverlay) cartOverlay.addEventListener('click', closeCart);
-    if (checkoutBtn) checkoutBtn.addEventListener('click', () => {
-      if (cart.length === 0) showToast('🛒 Cart is empty!');
-      else window.location.href = 'secure-checkout.html';
-    });
+    document.getElementById('floatingCart')?.addEventListener('click', openCart);
+    document.getElementById('closeCartBtn')?.addEventListener('click', closeCart);
+    document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
+    document.getElementById('checkoutBtn')?.addEventListener('click', () => { if (cart.length === 0) showToast('Cart is empty!'); else window.location.href = 'secure-checkout.html'; });
   }
-
-  window.scrollTo({ top: 0, behavior: 'instant' });
-  document.addEventListener('DOMContentLoaded', () => window.scrollTo({ top: 0, behavior: 'instant' }));
-  window.addEventListener('load', () => { window.scrollTo({ top: 0, behavior: 'instant' }); });
   
+  window.scrollTo(0, 0);
   let touchStartX = 0, touchEndX = 0;
   document.body.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
-  document.body.addEventListener('touchend', (e) => {
-    touchEndX = e.changedTouches[0].screenX;
-    const diff = touchEndX - touchStartX;
-    if (Math.abs(diff) > 40) diff > 0 ? prevProduct() : nextProduct();
-  });
+  document.body.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; if (Math.abs(touchEndX - touchStartX) > 40) touchEndX > touchStartX ? prevProduct() : nextProduct(); });
   
-  // 🔥 STEP 1: Instant render from cache (no waiting)
   renderProductFromCache();
-  
-  // 🔥 STEP 2: Fetch fresh data in background (silent)
   fetchFreshData();
-  
   updateCartUI();
   attachCartEvents();
 </script>
