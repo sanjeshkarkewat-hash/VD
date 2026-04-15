@@ -6,6 +6,8 @@
   <title>Secure Checkout - Vedanta</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Razorpay SDK -->
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -229,98 +231,6 @@
       border-radius: 50%;
     }
 
-    /* UPI Apps List - Now Single Column Layout (One per row) */
-    .upi-apps {
-      display: none;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-    .upi-apps.show {
-      display: flex;
-    }
-    .upi-app {
-      background: rgba(0,0,0,0.3);
-      border: 1px solid rgba(212,175,55,0.2);
-      border-radius: 16px;
-      padding: 14px 18px;
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      cursor: pointer;
-      transition: 0.2s;
-      width: 100%;
-    }
-    .upi-app:hover {
-      border-color: #D4AF37;
-      background: rgba(212,175,55,0.1);
-      transform: translateX(5px);
-    }
-    .upi-app img {
-      width: 44px;
-      height: 44px;
-      object-fit: contain;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      padding: 4px;
-    }
-    .upi-app span {
-      font-size: 15px;
-      font-weight: 600;
-      flex: 1;
-    }
-    .upi-app .upi-app-arrow {
-      color: #D4AF37;
-      opacity: 0.6;
-      transition: 0.2s;
-    }
-    .upi-app:hover .upi-app-arrow {
-      opacity: 1;
-      transform: translateX(3px);
-    }
-
-    /* UPI ID Input */
-    .upi-id-section {
-      display: none;
-      margin-top: 15px;
-      padding-top: 15px;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
-    .upi-id-section.show {
-      display: block;
-    }
-    .upi-id-input {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .upi-id-input input {
-      flex: 1;
-      padding: 14px;
-      background: rgba(0,0,0,0.5);
-      border: 1px solid rgba(212,175,55,0.3);
-      border-radius: 16px;
-      color: white;
-      font-size: 14px;
-      min-width: 180px;
-    }
-    .pay-now-btn {
-      background: linear-gradient(135deg, #D4AF37, #FF8C00);
-      border: none;
-      padding: 14px 24px;
-      border-radius: 16px;
-      font-weight: 700;
-      color: #050508;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .pay-now-btn:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 12px rgba(212,175,55,0.4);
-    }
-
     /* COD Section */
     .cod-details {
       display: none;
@@ -344,11 +254,34 @@
       color: white;
       cursor: pointer;
       margin-top: 10px;
-      transition: 0.2s;
     }
-    .place-order-cod:hover {
-      transform: scale(1.02);
-      box-shadow: 0 0 12px rgba(76,175,80,0.4);
+
+    .razorpay-section {
+      display: none;
+      margin-top: 15px;
+      padding: 15px;
+      background: rgba(212,175,55,0.1);
+      border-radius: 16px;
+      text-align: center;
+    }
+    .razorpay-section.show {
+      display: block;
+    }
+    .pay-razorpay-btn {
+      width: 100%;
+      background: linear-gradient(135deg, #D4AF37, #FF8C00);
+      border: none;
+      padding: 16px;
+      border-radius: 50px;
+      font-weight: 800;
+      font-size: 16px;
+      color: #050508;
+      cursor: pointer;
+      margin-top: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
     }
 
     .order-summary {
@@ -464,8 +397,6 @@
       z-index: 10000;
       font-size: 14px;
       display: none;
-      white-space: nowrap;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.3);
     }
     .toast.show { display: block; animation: fadeInOut 2s ease; }
     @keyframes fadeInOut {
@@ -473,18 +404,6 @@
       15% { opacity: 1; transform: translateX(-50%) translateY(0); }
       85% { opacity: 1; }
       100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
-    }
-    
-    /* Responsive adjustments */
-    @media (max-width: 550px) {
-      .upi-id-input {
-        flex-direction: column;
-      }
-      .toast {
-        white-space: normal;
-        text-align: center;
-        max-width: 90%;
-      }
     }
   </style>
 </head>
@@ -511,7 +430,7 @@
         </div>
         <div class="form-group">
           <label>Phone Number <span class="required">*</span></label>
-          <input type="tel" id="phone" placeholder="Enter 10-digit mobile number" required pattern="[0-9]{10}">
+          <input type="tel" id="phone" placeholder="Enter 10-digit mobile number" required>
           <p style="font-size: 11px; color: #888; margin-top: 5px;">We'll send order updates here</p>
         </div>
         <div class="form-group">
@@ -539,7 +458,7 @@
         <div class="form-row">
           <div class="form-group">
             <label>Pincode <span class="required">*</span></label>
-            <input type="text" id="pincode" placeholder="6-digit pincode" required pattern="[0-9]{6}">
+            <input type="text" id="pincode" placeholder="6-digit pincode" required>
           </div>
           <div class="form-group">
             <label>Landmark (Optional)</label>
@@ -567,51 +486,16 @@
             <div class="radio-circle"></div>
           </div>
 
-          <!-- UPI Option -->
-          <div class="payment-option" id="upiOption">
+          <!-- Razorpay Option -->
+          <div class="payment-option" id="razorpayOption">
             <div class="payment-icon">
-              <i class="fas fa-mobile-alt" style="color: #D4AF37;"></i>
+              <i class="fas fa-credit-card" style="color: #D4AF37;"></i>
             </div>
             <div class="payment-info">
-              <h4>Online Payment (UPI / GPay / PhonePe)</h4>
-              <p>Pay using Google Pay, PhonePe, Paytm, Amazon Pay</p>
+              <h4>Card / UPI / NetBanking</h4>
+              <p>Pay securely with Razorpay (Cards, UPI, NetBanking, Wallet)</p>
             </div>
             <div class="radio-circle"></div>
-          </div>
-          
-          <!-- UPI Apps List - Now One Per Row (Single Column) -->
-          <div class="upi-apps" id="upiApps">
-            <div class="upi-app" data-app="gpay">
-              <img src="images/gpay.png" alt="Google Pay" onerror="this.src='https://via.placeholder.com/44?text=GPay'">
-              <span>Google Pay</span>
-              <i class="fas fa-chevron-right upi-app-arrow"></i>
-            </div>
-            <div class="upi-app" data-app="phonepe">
-              <img src="images/phonepe.png" alt="PhonePe" onerror="this.src='https://via.placeholder.com/44?text=PhonePe'">
-              <span>PhonePe</span>
-              <i class="fas fa-chevron-right upi-app-arrow"></i>
-            </div>
-            <div class="upi-app" data-app="paytm">
-              <img src="images/paytm.png" alt="Paytm" onerror="this.src='https://via.placeholder.com/44?text=Paytm'">
-              <span>Paytm</span>
-              <i class="fas fa-chevron-right upi-app-arrow"></i>
-            </div>
-            <div class="upi-app" data-app="amazon">
-              <img src="images/amazon-pay.png" alt="Amazon Pay" onerror="this.src='https://via.placeholder.com/44?text=Amazon'">
-              <span>Amazon Pay</span>
-              <i class="fas fa-chevron-right upi-app-arrow"></i>
-            </div>
-          </div>
-          
-          <!-- UPI ID Section -->
-          <div class="upi-id-section" id="upiIdSection">
-            <div class="upi-id-input">
-              <input type="text" id="upiId" placeholder="Enter UPI ID (e.g., name@okhdfcbank)">
-              <button class="pay-now-btn" id="payNowBtn">Pay Now</button>
-            </div>
-            <p style="font-size: 11px; color: #888; margin-top: 8px;">
-              <i class="fas fa-shield-alt"></i> Secure payment via UPI
-            </p>
           </div>
 
           <!-- COD Details Section -->
@@ -619,10 +503,19 @@
             <p><i class="fas fa-truck"></i> Pay when you receive your order</p>
             <button class="place-order-cod" id="placeOrderCodBtn">Place Order (COD)</button>
           </div>
+
+          <!-- Razorpay Section -->
+          <div class="razorpay-section" id="razorpaySection">
+            <p><i class="fas fa-shield-alt"></i> Secured by Razorpay</p>
+            <p style="font-size: 12px; color: #888; margin: 8px 0;">Cards | UPI | NetBanking | Wallets</p>
+            <button class="pay-razorpay-btn" id="payRazorpayBtn">
+              <i class="fas fa-lock"></i> Pay with Razorpay
+            </button>
+          </div>
         </div>
         
         <div class="payment-note" style="margin-top: 15px; font-size: 12px; color: #888; text-align: center;">
-          <i class="fas fa-shield-alt"></i> Your payment is 100% secure
+          <i class="fas fa-shield-alt"></i> Your payment is 100% secure with Razorpay
         </div>
       </div>
     </div>
@@ -662,7 +555,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== FIREBASE CONFIGURATION ==========
+  // ========== 🔥 FIREBASE CONFIGURATION ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
     authDomain: "vedanta-d0199.firebaseapp.com",
@@ -678,13 +571,11 @@
   const db = firebase.firestore();
   console.log("🔥 Firebase Connected!");
   
-  // YOUR UPI ID (as provided by you)
-  const MERCHANT_UPI_ID = "sanjeshkarking32@oksbi";
-  const MERCHANT_NAME = "VEDANTA";
+  // ========== RAZORPAY LIVE KEY ==========
+  const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   
   let cart = [];
   let cartTotal = 0;
-  let selectedApp = null;
   let selectedPaymentMethod = null;
   let isProcessing = false;
   
@@ -727,6 +618,8 @@
         </div>
         <div class="order-item-info">
           <h4>${escapeHtml(item.name)}</h4>
+          ${item.size ? `<div class="order-item-size"><i class="fas fa-tshirt"></i> Size: ${escapeHtml(item.size)}</div>` : ''}
+          ${item.color ? `<div class="order-item-size"><i class="fas fa-palette"></i> Color: ${escapeHtml(item.color)}</div>` : ''}
           <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
         </div>
         <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
@@ -735,19 +628,6 @@
     
     document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
     document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
-    
-    // Update COD details text dynamically after each render
-    const codDetailsDiv = document.getElementById('codDetails');
-    if (codDetailsDiv) {
-      codDetailsDiv.innerHTML = `
-        <p><i class="fas fa-truck"></i> Pay ₹${cartTotal.toLocaleString()} when you receive your order</p>
-        <button class="place-order-cod" id="placeOrderCodBtn">Place Order (COD)</button>
-      `;
-      const newCodBtn = document.getElementById('placeOrderCodBtn');
-      if (newCodBtn) {
-        newCodBtn.addEventListener('click', saveOrderCOD);
-      }
-    }
   }
   
   function validateForm() {
@@ -769,15 +649,21 @@
     return true;
   }
   
+  function getCustomerDetails() {
+    return {
+      fullName: document.getElementById('fullName').value.trim(),
+      phone: document.getElementById('phone').value.trim(),
+      email: document.getElementById('email').value.trim() || currentUser.email,
+      address: document.getElementById('address').value,
+      city: document.getElementById('city').value,
+      state: document.getElementById('state').value,
+      pincode: document.getElementById('pincode').value
+    };
+  }
+  
   // ========== SAVE ORDER TO FIREBASE ==========
-  async function saveOrderToFirebase(paymentStatus, paymentMethod, transactionId = null) {
-    const fullName = document.getElementById('fullName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const email = document.getElementById('email').value.trim() || currentUser.email;
-    const address = document.getElementById('address').value;
-    const city = document.getElementById('city').value;
-    const state = document.getElementById('state').value;
-    const pincode = document.getElementById('pincode').value;
+  async function saveOrderToFirebase(paymentStatus, paymentMethod, transactionId = null, paymentDetails = null) {
+    const details = getCustomerDetails();
     
     const itemsWithDetails = cart.map(item => ({
       id: item.id,
@@ -785,6 +671,7 @@
       price: item.price,
       quantity: item.quantity,
       size: item.size || 'Not Selected',
+      color: item.color || 'Not Selected',
       total: item.price * item.quantity
     }));
     
@@ -792,14 +679,15 @@
     
     const orderData = {
       orderId: orderId,
-      customerName: fullName,
-      customerPhone: phone,
-      customerEmail: email,
-      shippingAddress: { address, city, state, pincode },
+      customerName: details.fullName,
+      customerPhone: details.phone,
+      customerEmail: details.email,
+      shippingAddress: { address: details.address, city: details.city, state: details.state, pincode: details.pincode },
       items: itemsWithDetails,
       paymentMethod: paymentMethod,
       paymentStatus: paymentStatus,
-      transactionId: transactionId || null,
+      transactionId: transactionId,
+      razorpayDetails: paymentDetails,
       subtotal: cartTotal,
       total: cartTotal,
       status: paymentStatus === 'paid' ? 'confirmed' : 'pending',
@@ -817,7 +705,7 @@
       localStorage.setItem('vedantaOrders', JSON.stringify(orders));
       localStorage.setItem('lastOrder', JSON.stringify(orderData));
       
-      return { success: true, orderId: orderId };
+      return { success: true, orderId: orderId, orderData: orderData };
     } catch (error) {
       console.error("Firebase Error:", error);
       return { success: false, error: error.message };
@@ -842,7 +730,7 @@
       localStorage.removeItem('vedantaCart');
       showToast(`✅ Order placed successfully! Order ID: ${result.orderId}`);
       setTimeout(() => {
-        window.location.href = 'order-success.html';
+        window.location.href = 'order-success.html?orderId=' + result.orderId;
       }, 1500);
     } else {
       showToast('❌ Failed to place order', true);
@@ -854,176 +742,141 @@
     isProcessing = false;
   }
   
-  // ========== DIRECT UPI REDIRECT WITH YOUR UPI ID ==========
-  // This redirects user to selected UPI app with YOUR UPI ID (sanjeshkarking32@oksbi)
-  // Order is NOT saved automatically - user must complete payment in app
-  function redirectToUpiAppForPayment(app) {
-    const amount = cartTotal;
-    const payeeVpa = MERCHANT_UPI_ID;  // YOUR UPI ID
-    const payeeName = MERCHANT_NAME;
-    const transactionNote = `Vedanta Order ${Date.now()}`;
-    const currency = 'INR';
-    
-    let upiIntent = '';
-    if (app === 'gpay') {
-      upiIntent = `gpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-    } else if (app === 'phonepe') {
-      upiIntent = `phonepe://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-    } else if (app === 'paytm') {
-      upiIntent = `paytmmp://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-    } else if (app === 'amazon') {
-      upiIntent = `amazonpay://upi/pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-    } else {
-      // Fallback standard UPI intent
-      upiIntent = `upi://pay?pa=${payeeVpa}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=${currency}&tn=${encodeURIComponent(transactionNote)}`;
-    }
-    
-    // Store order details temporarily in sessionStorage
-    const pendingOrder = {
-      cart: cart,
-      cartTotal: cartTotal,
-      customerDetails: {
-        fullName: document.getElementById('fullName').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        email: document.getElementById('email').value.trim() || currentUser.email,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        pincode: document.getElementById('pincode').value
-      },
-      timestamp: Date.now()
-    };
-    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(pendingOrder));
-    
-    // Redirect to UPI app
-    window.location.href = upiIntent;
-    
-    // Fallback if app not installed
-    setTimeout(() => {
-      showToast('⚠️ If app didn\'t open, please complete payment manually using UPI ID: ' + MERCHANT_UPI_ID, false);
-    }, 2000);
-    
-    return true;
-  }
-  
-  // ========== PROCESS ONLINE PAYMENT ==========
-  async function processOnlinePayment() {
-    if (!validateForm()) return false;
-    if (isProcessing) return false;
-    
+  // ========== RAZORPAY PAYMENT ==========
+  async function initiateRazorpayPayment() {
+    if (!validateForm()) return;
+    if (isProcessing) return;
     isProcessing = true;
     
-    // Store pending order data before redirect
-    const pendingOrder = {
-      cart: cart,
-      cartTotal: cartTotal,
-      customerDetails: {
-        fullName: document.getElementById('fullName').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        email: document.getElementById('email').value.trim() || currentUser.email,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        pincode: document.getElementById('pincode').value
-      },
-      timestamp: Date.now()
-    };
-    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(pendingOrder));
+    const btn = document.getElementById('payRazorpayBtn');
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Preparing Payment...';
+    }
     
-    showToast(`🔄 Redirecting to ${selectedApp.toUpperCase()} for payment of ₹${cartTotal.toLocaleString()}...`);
+    const details = getCustomerDetails();
     
-    // Redirect to UPI app with YOUR UPI ID
-    redirectToUpiAppForPayment(selectedApp);
+    // Generate a unique receipt ID
+    const receiptId = 'rcpt_' + Date.now();
+    const orderAmount = Math.round(cartTotal); // Amount in rupees
     
-    isProcessing = false;
-    return true;
-  }
-  
-  // Check if returning from payment (for session restoration)
-  function checkForPendingOrder() {
-    const pending = sessionStorage.getItem('pendingVedantaOrder');
-    if (pending && cart.length > 0) {
-      // User might have returned after payment
-      // We don't auto-save - they need to confirm payment manually
-      // But we show a helpful message
-      setTimeout(() => {
-        showToast('💡 Did you complete the payment? Click on your selected UPI app again to confirm order.', false);
-      }, 1000);
+    try {
+      // Step 1: Create order on Razorpay (using their backend API)
+      // Since we're using frontend only, we'll use Razorpay's order creation API directly
+      // Note: For production, you should create order via backend for security
+      
+      const options = {
+        key: RAZORPAY_KEY_ID,
+        amount: orderAmount * 100, // Amount in paise
+        currency: 'INR',
+        name: 'VEDANTA',
+        description: 'Order Payment',
+        image: 'https://sanjeshkarkewat-hash.github.io/VD/favicon.ico',
+        prefill: {
+          name: details.fullName,
+          email: details.email,
+          contact: details.phone
+        },
+        notes: {
+          address: details.address,
+          city: details.city,
+          state: details.state,
+          pincode: details.pincode
+        },
+        theme: {
+          color: '#D4AF37'
+        },
+        modal: {
+          ondismiss: function() {
+            showToast('Payment cancelled', true);
+            if (btn) {
+              btn.disabled = false;
+              btn.innerHTML = '<i class="fas fa-lock"></i> Pay with Razorpay';
+            }
+            isProcessing = false;
+          }
+        }
+      };
+      
+      const razorpay = new Razorpay(options);
+      
+      razorpay.on('payment.success', async function(response) {
+        console.log('Payment Success:', response);
+        
+        // Save order to Firebase with payment details
+        const result = await saveOrderToFirebase(
+          'paid', 
+          'Razorpay', 
+          response.razorpay_payment_id,
+          {
+            orderId: response.razorpay_order_id,
+            paymentId: response.razorpay_payment_id,
+            signature: response.razorpay_signature
+          }
+        );
+        
+        if (result.success) {
+          localStorage.removeItem('vedantaCart');
+          showToast(`✅ Payment successful! Order placed!`);
+          setTimeout(() => {
+            window.location.href = 'order-success.html?orderId=' + result.orderId;
+          }, 1500);
+        } else {
+          showToast('❌ Payment successful but order save failed! Contact support.', true);
+        }
+        
+        isProcessing = false;
+      });
+      
+      razorpay.on('payment.error', function(response) {
+        console.error('Payment Error:', response);
+        showToast('❌ Payment failed! Please try again.', true);
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = '<i class="fas fa-lock"></i> Pay with Razorpay';
+        }
+        isProcessing = false;
+      });
+      
+      razorpay.open();
+      
+    } catch (error) {
+      console.error('Razorpay Error:', error);
+      showToast('❌ Failed to initialize payment. Please try again.', true);
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-lock"></i> Pay with Razorpay';
+      }
+      isProcessing = false;
     }
   }
   
   // ========== EVENT LISTENERS ==========
   const codOption = document.getElementById('codOption');
-  const upiOption = document.getElementById('upiOption');
-  const upiApps = document.getElementById('upiApps');
-  const upiIdSection = document.getElementById('upiIdSection');
+  const razorpayOption = document.getElementById('razorpayOption');
   const codDetails = document.getElementById('codDetails');
-  const payNowBtn = document.getElementById('payNowBtn');
+  const razorpaySection = document.getElementById('razorpaySection');
+  const payRazorpayBtn = document.getElementById('payRazorpayBtn');
   
   codOption?.addEventListener('click', () => {
     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
     codOption.classList.add('selected');
     selectedPaymentMethod = 'cod';
-    upiApps.classList.remove('show');
-    upiIdSection.classList.remove('show');
     codDetails.classList.add('show');
+    razorpaySection.classList.remove('show');
   });
   
-  upiOption?.addEventListener('click', () => {
+  razorpayOption?.addEventListener('click', () => {
     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-    upiOption.classList.add('selected');
-    selectedPaymentMethod = 'upi';
+    razorpayOption.classList.add('selected');
+    selectedPaymentMethod = 'razorpay';
     codDetails.classList.remove('show');
-    upiApps.classList.add('show');
+    razorpaySection.classList.add('show');
   });
   
-  // For UPI app clicks - redirects to app with YOUR UPI ID
-  document.querySelectorAll('.upi-app').forEach(app => {
-    app.addEventListener('click', () => {
-      // Highlight selected app
-      document.querySelectorAll('.upi-app').forEach(a => a.style.background = 'rgba(0,0,0,0.3)');
-      app.style.background = 'rgba(212,175,55,0.2)';
-      selectedApp = app.getAttribute('data-app');
-      
-      // Hide UPI ID section if visible
-      upiIdSection.classList.remove('show');
-      
-      // Process payment - redirect to UPI app
-      processOnlinePayment();
-    });
-  });
+  payRazorpayBtn?.addEventListener('click', initiateRazorpayPayment);
   
-  // For manual UPI ID entry
-  payNowBtn?.addEventListener('click', () => {
-    const upiId = document.getElementById('upiId')?.value.trim();
-    if (!upiId) {
-      showToast('❌ Please enter UPI ID', true);
-      return;
-    }
-    selectedApp = 'other';
-    showToast(`🔄 Redirecting for payment of ₹${cartTotal.toLocaleString()}...`);
-    
-    // Store pending order
-    const pendingOrder = {
-      cart: cart,
-      cartTotal: cartTotal,
-      customerDetails: {
-        fullName: document.getElementById('fullName').value.trim(),
-        phone: document.getElementById('phone').value.trim(),
-        email: document.getElementById('email').value.trim() || currentUser.email,
-        address: document.getElementById('address').value,
-        city: document.getElementById('city').value,
-        state: document.getElementById('state').value,
-        pincode: document.getElementById('pincode').value
-      },
-      timestamp: Date.now()
-    };
-    sessionStorage.setItem('pendingVedantaOrder', JSON.stringify(pendingOrder));
-    
-    // Redirect with entered UPI ID as payee
-    const upiIntent = `upi://pay?pa=${upiId}&pn=${MERCHANT_NAME}&am=${cartTotal}&cu=INR&tn=Vedanta Order ${Date.now()}`;
-    window.location.href = upiIntent;
-  });
+  document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
   
   document.getElementById('getLocationBtn')?.addEventListener('click', () => {
     if (navigator.geolocation) {
@@ -1059,7 +912,6 @@
   }
   
   loadCart();
-  checkForPendingOrder();
 </script>
 </body>
 </html>
