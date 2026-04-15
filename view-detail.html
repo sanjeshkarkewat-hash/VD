@@ -10,13 +10,14 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: 'Space Grotesk', sans-serif;
             background: #050508;
             color: #FFFFFF;
             overflow-x: hidden;
             min-height: 100vh;
+            padding-bottom: 20px;
         }
         body::before {
             content: '';
@@ -30,19 +31,21 @@
             z-index: -1;
         }
         
+        /* Mobile-first header */
         .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 16px 20px;
-            background: rgba(10,10,18,0.95);
+            padding: 12px 16px;
+            background: rgba(10,10,18,0.98);
+            backdrop-filter: blur(10px);
             border-bottom: 1px solid rgba(212,175,55,0.2);
             position: sticky;
             top: 0;
             z-index: 100;
         }
         .logo h1 {
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00);
             -webkit-background-clip: text;
@@ -52,71 +55,73 @@
         .back-btn {
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.3);
-            padding: 8px 20px;
+            padding: 6px 14px;
             border-radius: 40px;
             color: #D4AF37;
             text-decoration: none;
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             cursor: pointer;
             transition: 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
-        .back-btn:hover {
-            background: rgba(212,175,55,0.25);
-        }
+        .back-btn i { font-size: 12px; }
         
         .container {
-            max-width: 800px;
+            max-width: 600px;
             margin: 0 auto;
-            padding: 20px;
+            padding: 12px;
         }
         
-        /* Skeleton Loading */
+        /* Mobile skeleton loading */
         .skeleton-card {
             background: rgba(15,15,22,0.6);
-            border-radius: 28px;
-            padding: 24px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
             border: 1px solid rgba(212,175,55,0.1);
         }
         .skeleton-title {
-            height: 24px;
+            height: 20px;
             width: 40%;
             background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
             border-radius: 8px;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
         }
         .skeleton-line {
-            height: 14px;
+            height: 12px;
             background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
             border-radius: 6px;
-            margin: 12px 0;
+            margin: 10px 0;
         }
         .skeleton-steps {
             display: flex;
             justify-content: space-between;
-            margin: 20px 0;
+            gap: 8px;
+            margin: 16px 0;
         }
         .skeleton-step {
             flex: 1;
             text-align: center;
         }
         .skeleton-step-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
             border-radius: 50%;
-            margin: 0 auto 10px;
+            margin: 0 auto 8px;
         }
         .skeleton-step-label {
-            height: 10px;
-            width: 50px;
+            height: 8px;
+            width: 40px;
             margin: 0 auto;
             background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
             background-size: 200% 100%;
@@ -125,64 +130,53 @@
         }
         .skeleton-item {
             display: flex;
-            gap: 15px;
-            padding: 15px 0;
+            gap: 12px;
+            padding: 12px 0;
         }
         .skeleton-img {
-            width: 80px;
-            height: 80px;
+            width: 65px;
+            height: 65px;
             background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
             background-size: 200% 100%;
             animation: shimmer 1.5s infinite;
-            border-radius: 16px;
+            border-radius: 14px;
             flex-shrink: 0;
-        }
-        .skeleton-text {
-            flex: 1;
         }
         @keyframes shimmer {
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
         
+        /* Mobile status bar */
         .status-bar {
             background: rgba(15,15,22,0.6);
-            border-radius: 28px;
-            padding: 20px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
             border: 1px solid rgba(212,175,55,0.2);
         }
         .status-steps {
             display: flex;
             justify-content: space-between;
-            position: relative;
-            margin: 20px 0;
-        }
-        .status-steps::before {
-            content: '';
-            position: absolute;
-            top: 20px;
-            left: 10%;
-            right: 10%;
-            height: 2px;
-            background: rgba(255,255,255,0.1);
-            z-index: 0;
+            gap: 4px;
+            margin: 16px 0;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
         }
         .step {
             text-align: center;
             flex: 1;
-            position: relative;
-            z-index: 1;
+            min-width: 55px;
         }
         .step-icon {
-            width: 40px;
-            height: 40px;
+            width: 36px;
+            height: 36px;
             background: #1A1A1A;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            margin: 0 auto 10px;
+            margin: 0 auto 6px;
             border: 2px solid rgba(212,175,55,0.3);
             transition: all 0.3s ease;
         }
@@ -197,41 +191,38 @@
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(212,175,55,0); }
+            70% { box-shadow: 0 0 0 8px rgba(212,175,55,0); }
             100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
         }
-        .step-icon i { font-size: 18px; color: #050508; }
-        .step-label { font-size: 11px; color: #888; }
+        .step-icon i { font-size: 14px; color: #050508; }
+        .step-label { font-size: 9px; color: #888; white-space: nowrap; }
         .step.completed .step-label { color: #4CAF50; }
         .step.active .step-label { color: #D4AF37; font-weight: 600; }
         
+        /* Mobile info cards */
         .info-card {
             background: rgba(15,15,22,0.6);
-            border-radius: 28px;
-            padding: 24px;
-            margin-bottom: 20px;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
             border: 1px solid rgba(212,175,55,0.2);
-            transition: transform 0.2s;
-        }
-        .info-card:hover {
-            transform: translateY(-2px);
-            border-color: rgba(212,175,55,0.4);
         }
         .card-title {
-            font-size: 18px;
+            font-size: 15px;
             font-weight: 700;
             color: #D4AF37;
-            margin-bottom: 16px;
+            margin-bottom: 12px;
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding-bottom: 12px;
+            gap: 8px;
+            padding-bottom: 10px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
         }
+        .card-title i { font-size: 14px; }
         .info-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.05);
         }
         .info-row:last-child {
@@ -239,45 +230,36 @@
         }
         .info-label {
             color: #888;
-            font-size: 13px;
+            font-size: 12px;
         }
         .info-value {
             color: #FFFFFF;
             font-weight: 500;
-            font-size: 13px;
+            font-size: 12px;
+            text-align: right;
+            word-break: break-word;
+            max-width: 60%;
         }
         .price-highlight {
             color: #D4AF37;
             font-weight: 700;
         }
-        .discount-badge {
-            background: #4CAF50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            margin-left: 8px;
-            display: inline-block;
-        }
         
+        /* Mobile order items */
         .order-item {
             display: flex;
-            gap: 15px;
-            padding: 15px 0;
+            gap: 12px;
+            padding: 12px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
-            transition: background 0.2s;
         }
-        .order-item:hover {
+        .order-item:active {
             background: rgba(212,175,55,0.05);
-            border-radius: 16px;
-            padding-left: 10px;
-            padding-right: 10px;
         }
         .order-item-img {
-            width: 80px;
-            height: 80px;
+            width: 65px;
+            height: 65px;
             background: #0E0E14;
-            border-radius: 16px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -290,154 +272,133 @@
             object-fit: cover;
         }
         .order-item-img i {
-            font-size: 32px;
+            font-size: 28px;
             color: #D4AF37;
         }
         .order-item-info {
             flex: 1;
         }
         .order-item-name {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600;
-            margin-bottom: 5px;
+            margin-bottom: 4px;
         }
         .item-attributes {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin: 8px 0;
+            gap: 6px;
+            margin: 6px 0;
         }
-        .size-badge {
+        .size-badge, .color-badge {
             background: rgba(212,175,55,0.15);
-            padding: 3px 10px;
+            padding: 2px 8px;
             border-radius: 20px;
-            font-size: 11px;
-            color: #D4AF37;
-        }
-        .color-dot-small {
-            width: 14px;
-            height: 14px;
-            border-radius: 50%;
-            display: inline-block;
-            margin-right: 4px;
-            vertical-align: middle;
-        }
-        .color-badge {
-            background: rgba(212,175,55,0.15);
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
+            font-size: 10px;
             color: #D4AF37;
             display: inline-flex;
             align-items: center;
-            gap: 5px;
+            gap: 4px;
+        }
+        .color-dot-small {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            display: inline-block;
         }
         .order-item-price {
             text-align: right;
-            min-width: 100px;
-        }
-        .original-price {
-            font-size: 12px;
-            color: #888;
-            text-decoration: line-through;
+            min-width: 85px;
         }
         .final-price {
             font-weight: 700;
             color: #D4AF37;
-            font-size: 16px;
+            font-size: 14px;
         }
         .order-item-qty {
-            font-size: 12px;
+            font-size: 10px;
             color: #888;
             margin-top: 4px;
         }
         
+        /* Mobile total section */
         .total-section {
-            margin-top: 15px;
-            padding-top: 15px;
+            margin-top: 12px;
+            padding-top: 12px;
             border-top: 2px solid rgba(212,175,55,0.3);
         }
         .total-row {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0;
+            padding: 6px 0;
+            font-size: 13px;
         }
         .grand-total {
-            font-size: 18px;
+            font-size: 16px;
             font-weight: 800;
             color: #D4AF37;
-            margin-top: 10px;
-            padding-top: 10px;
+            margin-top: 8px;
+            padding-top: 8px;
             border-top: 1px solid rgba(255,255,255,0.1);
         }
         
+        /* Mobile offer card */
         .offer-card {
             background: rgba(76,175,80,0.1);
             border: 1px solid rgba(76,175,80,0.3);
-            border-radius: 16px;
-            padding: 12px 15px;
-            margin: 10px 0;
+            border-radius: 14px;
+            padding: 10px 12px;
+            margin: 8px 0;
+            font-size: 11px;
         }
-        .offer-card i {
-            color: #4CAF50;
-            margin-right: 8px;
-        }
+        .offer-card i { color: #4CAF50; margin-right: 6px; }
         
+        /* Mobile action buttons - fixed at bottom on scroll */
         .action-buttons {
             display: flex;
-            gap: 15px;
-            margin-top: 20px;
-            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 16px;
+            flex-direction: column;
+            position: sticky;
+            bottom: 10px;
+            background: rgba(5,5,8,0.95);
+            backdrop-filter: blur(10px);
+            padding: 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .btn-primary, .btn-secondary {
+            width: 100%;
+            padding: 12px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: transform 0.2s;
+            border: none;
         }
         .btn-primary {
-            flex: 1;
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 14px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 14px;
             color: #050508;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 15px rgba(212,175,55,0.3);
         }
         .btn-secondary {
-            flex: 1;
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.5);
-            padding: 14px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 14px;
             color: #D4AF37;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: all 0.2s;
-        }
-        .btn-secondary:hover {
-            background: rgba(212,175,55,0.25);
-            transform: translateY(-2px);
         }
         .btn-cancel {
             background: rgba(244,67,54,0.15);
             border: 1px solid rgba(244,67,54,0.5);
             color: #F44336;
         }
-        .btn-cancel:hover {
-            background: rgba(244,67,54,0.25);
+        .btn-primary:active, .btn-secondary:active {
+            transform: scale(0.97);
         }
         
+        /* Mobile modal */
         .modal {
             display: none;
             position: fixed;
@@ -445,57 +406,51 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             z-index: 10000;
             align-items: center;
             justify-content: center;
+            padding: 20px;
         }
         .modal.show { display: flex; }
         .modal-content {
-            background: rgba(15,15,22,0.95);
+            background: rgba(15,15,22,0.98);
             backdrop-filter: blur(15px);
-            border-radius: 32px;
-            padding: 28px;
-            max-width: 350px;
-            width: 90%;
+            border-radius: 24px;
+            padding: 24px;
+            max-width: 320px;
+            width: 100%;
             text-align: center;
             border: 1px solid rgba(212,175,55,0.3);
-            animation: modalSlideIn 0.3s ease;
         }
-        @keyframes modalSlideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        .modal-content i { font-size: 60px; color: #F44336; margin-bottom: 20px; }
-        .modal-content h3 { font-size: 24px; margin-bottom: 10px; }
-        .modal-content p { color: #888; font-size: 14px; margin-bottom: 25px; }
-        .modal-buttons { display: flex; gap: 15px; }
-        .modal-btn { flex: 1; padding: 12px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; transition: transform 0.2s; }
-        .modal-btn:hover { transform: scale(0.98); }
+        .modal-content i { font-size: 48px; color: #F44336; margin-bottom: 16px; }
+        .modal-content h3 { font-size: 20px; margin-bottom: 8px; }
+        .modal-content p { color: #888; font-size: 13px; margin-bottom: 20px; }
+        .modal-buttons { display: flex; gap: 12px; }
+        .modal-btn { flex: 1; padding: 10px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; font-size: 13px; }
         .modal-confirm { background: #F44336; color: white; }
         .modal-cancel { background: rgba(255,255,255,0.1); color: white; }
         
+        /* Mobile toast */
         .toast {
             position: fixed;
-            bottom: 30px;
+            bottom: 80px;
             left: 50%;
             transform: translateX(-50%);
             background: #D4AF37;
             color: #050508;
-            padding: 12px 24px;
+            padding: 10px 20px;
             border-radius: 50px;
             font-weight: bold;
             z-index: 10000;
             display: none;
-            animation: fadeInOut 2s ease;
+            font-size: 12px;
+            white-space: nowrap;
+            max-width: 90%;
+            white-space: normal;
+            text-align: center;
         }
-        .toast.show { display: block; }
+        .toast.show { display: block; animation: fadeInOut 2s ease; }
         @keyframes fadeInOut {
             0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
             15% { opacity: 1; transform: translateX(-50%) translateY(0); }
@@ -503,16 +458,15 @@
         }
         
         .error-state { text-align: center; padding: 60px 20px; }
-        .error-state i { font-size: 60px; color: #F44336; margin-bottom: 20px; }
+        .error-state i { font-size: 50px; color: #F44336; margin-bottom: 16px; }
+        .error-state h3 { font-size: 18px; margin-bottom: 8px; }
         
-        @media (max-width: 600px) {
-            .container { padding: 16px; }
-            .status-steps { flex-wrap: wrap; gap: 15px; }
-            .status-steps::before { display: none; }
-            .step { flex: auto; min-width: 80px; }
-            .action-buttons { flex-direction: column; }
-            .order-item { flex-wrap: wrap; }
-            .order-item-price { text-align: left; margin-top: 5px; }
+        .cancelled-banner {
+            text-align: center;
+            padding: 12px;
+            background: rgba(244,67,54,0.1);
+            border-radius: 14px;
+            margin: 12px 0;
         }
     </style>
 </head>
@@ -520,11 +474,11 @@
 
 <div class="header">
     <div class="logo"><h1>VEDANTA</h1></div>
-    <a href="booking.html" class="back-btn"><i class="fas fa-arrow-left"></i> Back to Bookings</a>
+    <a href="booking.html" class="back-btn"><i class="fas fa-arrow-left"></i> Bookings</a>
 </div>
 
 <div class="container" id="app">
-    <!-- Skeleton Loaders - Shows instantly -->
+    <!-- Mobile Skeleton Loaders -->
     <div class="skeleton-card">
         <div class="skeleton-title"></div>
         <div class="skeleton-steps">
@@ -536,20 +490,20 @@
         </div>
     </div>
     <div class="skeleton-card">
-        <div class="skeleton-title" style="width: 30%;"></div>
+        <div class="skeleton-title" style="width: 35%;"></div>
         <div class="skeleton-line"></div>
         <div class="skeleton-line"></div>
-        <div class="skeleton-line"></div>
+        <div class="skeleton-line" style="width: 70%;"></div>
     </div>
     <div class="skeleton-card">
-        <div class="skeleton-title" style="width: 35%;"></div>
+        <div class="skeleton-title" style="width: 40%;"></div>
         <div class="skeleton-item">
             <div class="skeleton-img"></div>
-            <div class="skeleton-text"><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 50%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
+            <div style="flex:1"><div class="skeleton-line" style="width: 80%;"></div><div class="skeleton-line" style="width: 60%;"></div></div>
         </div>
         <div class="skeleton-item">
             <div class="skeleton-img"></div>
-            <div class="skeleton-text"><div class="skeleton-line" style="width: 70%;"></div><div class="skeleton-line" style="width: 50%;"></div><div class="skeleton-line" style="width: 40%;"></div></div>
+            <div style="flex:1"><div class="skeleton-line" style="width: 80%;"></div><div class="skeleton-line" style="width: 60%;"></div></div>
         </div>
     </div>
 </div>
@@ -561,7 +515,7 @@
         <p>Are you sure you want to cancel this order? This action cannot be undone.</p>
         <div class="modal-buttons">
             <button class="modal-btn modal-cancel" id="modalCancelBtn">No, Go Back</button>
-            <button class="modal-btn modal-confirm" id="modalConfirmBtn">Yes, Cancel Order</button>
+            <button class="modal-btn modal-confirm" id="modalConfirmBtn">Yes, Cancel</button>
         </div>
     </div>
 </div>
@@ -582,10 +536,8 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
-    // Enable offline persistence for faster subsequent loads
-    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
-        console.log("Persistence (non-critical):", err);
-    });
+    // Enable offline persistence
+    db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Persistence:", err));
     
     let currentOrder = null;
     let productsCache = new Map();
@@ -604,285 +556,172 @@
         return urlParams.get('orderId');
     }
     
-    // Load products from cache or Firebase
+    // Load products from cache
     async function loadProductsFast() {
-        // Check sessionStorage cache first
         const cached = sessionStorage.getItem('vedanta_products_cache');
         if (cached) {
             try {
                 const parsed = JSON.parse(cached);
-                if (parsed && Date.now() - parsed.timestamp < 3600000) { // 1 hour cache
+                if (parsed && Date.now() - parsed.timestamp < 3600000) {
                     productsCache = new Map(parsed.data);
-                    console.log("✅ Products from cache:", productsCache.size);
+                    console.log("✅ Products from cache");
                     return;
                 }
             } catch(e) {}
         }
         
-        // If not cached, fetch from Firebase
         try {
             const snapshot = await db.collection('products').get();
             const productsArray = [];
             snapshot.forEach(doc => {
                 const p = doc.data();
                 productsCache.set(p.id, {
-                    name: p.name,
-                    images: p.images || [],
-                    icon: p.icon || 'fa-gem',
-                    sizes: p.sizes || [],
-                    colors: p.colors || [],
-                    combos: p.combos || [],
-                    bulkDiscounts: p.bulkDiscounts || {},
-                    price: p.price,
-                    comparePrice: p.comparePrice
+                    name: p.name, images: p.images || [], icon: p.icon || 'fa-gem',
+                    sizes: p.sizes || [], colors: p.colors || []
                 });
                 productsArray.push([p.id, {
                     name: p.name, images: p.images || [], icon: p.icon || 'fa-gem',
-                    sizes: p.sizes || [], colors: p.colors || [], combos: p.combos || [],
-                    bulkDiscounts: p.bulkDiscounts || {}, price: p.price, comparePrice: p.comparePrice
+                    sizes: p.sizes || [], colors: p.colors || []
                 }]);
             });
-            
-            // Cache in sessionStorage
-            sessionStorage.setItem('vedanta_products_cache', JSON.stringify({
-                timestamp: Date.now(),
-                data: productsArray
-            }));
-            console.log("✅ Products from Firestore:", productsCache.size);
-        } catch(e) {
-            console.log("Products fetch error:", e);
-        }
+            sessionStorage.setItem('vedanta_products_cache', JSON.stringify({ timestamp: Date.now(), data: productsArray }));
+        } catch(e) { console.log("Products error:", e); }
     }
     
-    // Get order from cache or Firebase
+    // Load order from cache or Firebase
     async function loadOrderFast() {
         const orderId = getOrderIdFromUrl();
-        if (!orderId) {
-            showError("No order ID found");
-            return false;
-        }
+        if (!orderId) return false;
         
-        // Try to get from sessionStorage first (cached from booking page)
+        // Check cached orders
         const cachedOrders = sessionStorage.getItem('vedanta_orders_fast');
         if (cachedOrders) {
             try {
                 const orders = JSON.parse(cachedOrders);
-                const cachedOrder = orders.find(o => (o.orderId === orderId || o.id === orderId));
-                if (cachedOrder) {
-                    currentOrder = cachedOrder;
-                    return true;
-                }
+                const cached = orders.find(o => (o.orderId === orderId || o.id === orderId));
+                if (cached) { currentOrder = cached; return true; }
             } catch(e) {}
         }
         
-        // Try localStorage backup
-        const localOrders = localStorage.getItem('vedantaOrders_cache');
-        if (localOrders) {
-            try {
-                const cacheData = JSON.parse(localOrders);
-                if (cacheData.orders) {
-                    const cachedOrder = cacheData.orders.find(o => (o.orderId === orderId || o.id === orderId));
-                    if (cachedOrder) {
-                        currentOrder = cachedOrder;
-                        return true;
-                    }
-                }
-            } catch(e) {}
-        }
-        
-        // Finally fetch from Firebase
+        // Fetch from Firebase
         try {
             const doc = await db.collection('orders').doc(orderId).get();
             if (doc.exists) {
                 currentOrder = { id: doc.id, ...doc.data() };
                 return true;
             }
-        } catch (error) {
-            console.error("Error fetching order:", error);
-        }
-        
+        } catch(e) { console.error("Fetch error:", e); }
         return false;
     }
     
-    // Update from Firebase in background (real-time)
-    async function updateOrderFromFirebase() {
+    // Background update
+    async function updateOrderBackground() {
         const orderId = getOrderIdFromUrl();
         if (!orderId || !currentOrder) return;
-        
         try {
             const doc = await db.collection('orders').doc(orderId).get();
             if (doc.exists) {
-                const freshOrder = { id: doc.id, ...doc.data() };
-                if (JSON.stringify(currentOrder) !== JSON.stringify(freshOrder)) {
-                    currentOrder = freshOrder;
+                const fresh = { id: doc.id, ...doc.data() };
+                if (JSON.stringify(currentOrder) !== JSON.stringify(fresh)) {
+                    currentOrder = fresh;
                     renderOrderDetails();
                 }
             }
-        } catch (error) {
-            console.error("Background update error:", error);
-        }
+        } catch(e) {}
     }
     
-    // Set up real-time listener for status updates
-    function setupRealtimeListener() {
+    // Real-time listener
+    function setupRealtime() {
         const orderId = getOrderIdFromUrl();
         if (!orderId) return;
-        
         db.collection('orders').doc(orderId).onSnapshot((doc) => {
             if (doc.exists) {
-                const updatedOrder = { id: doc.id, ...doc.data() };
-                if (JSON.stringify(currentOrder) !== JSON.stringify(updatedOrder)) {
-                    currentOrder = updatedOrder;
+                const updated = { id: doc.id, ...doc.data() };
+                if (JSON.stringify(currentOrder) !== JSON.stringify(updated)) {
+                    currentOrder = updated;
                     renderOrderDetails();
-                    if (updatedOrder.status === 'cancelled') {
-                        showToast("Order status updated: Cancelled");
-                    } else if (updatedOrder.status === 'shipped') {
-                        showToast("🎉 Great news! Your order has been shipped!");
-                    } else if (updatedOrder.status === 'delivered') {
-                        showToast("✅ Order delivered! Thank you for shopping with Vedanta!");
-                    }
+                    if (updated.status === 'shipped') showToast("🎉 Your order has been shipped!");
+                    else if (updated.status === 'delivered') showToast("✅ Order delivered! Thank you!");
+                    else if (updated.status === 'cancelled') showToast("Order cancelled");
                 }
             }
         });
     }
     
-    function canCancelOrder() {
-        if (!currentOrder) return false;
-        const cancellableStatuses = ['pending', 'confirmed', 'processing'];
-        return cancellableStatuses.includes(currentOrder.status);
+    function canCancel() {
+        return currentOrder && ['pending', 'confirmed', 'processing'].includes(currentOrder.status);
     }
     
     async function cancelOrder() {
-        if (!canCancelOrder()) {
-            showToast("This order cannot be cancelled at this stage", true);
-            return;
-        }
-        
+        if (!canCancel()) { showToast("Cannot cancel this order", true); return; }
         try {
             await db.collection('orders').doc(currentOrder.id).update({
-                status: 'cancelled',
-                cancelledAt: new Date().toISOString(),
-                updatedAt: new Date().toISOString()
+                status: 'cancelled', cancelledAt: new Date().toISOString()
             });
             currentOrder.status = 'cancelled';
-            showToast("✅ Order cancelled successfully!");
+            showToast("✅ Order cancelled");
             renderOrderDetails();
-        } catch (error) {
-            showToast("❌ Failed to cancel order", true);
-        }
+        } catch(e) { showToast("Failed to cancel", true); }
     }
     
-    function showCancelConfirmation() {
-        if (!canCancelOrder()) {
-            showToast("This order cannot be cancelled at this stage", true);
-            return;
-        }
-        document.getElementById('cancelModal').classList.add('show');
-    }
-    
-    function hideModal() {
-        document.getElementById('cancelModal').classList.remove('show');
-    }
-    
-    function getProductImage(productId) {
-        const prod = productsCache.get(productId);
-        if (prod && prod.images && prod.images.length > 0) return prod.images[0];
-        return null;
-    }
-    
-    function getProductDetails(productId) {
-        return productsCache.get(productId) || { sizes: [], colors: [], combos: [] };
+    function getProductImage(id) {
+        const prod = productsCache.get(id);
+        return prod?.images?.[0] || null;
     }
     
     function getStatusLabel(status) {
-        const map = {
-            'pending': 'Pending', 'confirmed': 'Confirmed', 'processing': 'Processing',
-            'shipped': 'Shipped', 'delivered': 'Delivered', 'cancelled': 'Cancelled'
-        };
-        return map[status] || status || 'Pending';
-    }
-    
-    function getStatusStep(status) {
-        const steps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
-        if (status === 'cancelled') {
-            return steps.map(step => ({ name: step, label: getStatusLabel(step), completed: false, active: false }));
-        }
-        const currentIndex = steps.indexOf(status);
-        const completedStatuses = steps.slice(0, currentIndex + 1);
-        return steps.map((step, index) => ({
-            name: step, label: getStatusLabel(step),
-            completed: completedStatuses.includes(step), active: step === status
-        }));
+        const map = { pending:'Pending', confirmed:'Confirmed', processing:'Processing', shipped:'Shipped', delivered:'Delivered', cancelled:'Cancelled' };
+        return map[status] || 'Pending';
     }
     
     function renderOrderDetails() {
         if (!currentOrder) return;
         
         const container = document.getElementById('app');
-        const statusSteps = getStatusStep(currentOrder.status);
-        const orderDate = currentOrder.orderDate ? new Date(currentOrder.orderDate).toLocaleString() : 'N/A';
         const isCancelled = currentOrder.status === 'cancelled';
-        const canCancel = canCancelOrder();
+        const canCancelOrder = canCancel();
+        const orderDate = currentOrder.orderDate ? new Date(currentOrder.orderDate).toLocaleString() : 'N/A';
         
-        const itemsHtml = (currentOrder.items || []).map(item => {
-            const productImg = getProductImage(item.id);
-            const productDetails = getProductDetails(item.id);
-            const iconClass = productDetails.icon || 'fa-gem';
-            
-            // Get selected size and color
-            const selectedSize = item.size || item.selectedSize || '';
-            const selectedColor = item.color || item.selectedColor || '';
-            
-            let colorCode = '#D4AF37';
-            if (selectedColor && productDetails.colors) {
-                const colorObj = productDetails.colors.find(c => c.name === selectedColor || c === selectedColor);
-                if (colorObj) {
-                    colorCode = colorObj.code || (typeof colorObj === 'object' ? colorObj.code : '#D4AF37');
-                }
-            }
-            
-            return `
-                <div class="order-item">
-                    <div class="order-item-img">
-                        ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i class="fas ${iconClass}"></i>`}
-                    </div>
-                    <div class="order-item-info">
-                        <div class="order-item-name">${escapeHtml(item.name)}</div>
-                        <div class="item-attributes">
-                            ${selectedSize ? `<span class="size-badge"><i class="fas fa-tshirt"></i> Size: ${escapeHtml(selectedSize)}</span>` : ''}
-                            ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background: ${colorCode};"></span> Color: ${escapeHtml(selectedColor)}</span>` : ''}
-                        </div>
-                        <div class="order-item-qty">Quantity: ${item.quantity}</div>
-                    </div>
-                    <div class="order-item-price">
-                        <div class="final-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-        
+        // Status steps
+        const steps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
         let statusHtml = '';
         if (isCancelled) {
-            statusHtml = `<div style="text-align: center; padding: 20px;"><i class="fas fa-times-circle" style="font-size: 48px; color: #F44336;"></i><p style="margin-top: 10px; color: #F44336; font-weight: 600;">Order Cancelled</p></div>`;
+            statusHtml = `<div class="cancelled-banner"><i class="fas fa-times-circle"></i> Order Cancelled</div>`;
         } else {
-            statusHtml = `<div class="status-steps">${statusSteps.map(step => `
-                <div class="step ${step.completed ? 'completed' : ''} ${step.active ? 'active' : ''}">
-                    <div class="step-icon"><i class="fas ${step.name === 'pending' ? 'fa-clock' : (step.name === 'confirmed' ? 'fa-check' : (step.name === 'processing' ? 'fa-cogs' : (step.name === 'shipped' ? 'fa-truck' : 'fa-check-circle')))}"></i></div>
-                    <div class="step-label">${step.label}</div>
-                </div>`).join('')}</div>`;
+            const currentIndex = steps.indexOf(currentOrder.status);
+            statusHtml = `<div class="status-steps">${steps.map((step, idx) => {
+                const completed = idx <= currentIndex;
+                const active = step === currentOrder.status;
+                const icons = { pending:'fa-clock', confirmed:'fa-check', processing:'fa-cogs', shipped:'fa-truck', delivered:'fa-check-circle' };
+                return `<div class="step ${completed ? 'completed' : ''} ${active ? 'active' : ''}">
+                    <div class="step-icon"><i class="fas ${icons[step]}"></i></div>
+                    <div class="step-label">${getStatusLabel(step)}</div>
+                </div>`;
+            }).join('')}</div>`;
         }
         
-        const hasComboOffer = currentOrder.comboApplied || (currentOrder.items && currentOrder.items.length > 1);
+        // Items HTML
+        const itemsHtml = (currentOrder.items || []).map(item => {
+            const img = getProductImage(item.id);
+            const selectedSize = item.size || item.selectedSize || '';
+            const selectedColor = item.color || item.selectedColor || '';
+            return `<div class="order-item">
+                <div class="order-item-img">${img ? `<img src="${img}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i class="fas fa-gem"></i>`}</div>
+                <div class="order-item-info">
+                    <div class="order-item-name">${escapeHtml(item.name)}</div>
+                    <div class="item-attributes">
+                        ${selectedSize ? `<span class="size-badge"><i class="fas fa-tshirt"></i> ${escapeHtml(selectedSize)}</span>` : ''}
+                        ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background:#D4AF37"></span> ${escapeHtml(selectedColor)}</span>` : ''}
+                    </div>
+                    <div class="order-item-qty">Qty: ${item.quantity}</div>
+                </div>
+                <div class="order-item-price">
+                    <div class="final-price">₹${(item.price * item.quantity).toLocaleString('en-IN')}</div>
+                </div>
+            </div>`;
+        }).join('');
         
-        const cancelButtonHtml = canCancel ? `
-            <button class="btn-secondary btn-cancel" id="cancelOrderBtn">
-                <i class="fas fa-times-circle"></i> Cancel Order
-            </button>
-        ` : (isCancelled ? `
-            <div style="text-align: center; padding: 10px; background: rgba(244,67,54,0.1); border-radius: 16px;">
-                <i class="fas fa-ban"></i> This order has been cancelled
-            </div>
-        ` : ``);
+        const cancelBtnHtml = canCancelOrder ? `<button class="btn-secondary btn-cancel" id="cancelOrderBtn"><i class="fas fa-times-circle"></i> Cancel Order</button>` : '';
         
         container.innerHTML = `
             <div class="status-bar">
@@ -891,100 +730,72 @@
             </div>
             
             <div class="info-card">
-                <div class="card-title"><i class="fas fa-receipt"></i> Order Information</div>
+                <div class="card-title"><i class="fas fa-receipt"></i> Order Info</div>
                 <div class="info-row"><span class="info-label">Order ID</span><span class="info-value">${currentOrder.orderId || currentOrder.id}</span></div>
-                <div class="info-row"><span class="info-label">Order Date</span><span class="info-value">${orderDate}</span></div>
-                <div class="info-row"><span class="info-label">Payment Method</span><span class="info-value">${currentOrder.paymentMethod || 'Cash on Delivery'}</span></div>
-                <div class="info-row"><span class="info-label">Order Status</span><span class="info-value price-highlight" style="color: ${isCancelled ? '#F44336' : '#D4AF37'}">${getStatusLabel(currentOrder.status)}</span></div>
-                ${currentOrder.cancelledAt ? `<div class="info-row"><span class="info-label">Cancelled On</span><span class="info-value">${new Date(currentOrder.cancelledAt).toLocaleString()}</span></div>` : ''}
+                <div class="info-row"><span class="info-label">Date</span><span class="info-value">${orderDate}</span></div>
+                <div class="info-row"><span class="info-label">Payment</span><span class="info-value">${currentOrder.paymentMethod || 'COD'}</span></div>
+                <div class="info-row"><span class="info-label">Status</span><span class="info-value price-highlight" style="color:${isCancelled?'#F44336':'#D4AF37'}">${getStatusLabel(currentOrder.status)}</span></div>
             </div>
             
             <div class="info-card">
-                <div class="card-title"><i class="fas fa-user-circle"></i> Customer Details</div>
-                <div class="info-row"><span class="info-label">Full Name</span><span class="info-value">${escapeHtml(currentOrder.customerName || 'Guest')}</span></div>
-                <div class="info-row"><span class="info-label">Email Address</span><span class="info-value">${escapeHtml(currentOrder.customerEmail || 'N/A')}</span></div>
-                <div class="info-row"><span class="info-label">Phone Number</span><span class="info-value">${escapeHtml(currentOrder.customerPhone || 'N/A')}</span></div>
+                <div class="card-title"><i class="fas fa-user"></i> Customer</div>
+                <div class="info-row"><span class="info-label">Name</span><span class="info-value">${escapeHtml(currentOrder.customerName || 'Guest')}</span></div>
+                <div class="info-row"><span class="info-label">Email</span><span class="info-value">${escapeHtml(currentOrder.customerEmail || 'N/A')}</span></div>
+                <div class="info-row"><span class="info-label">Phone</span><span class="info-value">${escapeHtml(currentOrder.customerPhone || 'N/A')}</span></div>
             </div>
             
             <div class="info-card">
-                <div class="card-title"><i class="fas fa-map-marker-alt"></i> Shipping Address</div>
+                <div class="card-title"><i class="fas fa-map-marker-alt"></i> Shipping</div>
                 <div class="info-row"><span class="info-label">Address</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.address || 'N/A')}</span></div>
                 <div class="info-row"><span class="info-label">City</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.city || 'N/A')}</span></div>
-                <div class="info-row"><span class="info-label">State</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.state || 'N/A')}</span></div>
                 <div class="info-row"><span class="info-label">PIN Code</span><span class="info-value">${escapeHtml(currentOrder.shippingAddress?.pincode || 'N/A')}</span></div>
             </div>
             
-            ${hasComboOffer ? `
-            <div class="offer-card">
-                <i class="fas fa-gift"></i> <strong>Special Offer Applied!</strong>
-                <span style="font-size: 12px; margin-left: 8px;">You saved extra on this combo purchase!</span>
-            </div>
-            ` : ''}
-            
             <div class="info-card">
-                <div class="card-title"><i class="fas fa-shopping-bag"></i> Order Items (${currentOrder.items?.length || 0})</div>
-                ${itemsHtml || '<div class="info-row"><span class="info-label">No items found</span></div>'}
-                
+                <div class="card-title"><i class="fas fa-shopping-bag"></i> Items (${currentOrder.items?.length || 0})</div>
+                ${itemsHtml || '<div class="info-row">No items</div>'}
                 <div class="total-section">
                     <div class="total-row"><span>Subtotal</span><span>₹${(currentOrder.subtotal || currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
-                    ${currentOrder.discount ? `<div class="total-row"><span>Discount</span><span style="color: #4CAF50;">-₹${currentOrder.discount.toLocaleString('en-IN')}</span></div>` : ''}
-                    ${currentOrder.shippingCharge ? `<div class="total-row"><span>Shipping</span><span>₹${currentOrder.shippingCharge.toLocaleString('en-IN')}</span></div>` : '<div class="total-row"><span>Shipping</span><span style="color: #4CAF50;">FREE</span></div>'}
-                    <div class="total-row grand-total"><span>Total Amount</span><span>₹${(currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
+                    ${currentOrder.discount ? `<div class="total-row"><span>Discount</span><span style="color:#4CAF50;">-₹${currentOrder.discount.toLocaleString('en-IN')}</span></div>` : ''}
+                    <div class="total-row"><span>Shipping</span><span>${currentOrder.shippingCharge ? '₹'+currentOrder.shippingCharge : 'FREE'}</span></div>
+                    <div class="total-row grand-total"><span>Total</span><span>₹${(currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
                 </div>
             </div>
             
             <div class="action-buttons">
-                ${cancelButtonHtml}
-                <button class="btn-secondary" onclick="window.location.href='booking.html'"><i class="fas fa-arrow-left"></i> All Orders</button>
-                <button class="btn-primary" onclick="window.location.href='index.html'"><i class="fas fa-shopping-cart"></i> Continue Shopping</button>
+                ${cancelBtnHtml}
+                <button class="btn-secondary" onclick="window.location.href='booking.html'"><i class="fas fa-list"></i> All Orders</button>
+                <button class="btn-primary" onclick="window.location.href='index.html'"><i class="fas fa-shopping-cart"></i> Shop More</button>
             </div>
         `;
         
         const cancelBtn = document.getElementById('cancelOrderBtn');
-        if (cancelBtn) cancelBtn.addEventListener('click', showCancelConfirmation);
-    }
-    
-    function showError(message) {
-        const container = document.getElementById('app');
-        container.innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><h3>${message}</h3><p style="color: #888; margin-top: 10px;">The order you're looking for could not be found.</p><button class="btn-primary" onclick="window.location.href='booking.html'" style="margin-top: 20px;"><i class="fas fa-arrow-left"></i> Back to Bookings</button></div>`;
+        if (cancelBtn) cancelBtn.addEventListener('click', () => document.getElementById('cancelModal').classList.add('show'));
     }
     
     function escapeHtml(str) {
         if (!str) return '';
-        return String(str).replace(/[&<>]/g, function(m) {
-            if (m === '&') return '&amp;';
-            if (m === '<') return '&lt;';
-            if (m === '>') return '&gt;';
-            return m;
-        });
+        return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
     }
     
     // Event listeners
-    document.getElementById('modalCancelBtn')?.addEventListener('click', hideModal);
-    document.getElementById('modalConfirmBtn')?.addEventListener('click', async () => { hideModal(); await cancelOrder(); });
-    window.addEventListener('click', (e) => { if (e.target === document.getElementById('cancelModal')) hideModal(); });
+    document.getElementById('modalCancelBtn')?.addEventListener('click', () => document.getElementById('cancelModal').classList.remove('show'));
+    document.getElementById('modalConfirmBtn')?.addEventListener('click', async () => {
+        document.getElementById('cancelModal').classList.remove('show');
+        await cancelOrder();
+    });
+    window.addEventListener('click', (e) => { if (e.target === document.getElementById('cancelModal')) document.getElementById('cancelModal').classList.remove('show'); });
     
-    // Main initialization - FAST parallel loading
+    // Init - fast parallel loading
     (async function init() {
-        // Load products and order in parallel
-        const [_, orderLoaded] = await Promise.all([
-            loadProductsFast(),
-            loadOrderFast()
-        ]);
-        
-        if (!orderLoaded || !currentOrder) {
-            showError("Order not found");
+        await Promise.all([loadProductsFast(), loadOrderFast()]);
+        if (!currentOrder) {
+            document.getElementById('app').innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><h3>Order Not Found</h3><button class="btn-primary" onclick="location.href='booking.html'">Back to Bookings</button></div>`;
             return;
         }
-        
-        // Render immediately with cached data
         renderOrderDetails();
-        
-        // Then update from Firebase in background (for latest status)
-        await updateOrderFromFirebase();
-        
-        // Set up real-time listener for live status updates
-        setupRealtimeListener();
+        await updateOrderBackground();
+        setupRealtime();
     })();
 </script>
 </body>
