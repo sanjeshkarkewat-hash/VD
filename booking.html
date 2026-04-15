@@ -121,6 +121,17 @@
             overflow: hidden;
             border: 1px solid rgba(212,175,55,0.2);
             transition: transform 0.2s, border-color 0.2s;
+            animation: fadeInUp 0.3s ease-out;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
         .booking-card:hover {
             border-color: rgba(212,175,55,0.5);
@@ -191,6 +202,7 @@
         }
         .status-pending { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.3); }
         .status-processing { background: rgba(33,150,243,0.15); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
+        .status-confirmed { background: rgba(33,150,243,0.15); color: #2196F3; border: 1px solid rgba(33,150,243,0.3); }
         .status-shipped { background: rgba(156,39,176,0.15); color: #CE93D8; border: 1px solid rgba(156,39,176,0.3); }
         .status-delivered { background: rgba(76,175,80,0.15); color: #4CAF50; border: 1px solid rgba(76,175,80,0.3); }
         .status-cancelled { background: rgba(244,67,54,0.15); color: #F44336; border: 1px solid rgba(244,67,54,0.3); }
@@ -328,6 +340,48 @@
             .nav-item { padding: 6px 20px; }
             .product-img { width: 100px; height: 100px; }
         }
+        .loading-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(212,175,55,0.3);
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Skeleton loading effect */
+        .skeleton-card {
+            background: rgba(15,15,22,0.7);
+            border-radius: 28px;
+            padding: 18px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .skeleton-img {
+            width: 90px;
+            height: 90px;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 20px;
+        }
+        .skeleton-text {
+            height: 16px;
+            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 8px;
+            margin: 8px 0;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
     </style>
 </head>
 <body>
@@ -346,13 +400,36 @@
     <div class="tabs">
         <button class="tab-btn active" data-filter="all">All Bookings</button>
         <button class="tab-btn" data-filter="pending">Pending</button>
+        <button class="tab-btn" data-filter="confirmed">Confirmed</button>
         <button class="tab-btn" data-filter="processing">Processing</button>
         <button class="tab-btn" data-filter="delivered">Delivered</button>
         <button class="tab-btn" data-filter="cancelled">Cancelled</button>
     </div>
 </div>
 
-<div class="orders-container" id="ordersContainer"></div>
+<div class="orders-container" id="ordersContainer">
+    <!-- Skeleton loaders for better UX -->
+    <div class="skeleton-card">
+        <div style="display: flex; gap: 16px;">
+            <div class="skeleton-img"></div>
+            <div style="flex: 1;">
+                <div class="skeleton-text" style="width: 60%; height: 20px;"></div>
+                <div class="skeleton-text" style="width: 40%; margin-top: 12px;"></div>
+                <div class="skeleton-text" style="width: 30%; margin-top: 8px;"></div>
+            </div>
+        </div>
+    </div>
+    <div class="skeleton-card">
+        <div style="display: flex; gap: 16px;">
+            <div class="skeleton-img"></div>
+            <div style="flex: 1;">
+                <div class="skeleton-text" style="width: 60%; height: 20px;"></div>
+                <div class="skeleton-text" style="width: 40%; margin-top: 12px;"></div>
+                <div class="skeleton-text" style="width: 30%; margin-top: 8px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
 
 <div class="bottom-nav">
     <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
@@ -374,16 +451,19 @@
         measurementId: "G-RQMQZVGK75"
     };
     
-    // Initialize Firebase
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    console.log("🔥 Firebase Connected!");
+    
+    // Enable Firestore caching for faster subsequent loads
+    db.enablePersistence({ synchronizeTabs: true }).catch(err => {
+        console.log("Persistence error (non-critical):", err);
+    });
     
     let allOrders = [];
-    let productsMap = new Map();
+    let productsCache = new Map();
     let currentFilter = 'all';
     let currentUser = null;
-    let isFirstLoad = true;
+    let isLoading = true;
     
     function showToastMessage(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -406,68 +486,71 @@
         return null;
     }
     
-    // Load products from localStorage (instant)
-    function loadProductsFromCache() {
-        const cachedProducts = localStorage.getItem('vedantaProducts');
-        if (cachedProducts) {
-            try {
-                const products = JSON.parse(cachedProducts);
-                products.forEach(p => {
-                    productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
-                });
-                return true;
-            } catch(e) {}
-        }
-        return false;
-    }
-    
-    // Get orders from localStorage (instant)
-    function getOrdersFromCache() {
-        const cached = localStorage.getItem('vedantaOrders_cache');
-        if (cached) {
-            try {
-                const cacheData = JSON.parse(cached);
-                if (cacheData.orders && cacheData.orders.length > 0) {
-                    return cacheData.orders;
+    // Load products once and cache them
+    async function loadProducts() {
+        if (productsCache.size > 0) return productsCache;
+        
+        try {
+            // Check sessionStorage for cached products (faster than Firestore)
+            const cached = sessionStorage.getItem('vedanta_products_cache');
+            if (cached) {
+                const parsed = JSON.parse(cached);
+                if (parsed && Date.now() - parsed.timestamp < 3600000) { // 1 hour cache
+                    productsCache = new Map(parsed.data);
+                    console.log("✅ Products loaded from cache:", productsCache.size);
+                    return productsCache;
                 }
-            } catch(e) {}
+            }
+            
+            const snapshot = await db.collection('products').get();
+            const productsArray = [];
+            snapshot.forEach(doc => {
+                const p = doc.data();
+                productsCache.set(p.id, { 
+                    images: p.images || [], 
+                    icon: p.icon || 'fa-gem', 
+                    name: p.name || 'Product'
+                });
+                productsArray.push([p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name || 'Product' }]);
+            });
+            
+            // Cache in sessionStorage
+            sessionStorage.setItem('vedanta_products_cache', JSON.stringify({
+                timestamp: Date.now(),
+                data: productsArray
+            }));
+            
+            console.log("✅ Products loaded from Firestore:", productsCache.size);
+        } catch(e) {
+            console.warn("Products fetch error:", e);
         }
-        return [];
-    }
-    
-    // Save orders to localStorage
-    function saveOrdersToCache(orders) {
-        localStorage.setItem('vedantaOrders_cache', JSON.stringify({
-            orders: orders,
-            timestamp: Date.now()
-        }));
+        return productsCache;
     }
     
     function getProductImage(productId) {
-        const prod = productsMap.get(productId);
-        if (prod && prod.images && prod.images.length > 0) return prod.images[0];
-        return null;
+        const prod = productsCache.get(productId);
+        return (prod && prod.images && prod.images.length > 0) ? prod.images[0] : null;
     }
     
     function getProductIcon(productId) {
-        const prod = productsMap.get(productId);
+        const prod = productsCache.get(productId);
         return (prod && prod.icon) ? prod.icon : 'fa-gem';
     }
     
     function getStatusClass(status) {
-        switch(status) {
-            case 'pending': return 'status-pending';
-            case 'processing': return 'status-processing';
-            case 'confirmed': return 'status-processing';
-            case 'shipped': return 'status-shipped';
-            case 'delivered': return 'status-delivered';
-            case 'cancelled': return 'status-cancelled';
-            default: return 'status-pending';
-        }
+        const classes = {
+            'pending': 'status-pending',
+            'confirmed': 'status-confirmed',
+            'processing': 'status-processing',
+            'shipped': 'status-shipped',
+            'delivered': 'status-delivered',
+            'cancelled': 'status-cancelled'
+        };
+        return classes[status] || 'status-pending';
     }
     
     function getStatusLabel(status) {
-        const map = {
+        const labels = {
             'pending': 'Pending',
             'confirmed': 'Confirmed',
             'processing': 'Processing',
@@ -475,7 +558,7 @@
             'delivered': 'Delivered',
             'cancelled': 'Cancelled'
         };
-        return map[status] || status || 'Pending';
+        return labels[status] || status || 'Pending';
     }
     
     function escapeHtml(str) {
@@ -497,7 +580,7 @@
             filtered = filtered.filter(o => o.status === currentFilter);
         }
         
-        if (filtered.length === 0) {
+        if (filtered.length === 0 && !isLoading) {
             container.innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-box-open"></i>
@@ -511,30 +594,43 @@
             return;
         }
         
+        if (filtered.length === 0 && isLoading) return;
+        
         container.innerHTML = '';
-        filtered.forEach(order => {
+        filtered.forEach((order, index) => {
             const mainItem = order.items && order.items[0] ? order.items[0] : { id: 0, name: 'Product', price: order.total || 0, quantity: 1 };
-            const productImg = getProductImage(mainItem.id);
+            const productImgUrl = getProductImage(mainItem.id);
             const iconClass = getProductIcon(mainItem.id);
             const statusClass = getStatusClass(order.status);
             const statusLabel = getStatusLabel(order.status);
             const priceAmount = order.total || (mainItem.price * mainItem.quantity);
             const orderDate = order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-IN') : 'N/A';
+            const orderIdDisplay = order.orderId || order.id;
+            
+            let statusIcon = 'fa-clock';
+            if (order.status === 'cancelled') statusIcon = 'fa-times-circle';
+            else if (order.status === 'delivered') statusIcon = 'fa-check-circle';
+            else if (order.status === 'confirmed') statusIcon = 'fa-check';
+            else if (order.status === 'shipped') statusIcon = 'fa-truck';
+            
+            const imageHtml = productImgUrl 
+                ? `<img src="${productImgUrl}" alt="${escapeHtml(mainItem.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` 
+                : `<i class="fas ${iconClass}"></i>`;
             
             container.innerHTML += `
-                <div class="booking-card" data-order-id="${order.orderId}">
+                <div class="booking-card" style="animation-delay: ${index * 0.05}s">
                     <div class="product-row">
                         <div class="product-img">
-                            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(mainItem.name)}" loading="lazy">` : `<i class="fas ${iconClass}"></i>`}
+                            ${imageHtml}
                         </div>
                         <div class="product-details">
                             <div class="product-name">${escapeHtml(mainItem.name)}</div>
                             <div class="order-meta">
-                                <span><i class="fas fa-hashtag"></i> ${order.orderId}</span>
+                                <span><i class="fas fa-hashtag"></i> ${escapeHtml(orderIdDisplay)}</span>
                                 <span><i class="far fa-calendar-alt"></i> ${orderDate}</span>
                             </div>
                             <div class="status-badge ${statusClass}">
-                                <i class="fas ${order.status === 'cancelled' ? 'fa-times-circle' : (order.status === 'delivered' ? 'fa-check-circle' : 'fa-clock')}"></i> ${statusLabel}
+                                <i class="fas ${statusIcon}"></i> ${statusLabel}
                             </div>
                         </div>
                     </div>
@@ -546,7 +642,7 @@
                         </div>
                         <div class="info-item">
                             <span class="info-label">PAYMENT</span>
-                            <span class="info-value">${order.paymentMethod || 'COD'}</span>
+                            <span class="info-value">${order.paymentMethod || 'Cash on Delivery'}</span>
                         </div>
                         <div class="info-item">
                             <span class="info-label">ITEMS</span>
@@ -555,7 +651,7 @@
                     </div>
                     
                     <div class="card-actions">
-                        <a href="view-detail.html?orderId=${order.orderId}" class="btn-view">
+                        <a href="view-detail.html?orderId=${encodeURIComponent(orderIdDisplay)}" class="btn-view">
                             <i class="fas fa-eye"></i> View Details
                         </a>
                     </div>
@@ -564,7 +660,6 @@
         });
     }
     
-    // Filter tabs
     function initFilters() {
         const btns = document.querySelectorAll('.tab-btn');
         btns.forEach(btn => {
@@ -577,8 +672,8 @@
         });
     }
     
-    // 🔥 MAIN INIT - Super Fast
-    (function init() {
+    // Main initialization - parallel loading for speed
+    (async function init() {
         currentUser = getCurrentUser();
         
         if (!currentUser || !currentUser.email) {
@@ -595,55 +690,84 @@
             return;
         }
         
-        // STEP 1: Load products from cache (instant)
-        loadProductsFromCache();
+        console.log("👤 Current User Email:", currentUser.email);
         
-        // STEP 2: Load orders from cache (instant)
-        const cachedOrders = getOrdersFromCache();
-        const userCachedOrders = cachedOrders.filter(o => o.customerEmail === currentUser.email);
+        // Start parallel loading: products + orders
+        const productsPromise = loadProducts();
         
-        if (userCachedOrders.length > 0) {
-            allOrders = userCachedOrders;
-            renderOrders();
-            console.log("✅ Instant load from cache:", userCachedOrders.length, "orders");
-        }
-        
-        // STEP 3: Setup real-time listener (will update instantly)
-        db.collection('orders')
-            .where('customerEmail', '==', currentUser.email)
-            .orderBy('orderDate', 'desc')
-            .onSnapshot((snapshot) => {
-                const freshOrders = [];
+        // Fetch orders with a single optimized query
+        const fetchOrders = async () => {
+            try {
+                // Try userEmail first
+                let query = db.collection('orders')
+                    .where('userEmail', '==', currentUser.email)
+                    .orderBy('orderDate', 'desc')
+                    .limit(50); // Limit to recent 50 orders for speed
+                
+                let snapshot = await query.get();
+                let orders = [];
+                
                 snapshot.forEach(doc => {
-                    freshOrders.push({ id: doc.id, ...doc.data() });
+                    orders.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // Check if orders changed
-                if (JSON.stringify(allOrders) !== JSON.stringify(freshOrders)) {
-                    allOrders = freshOrders;
-                    saveOrdersToCache(allOrders);
-                    renderOrders();
-                    console.log("🔄 Real-time update:", freshOrders.length, "orders");
+                // If no orders, try customerEmail
+                if (orders.length === 0) {
+                    query = db.collection('orders')
+                        .where('customerEmail', '==', currentUser.email)
+                        .orderBy('orderDate', 'desc')
+                        .limit(50);
                     
-                    if (isFirstLoad && freshOrders.length > 0) {
-                        isFirstLoad = false;
-                    }
+                    snapshot = await query.get();
+                    snapshot.forEach(doc => {
+                        orders.push({ id: doc.id, ...doc.data() });
+                    });
                 }
-            }, (error) => {
-                console.error("Listener error:", error);
-            });
+                
+                return orders;
+            } catch(e) {
+                console.error("Error fetching orders:", e);
+                return [];
+            }
+        };
         
-        // STEP 4: Initialize filters
+        // Wait for both products and orders in parallel
+        const [_, orders] = await Promise.all([productsPromise, fetchOrders()]);
+        
+        allOrders = orders;
+        isLoading = false;
+        renderOrders();
         initFilters();
         
-        // STEP 5: Fetch fresh products in background
-        db.collection('products').get().then(snapshot => {
-            snapshot.forEach(doc => {
-                const p = doc.data();
-                productsMap.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
-            });
-            renderOrders(); // Re-render with product images if needed
-        }).catch(e => console.log("Products fetch error:", e));
+        console.log(`✅ Loaded ${orders.length} orders in ${performance.now()}ms`);
+        
+        // Set up real-time listener for updates (but don't block initial load)
+        setTimeout(() => {
+            db.collection('orders')
+                .where('userEmail', '==', currentUser.email)
+                .orderBy('orderDate', 'desc')
+                .onSnapshot((snapshot) => {
+                    const freshOrders = [];
+                    snapshot.forEach(doc => freshOrders.push({ id: doc.id, ...doc.data() }));
+                    
+                    if (freshOrders.length === 0) {
+                        db.collection('orders')
+                            .where('customerEmail', '==', currentUser.email)
+                            .orderBy('orderDate', 'desc')
+                            .onSnapshot((snap2) => {
+                                const orders2 = [];
+                                snap2.forEach(doc => orders2.push({ id: doc.id, ...doc.data() }));
+                                if (orders2.length > 0 || allOrders.length > 0) {
+                                    allOrders = orders2;
+                                    renderOrders();
+                                }
+                            });
+                    } else if (freshOrders.length > 0 || allOrders.length > 0) {
+                        allOrders = freshOrders;
+                        renderOrders();
+                    }
+                });
+        }, 100);
     })();
 </script>
 </body>
