@@ -33,7 +33,7 @@
 
     /* Premium Animations */
     @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
     @keyframes slideInRight {
@@ -45,23 +45,14 @@
       50% { box-shadow: 0 0 0 8px rgba(212,175,55,0.2); transform: scale(1.02); }
       100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); transform: scale(1); }
     }
-    @keyframes comboSelect {
-      0% { transform: scale(1); border-color: rgba(212,175,55,0.3); }
-      50% { transform: scale(1.02); border-color: #D4AF37; }
-      100% { transform: scale(1); border-color: #D4AF37; }
-    }
-    @keyframes comboUnselect {
-      0% { transform: scale(1); border-color: #D4AF37; }
-      50% { transform: scale(0.98); border-color: rgba(212,175,55,0.5); }
-      100% { transform: scale(1); border-color: rgba(212,175,55,0.3); }
-    }
     .animate-fade-up { animation: fadeInUp 0.5s ease forwards; }
     .animate-slide { animation: slideInRight 0.4s ease forwards; }
 
     .floating-cart {
       position: fixed;
       bottom: 100px;
-      left: 16px;
+      right: 16px;
+      left: auto;
       z-index: 1001;
       cursor: pointer;
     }
@@ -96,7 +87,8 @@
     .cart-sidebar {
       position: fixed;
       top: 0;
-      left: -100%;
+      right: -100%;
+      left: auto;
       width: 85%;
       max-width: 380px;
       height: 100%;
@@ -104,11 +96,11 @@
       backdrop-filter: blur(20px);
       z-index: 2000;
       transition: 0.3s;
-      border-right: 1px solid rgba(212,175,55,0.3);
+      border-left: 1px solid rgba(212,175,55,0.3);
       display: flex;
       flex-direction: column;
     }
-    .cart-sidebar.open { left: 0; }
+    .cart-sidebar.open { right: 0; left: auto; }
     .cart-header {
       padding: 20px;
       border-bottom: 1px solid rgba(212,175,55,0.3);
@@ -215,8 +207,6 @@
     .logo h1 { font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 8px 16px; border-radius: 40px; color: #D4AF37; text-decoration: none; font-size: 13px; font-weight: 600; cursor: pointer; }
 
-    .swipe-indicator { background: rgba(0,0,0,0.5); padding: 8px; text-align: center; font-size: 11px; color: #D4AF37; display: flex; justify-content: center; gap: 20px; }
-
     .product-gallery {
       background: rgba(15,15,22,0.6);
       padding: 20px;
@@ -271,10 +261,6 @@
       align-items: center;
       justify-content: center;
     }
-    .slider-btn:hover {
-      background: #D4AF37;
-      color: #050508;
-    }
     .slider-prev { left: 10px; }
     .slider-next { right: 10px; }
     .badge {
@@ -309,37 +295,9 @@
       overflow: hidden;
       flex-shrink: 0;
     }
-    .thumbnail.active {
-      border-color: #D4AF37;
-    }
-    .thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .thumbnail i {
-      font-size: 30px;
-      color: #D4AF37;
-    }
-    .dots-container {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-top: 12px;
-    }
-    .dot {
-      width: 8px;
-      height: 8px;
-      background: rgba(255,255,255,0.3);
-      border-radius: 50%;
-      cursor: pointer;
-      transition: 0.3s;
-    }
-    .dot.active {
-      background: #D4AF37;
-      width: 20px;
-      border-radius: 10px;
-    }
+    .thumbnail.active { border-color: #D4AF37; }
+    .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+    .thumbnail i { font-size: 30px; color: #D4AF37; }
 
     .product-info {
       background: rgba(15,15,22,0.6);
@@ -358,14 +316,13 @@
     .original-price { font-size: 18px; color: #888; text-decoration: line-through; margin-left: 10px; }
     .discount { background: #FF4500; padding: 4px 10px; border-radius: 25px; font-size: 12px; font-weight: 600; margin-left: 10px; }
     
-    /* Size Section - Fixed Text Color */
-    .size-section {
-      margin: 16px 0 20px 0;
+    .size-section, .color-section, .combo-section {
+      margin: 16px 0;
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
       padding: 12px;
     }
-    .size-title {
+    .size-title, .color-title, .combo-title {
       font-size: 14px;
       font-weight: 600;
       color: #D4AF37;
@@ -387,31 +344,14 @@
       font-size: 14px;
       font-weight: 600;
       cursor: pointer;
-      transition: 0.2s;
       color: #FFFFFF;
     }
-    .size-btn:hover, .size-btn.active {
+    .size-btn.active, .size-btn:hover {
       background: #D4AF37;
       color: #050508;
       border-color: #D4AF37;
     }
     
-    /* Color Section with Color Dots */
-    .color-section {
-      margin: 16px 0 20px 0;
-      background: rgba(0,0,0,0.3);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .color-title {
-      font-size: 14px;
-      font-weight: 600;
-      color: #D4AF37;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
     .color-options {
       display: flex;
       flex-wrap: wrap;
@@ -423,56 +363,20 @@
       align-items: center;
       gap: 6px;
       cursor: pointer;
-      transition: 0.2s;
       padding: 5px;
       border-radius: 12px;
     }
-    .color-btn.active {
-      background: rgba(212,175,55,0.2);
-      transform: scale(1.05);
-    }
+    .color-btn.active { background: rgba(212,175,55,0.2); transform: scale(1.05); }
     .color-circle {
       width: 45px;
       height: 45px;
       border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.3);
-      transition: 0.2s;
     }
-    .color-btn.active .color-circle {
-      border-color: #D4AF37;
-      transform: scale(1.1);
-      box-shadow: 0 0 15px rgba(212,175,55,0.6);
-    }
-    .color-name {
-      font-size: 11px;
-      color: #888;
-    }
-    .color-btn.active .color-name {
-      color: #D4AF37;
-      font-weight: 600;
-    }
+    .color-btn.active .color-circle { border-color: #D4AF37; box-shadow: 0 0 15px rgba(212,175,55,0.6); }
+    .color-name { font-size: 11px; color: #888; }
+    .color-btn.active .color-name { color: #D4AF37; font-weight: 600; }
 
-    /* Premium Combo Section */
-    .combo-section {
-      margin: 16px 0;
-      background: linear-gradient(135deg, rgba(76,175,80,0.1), rgba(212,175,55,0.1));
-      border-radius: 24px;
-      padding: 20px;
-      border: 1px solid rgba(76,175,80,0.3);
-      animation: fadeInUp 0.5s ease;
-    }
-    .combo-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #4CAF50;
-      margin-bottom: 16px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-    }
-    .combo-title i {
-      animation: pulseGlow 1.5s infinite;
-    }
     .combo-list {
       display: flex;
       flex-direction: column;
@@ -481,85 +385,23 @@
     .combo-item {
       background: rgba(0,0,0,0.4);
       border-radius: 20px;
-      padding: 16px 20px;
+      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
-      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border: 2px solid rgba(212,175,55,0.2);
-      position: relative;
-      overflow: hidden;
-    }
-    .combo-item::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: -100%;
-      width: 100%;
-      height: 100%;
-      background: linear-gradient(90deg, transparent, rgba(212,175,55,0.1), transparent);
-      transition: left 0.5s ease;
-    }
-    .combo-item:hover::before {
-      left: 100%;
-    }
-    .combo-item:hover {
-      transform: translateX(8px);
-      border-color: #4CAF50;
-      background: rgba(76,175,80,0.15);
+      transition: all 0.3s ease;
     }
     .combo-item.selected {
       border-color: #D4AF37;
       background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(76,175,80,0.15));
-      animation: comboSelect 0.4s ease;
-      box-shadow: 0 0 20px rgba(212,175,55,0.3);
     }
-    .combo-item.unselecting {
-      animation: comboUnselect 0.3s ease;
-    }
-    .combo-item-info {
-      display: flex;
-      flex-direction: column;
-      gap: 5px;
-    }
-    .combo-quantity {
-      font-size: 20px;
-      font-weight: 800;
-      color: #4CAF50;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .combo-quantity i {
-      font-size: 22px;
-    }
-    .combo-save {
-      font-size: 12px;
-      color: #FFB800;
-      background: rgba(255,184,0,0.15);
-      padding: 2px 8px;
-      border-radius: 20px;
-      display: inline-block;
-      width: fit-content;
-    }
-    .combo-price {
-      text-align: right;
-    }
-    .combo-price .price-big {
-      font-size: 24px;
-      font-weight: 800;
-      color: #D4AF37;
-    }
-    .combo-price .price-small {
-      font-size: 12px;
-      color: #888;
-    }
-    .combo-price .per-piece {
-      font-size: 11px;
-      color: #4CAF50;
-      margin-top: 4px;
-    }
+    .combo-quantity { font-size: 18px; font-weight: 800; color: #4CAF50; display: flex; align-items: center; gap: 8px; }
+    .combo-save { font-size: 11px; color: #FFB800; background: rgba(255,184,0,0.15); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 4px; }
+    .combo-price { text-align: right; }
+    .combo-price .price-big { font-size: 20px; font-weight: 800; color: #D4AF37; }
+    .combo-price .per-piece { font-size: 10px; color: #4CAF50; }
     .combo-select-icon {
       width: 32px;
       height: 32px;
@@ -568,28 +410,21 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 15px;
-      transition: 0.2s;
+      margin-left: 12px;
     }
-    .combo-item.selected .combo-select-icon {
-      background: #4CAF50;
-      animation: pulseGlow 0.5s ease;
-    }
-    .combo-select-icon i {
-      font-size: 16px;
-      color: white;
-    }
+    .combo-item.selected .combo-select-icon { background: #4CAF50; }
+    .combo-select-icon i { font-size: 16px; color: white; }
     .combo-badge {
       position: absolute;
       top: -8px;
-      right: 20px;
+      right: 12px;
       background: #FF4500;
       color: white;
-      font-size: 10px;
-      padding: 2px 10px;
+      font-size: 9px;
+      padding: 2px 8px;
       border-radius: 20px;
-      font-weight: bold;
     }
+    .combo-item { position: relative; }
 
     .product-detail-section {
       margin: 20px 0;
@@ -608,26 +443,9 @@
       border-left: 3px solid #D4AF37;
       padding-left: 12px;
     }
-    .full-description {
-      color: #CCCCCC;
-      line-height: 1.7;
-      font-size: 14px;
-      text-align: justify;
-    }
-    
-    .features-list {
-      margin-top: 16px;
-      background: rgba(212,175,55,0.05);
-      border-radius: 16px;
-      padding: 12px;
-    }
-    .feature-item {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 8px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
+    .full-description { color: #CCCCCC; line-height: 1.7; font-size: 14px; text-align: justify; }
+    .features-list { margin-top: 16px; background: rgba(212,175,55,0.05); border-radius: 16px; padding: 12px; }
+    .feature-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .feature-item:last-child { border-bottom: none; }
     .feature-item i { width: 24px; color: #D4AF37; font-size: 14px; }
     .feature-item span { font-size: 13px; color: #AAAAAA; }
@@ -658,35 +476,27 @@
     }
 
     .action-buttons { display: flex; flex-direction: column; gap: 12px; margin-top: 20px; }
-    .add-cart-btn {
+    .add-cart-btn, .buy-btn {
       width: 100%;
-      background: rgba(212,175,55,0.15);
-      border: 1px solid rgba(212,175,55,0.5);
       padding: 15px;
       border-radius: 50px;
       font-weight: 700;
       font-size: 15px;
-      color: #D4AF37;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
       cursor: pointer;
     }
+    .add-cart-btn {
+      background: rgba(212,175,55,0.15);
+      border: 1px solid rgba(212,175,55,0.5);
+      color: #D4AF37;
+    }
     .buy-btn {
-      width: 100%;
       background: linear-gradient(135deg, #FF4500, #FF8C00);
       border: none;
-      padding: 15px;
-      border-radius: 50px;
-      font-weight: 700;
-      font-size: 15px;
       color: white;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 10px;
-      cursor: pointer;
     }
 
     .section-title { font-size: 20px; font-weight: 700; margin: 24px 16px 16px; display: flex; align-items: center; gap: 10px; }
@@ -706,10 +516,6 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    .related-card:hover {
-      transform: translateY(-3px);
-      background: rgba(212,175,55,0.1);
-    }
     .related-img {
       height: 140px;
       background: #0E0E14;
@@ -720,15 +526,8 @@
       margin-bottom: 10px;
       overflow: hidden;
     }
-    .related-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .related-img i {
-      font-size: 55px;
-      color: #D4AF37;
-    }
+    .related-img img { width: 100%; height: 100%; object-fit: cover; }
+    .related-img i { font-size: 55px; color: #D4AF37; }
     .related-name { font-size: 13px; font-weight: 600; margin-top: 8px; }
     .related-price { font-size: 15px; font-weight: 800; color: #D4AF37; margin-top: 5px; }
 
@@ -764,6 +563,25 @@
       15% { opacity: 1; transform: translateX(-50%) translateY(0); }
       100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
     }
+    
+    /* Loading state */
+    .loading-state {
+      text-align: center;
+      padding: 60px 20px;
+    }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(212,175,55,0.3);
+      border-top-color: #D4AF37;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 20px;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    
+    /* Nav buttons removed - no swipe to change product */
+    .nav-buttons { display: none; }
   </style>
 </head>
 <body>
@@ -788,7 +606,12 @@
   </div>
 </div>
 
-<div class="container" id="app"></div>
+<div class="container" id="app">
+  <div class="loading-state">
+    <div class="loading-spinner"></div>
+    <p>Loading product details...</p>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
 
 <script>
@@ -803,6 +626,7 @@
   
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Persistence:", err));
   
   let allProducts = [];
   let currentProductId = null;
@@ -833,6 +657,7 @@
     }
     saveCart();
     showToast(combo ? `🎉 ${combo.quantity} items for ₹${combo.price} added!` : `🛍️ ${product.name} added!`);
+    if (combo) selectedCombo = null;
   }
   
   function updateCartQuantity(index, newQuantity) {
@@ -890,15 +715,37 @@
   function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m)); }
   
-  function renderProductFromCache() {
-    const savedProducts = localStorage.getItem('vedantaProducts');
-    if (savedProducts && savedProducts !== '[]') allProducts = JSON.parse(savedProducts);
-    currentProductId = localStorage.getItem('vedanta_selected_product_id') || "1";
-    currentProduct = allProducts.find(p => p.id == currentProductId);
-    if (currentProduct) { renderPageContent(); console.log("Instant render from cache"); }
+  function ensureProductFields(p) {
+    if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
+    if (!p.rating) p.rating = 4.5;
+    if (!p.reviewCount) p.reviewCount = 500;
+    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Crafted with precision and care, this piece embodies luxury and elegance.";
+    if (!p.sizes) p.sizes = [];
+    if (!p.colors) p.colors = [];
+    if (!p.combos) p.combos = [];
+    if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India", "Eco-friendly"];
+    if (!p.images) p.images = [];
+    return p;
   }
   
-  async function fetchFreshData() {
+  function setSelectedProductId(id) { localStorage.setItem('vedanta_selected_product_id', id); }
+  
+  async function loadProductData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
+    
+    // Try cache first
+    const cached = localStorage.getItem('vedantaProducts');
+    if (cached) {
+      allProducts = JSON.parse(cached);
+      currentProduct = allProducts.find(p => p.id == currentProductId);
+      if (currentProduct) {
+        currentProduct = ensureProductFields(currentProduct);
+        renderPageContent();
+      }
+    }
+    
+    // Fetch fresh from Firebase
     try {
       const snapshot = await db.collection('products').get();
       const products = [];
@@ -907,37 +754,28 @@
         allProducts = products;
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
         const newProduct = allProducts.find(p => p.id == currentProductId);
-        if (newProduct && JSON.stringify(newProduct) !== JSON.stringify(currentProduct)) { currentProduct = newProduct; renderPageContent(); }
+        if (newProduct) {
+          currentProduct = ensureProductFields(newProduct);
+          renderPageContent();
+        }
       }
-    } catch (error) { console.error(error); }
+    } catch (error) { console.error("Firebase error:", error); }
   }
-  
-  function ensureProductFields(p) {
-    if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
-    if (!p.rating) p.rating = 4.5;
-    if (!p.reviewCount) p.reviewCount = 500;
-    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta.";
-    if (!p.sizes) p.sizes = [];
-    if (!p.colors) p.colors = [];
-    if (!p.combos) p.combos = [];
-    if (!p.bulkDiscounts) p.bulkDiscounts = {};
-    if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India"];
-    if (!p.images) p.images = [];
-    return p;
-  }
-  
-  function setSelectedProductId(id) { localStorage.setItem('vedanta_selected_product_id', id); }
-  function navigateToProduct(productId) { if (!productId) return; setSelectedProductId(productId); window.location.reload(); }
-  function prevProduct() { let idx = allProducts.findIndex(p => p.id == currentProductId); navigateToProduct(allProducts[idx > 0 ? idx - 1 : allProducts.length - 1].id); }
-  function nextProduct() { let idx = allProducts.findIndex(p => p.id == currentProductId); navigateToProduct(allProducts[idx < allProducts.length - 1 ? idx + 1 : 0].id); }
   
   function renderImageSlider() {
     const images = currentProduct.images || [];
     const hasImages = images.length > 0;
     let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
     let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
-    let dotsHtml = hasImages && images.length > 1 ? images.map((_, i) => `<div class="dot ${i === currentSlide ? 'active' : ''}" data-dot-index="${i}"></div>`).join('') : '';
-    return `<div class="product-gallery"><div class="main-image-container"><div class="badge">${currentProduct.badge || 'New'}</div><div class="main-image-slider" id="imageSlider" style="transform: translateX(-${currentSlide * 100}%);">${slidesHtml}</div>${hasImages && images.length > 1 ? `<button class="slider-btn slider-prev" id="prevSlide"><i class="fas fa-chevron-left"></i></button><button class="slider-btn slider-next" id="nextSlide"><i class="fas fa-chevron-right"></i></button>` : ''}</div><div class="thumbnail-list" id="thumbnailList">${thumbnailsHtml}</div>${dotsHtml ? `<div class="dots-container" id="dotsContainer">${dotsHtml}</div>` : ''}</div>`;
+    
+    return `<div class="product-gallery">
+      <div class="main-image-container">
+        <div class="badge">${currentProduct.badge || 'New'}</div>
+        <div class="main-image-slider" id="imageSlider" style="transform: translateX(-${currentSlide * 100}%);">${slidesHtml}</div>
+        ${hasImages && images.length > 1 ? `<button class="slider-btn slider-prev" id="prevSlide"><i class="fas fa-chevron-left"></i></button><button class="slider-btn slider-next" id="nextSlide"><i class="fas fa-chevron-right"></i></button>` : ''}
+      </div>
+      <div class="thumbnail-list" id="thumbnailList">${thumbnailsHtml}</div>
+    </div>`;
   }
   
   function initSlider() {
@@ -948,19 +786,24 @@
     const prevBtn = document.getElementById('prevSlide');
     const nextBtn = document.getElementById('nextSlide');
     const thumbnails = document.querySelectorAll('.thumbnail');
-    const dots = document.querySelectorAll('.dot');
-    function updateSlider(index) { if (index < 0) index = totalSlides - 1; if (index >= totalSlides) index = 0; currentSlide = index; if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`; thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active')); dots.forEach((d, i) => i === currentSlide ? d.classList.add('active') : d.classList.remove('active')); }
+    
+    function updateSlider(index) {
+      if (index < 0) index = totalSlides - 1;
+      if (index >= totalSlides) index = 0;
+      currentSlide = index;
+      if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+      thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active'));
+    }
     prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
     nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
     thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
-    dots.forEach((d, i) => d.addEventListener('click', () => updateSlider(i)));
+    
     if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
     document.querySelector('.product-gallery')?.addEventListener('mouseenter', () => clearInterval(slideInterval));
     document.querySelector('.product-gallery')?.addEventListener('mouseleave', () => { slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000); });
   }
   
-  // Color render with actual color dots
   function renderColors() {
     const colors = currentProduct.colors || [];
     if (colors.length === 0) return '';
@@ -971,16 +814,9 @@
         ${colors.map(color => {
           const colorName = typeof color === 'object' ? color.name : color;
           let colorCode = '#D4AF37';
-          if (typeof color === 'object' && color.code) {
-            colorCode = color.code;
-          } else {
-            const colorMap = {
-              'Red': '#FF0000', 'Blue': '#2196F3', 'Green': '#4CAF50',
-              'Black': '#000000', 'White': '#FFFFFF', 'Yellow': '#FFEB3B',
-              'Purple': '#9C27B0', 'Pink': '#FF69B4', 'Orange': '#FF9800',
-              'Brown': '#795548', 'Gold': '#D4AF37', 'Silver': '#C0C0C0',
-              'Maroon': '#800000', 'Navy': '#000080', 'Teal': '#008080'
-            };
+          if (typeof color === 'object' && color.code) colorCode = color.code;
+          else {
+            const colorMap = { 'Red':'#FF0000', 'Blue':'#2196F3', 'Green':'#4CAF50', 'Black':'#000000', 'White':'#FFFFFF', 'Gold':'#D4AF37', 'Silver':'#C0C0C0' };
             colorCode = colorMap[colorName] || '#D4AF37';
           }
           return `<div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}">
@@ -992,33 +828,30 @@
     </div>`;
   }
   
-  // Premium Combo Offers with Select/Unselect
   function renderComboOffers() {
     const combos = currentProduct.combos || [];
     if (combos.length === 0) return '';
     
     return `<div class="combo-section">
-      <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS <span style="font-size:12px;">(Click to select/unselect)</span></div>
+      <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS</div>
       <div class="combo-list" id="comboList">
         ${combos.map((combo, idx) => {
           const savePercent = Math.round(((combo.quantity * currentProduct.price) - combo.price) / (combo.quantity * currentProduct.price) * 100);
-          const saveAmount = (combo.quantity * currentProduct.price) - combo.price;
           const isSelected = selectedCombo && selectedCombo.quantity === combo.quantity && selectedCombo.price === combo.price;
           return `<div class="combo-item ${isSelected ? 'selected' : ''}" data-combo-index="${idx}" data-combo-qty="${combo.quantity}" data-combo-price="${combo.price}">
             <div class="combo-item-info">
               <div class="combo-quantity"><i class="fas fa-boxes"></i> Buy ${combo.quantity} Items</div>
-              <div class="combo-save">🔥 Save ${savePercent}% (₹${saveAmount} off)</div>
+              <div class="combo-save">🔥 Save ${savePercent}%</div>
             </div>
             <div class="combo-price">
               <div class="price-big">₹${combo.price}</div>
-              <div class="per-piece">₹${Math.round(combo.price / combo.quantity)} per piece</div>
+              <div class="per-piece">₹${Math.round(combo.price / combo.quantity)}/piece</div>
             </div>
             <div class="combo-select-icon"><i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}"></i></div>
             <div class="combo-badge">BEST VALUE</div>
           </div>`;
         }).join('')}
       </div>
-      <div class="offer-tag" style="margin-top:12px; background:rgba(212,175,55,0.1);"><i class="fas fa-info-circle"></i> Click any combo to select/unselect. Selected combo will be applied on checkout!</div>
     </div>`;
   }
   
@@ -1032,12 +865,9 @@
         
         if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
           selectedCombo = null;
-          combo.classList.add('unselecting');
-          setTimeout(() => {
-            combo.classList.remove('selected', 'unselecting');
-            const icon = combo.querySelector('.combo-select-icon i');
-            if (icon) icon.className = 'fas fa-plus-circle';
-          }, 300);
+          combo.classList.remove('selected');
+          const icon = combo.querySelector('.combo-select-icon i');
+          if (icon) icon.className = 'fas fa-plus-circle';
           showToast(`✨ Combo offer removed! Regular price applied.`);
         } else {
           comboItems.forEach(c => {
@@ -1067,6 +897,20 @@
     if (colorBtns.length > 0 && !selectedColor) { colorBtns[0].classList.add('active'); selectedColor = colorBtns[0].getAttribute('data-color'); }
   }
   
+  function attachSizeEvents() {
+    const sizeBtns = document.querySelectorAll('.size-btn');
+    if (sizeBtns.length > 0) {
+      sizeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sizeBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedSize = btn.dataset.size;
+        });
+      });
+      if (!selectedSize) { sizeBtns[0].classList.add('active'); selectedSize = sizeBtns[0].dataset.size; }
+    }
+  }
+  
   function renderRelatedProducts() {
     const related = allProducts.filter(p => p.category === currentProduct.category && p.id != currentProduct.id).slice(0, 4);
     const container = document.getElementById('relatedProducts');
@@ -1074,16 +918,19 @@
     if (related.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No related products</p>'; return; }
     container.innerHTML = related.map(p => {
       const hasImage = p.images && p.images.length > 0;
-      return `<div class="related-card" data-product-id="${p.id}"><div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div><div class="related-name">${escapeHtml(p.name)}</div><div class="related-price">₹${p.price.toLocaleString()}</div></div>`;
+      return `<div class="related-card" data-product-id="${p.id}">
+        <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div>
+        <div class="related-name">${escapeHtml(p.name)}</div>
+        <div class="related-price">₹${p.price.toLocaleString()}</div>
+      </div>`;
     }).join('');
-    document.querySelectorAll('.related-card').forEach(card => card.addEventListener('click', () => navigateToProduct(card.dataset.productId)));
+    document.querySelectorAll('.related-card').forEach(card => card.addEventListener('click', () => { setSelectedProductId(card.dataset.productId); window.location.reload(); }));
   }
   
   function renderPageContent() {
     if (!currentProduct) return;
-    currentProduct = ensureProductFields(currentProduct);
+    
     const discountPercent = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
-    const reviews = [{ name: "Priya Sharma", rating: 5, text: "Absolutely stunning!", date: "15 Mar 2025", verified: true }];
     const galleryHtml = renderImageSlider();
     const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
     const sizeHtml = hasSizes ? `<div class="size-section"><div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div><div class="size-options" id="sizeOptions">${currentProduct.sizes.map(size => `<button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}</div></div>` : '';
@@ -1091,28 +938,53 @@
     const combosHtml = renderComboOffers();
     const benefitsHtml = `<div class="features-list">${currentProduct.benefits.map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}</div>`;
     
-    const html = `<div class="header"><div class="logo"><h1>VEDANTA</h1></div><div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div></div><div class="swipe-indicator"><span><i class="fas fa-arrow-left"></i> Swipe → Previous</span><span><i class="fas fa-arrow-right"></i> Swipe ← Next</span></div>${galleryHtml}<div class="product-info"><div class="product-brand">VEDANTA EXCLUSIVE</div><div class="product-name">${escapeHtml(currentProduct.name)}</div><div class="rating"><div class="stars">★★★★★</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div><div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString()}</span><span class="original-price">₹${currentProduct.originalPrice.toLocaleString()}</span><span class="discount">${discountPercent}% OFF</span></div>${sizeHtml}${colorsHtml}${combosHtml}<div class="product-detail-section"><div class="detail-title"><i class="fas fa-align-left"></i> Product Details</div><div class="full-description">${escapeHtml(currentProduct.fullDesc)}</div></div>${benefitsHtml}<div class="offer-tag"><i class="fas fa-tags"></i> Free Shipping • COD Available • Easy Returns</div><div class="quantity-selector"><button class="qty-btn" id="qtyMinus">-</button><input type="text" class="qty-input" id="qtyInput" value="1" readonly><button class="qty-btn" id="qtyPlus">+</button></div><div class="action-buttons"><button class="add-cart-btn" id="addToCartBtn"><i class="fa-regular fa-bag-shopping"></i> ADD TO CART</button><button class="buy-btn" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button></div></div><div class="section-title"><span></span> You May Also Like</div><div class="related-products" id="relatedProducts"></div><div class="section-title"><span></span> Customer Reviews</div><div class="reviews-section">${reviews.map(r => `<div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> ${r.name} ${r.verified ? '<span style="color:#4CAF50;">✓ Verified</span>' : ''}</div><div class="review-stars-small">★★★★★</div><div class="review-text">"${r.text}"</div><div class="review-date">${r.date}</div></div>`).join('')}</div>`;
+    const html = `<div class="header">
+      <div class="logo"><h1>VEDANTA</h1></div>
+      <div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div>
+    </div>
+    ${galleryHtml}
+    <div class="product-info">
+      <div class="product-brand">VEDANTA EXCLUSIVE</div>
+      <div class="product-name">${escapeHtml(currentProduct.name)}</div>
+      <div class="rating"><div class="stars">★★★★★</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div>
+      <div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString()}</span><span class="original-price">₹${currentProduct.originalPrice.toLocaleString()}</span><span class="discount">${discountPercent}% OFF</span></div>
+      ${sizeHtml}
+      ${colorsHtml}
+      ${combosHtml}
+      <div class="product-detail-section"><div class="detail-title"><i class="fas fa-align-left"></i> Product Details</div><div class="full-description">${escapeHtml(currentProduct.fullDesc)}</div></div>
+      ${benefitsHtml}
+      <div class="offer-tag"><i class="fas fa-tags"></i> Free Shipping • COD Available • Easy Returns</div>
+      <div class="quantity-selector"><button class="qty-btn" id="qtyMinus">-</button><input type="text" class="qty-input" id="qtyInput" value="1" readonly><button class="qty-btn" id="qtyPlus">+</button></div>
+      <div class="action-buttons"><button class="add-cart-btn" id="addToCartBtn"><i class="fa-regular fa-bag-shopping"></i> ADD TO CART</button><button class="buy-btn" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button></div>
+    </div>
+    <div class="section-title"><span></span> You May Also Like</div>
+    <div class="related-products" id="relatedProducts"></div>
+    <div class="section-title"><span></span> Customer Reviews</div>
+    <div class="reviews-section">
+      <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Priya Sharma <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Absolutely stunning product! The quality is amazing."</div><div class="review-date">15 Mar 2025</div></div>
+      <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Amit Kumar <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Worth every penny. Premium finish and fast delivery."</div><div class="review-date">10 Mar 2025</div></div>
+    </div>`;
     
     document.getElementById('app').innerHTML = html;
-    setTimeout(() => { initSlider(); attachProductEvents(hasSizes); attachComboEvents(); renderRelatedProducts(); attachColorEvents(); }, 50);
-  }
-  
-  function attachProductEvents(hasSizes) {
-    if (hasSizes) {
-      const sizeBtns = document.querySelectorAll('.size-btn');
-      sizeBtns.forEach(btn => { btn.addEventListener('click', () => { sizeBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); selectedSize = btn.dataset.size; }); });
-      if (sizeBtns.length > 0 && !selectedSize) { sizeBtns[0].classList.add('active'); selectedSize = sizeBtns[0].dataset.size; }
-    }
-    let qty = 1;
-    const qtyMinus = document.getElementById('qtyMinus');
-    const qtyPlus = document.getElementById('qtyPlus');
-    const qtyInput = document.getElementById('qtyInput');
-    if (qtyMinus && qtyPlus && qtyInput) {
-      qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyInput.value = qty; } });
-      qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
-    }
-    document.getElementById('addToCartBtn')?.addEventListener('click', () => { addToCart(currentProduct, qty, selectedSize, selectedColor, selectedCombo); if (selectedCombo) selectedCombo = null; });
-    document.getElementById('buyNowBtn')?.addEventListener('click', () => { buyNowDirect(currentProduct, qty, selectedSize, selectedColor, selectedCombo); });
+    
+    setTimeout(() => {
+      initSlider();
+      attachSizeEvents();
+      attachColorEvents();
+      attachComboEvents();
+      renderRelatedProducts();
+      
+      let qty = 1;
+      const qtyMinus = document.getElementById('qtyMinus');
+      const qtyPlus = document.getElementById('qtyPlus');
+      const qtyInput = document.getElementById('qtyInput');
+      if (qtyMinus && qtyPlus && qtyInput) {
+        qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyInput.value = qty; } });
+        qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
+      }
+      document.getElementById('addToCartBtn')?.addEventListener('click', () => { addToCart(currentProduct, qty, selectedSize, selectedColor, selectedCombo); if (selectedCombo) selectedCombo = null; });
+      document.getElementById('buyNowBtn')?.addEventListener('click', () => { buyNowDirect(currentProduct, qty, selectedSize, selectedColor, selectedCombo); });
+    }, 50);
   }
   
   function attachCartEvents() {
@@ -1122,13 +994,8 @@
     document.getElementById('checkoutBtn')?.addEventListener('click', () => { if (cart.length === 0) showToast('Cart is empty!'); else window.location.href = 'secure-checkout.html'; });
   }
   
-  window.scrollTo(0, 0);
-  let touchStartX = 0, touchEndX = 0;
-  document.body.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; });
-  document.body.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; if (Math.abs(touchEndX - touchStartX) > 40) touchEndX > touchStartX ? prevProduct() : nextProduct(); });
-  
-  renderProductFromCache();
-  fetchFreshData();
+  // Initialize
+  loadProductData();
   updateCartUI();
   attachCartEvents();
 </script>
