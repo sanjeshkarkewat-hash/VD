@@ -533,7 +533,9 @@
       border-radius: 18px;
       padding: 10px;
       cursor: pointer;
+      transition: transform 0.2s;
     }
+    .related-card:active { transform: scale(0.97); }
     .related-img {
       height: 120px;
       background: #0E0E14;
@@ -669,10 +671,9 @@
       finalPrice = combo.price / combo.quantity;
       comboInfo = `${combo.quantity} for ₹${combo.price}`;
       comboQtyMultiplier = combo.quantity;
-      qty = combo.quantity; // When adding combo, quantity becomes the combo pack size
+      qty = combo.quantity;
     }
     
-    // Check if same combo item exists
     const existingIndex = cart.findIndex(item => 
       item.id === product.id && 
       item.size === size && 
@@ -681,7 +682,6 @@
     );
     
     if (existingIndex !== -1) {
-      // For combo items, quantity is in multiples of combo pack size
       if (combo) {
         cart[existingIndex].quantity += combo.quantity;
       } else {
@@ -709,16 +709,12 @@
     const item = cart[index];
     
     if (item.isCombo && item.comboMultiplier) {
-      // For combo items, quantity must be multiples of the combo pack size
-      // If increasing: add one combo pack
-      // If decreasing: remove one combo pack
       const currentMultiples = item.quantity / item.comboMultiplier;
       const newMultiples = newQuantity / item.comboMultiplier;
       
       if (newMultiples < 1) {
         cart.splice(index, 1);
       } else {
-        // Ensure quantity stays as multiple of combo pack size
         item.quantity = newMultiples * item.comboMultiplier;
       }
     } else {
@@ -851,7 +847,20 @@
     return p;
   }
   
-  function setSelectedProductId(id) { localStorage.setItem('vedanta_selected_product_id', id); }
+  function setSelectedProductId(id) { 
+    localStorage.setItem('vedanta_selected_product_id', id); 
+  }
+  
+  // DIRECT NAVIGATION - Instant page refresh with scroll to top
+  function navigateToRelatedProduct(productId) {
+    if (!productId) return;
+    // Save the product ID
+    localStorage.setItem('vedanta_selected_product_id', productId);
+    // Set flag to scroll to top after page loads
+    sessionStorage.setItem('scrollToTop', 'true');
+    // Force page reload
+    window.location.href = window.location.pathname + '?id=' + productId;
+  }
   
   async function loadProductData() {
     const urlParams = new URLSearchParams(window.location.search);
@@ -881,6 +890,16 @@
         }
       }
     } catch (error) { console.error("Firebase error:", error); }
+    
+    // INSTANT SCROLL TO TOP - Execute immediately when page loads
+    if (sessionStorage.getItem('scrollToTop') === 'true') {
+      sessionStorage.removeItem('scrollToTop');
+      // Immediate scroll to top without delay
+      window.scrollTo(0, 0);
+      // Also ensure body scrolls to top
+      document.body.scrollTop = 0;
+      document.documentElement.scrollTop = 0;
+    }
   }
   
   function renderImageSlider() {
@@ -1043,7 +1062,14 @@
         <div class="related-price">₹${p.price.toLocaleString()}</div>
       </div>`;
     }).join('');
-    document.querySelectorAll('.related-card').forEach(card => card.addEventListener('click', () => { setSelectedProductId(card.dataset.productId); window.location.reload(); }));
+    // Direct click handler for instant navigation
+    document.querySelectorAll('.related-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const productId = card.getAttribute('data-product-id');
+        navigateToRelatedProduct(productId);
+      });
+    });
   }
   
   function renderPageContent() {
