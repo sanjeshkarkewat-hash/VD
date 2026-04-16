@@ -297,6 +297,15 @@
         }
         .cart-item-info h4 { font-size: 14px; margin-bottom: 4px; }
         .cart-item-info p { color: #D4AF37; font-weight: bold; font-size: 14px; }
+        .combo-tag {
+            background: #4CAF50;
+            color: white;
+            font-size: 10px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 4px;
+        }
         .cart-item-actions {
             display: flex;
             align-items: center;
@@ -1581,28 +1590,66 @@ Questions? Ask us!`
     window.setLanguage = setLanguage;
     window.goToProductDetail = goToProductDetail;
     
-    // ========== CART FUNCTIONS ==========
+    // ========== CART FUNCTIONS WITH COMBO SUPPORT ==========
     function saveCart() { 
         localStorage.setItem('vedantaCart', JSON.stringify(cart)); 
         updateCartUI(); 
     }
     
     function addToCart(product) {
-        const existing = cart.find(item => item.id == product.id);
+        // Check if product is a combo (combo info would come from product detail page)
+        // For home page, regular products are added normally
+        const existing = cart.find(item => item.id == product.id && !item.isCombo);
         if (existing) {
             existing.quantity++;
         } else {
-            cart.push({ ...product, quantity: 1 });
+            cart.push({ ...product, quantity: 1, isCombo: false });
         }
         saveCart();
         showToastMessage(`🛍️ ${product.name} added!`);
     }
     
-    function updateCartQuantity(index, newQuantity) {
-        if (newQuantity < 1) {
-            cart.splice(index, 1);
+    // For combo items (used when coming from product detail with combo)
+    function addComboToCart(product, comboQty, comboPrice) {
+        const finalPrice = comboPrice / comboQty;
+        const comboInfo = `${comboQty} for ₹${comboPrice}`;
+        
+        const existing = cart.find(item => item.id == product.id && item.combo === comboInfo);
+        if (existing) {
+            existing.quantity += comboQty;
         } else {
-            cart[index].quantity = newQuantity;
+            cart.push({ 
+                id: product.id, 
+                name: product.name, 
+                price: finalPrice, 
+                quantity: comboQty, 
+                combo: comboInfo,
+                isCombo: true,
+                comboMultiplier: comboQty
+            });
+        }
+        saveCart();
+        showToastMessage(`🎉 Combo: ${comboQty} items for ₹${comboPrice} added!`);
+    }
+    
+    function updateCartQuantity(index, newQuantity) {
+        const item = cart[index];
+        
+        if (item.isCombo && item.comboMultiplier) {
+            const currentMultiples = item.quantity / item.comboMultiplier;
+            const newMultiples = newQuantity / item.comboMultiplier;
+            
+            if (newMultiples < 1) {
+                cart.splice(index, 1);
+            } else {
+                item.quantity = newMultiples * item.comboMultiplier;
+            }
+        } else {
+            if (newQuantity < 1) {
+                cart.splice(index, 1);
+            } else {
+                cart[index].quantity = newQuantity;
+            }
         }
         saveCart();
     }
@@ -1637,6 +1684,7 @@ Questions? Ask us!`
                 <div class="cart-item">
                     <div class="cart-item-info">
                         <h4>${escapeHtml(item.name)}</h4>
+                        ${item.combo ? `<div class="combo-tag"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</div>` : ''}
                         <p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p>
                     </div>
                     <div class="cart-item-actions">
@@ -1654,10 +1702,20 @@ Questions? Ask us!`
                 e.stopPropagation();
                 const idx = parseInt(btn.getAttribute('data-index'));
                 const action = btn.getAttribute('data-action');
+                const item = cart[idx];
+                
                 if (action === 'incr') {
-                    updateCartQuantity(idx, cart[idx].quantity + 1);
+                    if (item.isCombo && item.comboMultiplier) {
+                        updateCartQuantity(idx, item.quantity + item.comboMultiplier);
+                    } else {
+                        updateCartQuantity(idx, item.quantity + 1);
+                    }
                 } else if (action === 'decr') {
-                    updateCartQuantity(idx, cart[idx].quantity - 1);
+                    if (item.isCombo && item.comboMultiplier) {
+                        updateCartQuantity(idx, item.quantity - item.comboMultiplier);
+                    } else {
+                        updateCartQuantity(idx, item.quantity - 1);
+                    }
                 }
             });
         });
@@ -1675,9 +1733,6 @@ Questions? Ask us!`
     
     function showToastMessage(msg, isError = false) {
         let toast = document.getElementById('toastMsg');
-        if (!toast) {
-            toast = document.getElementById('toastMsg');
-        }
         if (toast) {
             toast.innerText = msg;
             toast.style.background = isError ? '#F44336' : '#D4AF37';
@@ -1917,6 +1972,9 @@ Questions? Ask us!`
             renderProducts();
         }
     });
+    
+    // Expose addComboToCart for product detail page
+    window.addComboToCart = addComboToCart;
 </script>
 </body>
 </html>
