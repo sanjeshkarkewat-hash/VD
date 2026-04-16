@@ -16,7 +16,7 @@
       background: #050508;
       color: #FFFFFF;
       overflow-x: hidden;
-      padding-bottom: 80px;
+      padding-bottom: 20px;
     }
     body::before {
       content: '';
@@ -34,7 +34,7 @@
     /* Sticky Floating Cart - Always Visible */
     .floating-cart {
       position: fixed;
-      bottom: 85px;
+      bottom: 30px;
       right: 16px;
       left: auto;
       z-index: 1001;
@@ -119,6 +119,15 @@
     }
     .cart-item-info h4 { font-size: 14px; margin-bottom: 4px; }
     .cart-item-info p { color: #D4AF37; font-weight: bold; font-size: 14px; }
+    .combo-tag {
+      background: #4CAF50;
+      color: white;
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 20px;
+      display: inline-block;
+      margin-top: 4px;
+    }
     .cart-item-actions {
       display: flex;
       align-items: center;
@@ -311,7 +320,6 @@
     .original-price { font-size: 16px; color: #888; text-decoration: line-through; margin-left: 8px; }
     .discount { background: #FF4500; padding: 3px 8px; border-radius: 25px; font-size: 11px; font-weight: 600; margin-left: 8px; }
     
-    /* Mobile Size/Color/Combo */
     .size-section, .color-section, .combo-section {
       margin: 12px 0;
       background: rgba(0,0,0,0.3);
@@ -471,7 +479,7 @@
       border-radius: 12px;
     }
 
-    /* Mobile Action Buttons - Sticky at Bottom */
+    /* Sticky Action Buttons at Bottom */
     .action-buttons {
       position: sticky;
       bottom: 0;
@@ -592,36 +600,6 @@
       margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    /* Bottom Navigation */
-    .bottom-nav {
-      position: fixed;
-      bottom: 12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: rgba(0,0,0,0.95);
-      backdrop-filter: blur(20px);
-      border-radius: 50px;
-      padding: 6px 16px;
-      display: flex;
-      gap: 20px;
-      z-index: 1000;
-      border: 1px solid rgba(212,175,55,0.4);
-    }
-    .nav-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 2px;
-      cursor: pointer;
-      padding: 6px 12px;
-      border-radius: 40px;
-      transition: 0.2s;
-    }
-    .nav-item i { font-size: 18px; color: #ccc; }
-    .nav-item span { font-size: 9px; color: #ccc; }
-    .nav-item.active, .nav-item:active { background: rgba(212,175,55,0.2); }
-    .nav-item.active i, .nav-item.active span { color: #D4AF37; }
   </style>
 </head>
 <body>
@@ -651,12 +629,6 @@
     <div class="loading-spinner"></div>
     <p>Loading product details...</p>
   </div>
-</div>
-
-<div class="bottom-nav">
-  <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
-  <div class="nav-item" onclick="window.location.href='booking.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
-  <div class="nav-item active" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -691,25 +663,71 @@
   function addToCart(product, qty, size, color, combo = null) {
     let finalPrice = product.price;
     let comboInfo = null;
+    let comboQtyMultiplier = 1;
+    
     if (combo) {
       finalPrice = combo.price / combo.quantity;
       comboInfo = `${combo.quantity} for ₹${combo.price}`;
-      qty = combo.quantity;
+      comboQtyMultiplier = combo.quantity;
+      qty = combo.quantity; // When adding combo, quantity becomes the combo pack size
     }
-    const existingIndex = cart.findIndex(item => item.id === product.id && item.size === size && item.color === color && item.combo === comboInfo);
+    
+    // Check if same combo item exists
+    const existingIndex = cart.findIndex(item => 
+      item.id === product.id && 
+      item.size === size && 
+      item.color === color && 
+      item.combo === comboInfo
+    );
+    
     if (existingIndex !== -1) {
-      cart[existingIndex].quantity += qty;
+      // For combo items, quantity is in multiples of combo pack size
+      if (combo) {
+        cart[existingIndex].quantity += combo.quantity;
+      } else {
+        cart[existingIndex].quantity += qty;
+      }
     } else {
-      cart.push({ id: product.id, name: product.name, price: finalPrice, quantity: qty, size: size || 'Default', color: color || '', combo: comboInfo });
+      cart.push({ 
+        id: product.id, 
+        name: product.name, 
+        price: finalPrice, 
+        quantity: qty, 
+        size: size || 'Default', 
+        color: color || '', 
+        combo: comboInfo,
+        isCombo: !!combo,
+        comboMultiplier: comboQtyMultiplier
+      });
     }
     saveCart();
-    showToast(combo ? `🎉 ${combo.quantity} items for ₹${combo.price} added!` : `🛍️ ${product.name} added!`);
+    showToast(combo ? `🎉 Combo Pack: ${combo.quantity} items for ₹${combo.price} added!` : `🛍️ ${product.name} added!`);
     if (combo) selectedCombo = null;
   }
   
   function updateCartQuantity(index, newQuantity) {
-    if (newQuantity < 1) cart.splice(index, 1);
-    else cart[index].quantity = newQuantity;
+    const item = cart[index];
+    
+    if (item.isCombo && item.comboMultiplier) {
+      // For combo items, quantity must be multiples of the combo pack size
+      // If increasing: add one combo pack
+      // If decreasing: remove one combo pack
+      const currentMultiples = item.quantity / item.comboMultiplier;
+      const newMultiples = newQuantity / item.comboMultiplier;
+      
+      if (newMultiples < 1) {
+        cart.splice(index, 1);
+      } else {
+        // Ensure quantity stays as multiple of combo pack size
+        item.quantity = newMultiples * item.comboMultiplier;
+      }
+    } else {
+      if (newQuantity < 1) {
+        cart.splice(index, 1);
+      } else {
+        cart[index].quantity = newQuantity;
+      }
+    }
     saveCart();
   }
   
@@ -725,12 +743,26 @@
     let finalPrice = product.price;
     let finalQty = qty;
     let comboInfo = null;
+    let comboMultiplier = 1;
+    
     if (combo) {
       finalPrice = combo.price / combo.quantity;
       comboInfo = `${combo.quantity} for ₹${combo.price}`;
       finalQty = combo.quantity;
+      comboMultiplier = combo.quantity;
     }
-    const tempCart = [{ id: product.id, name: product.name, price: finalPrice, quantity: finalQty, size: size || 'Default', color: color || '', combo: comboInfo }];
+    
+    const tempCart = [{ 
+      id: product.id, 
+      name: product.name, 
+      price: finalPrice, 
+      quantity: finalQty, 
+      size: size || 'Default', 
+      color: color || '', 
+      combo: comboInfo,
+      isCombo: !!combo,
+      comboMultiplier: comboMultiplier
+    }];
     localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
     showToast(`💳 Proceeding to checkout`);
     setTimeout(() => window.location.href = 'secure-checkout.html', 500);
@@ -752,14 +784,52 @@
     cart.forEach((item, idx) => {
       const itemTotal = item.price * item.quantity;
       total += itemTotal;
-      cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)} ${item.size ? `(${item.size})` : ''} ${item.color ? `- ${item.color}` : ''} ${item.combo ? `<span style="color:#4CAF50;">[${item.combo}]</span>` : ''}</h4><p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`;
+      
+      cartItemsDiv.innerHTML += `<div class="cart-item">
+        <div class="cart-item-info">
+          <h4>${escapeHtml(item.name)} ${item.size ? `(${item.size})` : ''} ${item.color ? `- ${item.color}` : ''}</h4>
+          ${item.combo ? `<span class="combo-tag"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</span>` : ''}
+          <p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p>
+        </div>
+        <div class="cart-item-actions">
+          <button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button>
+          <span class="cart-qty">${item.quantity}</span>
+          <button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button>
+          <button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button>
+        </div>
+      </div>`;
     });
+    
     cartItemsDiv.querySelectorAll('.cart-qty-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); const idx = parseInt(btn.dataset.index); const action = btn.dataset.action; if (action === 'incr') updateCartQuantity(idx, cart[idx].quantity + 1); else if (action === 'decr') updateCartQuantity(idx, cart[idx].quantity - 1); });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const idx = parseInt(btn.dataset.index);
+        const action = btn.dataset.action;
+        const item = cart[idx];
+        
+        if (action === 'incr') {
+          if (item.isCombo && item.comboMultiplier) {
+            updateCartQuantity(idx, item.quantity + item.comboMultiplier);
+          } else {
+            updateCartQuantity(idx, item.quantity + 1);
+          }
+        } else if (action === 'decr') {
+          if (item.isCombo && item.comboMultiplier) {
+            updateCartQuantity(idx, item.quantity - item.comboMultiplier);
+          } else {
+            updateCartQuantity(idx, item.quantity - 1);
+          }
+        }
+      });
     });
+    
     cartItemsDiv.querySelectorAll('.cart-item-remove').forEach(btn => {
-      btn.addEventListener('click', (e) => { e.stopPropagation(); removeFromCart(parseInt(btn.dataset.index)); });
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeFromCart(parseInt(btn.dataset.index));
+      });
     });
+    
     if (cartTotalSpan) cartTotalSpan.innerText = `₹${total}`;
   }
   
