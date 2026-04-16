@@ -843,18 +843,10 @@
     }
   }
   
-  // Show order confirmation and redirect
-  function showOrderConfirmation(orderId) {
-    // Clear cart
+  // ✅ FIXED: Redirect to order-success.html (NOT contact.html)
+  function redirectToOrderSuccess(orderId) {
     localStorage.removeItem('vedantaCart');
-    
-    // Show success message and redirect
-    showToast(`✅ Order placed successfully! Order ID: ${orderId}`);
-    
-    // Redirect to order success page
-    setTimeout(() => {
-      window.location.href = `order-success.html?orderId=${orderId}`;
-    }, 1500);
+    window.location.href = `order-success.html?orderId=${orderId}`;
   }
   
   async function saveOrderCOD() {
@@ -871,15 +863,18 @@
     const result = await saveOrderToFirebase('pending', 'Cash on Delivery');
     
     if (result.success) {
-      showOrderConfirmation(result.orderId);
+      showToast(`✅ Order placed! Order ID: ${result.orderId}`);
+      setTimeout(() => {
+        redirectToOrderSuccess(result.orderId);
+      }, 800);
     } else {
       showToast('❌ Failed to place order. Please try again.', true);
       if (btn) {
         btn.disabled = false;
         btn.innerHTML = 'Confirm Order (COD)';
       }
+      isProcessing = false;
     }
-    isProcessing = false;
   }
   
   async function initiateRazorpayPayment() {
@@ -936,7 +931,6 @@
       razorpay.on('payment.success', async function(response) {
         console.log('Payment Success:', response);
         
-        // Save order to Firebase with payment success
         const result = await saveOrderToFirebase(
           'paid', 
           'Razorpay', 
@@ -949,14 +943,17 @@
         );
         
         if (result.success) {
-          showOrderConfirmation(result.orderId);
+          showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
+          setTimeout(() => {
+            redirectToOrderSuccess(result.orderId);
+          }, 800);
         } else {
+          // ✅ FIXED: Changed contact.html to order-success.html
           showToast('⚠️ Payment successful but order save failed. Please contact support.', true);
           setTimeout(() => {
-            window.location.href = 'contact.html';
+            window.location.href = 'order-success.html';
           }, 2000);
         }
-        
         isProcessing = false;
       });
       

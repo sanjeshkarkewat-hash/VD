@@ -196,132 +196,6 @@
         }
         .logout-btn:active { transform: scale(0.97); }
         
-        /* Modal Styles for Addresses and Payment Methods */
-        .modal-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .modal-overlay.show { display: flex; }
-        .modal-content {
-            background: rgba(15,15,22,0.98);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 24px;
-            max-width: 500px;
-            width: 100%;
-            max-height: 85vh;
-            overflow-y: auto;
-            border: 1px solid rgba(212,175,55,0.3);
-        }
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(212,175,55,0.3);
-        }
-        .modal-header h3 {
-            color: #D4AF37;
-            font-size: 20px;
-        }
-        .close-modal {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 28px;
-            cursor: pointer;
-        }
-        .address-card, .payment-card {
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-            padding: 15px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(212,175,55,0.2);
-        }
-        .address-card.default, .payment-card.default {
-            border-color: #4CAF50;
-            background: rgba(76,175,80,0.1);
-        }
-        .address-card h4, .payment-card h4 {
-            font-size: 14px;
-            margin-bottom: 8px;
-            color: #D4AF37;
-        }
-        .address-card p, .payment-card p {
-            font-size: 12px;
-            color: #ccc;
-            margin-bottom: 5px;
-        }
-        .default-badge {
-            background: #4CAF50;
-            color: white;
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 5px;
-        }
-        .address-actions, .payment-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .edit-address, .delete-address, .edit-payment, .delete-payment {
-            background: rgba(212,175,55,0.15);
-            border: none;
-            padding: 5px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            cursor: pointer;
-            color: #D4AF37;
-        }
-        .delete-address, .delete-payment { color: #F44336; background: rgba(244,67,54,0.15); }
-        .add-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 12px;
-            border-radius: 30px;
-            font-weight: 700;
-            font-size: 14px;
-            color: #050508;
-            cursor: pointer;
-            margin-top: 15px;
-        }
-        .form-group {
-            margin-bottom: 15px;
-        }
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            color: #D4AF37;
-            margin-bottom: 5px;
-        }
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 16px;
-            color: white;
-            font-size: 14px;
-        }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-        
         .toast {
             position: fixed;
             bottom: 80px;
@@ -451,70 +325,8 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Address Modal -->
-<div class="modal-overlay" id="addressModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-map-marker-alt"></i> My Addresses</h3>
-            <button class="close-modal" onclick="closeAddressModal()">&times;</button>
-        </div>
-        <div id="addressList"></div>
-        <button class="add-btn" onclick="showAddAddressForm()"><i class="fas fa-plus-circle"></i> Add New Address</button>
-        <div id="addAddressForm" style="display:none; margin-top:20px;">
-            <h4 style="color:#D4AF37; margin-bottom:15px;">Add New Address</h4>
-            <div class="form-group"><label>Full Name</label><input type="text" id="addrFullName" placeholder="Full name"></div>
-            <div class="form-group"><label>Phone Number</label><input type="tel" id="addrPhone" placeholder="Phone number"></div>
-            <div class="form-group"><label>Street Address</label><input type="text" id="addrStreet" placeholder="House number, street"></div>
-            <div class="form-group"><label>City</label><input type="text" id="addrCity" placeholder="City"></div>
-            <div class="form-row">
-                <div class="form-group"><label>State</label><input type="text" id="addrState" placeholder="State"></div>
-                <div class="form-group"><label>PIN Code</label><input type="text" id="addrPincode" placeholder="PIN code"></div>
-            </div>
-            <div class="form-group"><label>Landmark (Optional)</label><input type="text" id="addrLandmark" placeholder="Near..."></div>
-            <div class="form-group"><label><input type="checkbox" id="addrDefault"> Set as default address</label></div>
-            <div style="display:flex; gap:10px;">
-                <button class="add-btn" onclick="saveAddress()" style="flex:1;">Save Address</button>
-                <button class="add-btn" onclick="cancelAddAddress()" style="background:rgba(255,255,255,0.1);">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Payment Methods Modal -->
-<div class="modal-overlay" id="paymentModal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h3><i class="fas fa-credit-card"></i> Payment Methods</h3>
-            <button class="close-modal" onclick="closePaymentModal()">&times;</button>
-        </div>
-        <div id="paymentList"></div>
-        <button class="add-btn" onclick="showAddPaymentForm()"><i class="fas fa-plus-circle"></i> Add Payment Method</button>
-        <div id="addPaymentForm" style="display:none; margin-top:20px;">
-            <h4 style="color:#D4AF37; margin-bottom:15px;">Add Payment Method</h4>
-            <div class="form-group"><label>Card Type</label>
-                <select id="paymentType">
-                    <option value="Credit Card">💳 Credit Card</option>
-                    <option value="Debit Card">💳 Debit Card</option>
-                    <option value="UPI">📱 UPI ID</option>
-                    <option value="NetBanking">🏦 NetBanking</option>
-                </select>
-            </div>
-            <div class="form-group"><label>Card Number / UPI ID</label><input type="text" id="paymentNumber" placeholder="Enter details"></div>
-            <div class="form-row">
-                <div class="form-group"><label>Expiry (MM/YY)</label><input type="text" id="paymentExpiry" placeholder="MM/YY"></div>
-                <div class="form-group"><label>CVV</label><input type="password" id="paymentCvv" placeholder="CVV" maxlength="4"></div>
-            </div>
-            <div class="form-group"><label>Cardholder Name</label><input type="text" id="paymentName" placeholder="Name on card"></div>
-            <div class="form-group"><label><input type="checkbox" id="paymentDefault"> Set as default payment method</label></div>
-            <div style="display:flex; gap:10px;">
-                <button class="add-btn" onclick="savePaymentMethod()" style="flex:1;">Save</button>
-                <button class="add-btn" onclick="cancelAddPayment()" style="background:rgba(255,255,255,0.1);">Cancel</button>
-            </div>
-        </div>
-    </div>
-</div>
-
 <script>
+    // ========== 🔥 FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
         authDomain: "vedanta-d0199.firebaseapp.com",
@@ -527,8 +339,8 @@
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Persistence:", err));
     
+    // ==================== 🔐 EMAILJS CONFIGURATION ====================
     const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
     const EMAILJS_SERVICE_ID = "service_6ucrgd9";
     const EMAILJS_TEMPLATE_ID = "template_kniixfj";
@@ -541,8 +353,6 @@
     let countdownInterval = null;
     let resendCooldown = false;
     let userOrders = [];
-    let userAddresses = [];
-    let userPaymentMethods = [];
     
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -553,358 +363,133 @@
         setTimeout(() => toast.classList.remove('show'), 2500);
     }
     
-    // Load user data from Firebase
-    async function loadUserAddresses() {
-        if (!currentUser || !currentUser.email) return [];
-        try {
-            const snapshot = await db.collection('userAddresses')
-                .where('userEmail', '==', currentUser.email)
-                .orderBy('isDefault', 'desc')
-                .get();
-            const addresses = [];
-            snapshot.forEach(doc => addresses.push({ id: doc.id, ...doc.data() }));
-            userAddresses = addresses;
-            return addresses;
-        } catch(e) { console.log("Error loading addresses:", e); return []; }
-    }
-    
-    async function loadUserPaymentMethods() {
-        if (!currentUser || !currentUser.email) return [];
-        try {
-            const snapshot = await db.collection('userPayments')
-                .where('userEmail', '==', currentUser.email)
-                .orderBy('isDefault', 'desc')
-                .get();
-            const payments = [];
-            snapshot.forEach(doc => payments.push({ id: doc.id, ...doc.data() }));
-            userPaymentMethods = payments;
-            return payments;
-        } catch(e) { console.log("Error loading payments:", e); return []; }
-    }
-    
-    async function saveAddressToFirebase(address) {
-        if (!currentUser || !currentUser.email) return false;
-        try {
-            // If this is default, remove default from others
-            if (address.isDefault) {
-                const others = await db.collection('userAddresses')
-                    .where('userEmail', '==', currentUser.email)
-                    .get();
-                others.forEach(doc => {
-                    db.collection('userAddresses').doc(doc.id).update({ isDefault: false });
-                });
-            }
-            await db.collection('userAddresses').add({
-                ...address,
-                userEmail: currentUser.email,
-                createdAt: new Date().toISOString()
-            });
-            return true;
-        } catch(e) { console.log("Error saving address:", e); return false; }
-    }
-    
-    async function savePaymentToFirebase(payment) {
-        if (!currentUser || !currentUser.email) return false;
-        try {
-            if (payment.isDefault) {
-                const others = await db.collection('userPayments')
-                    .where('userEmail', '==', currentUser.email)
-                    .get();
-                others.forEach(doc => {
-                    db.collection('userPayments').doc(doc.id).update({ isDefault: false });
-                });
-            }
-            await db.collection('userPayments').add({
-                ...payment,
-                userEmail: currentUser.email,
-                createdAt: new Date().toISOString()
-            });
-            return true;
-        } catch(e) { console.log("Error saving payment:", e); return false; }
-    }
-    
-    async function deleteAddressFromFirebase(addressId) {
-        try {
-            await db.collection('userAddresses').doc(addressId).delete();
-            return true;
-        } catch(e) { return false; }
-    }
-    
-    async function deletePaymentFromFirebase(paymentId) {
-        try {
-            await db.collection('userPayments').doc(paymentId).delete();
-            return true;
-        } catch(e) { return false; }
-    }
-    
-    async function setDefaultAddress(addressId) {
-        try {
-            await db.collection('userAddresses').doc(addressId).update({ isDefault: true });
-            const others = await db.collection('userAddresses')
-                .where('userEmail', '==', currentUser.email)
-                .get();
-            others.forEach(doc => {
-                if (doc.id !== addressId) {
-                    db.collection('userAddresses').doc(doc.id).update({ isDefault: false });
-                }
-            });
-            return true;
-        } catch(e) { return false; }
-    }
-    
-    async function setDefaultPayment(paymentId) {
-        try {
-            await db.collection('userPayments').doc(paymentId).update({ isDefault: true });
-            const others = await db.collection('userPayments')
-                .where('userEmail', '==', currentUser.email)
-                .get();
-            others.forEach(doc => {
-                if (doc.id !== paymentId) {
-                    db.collection('userPayments').doc(doc.id).update({ isDefault: false });
-                }
-            });
-            return true;
-        } catch(e) { return false; }
-    }
-    
-    // Modal functions
-    function openAddressModal() {
-        document.getElementById('addressModal').classList.add('show');
-        renderAddressList();
-    }
-    function closeAddressModal() { document.getElementById('addressModal').classList.remove('show'); }
-    function openPaymentModal() {
-        document.getElementById('paymentModal').classList.add('show');
-        renderPaymentList();
-    }
-    function closePaymentModal() { document.getElementById('paymentModal').classList.remove('show'); }
-    
-    function showAddAddressForm() {
-        document.getElementById('addAddressForm').style.display = 'block';
-    }
-    function cancelAddAddress() {
-        document.getElementById('addAddressForm').style.display = 'none';
-        document.getElementById('addrFullName').value = '';
-        document.getElementById('addrPhone').value = '';
-        document.getElementById('addrStreet').value = '';
-        document.getElementById('addrCity').value = '';
-        document.getElementById('addrState').value = '';
-        document.getElementById('addrPincode').value = '';
-        document.getElementById('addrLandmark').value = '';
-        document.getElementById('addrDefault').checked = false;
-    }
-    
-    async function saveAddress() {
-        const address = {
-            fullName: document.getElementById('addrFullName').value,
-            phone: document.getElementById('addrPhone').value,
-            street: document.getElementById('addrStreet').value,
-            city: document.getElementById('addrCity').value,
-            state: document.getElementById('addrState').value,
-            pincode: document.getElementById('addrPincode').value,
-            landmark: document.getElementById('addrLandmark').value,
-            isDefault: document.getElementById('addrDefault').checked
-        };
-        if (!address.fullName || !address.phone || !address.street || !address.city || !address.state || !address.pincode) {
-            showToast('❌ Please fill all required fields', true);
-            return;
-        }
-        const success = await saveAddressToFirebase(address);
-        if (success) {
-            showToast('✅ Address saved successfully!');
-            cancelAddAddress();
-            await loadUserAddresses();
-            renderAddressList();
-        } else {
-            showToast('❌ Failed to save address', true);
-        }
-    }
-    
-    async function deleteAddress(id) {
-        if (confirm('Delete this address?')) {
-            const success = await deleteAddressFromFirebase(id);
-            if (success) {
-                showToast('✅ Address deleted');
-                await loadUserAddresses();
-                renderAddressList();
-            }
-        }
-    }
-    
-    async function renderAddressList() {
-        const container = document.getElementById('addressList');
-        await loadUserAddresses();
-        if (userAddresses.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No saved addresses</div>';
-            return;
-        }
-        container.innerHTML = userAddresses.map(addr => `
-            <div class="address-card ${addr.isDefault ? 'default' : ''}">
-                <h4>${escapeHtml(addr.fullName)}</h4>
-                <p>📞 ${escapeHtml(addr.phone)}</p>
-                <p>📍 ${escapeHtml(addr.street)}, ${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</p>
-                ${addr.landmark ? `<p>🏷️ Landmark: ${escapeHtml(addr.landmark)}</p>` : ''}
-                ${addr.isDefault ? '<span class="default-badge"><i class="fas fa-check-circle"></i> Default</span>' : ''}
-                <div class="address-actions">
-                    ${!addr.isDefault ? `<button class="edit-address" onclick="setDefaultAddress('${addr.id}')">Set as Default</button>` : ''}
-                    <button class="delete-address" onclick="deleteAddress('${addr.id}')">Delete</button>
-                </div>
-            </div>
-        `).join('');
-    }
-    
-    function showAddPaymentForm() {
-        document.getElementById('addPaymentForm').style.display = 'block';
-    }
-    function cancelAddPayment() {
-        document.getElementById('addPaymentForm').style.display = 'none';
-        document.getElementById('paymentType').value = 'Credit Card';
-        document.getElementById('paymentNumber').value = '';
-        document.getElementById('paymentExpiry').value = '';
-        document.getElementById('paymentCvv').value = '';
-        document.getElementById('paymentName').value = '';
-        document.getElementById('paymentDefault').checked = false;
-    }
-    
-    async function savePaymentMethod() {
-        const payment = {
-            type: document.getElementById('paymentType').value,
-            number: document.getElementById('paymentNumber').value,
-            expiry: document.getElementById('paymentExpiry').value,
-            cvv: document.getElementById('paymentCvv').value,
-            name: document.getElementById('paymentName').value,
-            isDefault: document.getElementById('paymentDefault').checked
-        };
-        if (!payment.number || !payment.name) {
-            showToast('❌ Please fill required fields', true);
-            return;
-        }
-        const success = await savePaymentToFirebase(payment);
-        if (success) {
-            showToast('✅ Payment method saved!');
-            cancelAddPayment();
-            await loadUserPaymentMethods();
-            renderPaymentList();
-        } else {
-            showToast('❌ Failed to save', true);
-        }
-    }
-    
-    async function deletePayment(id) {
-        if (confirm('Delete this payment method?')) {
-            const success = await deletePaymentFromFirebase(id);
-            if (success) {
-                showToast('✅ Payment method deleted');
-                await loadUserPaymentMethods();
-                renderPaymentList();
-            }
-        }
-    }
-    
-    async function renderPaymentList() {
-        const container = document.getElementById('paymentList');
-        await loadUserPaymentMethods();
-        if (userPaymentMethods.length === 0) {
-            container.innerHTML = '<div style="text-align:center; padding:20px; color:#888;">No saved payment methods</div>';
-            return;
-        }
-        container.innerHTML = userPaymentMethods.map(pm => {
-            let maskedNumber = pm.number;
-            if (pm.type === 'Credit Card' || pm.type === 'Debit Card') {
-                maskedNumber = '•••• ' + pm.number.slice(-4);
-            }
-            return `
-                <div class="payment-card ${pm.isDefault ? 'default' : ''}">
-                    <h4><i class="fas ${pm.type === 'UPI' ? 'fa-mobile-alt' : 'fa-credit-card'}"></i> ${escapeHtml(pm.type)}</h4>
-                    <p>${escapeHtml(maskedNumber)}</p>
-                    <p>${escapeHtml(pm.name)}</p>
-                    ${pm.expiry ? `<p>Expires: ${escapeHtml(pm.expiry)}</p>` : ''}
-                    ${pm.isDefault ? '<span class="default-badge"><i class="fas fa-check-circle"></i> Default</span>' : ''}
-                    <div class="payment-actions">
-                        ${!pm.isDefault ? `<button class="edit-payment" onclick="setDefaultPayment('${pm.id}')">Set as Default</button>` : ''}
-                        <button class="delete-payment" onclick="deletePayment('${pm.id}')">Delete</button>
-                    </div>
-                </div>
-            `;
-        }).join('');
-    }
-    
-    window.setDefaultAddress = async (id) => {
-        await setDefaultAddress(id);
-        await loadUserAddresses();
-        renderAddressList();
-        showToast('✅ Default address updated');
-    };
-    window.setDefaultPayment = async (id) => {
-        await setDefaultPayment(id);
-        await loadUserPaymentMethods();
-        renderPaymentList();
-        showToast('✅ Default payment method updated');
-    };
-    window.deleteAddress = deleteAddress;
-    window.deletePayment = deletePayment;
-    window.saveAddress = saveAddress;
-    window.savePaymentMethod = savePaymentMethod;
-    window.showAddAddressForm = showAddAddressForm;
-    window.cancelAddAddress = cancelAddAddress;
-    window.showAddPaymentForm = showAddPaymentForm;
-    window.cancelAddPayment = cancelAddPayment;
-    window.openAddressModal = openAddressModal;
-    window.closeAddressModal = closeAddressModal;
-    window.openPaymentModal = openPaymentModal;
-    window.closePaymentModal = closePaymentModal;
-    
-    // Load user orders
+    // ✅ FIXED: Load ALL orders from Firebase (same as booking.html)
     async function loadUserOrdersFromFirebase(email) {
         if (!email) return [];
-        const cached = sessionStorage.getItem(`vedanta_orders_${email}`);
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached);
-                if (Date.now() - parsed.timestamp < 300000) return parsed.orders;
-            } catch(e) {}
-        }
+        
         try {
-            const snapshot = await db.collection('orders')
+            console.log("Fetching orders for email:", email);
+            
+            // Query 1: By customerEmail
+            const emailSnapshot = await db.collection('orders')
                 .where('customerEmail', '==', email)
-                .orderBy('orderDate', 'desc')
-                .limit(20)
                 .get();
-            const orders = [];
-            snapshot.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-            sessionStorage.setItem(`vedanta_orders_${email}`, JSON.stringify({ timestamp: Date.now(), orders: orders }));
+            
+            // Query 2: By userEmail (for older orders)
+            const userEmailSnapshot = await db.collection('orders')
+                .where('userEmail', '==', email)
+                .get();
+            
+            // Query 3: By userId (for Firebase Auth users)
+            let userIdSnapshot = { docs: [] };
+            if (currentUser && currentUser.uid) {
+                userIdSnapshot = await db.collection('orders')
+                    .where('userId', '==', currentUser.uid)
+                    .get();
+            }
+            
+            // Merge all orders without duplicates
+            const ordersMap = new Map();
+            
+            emailSnapshot.forEach(doc => {
+                ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
+            });
+            
+            userEmailSnapshot.forEach(doc => {
+                if (!ordersMap.has(doc.id)) {
+                    ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
+                }
+            });
+            
+            userIdSnapshot.forEach(doc => {
+                if (!ordersMap.has(doc.id)) {
+                    ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
+                }
+            });
+            
+            // Convert to array and sort by date (newest first)
+            let orders = Array.from(ordersMap.values());
+            orders.sort((a, b) => {
+                const dateA = a.orderDate ? new Date(a.orderDate) : new Date(0);
+                const dateB = b.orderDate ? new Date(b.orderDate) : new Date(0);
+                return dateB - dateA;
+            });
+            
+            console.log("Total orders found:", orders.length);
+            console.log("Orders:", orders.map(o => ({ id: o.orderId, status: o.status, total: o.total })));
+            
             return orders;
-        } catch (error) { return []; }
+            
+        } catch (error) {
+            console.error("Error loading orders:", error);
+            return [];
+        }
     }
     
-    // EmailJS functions
+    // Send OTP via EmailJS
     async function sendEmailOTP(email) {
         try {
             generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
             otpEmail = email;
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, { to_email: email, otp_code: generatedOTP, app_name: "Vedanta", expiry_time: "5 minutes" });
+            
+            const templateParams = {
+                to_email: email,
+                otp_code: generatedOTP,
+                app_name: "Vedanta",
+                expiry_time: "5 minutes"
+            };
+            
+            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+            
             showToast(`✅ OTP sent to ${email}`);
             return { success: true };
+            
         } catch (error) {
-            showToast(`❌ Failed to send OTP`, true);
+            console.error("EmailJS Error:", error);
+            showToast(`❌ Failed to send OTP. Please try again.`, true);
             return { success: false };
         }
     }
     
+    // Verify OTP
     async function verifyEmailOTP(enteredOTP) {
-        if (!generatedOTP) { showToast("❌ Request OTP first", true); return false; }
+        if (!generatedOTP) {
+            showToast("❌ Please request OTP first", true);
+            return false;
+        }
+        
         if (enteredOTP === generatedOTP) {
-            const userData = { uid: `email_${Date.now()}`, email: otpEmail, name: otpEmail.split('@')[0], joinDate: new Date().toISOString(), phone: '' };
+            const userData = {
+                uid: `email_${Date.now()}`,
+                email: otpEmail,
+                name: otpEmail.split('@')[0],
+                joinDate: new Date().toISOString(),
+                phone: ''
+            };
+            
             localStorage.setItem('vedantaUser', JSON.stringify(userData));
             currentUser = userData;
-            showToast("✅ Login successful!");
+            
+            showToast("✅ Login successful! Welcome!");
             await renderProfilePage();
             return true;
-        } else { showToast("❌ Invalid OTP", true); return false; }
+        } else {
+            showToast("❌ Invalid OTP. Please try again.", true);
+            return false;
+        }
     }
     
     async function resendEmailOTP(email) {
-        if (resendCooldown) { showToast("⏳ Wait 30 seconds", true); return false; }
+        if (resendCooldown) {
+            showToast("⏳ Please wait 30 seconds", true);
+            return false;
+        }
+        
+        if (!email) {
+            showToast("❌ Please enter email first", true);
+            return false;
+        }
+        
         resendCooldown = true;
         startCountdown(30);
         return await sendEmailOTP(email);
@@ -913,105 +498,247 @@
     function startCountdown(seconds) {
         const countdownEl = document.getElementById('countdown');
         if (!countdownEl) return;
+        
         let remaining = seconds;
         countdownEl.style.display = 'block';
-        countdownEl.innerHTML = `Resend in ${remaining}s`;
+        countdownEl.innerHTML = `Resend available in ${remaining}s`;
+        
         if (countdownInterval) clearInterval(countdownInterval);
+        
         countdownInterval = setInterval(() => {
             remaining--;
-            if (remaining <= 0) { clearInterval(countdownInterval); countdownEl.style.display = 'none'; resendCooldown = false; }
-            else countdownEl.innerHTML = `Resend in ${remaining}s`;
+            if (remaining <= 0) {
+                clearInterval(countdownInterval);
+                countdownEl.style.display = 'none';
+                resendCooldown = false;
+            } else {
+                countdownEl.innerHTML = `Resend available in ${remaining}s`;
+            }
         }, 1000);
     }
     
     function renderLoginPage() {
         const container = document.getElementById('profileContainer');
         container.innerHTML = `
-            <div class="animated-logo"><div class="logo-glow">VEDANTA</div><div class="logo-sub">✦ WHERE SOUL MEETS LUXURY ✦</div></div>
-            <div class="card"><div class="login-title">🔐 Email OTP Login</div><div class="login-subtitle">Enter your email to receive OTP</div>
-            <div class="email-input-group"><input type="email" id="emailInput" placeholder="your@email.com"><button class="send-otp-btn" id="sendOtpBtn">Send OTP</button></div>
-            <div class="otp-group" id="otpGroup"><input type="tel" id="otpInput" class="otp-input" placeholder="000000" maxlength="6"><button class="verify-btn" id="verifyBtn">Verify & Login</button>
-            <div class="resend-otp"><button id="resendOtpBtn">Resend OTP</button></div><div id="countdown" class="countdown" style="display:none"></div></div>
-            <div class="setup-info"><i class="fas fa-envelope"></i> OTP sent to your email</div></div>
-            <div class="card"><div class="benefits-title"><i class="fas fa-crown"></i> Membership Benefits</div>
-            <div class="benefits-list"><div class="benefit-item"><i class="fas fa-tags"></i><div><h4>Exclusive Discounts</h4><p>10% off first order</p></div></div>
-            <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Priority Shipping</h4><p>On orders above ₹2999</p></div></div>
-            <div class="benefit-item"><i class="fas fa-gift"></i><div><h4>Birthday Surprise</h4><p>Special gift on birthday</p></div></div>
-            <div class="benefit-item"><i class="fas fa-star"></i><div><h4>Early Access</h4><p>To new collections</p></div></div>
-            <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>Earn on every purchase</p></div></div></div></div>`;
-        
+            <div class="animated-logo">
+                <div class="logo-glow">VEDANTA</div>
+                <div class="logo-sub">✦ WHERE SOUL MEETS LUXURY ✦</div>
+            </div>
+            
+            <div class="card">
+                <div class="login-title">🔐 Email OTP Login</div>
+                <div class="login-subtitle">Enter your email to receive OTP</div>
+                
+                <div class="email-input-group">
+                    <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email">
+                    <button class="send-otp-btn" id="sendOtpBtn">Send OTP</button>
+                </div>
+                
+                <div class="otp-group" id="otpGroup">
+                    <input type="tel" id="otpInput" class="otp-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*">
+                    <button class="verify-btn" id="verifyBtn">Verify & Login</button>
+                    <div class="resend-otp"><button id="resendOtpBtn">Resend OTP</button></div>
+                    <div id="countdown" class="countdown" style="display:none"></div>
+                </div>
+                
+                <div class="setup-info">
+                    <i class="fas fa-envelope"></i> OTP will be sent to your email inbox
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="benefits-title"><i class="fas fa-crown"></i> Membership Benefits</div>
+                <div class="benefits-list">
+                    <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>Exclusive Discounts</h4><p>10% off on first order</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Priority Shipping</h4><p>On orders above ₹2999</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-gift"></i><div><h4>Birthday Surprise</h4><p>Special gift on your birthday</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-star"></i><div><h4>Early Access</h4><p>To new collections & sales</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>Earn coins on every purchase</p></div></div>
+                </div>
+            </div>
+        `;
+
         let currentEmail = '';
+
         document.getElementById('sendOtpBtn')?.addEventListener('click', async () => {
             const email = document.getElementById('emailInput').value.trim();
-            if (!email || !email.includes('@')) { showToast('❌ Valid email required', true); return; }
+            if (!email || !email.includes('@')) {
+                showToast('❌ Please enter a valid email', true);
+                return;
+            }
+            
             const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true; btn.innerHTML = '<span class="loader"></span>Sending...';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span>Sending...';
+            
             currentEmail = email;
             const result = await sendEmailOTP(email);
-            btn.disabled = false; btn.innerHTML = 'Send OTP';
-            if (result.success) { document.getElementById('otpGroup').classList.add('show'); startCountdown(30); }
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Send OTP';
+            
+            if (result.success) {
+                document.getElementById('otpGroup').classList.add('show');
+                startCountdown(30);
+            }
         });
+
         document.getElementById('verifyBtn')?.addEventListener('click', async () => {
             const otp = document.getElementById('otpInput').value.trim();
-            if (!otp || otp.length !== 6) { showToast('❌ Enter 6-digit OTP', true); return; }
+            if (!otp) { showToast('❌ Please enter OTP', true); return; }
+            if (otp.length !== 6) { showToast('❌ Enter 6-digit OTP', true); return; }
+            
             const btn = document.getElementById('verifyBtn');
-            btn.disabled = true; btn.innerHTML = '<span class="loader"></span>Verifying...';
+            btn.disabled = true;
+            btn.innerHTML = '<span class="loader"></span>Verifying...';
+            
             await verifyEmailOTP(otp);
-            btn.disabled = false; btn.innerHTML = 'Verify & Login';
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Verify & Login';
         });
+
         document.getElementById('resendOtpBtn')?.addEventListener('click', async () => {
-            if (!currentEmail) { const email = document.getElementById('emailInput').value.trim(); if (!email) { showToast('❌ Enter email first', true); return; } currentEmail = email; }
+            if (!currentEmail) {
+                const email = document.getElementById('emailInput').value.trim();
+                if (!email || !email.includes('@')) {
+                    showToast('❌ Enter valid email first', true);
+                    return;
+                }
+                currentEmail = email;
+            }
+            
             const btn = document.getElementById('resendOtpBtn');
-            btn.disabled = true; btn.innerHTML = 'Sending...';
+            btn.disabled = true;
+            btn.innerHTML = 'Sending...';
+            
             await resendEmailOTP(currentEmail);
-            btn.disabled = false; btn.innerHTML = 'Resend OTP';
+            
+            btn.disabled = false;
+            btn.innerHTML = 'Resend OTP';
         });
-        setTimeout(() => document.getElementById('emailInput')?.focus(), 100);
+        
+        setTimeout(() => {
+            document.getElementById('emailInput')?.focus();
+        }, 100);
     }
     
+    // ✅ FIXED: Render Profile Page with CORRECT statistics
     async function renderProfilePage() {
         const container = document.getElementById('profileContainer');
-        container.innerHTML = `<div style="text-align:center; padding:40px;"><div class="loader" style="border-color:#D4AF37; border-top-color:transparent;"></div><p>Loading profile...</p></div>`;
+        
+        container.innerHTML = `<div style="text-align: center; padding: 40px;"><div class="loader" style="border-color: #D4AF37; border-top-color: transparent;"></div><p style="margin-top: 12px; font-size: 12px;">Loading profile...</p></div>`;
         
         if (currentUser && currentUser.email) {
             userOrders = await loadUserOrdersFromFirebase(currentUser.email);
-            await loadUserAddresses();
-            await loadUserPaymentMethods();
         }
         
-        const totalSpent = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
-        const pendingOrders = userOrders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+        // ✅ CORRECT ORDER STATUS CALCULATION
+        // Total Orders = All orders in Firebase for this user
+        const totalOrders = userOrders.length;
+        
+        // Active Orders = Orders that are NOT cancelled and NOT delivered
+        // Statuses: pending, confirmed, processing, shipped, paid
+        const activeStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'paid'];
+        const activeOrders = userOrders.filter(o => {
+            const status = o.status?.toLowerCase() || '';
+            return activeStatuses.includes(status);
+        }).length;
+        
+        // Cancelled Orders
+        const cancelledOrders = userOrders.filter(o => o.status?.toLowerCase() === 'cancelled').length;
+        
+        // Delivered Orders
+        const deliveredOrders = userOrders.filter(o => o.status?.toLowerCase() === 'delivered' || o.status?.toLowerCase() === 'completed').length;
+        
+        // Total Spent (excluding cancelled orders)
+        const totalSpent = userOrders
+            .filter(o => o.status?.toLowerCase() !== 'cancelled')
+            .reduce((sum, o) => sum + (o.total || 0), 0);
+        
+        // Coins = totalSpent / 100
+        const coinsEarned = Math.floor(totalSpent / 100);
+        
         const joinDate = currentUser.joinDate ? new Date(currentUser.joinDate).toLocaleDateString('en-IN') : 'Today';
         
+        console.log("Profile Stats:", {
+            totalOrders,
+            activeOrders,
+            cancelledOrders,
+            deliveredOrders,
+            totalSpent,
+            coinsEarned,
+            allOrders: userOrders.map(o => ({ id: o.orderId, status: o.status }))
+        });
+
         container.innerHTML = `
-            <div class="card"><div class="profile-header"><div class="profile-avatar"><i class="fas fa-user"></i></div>
-            <div class="profile-info"><h3>${escapeHtml(currentUser.name || 'Valued Customer')}</h3>
-            <p><i class="fas fa-envelope"></i> ${escapeHtml(currentUser.email)}</p><p><i class="fas fa-calendar"></i> Joined ${joinDate}</p></div></div></div>
-            <div class="card"><div class="stats-grid"><div class="stat-card"><div class="stat-number">${userOrders.length}</div><div class="stat-label">Orders</div></div>
-            <div class="stat-card"><div class="stat-number">${pendingOrders}</div><div class="stat-label">Active</div></div>
-            <div class="stat-card"><div class="stat-number">${Math.floor(totalSpent / 100)}</div><div class="stat-label">Coins</div></div></div></div>
-            <div class="card"><div class="benefits-title"><i class="fas fa-gem"></i> Member Benefits</div>
-            <div class="benefits-list"><div class="benefit-item"><i class="fas fa-tags"></i><div><h4>10% OFF on Next Order</h4><p>Use code: WELCOME10</p></div></div>
-            <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Express Shipping</h4><p>On orders above ₹2999</p></div></div>
-            <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>${Math.floor(totalSpent / 100)} coins = ₹${Math.floor(totalSpent / 100)} value</p></div></div></div></div>
-            <div class="card"><div class="menu-item" onclick="window.location.href='booking.html'"><div class="menu-left"><i class="fas fa-box"></i><span>My Orders (${userOrders.length})</span></div><i class="fas fa-chevron-right"></i></div>
-            <div class="menu-item" onclick="openAddressModal()"><div class="menu-left"><i class="fas fa-map-marker-alt"></i><span>Saved Addresses (${userAddresses.length})</span></div><i class="fas fa-chevron-right"></i></div>
-            <div class="menu-item" onclick="openPaymentModal()"><div class="menu-left"><i class="fas fa-credit-card"></i><span>Payment Methods (${userPaymentMethods.length})</span></div><i class="fas fa-chevron-right"></i></div>
-            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>`;
+            <div class="card">
+                <div class="profile-header">
+                    <div class="profile-avatar"><i class="fas fa-user"></i></div>
+                    <div class="profile-info">
+                        <h3>${escapeHtml(currentUser.name || 'Valued Customer')}</h3>
+                        <p><i class="fas fa-envelope"></i> ${escapeHtml(currentUser.email || 'No email')}</p>
+                        <p><i class="fas fa-calendar"></i> Joined ${joinDate}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="stats-grid">
+                    <div class="stat-card"><div class="stat-number">${totalOrders}</div><div class="stat-label">Total Orders</div></div>
+                    <div class="stat-card"><div class="stat-number">${activeOrders}</div><div class="stat-label">Active Orders</div></div>
+                    <div class="stat-card"><div class="stat-number">${deliveredOrders}</div><div class="stat-label">Delivered</div></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="benefits-title"><i class="fas fa-gem"></i> Member Benefits</div>
+                <div class="benefits-list">
+                    <div class="benefit-item"><i class="fas fa-tags"></i><div><h4>10% OFF on Next Order</h4><p>Use code: WELCOME10</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-truck-fast"></i><div><h4>Free Express Shipping</h4><p>On all orders above ₹2999</p></div></div>
+                    <div class="benefit-item"><i class="fas fa-coins"></i><div><h4>Vedanta Coins</h4><p>${coinsEarned} coins = ₹${coinsEarned} value</p></div></div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="menu-item" onclick="window.location.href='booking.html'">
+                    <div class="menu-left"><i class="fas fa-box"></i><span>My Orders (${totalOrders})</span></div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="menu-item" onclick="showToast('📍 Coming soon')">
+                    <div class="menu-left"><i class="fas fa-map-marker-alt"></i><span>Saved Addresses</span></div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <div class="menu-item" onclick="showToast('💳 Coming soon')">
+                    <div class="menu-left"><i class="fas fa-credit-card"></i><span>Payment Methods</span></div>
+                    <i class="fas fa-chevron-right"></i>
+                </div>
+                <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+            </div>
+        `;
         
         document.getElementById('logoutBtn')?.addEventListener('click', () => {
             localStorage.removeItem('vedantaUser');
             currentUser = null;
+            generatedOTP = null;
+            otpEmail = null;
+            userOrders = [];
             if (countdownInterval) clearInterval(countdownInterval);
-            showToast('👋 Logged out');
+            showToast('👋 Logged out successfully');
             renderLoginPage();
         });
     }
     
-    function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
+    }
     
-    if (currentUser && currentUser.email) renderProfilePage();
-    else renderLoginPage();
+    if (currentUser && currentUser.email) {
+        renderProfilePage();
+    } else {
+        renderLoginPage();
+    }
 </script>
 </body>
 </html>
