@@ -31,7 +31,6 @@
     }
     .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
 
-    /* Sticky Floating Cart - Always Visible */
     .floating-cart {
       position: fixed;
       bottom: 30px;
@@ -71,7 +70,6 @@
       justify-content: center;
     }
 
-    /* Cart Sidebar */
     .cart-sidebar {
       position: fixed;
       top: 0;
@@ -193,7 +191,6 @@
     }
     .overlay.show { display: block; }
 
-    /* Mobile Header */
     .header {
       display: flex;
       justify-content: space-between;
@@ -209,7 +206,6 @@
     .logo h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 6px 14px; border-radius: 40px; color: #D4AF37; text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-    /* Mobile Gallery */
     .product-gallery {
       background: rgba(15,15,22,0.6);
       padding: 16px;
@@ -303,7 +299,6 @@
     .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
     .thumbnail i { font-size: 24px; color: #D4AF37; }
 
-    /* Mobile Product Info */
     .product-info {
       background: rgba(15,15,22,0.6);
       padding: 16px;
@@ -321,31 +316,31 @@
     .discount { background: #FF4500; padding: 3px 8px; border-radius: 25px; font-size: 11px; font-weight: 600; margin-left: 8px; }
     
     .size-section, .color-section, .combo-section {
-      margin: 12px 0;
+      margin: 16px 0;
       background: rgba(0,0,0,0.3);
-      border-radius: 14px;
-      padding: 10px;
+      border-radius: 16px;
+      padding: 12px;
     }
     .size-title, .color-title, .combo-title {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       color: #D4AF37;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
     }
     .size-options {
       display: flex;
       flex-wrap: wrap;
-      gap: 10px;
+      gap: 12px;
     }
     .size-btn {
       background: rgba(212,175,55,0.15);
       border: 1px solid rgba(212,175,55,0.3);
-      padding: 8px 20px;
+      padding: 10px 24px;
       border-radius: 40px;
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 600;
       cursor: pointer;
       color: #FFFFFF;
@@ -356,113 +351,132 @@
       border-color: #D4AF37;
     }
     
+    /* FIXED COLOR SECTION - Proper color display */
     .color-options {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 15px;
     }
     .color-btn {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 5px;
+      gap: 6px;
       cursor: pointer;
-      padding: 4px;
-      border-radius: 10px;
+      padding: 5px;
+      border-radius: 12px;
+      transition: all 0.2s ease;
+      min-width: 60px;
     }
-    .color-btn.active { background: rgba(212,175,55,0.2); transform: scale(1.03); }
+    .color-btn.active {
+      background: rgba(212,175,55,0.25);
+      transform: scale(1.05);
+    }
     .color-circle {
-      width: 40px;
-      height: 40px;
+      width: 45px;
+      height: 45px;
       border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.3);
+      transition: all 0.2s ease;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    .color-btn.active .color-circle { border-color: #D4AF37; box-shadow: 0 0 12px rgba(212,175,55,0.5); }
-    .color-name { font-size: 10px; color: #888; }
-    .color-btn.active .color-name { color: #D4AF37; font-weight: 600; }
+    .color-btn.active .color-circle {
+      border-color: #D4AF37;
+      box-shadow: 0 0 15px rgba(212,175,55,0.6);
+      transform: scale(1.05);
+    }
+    .color-name {
+      font-size: 11px;
+      color: #aaa;
+      font-weight: 500;
+    }
+    .color-btn.active .color-name {
+      color: #D4AF37;
+      font-weight: 700;
+    }
 
     .combo-list {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
     .combo-item {
       background: rgba(0,0,0,0.4);
-      border-radius: 16px;
-      padding: 12px;
+      border-radius: 20px;
+      padding: 16px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       border: 2px solid rgba(212,175,55,0.2);
-      transition: all 0.2s ease;
+      transition: all 0.3s ease;
     }
     .combo-item.selected {
       border-color: #D4AF37;
       background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(76,175,80,0.15));
     }
-    .combo-quantity { font-size: 15px; font-weight: 800; color: #4CAF50; display: flex; align-items: center; gap: 6px; }
-    .combo-save { font-size: 10px; color: #FFB800; background: rgba(255,184,0,0.15); padding: 2px 6px; border-radius: 20px; display: inline-block; margin-top: 3px; }
+    .combo-quantity { font-size: 18px; font-weight: 800; color: #4CAF50; display: flex; align-items: center; gap: 8px; }
+    .combo-save { font-size: 11px; color: #FFB800; background: rgba(255,184,0,0.15); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 4px; }
     .combo-price { text-align: right; }
-    .combo-price .price-big { font-size: 18px; font-weight: 800; color: #D4AF37; }
-    .combo-price .per-piece { font-size: 9px; color: #4CAF50; }
+    .combo-price .price-big { font-size: 20px; font-weight: 800; color: #D4AF37; }
+    .combo-price .per-piece { font-size: 10px; color: #4CAF50; }
     .combo-select-icon {
-      width: 28px;
-      height: 28px;
+      width: 32px;
+      height: 32px;
       border-radius: 50%;
       background: rgba(212,175,55,0.2);
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-left: 10px;
+      margin-left: 12px;
     }
     .combo-item.selected .combo-select-icon { background: #4CAF50; }
-    .combo-select-icon i { font-size: 14px; color: white; }
+    .combo-select-icon i { font-size: 16px; color: white; }
     .combo-badge {
       position: absolute;
-      top: -6px;
-      right: 10px;
+      top: -8px;
+      right: 12px;
       background: #FF4500;
       color: white;
-      font-size: 8px;
-      padding: 2px 6px;
+      font-size: 9px;
+      padding: 2px 8px;
       border-radius: 20px;
     }
     .combo-item { position: relative; }
 
     .product-detail-section {
-      margin: 16px 0;
+      margin: 20px 0;
       background: rgba(0,0,0,0.3);
-      border-radius: 16px;
-      padding: 12px;
+      border-radius: 20px;
+      padding: 16px;
     }
     .detail-title {
-      font-size: 16px;
+      font-size: 18px;
       font-weight: 700;
       color: #D4AF37;
-      margin-bottom: 10px;
+      margin-bottom: 12px;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 8px;
       border-left: 3px solid #D4AF37;
-      padding-left: 10px;
+      padding-left: 12px;
     }
-    .full-description { color: #CCCCCC; line-height: 1.6; font-size: 13px; text-align: justify; }
-    .features-list { margin-top: 12px; background: rgba(212,175,55,0.05); border-radius: 14px; padding: 10px; }
-    .feature-item { display: flex; align-items: center; gap: 8px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+    .full-description { color: #CCCCCC; line-height: 1.7; font-size: 14px; text-align: justify; }
+    .features-list { margin-top: 16px; background: rgba(212,175,55,0.05); border-radius: 16px; padding: 12px; }
+    .feature-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .feature-item:last-child { border-bottom: none; }
-    .feature-item i { width: 20px; color: #D4AF37; font-size: 12px; }
-    .feature-item span { font-size: 12px; color: #AAAAAA; }
+    .feature-item i { width: 24px; color: #D4AF37; font-size: 14px; }
+    .feature-item span { font-size: 13px; color: #AAAAAA; }
 
-    .offer-tag { background: rgba(212,175,55,0.1); padding: 10px; border-radius: 14px; margin: 12px 0; text-align: center; font-size: 12px; }
-    .quantity-selector { display: flex; align-items: center; gap: 12px; margin: 16px 0; }
+    .offer-tag { background: rgba(212,175,55,0.1); padding: 12px; border-radius: 16px; margin: 16px 0; text-align: center; font-size: 13px; }
+    .quantity-selector { display: flex; align-items: center; gap: 15px; margin: 20px 0; }
     .qty-btn {
       background: rgba(212,175,55,0.15);
       border: 1px solid rgba(212,175,55,0.3);
-      width: 40px;
-      height: 40px;
-      border-radius: 12px;
-      font-size: 18px;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      font-size: 20px;
       font-weight: bold;
       cursor: pointer;
       color: #D4AF37;
@@ -470,23 +484,22 @@
     .qty-input {
       background: rgba(0,0,0,0.5);
       border: 1px solid rgba(212,175,55,0.3);
-      width: 55px;
-      height: 40px;
+      width: 60px;
+      height: 44px;
       text-align: center;
-      font-size: 16px;
+      font-size: 18px;
       font-weight: bold;
       color: white;
-      border-radius: 12px;
+      border-radius: 14px;
     }
 
-    /* Sticky Action Buttons at Bottom */
     .action-buttons {
       position: sticky;
       bottom: 0;
       display: flex;
       flex-direction: column;
-      gap: 10px;
-      margin-top: 16px;
+      gap: 12px;
+      margin-top: 20px;
       padding: 12px;
       background: rgba(5,5,8,0.95);
       backdrop-filter: blur(10px);
@@ -495,18 +508,16 @@
     }
     .add-cart-btn, .buy-btn {
       width: 100%;
-      padding: 14px;
+      padding: 15px;
       border-radius: 50px;
       font-weight: 700;
-      font-size: 14px;
+      font-size: 15px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 8px;
+      gap: 10px;
       cursor: pointer;
-      transition: transform 0.1s;
     }
-    .add-cart-btn:active, .buy-btn:active { transform: scale(0.98); }
     .add-cart-btn {
       background: rgba(212,175,55,0.15);
       border: 1px solid rgba(212,175,55,0.5);
@@ -518,50 +529,48 @@
       color: white;
     }
 
-    .section-title { font-size: 18px; font-weight: 700; margin: 20px 16px 12px; display: flex; align-items: center; gap: 8px; }
-    .section-title span { background: #D4AF37; width: 25px; height: 3px; }
+    .section-title { font-size: 20px; font-weight: 700; margin: 24px 16px 16px; display: flex; align-items: center; gap: 10px; }
+    .section-title span { background: #D4AF37; width: 30px; height: 3px; }
 
     .related-products {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
-      gap: 10px;
-      padding: 0 12px;
-      margin-bottom: 20px;
+      gap: 12px;
+      padding: 0 16px;
+      margin-bottom: 30px;
     }
     .related-card {
       background: rgba(15,15,22,0.6);
-      border-radius: 18px;
-      padding: 10px;
+      border-radius: 20px;
+      padding: 12px;
       cursor: pointer;
-      transition: transform 0.2s;
     }
-    .related-card:active { transform: scale(0.97); }
     .related-img {
-      height: 120px;
+      height: 140px;
       background: #0E0E14;
-      border-radius: 14px;
+      border-radius: 16px;
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 8px;
+      margin-bottom: 10px;
       overflow: hidden;
     }
     .related-img img { width: 100%; height: 100%; object-fit: cover; }
-    .related-img i { font-size: 45px; color: #D4AF37; }
-    .related-name { font-size: 12px; font-weight: 600; margin-top: 6px; }
-    .related-price { font-size: 14px; font-weight: 800; color: #D4AF37; margin-top: 4px; }
+    .related-img i { font-size: 55px; color: #D4AF37; }
+    .related-name { font-size: 13px; font-weight: 600; margin-top: 8px; }
+    .related-price { font-size: 15px; font-weight: 800; color: #D4AF37; margin-top: 5px; }
 
-    .reviews-section { padding: 0 12px; margin-bottom: 30px; }
+    .reviews-section { padding: 0 16px; margin-bottom: 40px; }
     .review-card {
       background: rgba(15,15,22,0.4);
-      border-radius: 18px;
-      padding: 14px;
-      margin-bottom: 10px;
+      border-radius: 20px;
+      padding: 16px;
+      margin-bottom: 12px;
     }
-    .reviewer { display: flex; align-items: center; gap: 8px; font-size: 12px; font-weight: 600; margin-bottom: 6px; }
-    .review-stars-small { color: #FFB800; font-size: 10px; margin-bottom: 6px; }
-    .review-text { font-size: 11px; line-height: 1.5; color: #CCCCCC; }
-    .review-date { font-size: 9px; color: #888; margin-top: 6px; }
+    .reviewer { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
+    .review-stars-small { color: #FFB800; font-size: 11px; margin-bottom: 8px; }
+    .review-text { font-size: 12px; line-height: 1.5; color: #CCCCCC; }
+    .review-date { font-size: 10px; color: #888; margin-top: 8px; }
 
     .toast {
       position: fixed;
@@ -576,10 +585,6 @@
       z-index: 10000;
       font-size: 12px;
       display: none;
-      white-space: nowrap;
-      max-width: 90%;
-      white-space: normal;
-      text-align: center;
     }
     .toast.show { display: block; animation: fadeInOut 2s ease; }
     @keyframes fadeInOut {
@@ -707,11 +712,9 @@
   
   function updateCartQuantity(index, newQuantity) {
     const item = cart[index];
-    
     if (item.isCombo && item.comboMultiplier) {
       const currentMultiples = item.quantity / item.comboMultiplier;
       const newMultiples = newQuantity / item.comboMultiplier;
-      
       if (newMultiples < 1) {
         cart.splice(index, 1);
       } else {
@@ -780,7 +783,6 @@
     cart.forEach((item, idx) => {
       const itemTotal = item.price * item.quantity;
       total += itemTotal;
-      
       cartItemsDiv.innerHTML += `<div class="cart-item">
         <div class="cart-item-info">
           <h4>${escapeHtml(item.name)} ${item.size ? `(${item.size})` : ''} ${item.color ? `- ${item.color}` : ''}</h4>
@@ -795,14 +797,12 @@
         </div>
       </div>`;
     });
-    
     cartItemsDiv.querySelectorAll('.cart-qty-btn').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         const idx = parseInt(btn.dataset.index);
         const action = btn.dataset.action;
         const item = cart[idx];
-        
         if (action === 'incr') {
           if (item.isCombo && item.comboMultiplier) {
             updateCartQuantity(idx, item.quantity + item.comboMultiplier);
@@ -818,14 +818,12 @@
         }
       });
     });
-    
     cartItemsDiv.querySelectorAll('.cart-item-remove').forEach(btn => {
       btn.addEventListener('click', (e) => {
         e.stopPropagation();
         removeFromCart(parseInt(btn.dataset.index));
       });
     });
-    
     if (cartTotalSpan) cartTotalSpan.innerText = `₹${total}`;
   }
   
@@ -847,18 +845,12 @@
     return p;
   }
   
-  function setSelectedProductId(id) { 
-    localStorage.setItem('vedanta_selected_product_id', id); 
-  }
+  function setSelectedProductId(id) { localStorage.setItem('vedanta_selected_product_id', id); }
   
-  // DIRECT NAVIGATION - Instant page refresh with scroll to top
   function navigateToRelatedProduct(productId) {
     if (!productId) return;
-    // Save the product ID
     localStorage.setItem('vedanta_selected_product_id', productId);
-    // Set flag to scroll to top after page loads
     sessionStorage.setItem('scrollToTop', 'true');
-    // Force page reload
     window.location.href = window.location.pathname + '?id=' + productId;
   }
   
@@ -891,12 +883,9 @@
       }
     } catch (error) { console.error("Firebase error:", error); }
     
-    // INSTANT SCROLL TO TOP - Execute immediately when page loads
     if (sessionStorage.getItem('scrollToTop') === 'true') {
       sessionStorage.removeItem('scrollToTop');
-      // Immediate scroll to top without delay
       window.scrollTo(0, 0);
-      // Also ensure body scrolls to top
       document.body.scrollTop = 0;
       document.documentElement.scrollTop = 0;
     }
@@ -942,6 +931,25 @@
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
   }
   
+  // FIXED: Proper color rendering with actual color circles
+  function getColorCode(colorName) {
+    const colorMap = {
+      'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
+      'Orange': '#FFA500', 'Gold': '#FFD700', 'Yellow': '#FFFF00',
+      'Lime': '#32CD32', 'Green': '#008000', 'Teal': '#008080',
+      'Cyan': '#00FFFF', 'Blue': '#0000FF', 'Navy': '#000080',
+      'Purple': '#800080', 'Magenta': '#FF00FF', 'Pink': '#FF69B4',
+      'HotPink': '#FF1493', 'Brown': '#8B4513', 'Black': '#000000',
+      'White': '#FFFFFF', 'Silver': '#C0C0C0', 'Lavender': '#E6E6FA',
+      'Peach': '#FFDAB9', 'Mint': '#98FB98', 'Coral': '#FF7F50',
+      'Turquoise': '#40E0D0', 'Indigo': '#4B0082', 'Violet': '#EE82EE',
+      'Rose': '#FF007F', 'Chocolate': '#D2691E', 'Khaki': '#F0E68C',
+      'Salmon': '#FA8072', 'Plum': '#DDA0DD', 'Tan': '#D2B48C',
+      'Beige': '#F5F5DC', 'Ivory': '#FFFFF0', 'Linen': '#FAF0E6'
+    };
+    return colorMap[colorName] || '#D4AF37';
+  }
+  
   function renderColors() {
     const colors = currentProduct.colors || [];
     if (colors.length === 0) return '';
@@ -951,12 +959,7 @@
       <div class="color-options" id="colorOptions">
         ${colors.map(color => {
           const colorName = typeof color === 'object' ? color.name : color;
-          let colorCode = '#D4AF37';
-          if (typeof color === 'object' && color.code) colorCode = color.code;
-          else {
-            const colorMap = { 'Red':'#FF0000', 'Blue':'#2196F3', 'Green':'#4CAF50', 'Black':'#000000', 'White':'#FFFFFF', 'Gold':'#D4AF37', 'Silver':'#C0C0C0' };
-            colorCode = colorMap[colorName] || '#D4AF37';
-          }
+          const colorCode = (typeof color === 'object' && color.code) ? color.code : getColorCode(colorName);
           return `<div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}">
             <div class="color-circle" style="background: ${colorCode};"></div>
             <span class="color-name">${colorName}</span>
@@ -964,6 +967,22 @@
         }).join('')}
       </div>
     </div>`;
+  }
+  
+  function attachColorEvents() {
+    const colorBtns = document.querySelectorAll('.color-btn');
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedColor = btn.getAttribute('data-color');
+        showToast(`🎨 ${selectedColor} selected`);
+      });
+    });
+    if (colorBtns.length > 0 && !selectedColor) {
+      colorBtns[0].classList.add('active');
+      selectedColor = colorBtns[0].getAttribute('data-color');
+    }
   }
   
   function renderComboOffers() {
@@ -1023,18 +1042,6 @@
     });
   }
   
-  function attachColorEvents() {
-    const colorBtns = document.querySelectorAll('.color-btn');
-    colorBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        colorBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedColor = btn.getAttribute('data-color');
-      });
-    });
-    if (colorBtns.length > 0 && !selectedColor) { colorBtns[0].classList.add('active'); selectedColor = colorBtns[0].getAttribute('data-color'); }
-  }
-  
   function attachSizeEvents() {
     const sizeBtns = document.querySelectorAll('.size-btn');
     if (sizeBtns.length > 0) {
@@ -1062,7 +1069,6 @@
         <div class="related-price">₹${p.price.toLocaleString()}</div>
       </div>`;
     }).join('');
-    // Direct click handler for instant navigation
     document.querySelectorAll('.related-card').forEach(card => {
       card.addEventListener('click', (e) => {
         e.stopPropagation();
@@ -1139,7 +1145,6 @@
     document.getElementById('checkoutBtn')?.addEventListener('click', () => { if (cart.length === 0) showToast('Cart is empty!'); else window.location.href = 'secure-checkout.html'; });
   }
   
-  // Initialize
   loadProductData();
   updateCartUI();
   attachCartEvents();
