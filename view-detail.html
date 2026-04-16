@@ -300,10 +300,20 @@
             gap: 4px;
         }
         .color-dot-small {
-            width: 10px;
-            height: 10px;
+            width: 12px;
+            height: 12px;
             border-radius: 50%;
             display: inline-block;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .combo-badge-order {
+            background: #4CAF50;
+            color: white;
+            font-size: 9px;
+            padding: 2px 8px;
+            border-radius: 20px;
+            display: inline-block;
+            margin-top: 4px;
         }
         .order-item-price {
             text-align: right;
@@ -542,6 +552,26 @@
     let currentOrder = null;
     let productsCache = new Map();
     
+    // Color code mapping function
+    function getColorCode(colorName) {
+        if (!colorName || colorName === 'Not Selected') return '#D4AF37';
+        const colorMap = {
+            'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
+            'Orange': '#FFA500', 'Gold': '#FFD700', 'Yellow': '#FFFF00',
+            'Lime': '#32CD32', 'Green': '#008000', 'Teal': '#008080',
+            'Cyan': '#00FFFF', 'Blue': '#0000FF', 'Navy': '#000080',
+            'Purple': '#800080', 'Magenta': '#FF00FF', 'Pink': '#FF69B4',
+            'HotPink': '#FF1493', 'Brown': '#8B4513', 'Black': '#000000',
+            'White': '#FFFFFF', 'Silver': '#C0C0C0', 'Lavender': '#E6E6FA',
+            'Peach': '#FFDAB9', 'Mint': '#98FB98', 'Coral': '#FF7F50',
+            'Turquoise': '#40E0D0', 'Indigo': '#4B0082', 'Violet': '#EE82EE',
+            'Rose': '#FF007F', 'Chocolate': '#D2691E', 'Khaki': '#F0E68C',
+            'Salmon': '#FA8072', 'Plum': '#DDA0DD', 'Tan': '#D2B48C',
+            'Beige': '#F5F5DC', 'Ivory': '#FFFFF0', 'Linen': '#FAF0E6'
+        };
+        return colorMap[colorName] || '#D4AF37';
+    }
+    
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
         toast.innerText = msg;
@@ -700,19 +730,31 @@
             }).join('')}</div>`;
         }
         
-        // Items HTML
+        // Items HTML with proper color display
         const itemsHtml = (currentOrder.items || []).map(item => {
             const img = getProductImage(item.id);
             const selectedSize = item.size || item.selectedSize || '';
             const selectedColor = item.color || item.selectedColor || '';
+            const colorCode = getColorCode(selectedColor);
+            const comboInfo = item.combo || '';
+            
+            // Combo display
+            let comboHtml = '';
+            if (comboInfo) {
+                comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> ${escapeHtml(comboInfo)}</div>`;
+            } else if (item.isCombo && item.comboMultiplier) {
+                comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> Combo Pack (${item.comboMultiplier} items per pack)</div>`;
+            }
+            
             return `<div class="order-item">
                 <div class="order-item-img">${img ? `<img src="${img}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i class="fas fa-gem"></i>`}</div>
                 <div class="order-item-info">
                     <div class="order-item-name">${escapeHtml(item.name)}</div>
                     <div class="item-attributes">
                         ${selectedSize ? `<span class="size-badge"><i class="fas fa-tshirt"></i> ${escapeHtml(selectedSize)}</span>` : ''}
-                        ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background:#D4AF37"></span> ${escapeHtml(selectedColor)}</span>` : ''}
+                        ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background: ${colorCode};"></span> ${escapeHtml(selectedColor)}</span>` : ''}
                     </div>
+                    ${comboHtml}
                     <div class="order-item-qty">Qty: ${item.quantity}</div>
                 </div>
                 <div class="order-item-price">

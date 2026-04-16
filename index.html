@@ -71,13 +71,13 @@
             justify-content: center;
         }
         
-        /* ========== AI CUSTOMER SUPPORT CHATBOT - RIGHT SIDE SAME HEIGHT ========== */
+        /* ========== AI CUSTOMER SUPPORT CHATBOT - LEFT TOP CORNER (SMALL) ========== */
         .chatbot-btn {
             position: fixed;
-            bottom: 100px;
-            right: 16px;
-            width: 55px;
-            height: 55px;
+            top: 80px;
+            left: 16px;
+            width: 45px;
+            height: 45px;
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             border-radius: 50%;
             display: flex;
@@ -85,25 +85,25 @@
             justify-content: center;
             cursor: pointer;
             z-index: 1002;
-            box-shadow: 0 0 20px rgba(212,175,55,0.5);
+            box-shadow: 0 0 15px rgba(212,175,55,0.5);
             transition: all 0.3s;
             animation: pulse 2s infinite;
         }
         @keyframes pulse {
             0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.7); }
-            70% { box-shadow: 0 0 0 15px rgba(212,175,55,0); }
+            70% { box-shadow: 0 0 0 10px rgba(212,175,55,0); }
             100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
         }
         .chatbot-btn:hover { transform: scale(1.05); }
-        .chatbot-btn i { font-size: 28px; color: #050508; }
+        .chatbot-btn i { font-size: 22px; color: #050508; }
         
         .chatbot-window {
             position: fixed;
-            bottom: 170px;
-            right: 16px;
-            width: 380px;
+            top: 140px;
+            left: 16px;
+            width: 350px;
             max-width: calc(100vw - 32px);
-            height: 550px;
+            height: 500px;
             background: rgba(10,10,18,0.98);
             backdrop-filter: blur(20px);
             border-radius: 24px;
@@ -118,7 +118,7 @@
         
         .chat-header {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            padding: 15px;
+            padding: 12px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -126,27 +126,27 @@
         .chat-header h4 {
             color: #050508;
             font-weight: 800;
-            font-size: 16px;
+            font-size: 14px;
         }
         .chat-header i {
             color: #050508;
-            font-size: 20px;
+            font-size: 18px;
             cursor: pointer;
         }
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 15px;
+            padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 10px;
+            gap: 8px;
         }
         .message {
             max-width: 85%;
-            padding: 12px 16px;
+            padding: 10px 14px;
             border-radius: 18px;
-            font-size: 13px;
-            line-height: 1.5;
+            font-size: 12px;
+            line-height: 1.4;
             animation: fadeInMsg 0.3s ease;
         }
         @keyframes fadeInMsg {
@@ -169,16 +169,16 @@
         .options-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 12px;
-            margin-bottom: 8px;
+            gap: 8px;
+            margin-top: 10px;
+            margin-bottom: 6px;
         }
         .option-btn {
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.3);
-            padding: 10px 16px;
+            padding: 6px 12px;
             border-radius: 30px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: 0.2s;
             color: #D4AF37;
@@ -190,23 +190,23 @@
         }
         .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 15px;
+            gap: 8px;
+            margin-top: 12px;
             flex-wrap: wrap;
         }
         .action-btn {
             background: rgba(212,175,55,0.2);
             border: 1px solid #D4AF37;
-            padding: 8px 16px;
+            padding: 6px 12px;
             border-radius: 30px;
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             color: #D4AF37;
             font-weight: 600;
             text-decoration: none;
             display: inline-flex;
             align-items: center;
-            gap: 6px;
+            gap: 5px;
         }
         .action-btn.agent {
             background: #25D366;
@@ -215,29 +215,30 @@
         }
         .language-selector {
             display: flex;
-            gap: 10px;
-            margin: 12px 0;
+            gap: 8px;
+            margin: 10px 0;
         }
         .lang-btn {
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.3);
-            padding: 8px 20px;
+            padding: 6px 16px;
             border-radius: 30px;
             cursor: pointer;
             color: #D4AF37;
             font-weight: 600;
+            font-size: 12px;
         }
         .typing-indicator {
             display: flex;
             gap: 4px;
-            padding: 10px 14px;
+            padding: 8px 12px;
             background: rgba(212,175,55,0.1);
             border-radius: 18px;
             width: fit-content;
         }
         .typing-indicator span {
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             background: #D4AF37;
             border-radius: 50%;
             animation: typing 1.4s infinite;
@@ -246,7 +247,7 @@
         .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
         @keyframes typing {
             0%, 60%, 100% { transform: translateY(0); opacity: 0.4; }
-            30% { transform: translateY(-6px); opacity: 1; }
+            30% { transform: translateY(-5px); opacity: 1; }
         }
         
         .chat-input-area { display: none; }
@@ -376,6 +377,7 @@
             border-top: 1px solid rgba(212,175,55,0.4);
             border-bottom: 1px solid rgba(212,175,55,0.4);
             padding: 12px 0;
+            margin-top: 70px;
         }
         .marquee-line {
             overflow: hidden;
@@ -592,18 +594,6 @@
             gap: 5px;
             cursor: pointer;
             font-size: 10px;
-        }
-        
-        .view-more-container { text-align: center; margin: 30px 0; }
-        .view-more-btn {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 12px 32px;
-            border-radius: 50px;
-            font-weight: 800;
-            font-size: 14px;
-            color: #050508;
-            cursor: pointer;
         }
         
         /* About Section */
@@ -864,13 +854,13 @@
     </div>
 </div>
 
-<!-- ========== AI CUSTOMER SUPPORT CHATBOT - RIGHT SIDE SAME HEIGHT ========== -->
+<!-- ========== AI CUSTOMER SUPPORT CHATBOT - LEFT TOP CORNER (SMALL) ========== -->
 <div class="chatbot-btn" id="chatbotBtn">
     <i class="fas fa-headset"></i>
 </div>
 <div class="chatbot-window" id="chatbotWindow">
     <div class="chat-header">
-        <h4><i class="fas fa-robot"></i> VEDANTA Support AI</h4>
+        <h4><i class="fas fa-robot"></i> VEDANTA Support</h4>
         <i class="fas fa-times" id="closeChatBtn"></i>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
@@ -931,10 +921,6 @@
         <div id="resultCount" style="color:#D4AF37;">0 products</div>
     </div>
     <div id="productsContainer" class="products-grid"></div>
-
-    <div class="view-more-container">
-        <button class="view-more-btn" id="viewMoreBtn">VIEW MORE +</button>
-    </div>
 
     <!-- ABOUT SECTION -->
     <div class="about-premium">
@@ -1021,7 +1007,6 @@
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
     let filteredProducts = [];
-    let visibleCount = 8;
     let activeCategory = "all";
     let currentLanguage = "english";
     
@@ -1038,235 +1023,53 @@
     // ========== DETAILED KNOWLEDGE BASE ==========
     const translations = {
         english: {
-            welcome: "✨ Namaste! Welcome to Vedanta Support. I'm here to help you with detailed information. How may I assist you today?",
+            welcome: "✨ Namaste! Welcome to Vedanta Support. How may I assist you today?",
             selectLanguage: "Please select your preferred language:",
-            mainMenu: "📋 **Main Menu** - Please select an option for detailed information:",
+            mainMenu: "📋 **Main Menu** - Select an option:",
             options: {
-                orderStatus: "📦 Order Status & Tracking",
-                returnPolicy: "🔄 Return & Exchange Policy",
-                shipping: "🚚 Shipping & Delivery Info",
+                orderStatus: "📦 Order Status",
+                returnPolicy: "🔄 Return Policy",
+                shipping: "🚚 Shipping Info",
                 payment: "💳 Payment Methods",
-                quality: "✨ Product Quality & Authenticity",
-                cancelOrder: "❌ Order Cancellation",
-                coupon: "🎟️ Coupons & Discount Offers",
-                trackOrder: "📍 Track Your Order",
-                exchange: "🔄 Size Exchange Policy",
+                quality: "✨ Product Quality",
+                cancelOrder: "❌ Cancel Order",
+                coupon: "🎟️ Coupons & Offers",
+                trackOrder: "📍 Track Order",
+                exchange: "🔄 Size Exchange",
                 contact: "📞 Contact Us",
                 refund: "💰 Refund Policy",
                 cod: "💵 Cash on Delivery"
             },
             detailedAnswers: {
-                orderStatus: `📦 **ORDER STATUS & TRACKING - Complete Guide**
-
-🔹 **How to Check Order Status:**
-1️⃣ Login to your Vedanta account
-2️⃣ Go to 'My Orders' section
-3️⃣ Click on the specific order
-
-🔹 **Order Status Meanings:**
-• ⏳ Pending: Order received, processing soon
-• ✅ Confirmed: Order verified
-• 🔄 Processing: Being packed
-• 📦 Shipped: Dispatched from warehouse
-• 🚚 Out for Delivery: On the way
-• ✅ Delivered: Successfully delivered
-
-🔹 **Tracking:**
-• SMS & Email with tracking link sent within 24 hours
-• Track on website or courier portal
-
-📞 Need help? Share your Order ID!`,
-                
-                returnPolicy: `🔄 **RETURN POLICY - Complete Guide**
-
-🔹 **15-Day Easy Return:**
-✅ Return within 15 days of delivery
-✅ Items must be unused with original tags
-✅ Original packaging required
-
-🔹 **How to Return:**
-1️⃣ Login to your account
-2️⃣ Go to 'My Orders' → Select order
-3️⃣ Click 'Return Item' → Select reason
-4️⃣ Schedule free pickup
-
-🔹 **Refund Timeline:**
-• 5-7 business days for refund
-• Refund to original payment method
-
-📞 For assistance: +91 63061 28837`,
-                
-                shipping: `🚚 **SHIPPING INFO - Complete Guide**
-
-🔹 **Shipping Timeline (India):**
-• Standard: 3-7 business days (FREE)
-• Express: 2-4 business days (₹199 extra)
-
-🔹 **International:**
-• Standard: 7-15 business days
-
-🔹 **Order Processing:**
-• 24-48 hours processing time
-• Tracking link sent via SMS/Email
-
-✅ Free shipping on ALL orders!`,
-                
-                payment: `💳 **PAYMENT METHODS**
-
-🔹 **Accepted Options:**
-✅ Credit/Debit Cards (Visa, Mastercard, RuPay)
-✅ UPI (Google Pay, PhonePe, Paytm)
-✅ Net Banking (All banks)
-✅ Cash on Delivery (COD)
-✅ EMI on orders above ₹5000
-
-🔹 **COD:**
-• Pay cash at delivery
-• Max limit: ₹10,000
-
-🔒 100% secure payments!`,
-                
-                quality: `✨ **QUALITY PROMISE**
-
-🔹 **100% Authentic Products**
-• Directly from master artisans
-• Certificate of authenticity included
-
-🔹 **Quality Checks:**
-Each product goes through 15+ quality checks
-
-🔹 **Materials:**
-• Pure silk, cotton, linen for clothing
-• Natural certified crystals
-• Sandalwood, Tulsi, Rudraksha malas
-
-⭐ Handcrafted with love and precision!`,
-                
-                cancelOrder: `❌ **ORDER CANCELLATION**
-
-🔹 **Cancellation Window:**
-⏰ Within 2 hours of placing order
-
-🔹 **How to Cancel:**
-1️⃣ Login to your account
-2️⃣ Go to 'My Orders'
-3️⃣ Click 'Cancel Order'
-
-🔹 **Refund:**
-• FULL refund if cancelled before shipping
-• Time: 5-7 business days
-
-📞 Call: +91 63061 28837 for help`,
-                
-                coupon: `🎟️ **COUPONS & OFFERS**
-
-🔹 **Active Coupons:**
-🎁 WELCOME10 - 10% off first order
-🎉 FLAT40 - 40% off on ₹3000+
-⭐ VEDANTA20 - 20% off sitewide
-
-🔹 **How to Apply:**
-Enter coupon code at checkout
-
-🔹 **Newsletter:**
-Subscribe for exclusive 15% discount!`,
-                
-                trackOrder: `📍 **TRACK YOUR ORDER**
-
-🔹 **Method 1 - Website:**
-Login → 'My Orders' → Click 'Track Order'
-
-🔹 **Method 2 - SMS/Email:**
-Click tracking link sent to you
-
-🔹 **Method 3 - WhatsApp:**
-Send Order ID to +91 63061 28837
-
-We'll help you track instantly!`,
-                
-                exchange: `🔄 **SIZE EXCHANGE**
-
-🔹 **Free Size Exchange:**
-✅ Within 15 days of delivery
-✅ FREE pickup & redelivery
-
-🔹 **How to Exchange:**
-1️⃣ Login to your account
-2️⃣ Go to 'My Orders'
-3️⃣ Click 'Exchange'
-4️⃣ Select new size/color
-
-📞 Need help? Call +91 63061 28837`,
-                
-                contact: `📞 **CONTACT US**
-
-🔹 **Customer Support:**
-🕐 Mon-Sat: 10 AM - 7 PM
-
-📞 Phone: +91 63061 28837
-💬 WhatsApp: +91 63061 28837
-📧 Email: vedanta777@gmail.com
-
-📍 Address:
-Lower Parel, Mumbai - 400013
-Maharashtra, India
-
-📱 Instagram: @vedanta
-
-We're here to help!`,
-                
-                refund: `💰 **REFUND POLICY**
-
-🔹 **When You Get Refund:**
-✅ Order cancelled before shipping
-✅ Return accepted
-✅ Wrong/damaged item
-
-🔹 **Refund Timeline:**
-• Card/UPI: 5-7 business days
-• COD: 7-10 days (bank transfer)
-• Store Credit: Instant
-
-🔹 **Check Status:**
-Login → 'My Orders' → Refund status
-
-📞 Refund issues: +91 63061 28837`,
-                
-                cod: `💵 **CASH ON DELIVERY (COD)**
-
-🔹 **COD Availability:**
-📍 Available across India
-❌ Not for International orders
-
-🔹 **COD Limits:**
-• Minimum: ₹299
-• Maximum: ₹10,000
-
-🔹 **COD Charges:**
-• FREE for orders above ₹999
-• ₹49 for orders below ₹999
-
-🔹 **How to Pay:**
-Select COD at checkout → Pay cash at delivery
-
-Questions? Ask us!`
+                orderStatus: `📦 **ORDER STATUS**\n\nCheck status: Login → 'My Orders'\n\nStatus meanings:\n• Pending: Order received\n• Confirmed: Verified\n• Processing: Being packed\n• Shipped: Dispatched\n• Delivered: Received\n\n📞 Need help? +91 63061 28837`,
+                returnPolicy: `🔄 **RETURN POLICY**\n\n✅ 15-day easy return\n✅ Unused with tags\n✅ Original packaging\n\n📞 Call: +91 63061 28837`,
+                shipping: `🚚 **SHIPPING**\n\nIndia: 3-7 days (FREE)\nExpress: 2-4 days (₹199)\nInternational: 7-15 days\n\n✅ Free shipping on all orders!`,
+                payment: `💳 **PAYMENT METHODS**\n\n✅ Cards (Visa, Mastercard)\n✅ UPI (GPay, PhonePe)\n✅ Net Banking\n✅ Cash on Delivery\n✅ EMI on ₹5000+`,
+                quality: `✨ **QUALITY PROMISE**\n\n✅ 100% Authentic\n✅ 15+ quality checks\n✅ Premium materials\n\n⭐ Handcrafted with love!`,
+                cancelOrder: `❌ **CANCEL ORDER**\n\n⏰ Within 2 hours of order\n\nHow to cancel:\nLogin → 'My Orders' → 'Cancel Order'\n\n💰 Full refund before shipping`,
+                coupon: `🎟️ **COUPONS**\n\n🎁 WELCOME10 - 10% off\n🎉 FLAT40 - 40% off (₹3000+)\n⭐ VEDANTA20 - 20% off`,
+                trackOrder: `📍 **TRACK ORDER**\n\nLogin → 'My Orders' → 'Track Order'\nOr click SMS/Email link\n\n📞 WhatsApp: +91 63061 28837`,
+                exchange: `🔄 **SIZE EXCHANGE**\n\n✅ Free exchange within 15 days\n✅ Free pickup & delivery\n\nLogin → 'My Orders' → 'Exchange'`,
+                contact: `📞 **CONTACT US**\n\n📞 Phone: +91 63061 28837\n💬 WhatsApp: +91 63061 28837\n📧 Email: vedanta777@gmail.com\n\n📍 Lower Parel, Mumbai`,
+                refund: `💰 **REFUND POLICY**\n\nRefund timeline:\n• Card/UPI: 5-7 days\n• COD: 7-10 days\n\n📞 Issues: +91 63061 28837`,
+                cod: `💵 **CASH ON DELIVERY**\n\n📍 Available in India\n• Min: ₹299\n• Max: ₹10,000\n• Free on ₹999+`
             },
-            backToMenu: "🔙 Back to Main Menu",
-            talkToAgent: "📞 Talk to Our Agent (WhatsApp)",
-            agentMessage: "📞 Our support agent will assist you! Click below to chat on WhatsApp.",
-            notFound: "Please select an option from the menu below for detailed assistance."
+            backToMenu: "🔙 Back to Menu",
+            talkToAgent: "📞 Talk to Agent",
+            agentMessage: "📞 Our agent will assist you! Click below to chat.",
+            notFound: "Please select an option from the menu."
         },
         hindi: {
-            welcome: "✨ नमस्ते! वेदांता सपोर्ट में आपका स्वागत है। मैं आपकी कैसे सहायता कर सकता हूँ?",
+            welcome: "✨ नमस्ते! वेदांता सपोर्ट में आपका स्वागत है।",
             selectLanguage: "कृपया अपनी भाषा चुनें:",
-            mainMenu: "📋 **मुख्य मेनू** - विस्तृत जानकारी के लिए कोई विकल्प चुनें:",
+            mainMenu: "📋 **मुख्य मेनू** - विकल्प चुनें:",
             options: {
-                orderStatus: "📦 ऑर्डर स्टेटस और ट्रैकिंग",
-                returnPolicy: "🔄 रिटर्न और एक्सचेंज नीति",
-                shipping: "🚚 शिपिंग और डिलीवरी",
-                payment: "💳 भुगतान के तरीके",
-                quality: "✨ उत्पाद की गुणवत्ता",
-                cancelOrder: "❌ ऑर्डर कैंसिल करना",
+                orderStatus: "📦 ऑर्डर स्टेटस",
+                returnPolicy: "🔄 रिटर्न नीति",
+                shipping: "🚚 शिपिंग",
+                payment: "💳 भुगतान",
+                quality: "✨ गुणवत्ता",
+                cancelOrder: "❌ ऑर्डर कैंसिल",
                 coupon: "🎟️ कूपन और ऑफर",
                 trackOrder: "📍 ऑर्डर ट्रैक करें",
                 exchange: "🔄 साइज एक्सचेंज",
@@ -1275,164 +1078,28 @@ Questions? Ask us!`
                 cod: "💵 कैश ऑन डिलीवरी"
             },
             detailedAnswers: {
-                orderStatus: `📦 **ऑर्डर स्टेटस और ट्रैकिंग**
-
-🔹 **ऑर्डर स्टेटस कैसे चेक करें:**
-1️⃣ अकाउंट में लॉगिन करें
-2️⃣ 'माई ऑर्डर्स' पर जाएं
-3️⃣ ऑर्डर पर क्लिक करें
-
-🔹 **स्टेटस के मीनिंग:**
-• ⏳ पेंडिंग: ऑर्डर मिला
-• ✅ कन्फर्म: वेरिफाई हो गया
-• 🔄 प्रोसेसिंग: पैक हो रहा है
-• 📦 शिप्ड: डिस्पैच हो गया
-• ✅ डिलीवर्ड: मिल गया
-
-📞 मदद चाहिए? +91 63061 28837`,
-                
-                returnPolicy: `🔄 **रिटर्न नीति**
-
-🔹 **15-दिन ईज़ी रिटर्न:**
-✅ 15 दिनों के भीतर
-✅ प्रोडक्ट अन्यूज्ड हो
-✅ ओरिजिनल टैग लगे हों
-
-🔹 **रिटर्न कैसे करें:**
-1️⃣ अकाउंट में लॉगिन करें
-2️⃣ 'माई ऑर्डर्स' → 'रिटर्न आइटम'
-3️⃣ फ्री पिकअप बुक करें
-
-📞 सहायता: +91 63061 28837`,
-                
-                shipping: `🚚 **शिपिंग जानकारी**
-
-🔹 **भारत:**
-• स्टैंडर्ड: 3-7 दिन (मुफ्त)
-• एक्सप्रेस: 2-4 दिन (₹199 अतिरिक्त)
-
-🔹 **अंतर्राष्ट्रीय:**
-• 7-15 दिन
-
-✅ सभी ऑर्डर पर फ्री शिपिंग!`,
-                
-                payment: `💳 **भुगतान के तरीके**
-
-🔹 **स्वीकृत विकल्प:**
-✅ क्रेडिट/डेबिट कार्ड
-✅ यूपीआई (गूगल पे, फोनपे)
-✅ नेट बैंकिंग
-✅ कैश ऑन डिलीवरी (COD)
-✅ ईएमआई (₹5000+)
-
-🔒 100% सुरक्षित!`,
-                
-                quality: `✨ **गुणवत्ता का वादा**
-
-🔹 **100% प्रामाणिक उत्पाद**
-🔹 **15+ गुणवत्ता जांच**
-🔹 **प्रीमियम सामग्री**
-
-⭐ हस्तनिर्मित और प्रमाणित!`,
-                
-                cancelOrder: `❌ **ऑर्डर कैंसिल**
-
-🔹 **समय सीमा:**
-⏰ ऑर्डर के 2 घंटे के भीतर
-
-🔹 **कैसे करें:**
-1️⃣ अकाउंट में लॉगिन करें
-2️⃣ 'माई ऑर्डर्स' पर जाएं
-3️⃣ 'कैंसिल ऑर्डर' क्लिक करें
-
-💰 शिपिंग से पहले कैंसिल पर पूरा रिफंड`,
-                
-                coupon: `🎟️ **कूपन और ऑफर**
-
-🔹 **एक्टिव कूपन:**
-🎁 WELCOME10 - 10% छूट
-🎉 FLAT40 - 40% छूट (₹3000+)
-⭐ VEDANTA20 - 20% छूट
-
-🔹 **कैसे अप्लाई करें:**
-चेकआउट पर कोड डालें`,
-                
-                trackOrder: `📍 **ऑर्डर ट्रैक करें**
-
-🔹 **तरीका 1 - वेबसाइट:**
-लॉगिन → 'माई ऑर्डर्स' → 'ट्रैक ऑर्डर'
-
-🔹 **तरीका 2 - WhatsApp:**
-ऑर्डर ID भेजें +91 63061 28837 पर
-
-हम तुरंत ट्रैक करके बताएंगे!`,
-                
-                exchange: `🔄 **साइज एक्सचेंज**
-
-🔹 **मुफ्त एक्सचेंज:**
-✅ 15 दिनों के भीतर
-✅ मुफ्त पिकअप और डिलीवरी
-
-🔹 **कैसे करें:**
-1️⃣ अकाउंट में लॉगिन करें
-2️⃣ 'माई ऑर्डर्स' → 'एक्सचेंज'
-3️⃣ नया साइज चुनें
-
-📞 +91 63061 28837`,
-                
-                contact: `📞 **संपर्क करें**
-
-📞 फोन: +91 63061 28837
-💬 व्हाट्सएप: +91 63061 28837
-📧 ईमेल: vedanta777@gmail.com
-
-📍 पता:
-लोअर परेल, मुंबई - 400013
-
-🕐 सोम-शनि: सुबह 10 बजे - शाम 7 बजे`,
-                
-                refund: `💰 **रिफंड नीति**
-
-🔹 **रिफंड कब मिलता है:**
-✅ कैंसिल ऑर्डर
-✅ रिटर्न स्वीकार होने पर
-
-🔹 **समय सीमा:**
-• कार्ड/यूपीआई: 5-7 दिन
-• COD: 7-10 दिन
-
-📞 रिफंड हेल्प: +91 63061 28837`,
-                
-                cod: `💵 **कैश ऑन डिलीवरी (COD)**
-
-🔹 **उपलब्धता:**
-📍 पूरे भारत में
-
-🔹 **सीमा:**
-• न्यूनतम: ₹299
-• अधिकतम: ₹10,000
-
-🔹 **चार्ज:**
-• ₹999+ पर मुफ्त
-• इससे कम पर ₹49
-
-❓ कोई सवाल? हमसे पूछें!`
+                orderStatus: `📦 **ऑर्डर स्टेटस**\n\nस्टेटस चेक करें: लॉगिन → 'माई ऑर्डर्स'\n\n📞 सहायता: +91 63061 28837`,
+                returnPolicy: `🔄 **रिटर्न नीति**\n\n✅ 15 दिन\n✅ अन्यूज्ड\n✅ ओरिजिनल पैकिंग`,
+                shipping: `🚚 **शिपिंग**\n\nभारत: 3-7 दिन (मुफ्त)\nएक्सप्रेस: 2-4 दिन (₹199)`,
+                payment: `💳 **भुगतान**\n\n✅ कार्ड, यूपीआई, नेट बैंकिंग\n✅ कैश ऑन डिलीवरी`,
+                quality: `✨ **गुणवत्ता**\n\n✅ 100% प्रामाणिक\n✅ 15+ गुणवत्ता जांच`,
+                cancelOrder: `❌ **ऑर्डर कैंसिल**\n\n⏰ 2 घंटे के भीतर\n\nलॉगिन → 'माई ऑर्डर्स' → 'कैंसिल'`,
+                coupon: `🎟️ **कूपन**\n\n🎁 WELCOME10 - 10% छूट\n🎉 FLAT40 - 40% छूट`,
+                trackOrder: `📍 **ऑर्डर ट्रैक**\n\nलॉगिन करें या SMS लिंक क्लिक करें`,
+                exchange: `🔄 **साइज एक्सचेंज**\n\n✅ 15 दिनों में मुफ्त`,
+                contact: `📞 **संपर्क**\n\n📞 +91 63061 28837\n💬 WhatsApp: +91 63061 28837`,
+                refund: `💰 **रिफंड**\n\n5-7 दिन (कार्ड/UPI)\n7-10 दिन (COD)`,
+                cod: `💵 **कैश ऑन डिलीवरी**\n\n📍 पूरे भारत में\n• न्यूनतम: ₹299\n• अधिकतम: ₹10,000`
             },
-            backToMenu: "🔙 मुख्य मेनू पर वापस जाएं",
+            backToMenu: "🔙 मेनू पर वापस",
             talkToAgent: "📞 एजेंट से बात करें",
-            agentMessage: "📞 हमारा सपोर्ट एजेंट आपसे जुड़ेगा! व्हाट्सएप पर चैट करने के लिए नीचे क्लिक करें।",
-            notFound: "कृपया नीचे दिए गए मेनू से कोई विकल्प चुनें।"
+            agentMessage: "📞 एजेंट आपसे जुड़ेगा!",
+            notFound: "कृपया मेनू से विकल्प चुनें।"
         }
     };
     
-    function t(key) {
-        return translations[currentLanguage][key] || translations.english[key] || key;
-    }
-    
-    function getDetailedAnswer(optionKey) {
-        return translations[currentLanguage].detailedAnswers[optionKey] || 
-               translations.english.detailedAnswers[optionKey];
-    }
+    function t(key) { return translations[currentLanguage][key] || translations.english[key] || key; }
+    function getDetailedAnswer(optionKey) { return translations[currentLanguage].detailedAnswers[optionKey] || translations.english.detailedAnswers[optionKey]; }
     
     // ========== CHATBOT FUNCTIONS ==========
     function addMessage(text, isUser = false, isHtml = false) {
@@ -1440,11 +1107,8 @@ Questions? Ask us!`
         if (!chatMessages) return;
         const messageDiv = document.createElement('div');
         messageDiv.className = `message ${isUser ? 'user' : 'bot'}`;
-        if (isHtml) {
-            messageDiv.innerHTML = text;
-        } else {
-            messageDiv.innerHTML = text.replace(/\n/g, '<br>');
-        }
+        if (isHtml) { messageDiv.innerHTML = text; } 
+        else { messageDiv.innerHTML = text.replace(/\n/g, '<br>'); }
         chatMessages.appendChild(messageDiv);
         chatMessages.scrollTop = chatMessages.scrollHeight;
     }
@@ -1469,12 +1133,7 @@ Questions? Ask us!`
         addMessage(t('selectLanguage'), false);
         const lastMsg = document.getElementById('chatMessages')?.lastChild;
         if (lastMsg) {
-            const langHtml = `
-                <div class="language-selector">
-                    <button class="lang-btn" onclick="window.setLanguage('english')">🇬🇧 English</button>
-                    <button class="lang-btn" onclick="window.setLanguage('hindi')">🇮🇳 हिंदी</button>
-                </div>
-            `;
+            const langHtml = `<div class="language-selector"><button class="lang-btn" onclick="window.setLanguage('english')">🇬🇧 English</button><button class="lang-btn" onclick="window.setLanguage('hindi')">🇮🇳 हिंदी</button></div>`;
             lastMsg.innerHTML = t('selectLanguage') + langHtml;
         }
     }
@@ -1482,38 +1141,15 @@ Questions? Ask us!`
     function setLanguage(lang) {
         currentLanguage = lang;
         addMessage(`✅ Language set to ${lang === 'english' ? 'English' : 'हिंदी'}`, false);
-        setTimeout(() => {
-            showMainMenu();
-        }, 500);
+        setTimeout(() => { showMainMenu(); }, 500);
     }
     
     function showMainMenu() {
         const options = t('options');
-        const mainMenuHtml = `
-            <div class="message bot">
-                ${t('mainMenu')}
-                <div class="options-container" id="mainOptionsContainer">
-                    <button class="option-btn" data-option="orderStatus">${options.orderStatus}</button>
-                    <button class="option-btn" data-option="returnPolicy">${options.returnPolicy}</button>
-                    <button class="option-btn" data-option="shipping">${options.shipping}</button>
-                    <button class="option-btn" data-option="payment">${options.payment}</button>
-                    <button class="option-btn" data-option="quality">${options.quality}</button>
-                    <button class="option-btn" data-option="cancelOrder">${options.cancelOrder}</button>
-                    <button class="option-btn" data-option="coupon">${options.coupon}</button>
-                    <button class="option-btn" data-option="trackOrder">${options.trackOrder}</button>
-                    <button class="option-btn" data-option="exchange">${options.exchange}</button>
-                    <button class="option-btn" data-option="contact">${options.contact}</button>
-                    <button class="option-btn" data-option="refund">${options.refund}</button>
-                    <button class="option-btn" data-option="cod">${options.cod}</button>
-                </div>
-            </div>
-        `;
+        const mainMenuHtml = `<div class="message bot">${t('mainMenu')}<div class="options-container" id="mainOptionsContainer"><button class="option-btn" data-option="orderStatus">${options.orderStatus}</button><button class="option-btn" data-option="returnPolicy">${options.returnPolicy}</button><button class="option-btn" data-option="shipping">${options.shipping}</button><button class="option-btn" data-option="payment">${options.payment}</button><button class="option-btn" data-option="quality">${options.quality}</button><button class="option-btn" data-option="cancelOrder">${options.cancelOrder}</button><button class="option-btn" data-option="coupon">${options.coupon}</button><button class="option-btn" data-option="trackOrder">${options.trackOrder}</button><button class="option-btn" data-option="exchange">${options.exchange}</button><button class="option-btn" data-option="contact">${options.contact}</button><button class="option-btn" data-option="refund">${options.refund}</button><button class="option-btn" data-option="cod">${options.cod}</button></div></div>`;
         addMessage('', false, true);
         const lastMsg = document.getElementById('chatMessages')?.lastChild;
-        if (lastMsg) {
-            lastMsg.innerHTML = mainMenuHtml;
-        }
-        
+        if (lastMsg) { lastMsg.innerHTML = mainMenuHtml; }
         document.querySelectorAll('.option-btn').forEach(btn => {
             btn.removeEventListener('click', handleOptionClick);
             btn.addEventListener('click', handleOptionClick);
@@ -1523,49 +1159,27 @@ Questions? Ask us!`
     function handleOptionClick(e) {
         const option = e.target.getAttribute('data-option');
         const selectedText = e.target.innerText;
-        
         addMessage(selectedText, true);
-        
         const optionsContainer = document.getElementById('mainOptionsContainer');
-        if (optionsContainer) {
-            optionsContainer.style.display = 'none';
-        }
-        
+        if (optionsContainer) { optionsContainer.style.display = 'none'; }
         showTypingIndicator();
-        
         setTimeout(() => {
             removeTypingIndicator();
             const answer = getDetailedAnswer(option);
             const whatsappNumber = "916306128837";
             const encodedQuestion = encodeURIComponent(selectedText);
             const whatsappUrl = `https://wa.me/${whatsappNumber}?text=Hello%20Vedanta%20Team!%20I%20need%20help%20regarding%3A%20${encodedQuestion}`;
-            
-            const solutionHtml = `
-                <div class="message bot">
-                    ${answer.replace(/\n/g, '<br>')}
-                    <div class="action-buttons">
-                        <button class="action-btn" onclick="window.goBackToMenu()">${t('backToMenu')}</button>
-                        <a href="${whatsappUrl}" target="_blank" class="action-btn agent" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;">
-                            <i class="fab fa-whatsapp"></i> ${t('talkToAgent')}
-                        </a>
-                    </div>
-                </div>
-            `;
+            const solutionHtml = `<div class="message bot">${answer.replace(/\n/g, '<br>')}<div class="action-buttons"><button class="action-btn" onclick="window.goBackToMenu()">${t('backToMenu')}</button><a href="${whatsappUrl}" target="_blank" class="action-btn agent" style="display:inline-flex; align-items:center; gap:6px; text-decoration:none;"><i class="fab fa-whatsapp"></i> ${t('talkToAgent')}</a></div></div>`;
             addMessage('', false, true);
             const lastMsg = document.getElementById('chatMessages')?.lastChild;
-            if (lastMsg) {
-                lastMsg.innerHTML = solutionHtml;
-            }
+            if (lastMsg) { lastMsg.innerHTML = solutionHtml; }
         }, 800);
     }
     
     function goBackToMenu() {
         addMessage(t('backToMenu'), true);
         showTypingIndicator();
-        setTimeout(() => {
-            removeTypingIndicator();
-            showMainMenu();
-        }, 500);
+        setTimeout(() => { removeTypingIndicator(); showMainMenu(); }, 500);
     }
     
     function resetChat() {
@@ -1579,155 +1193,89 @@ Questions? Ask us!`
         const chatbotWindow = document.getElementById('chatbotWindow');
         if (chatbotWindow) {
             chatbotWindow.classList.toggle('open');
-            if (chatbotWindow.classList.contains('open') && document.getElementById('chatMessages')?.children.length === 0) {
-                resetChat();
-            }
+            if (chatbotWindow.classList.contains('open') && document.getElementById('chatMessages')?.children.length === 0) { resetChat(); }
         }
     }
     
-    // Make functions global
     window.goBackToMenu = goBackToMenu;
     window.setLanguage = setLanguage;
     window.goToProductDetail = goToProductDetail;
     
-    // ========== CART FUNCTIONS WITH COMBO SUPPORT ==========
-    function saveCart() { 
-        localStorage.setItem('vedantaCart', JSON.stringify(cart)); 
-        updateCartUI(); 
-    }
+    // ========== CART FUNCTIONS ==========
+    function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
     
     function addToCart(product) {
-        // Check if product is a combo (combo info would come from product detail page)
-        // For home page, regular products are added normally
         const existing = cart.find(item => item.id == product.id && !item.isCombo);
-        if (existing) {
-            existing.quantity++;
-        } else {
-            cart.push({ ...product, quantity: 1, isCombo: false });
-        }
+        if (existing) { existing.quantity++; } 
+        else { cart.push({ ...product, quantity: 1, isCombo: false }); }
         saveCart();
         showToastMessage(`🛍️ ${product.name} added!`);
     }
     
-    // For combo items (used when coming from product detail with combo)
     function addComboToCart(product, comboQty, comboPrice) {
         const finalPrice = comboPrice / comboQty;
         const comboInfo = `${comboQty} for ₹${comboPrice}`;
-        
         const existing = cart.find(item => item.id == product.id && item.combo === comboInfo);
-        if (existing) {
-            existing.quantity += comboQty;
-        } else {
-            cart.push({ 
-                id: product.id, 
-                name: product.name, 
-                price: finalPrice, 
-                quantity: comboQty, 
-                combo: comboInfo,
-                isCombo: true,
-                comboMultiplier: comboQty
-            });
-        }
+        if (existing) { existing.quantity += comboQty; } 
+        else { cart.push({ id: product.id, name: product.name, price: finalPrice, quantity: comboQty, combo: comboInfo, isCombo: true, comboMultiplier: comboQty }); }
         saveCart();
         showToastMessage(`🎉 Combo: ${comboQty} items for ₹${comboPrice} added!`);
     }
     
     function updateCartQuantity(index, newQuantity) {
         const item = cart[index];
-        
         if (item.isCombo && item.comboMultiplier) {
-            const currentMultiples = item.quantity / item.comboMultiplier;
             const newMultiples = newQuantity / item.comboMultiplier;
-            
-            if (newMultiples < 1) {
-                cart.splice(index, 1);
-            } else {
-                item.quantity = newMultiples * item.comboMultiplier;
-            }
+            if (newMultiples < 1) { cart.splice(index, 1); } 
+            else { item.quantity = newMultiples * item.comboMultiplier; }
         } else {
-            if (newQuantity < 1) {
-                cart.splice(index, 1);
-            } else {
-                cart[index].quantity = newQuantity;
-            }
+            if (newQuantity < 1) { cart.splice(index, 1); } 
+            else { cart[index].quantity = newQuantity; }
         }
         saveCart();
     }
     
-    function removeFromCart(index) {
-        cart.splice(index, 1);
-        saveCart();
-    }
+    function removeFromCart(index) { cart.splice(index, 1); saveCart(); }
     
     function updateCartUI() {
         const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
         const cartCountEl = document.getElementById('cartCount');
         if (cartCountEl) cartCountEl.innerText = totalItems;
-        
         const cartItemsDiv = document.getElementById('cartItems');
         const cartTotalSpan = document.getElementById('cartTotal');
-        
         if (cart.length === 0) {
             if (cartItemsDiv) cartItemsDiv.innerHTML = '<div class="empty-cart">🛒 Your cart is empty</div>';
             if (cartTotalSpan) cartTotalSpan.innerText = '₹0';
             return;
         }
-        
         let total = 0;
         cartItemsDiv.innerHTML = '';
-        
         cart.forEach((item, idx) => {
             const itemTotal = item.price * item.quantity;
             total += itemTotal;
-            
-            cartItemsDiv.innerHTML += `
-                <div class="cart-item">
-                    <div class="cart-item-info">
-                        <h4>${escapeHtml(item.name)}</h4>
-                        ${item.combo ? `<div class="combo-tag"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</div>` : ''}
-                        <p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p>
-                    </div>
-                    <div class="cart-item-actions">
-                        <button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button>
-                        <span class="cart-qty">${item.quantity}</span>
-                        <button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button>
-                        <button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button>
-                    </div>
-                </div>
-            `;
+            cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)}</h4>${item.combo ? `<div class="combo-tag"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</div>` : ''}<p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`;
         });
-        
         cartItemsDiv.querySelectorAll('.cart-qty-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
                 const idx = parseInt(btn.getAttribute('data-index'));
                 const action = btn.getAttribute('data-action');
                 const item = cart[idx];
-                
                 if (action === 'incr') {
-                    if (item.isCombo && item.comboMultiplier) {
-                        updateCartQuantity(idx, item.quantity + item.comboMultiplier);
-                    } else {
-                        updateCartQuantity(idx, item.quantity + 1);
-                    }
+                    if (item.isCombo && item.comboMultiplier) { updateCartQuantity(idx, item.quantity + item.comboMultiplier); } 
+                    else { updateCartQuantity(idx, item.quantity + 1); }
                 } else if (action === 'decr') {
-                    if (item.isCombo && item.comboMultiplier) {
-                        updateCartQuantity(idx, item.quantity - item.comboMultiplier);
-                    } else {
-                        updateCartQuantity(idx, item.quantity - 1);
-                    }
+                    if (item.isCombo && item.comboMultiplier) { updateCartQuantity(idx, item.quantity - item.comboMultiplier); } 
+                    else { updateCartQuantity(idx, item.quantity - 1); }
                 }
             });
         });
-        
         cartItemsDiv.querySelectorAll('.cart-item-remove').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                const idx = parseInt(btn.getAttribute('data-index'));
-                removeFromCart(idx);
+                removeFromCart(parseInt(btn.getAttribute('data-index')));
             });
         });
-        
         if (cartTotalSpan) cartTotalSpan.innerText = `₹${total}`;
     }
     
@@ -1758,54 +1306,28 @@ Questions? Ask us!`
     function checkoutWithLoginCheck() {
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
         const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-        if (currentCart.length === 0) {
-            showToastMessage('🛒 Cart is empty!', true);
-            return;
-        }
-        if (currentUser && currentUser.email) {
-            window.location.href = 'secure-checkout.html';
-        } else {
-            showToastMessage('🔐 Please login to checkout');
-            setTimeout(() => { window.location.href = 'profile.html'; }, 800);
-        }
+        if (currentCart.length === 0) { showToastMessage('🛒 Cart is empty!', true); return; }
+        if (currentUser && currentUser.email) { window.location.href = 'secure-checkout.html'; } 
+        else { showToastMessage('🔐 Please login to checkout'); setTimeout(() => { window.location.href = 'profile.html'; }, 800); }
     }
     
-    function openCart() {
-        document.getElementById('cartSidebar').classList.add('open');
-        document.getElementById('cartOverlay').classList.add('show');
-    }
+    function openCart() { document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.add('show'); }
+    function closeCart() { document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('show'); }
+    function goToProductDetail(productId) { localStorage.setItem('vedanta_selected_product_id', productId); window.location.href = `product-detail.html`; }
     
-    function closeCart() {
-        document.getElementById('cartSidebar').classList.remove('open');
-        document.getElementById('cartOverlay').classList.remove('show');
-    }
-    
-    function goToProductDetail(productId) {
-        localStorage.setItem('vedanta_selected_product_id', productId);
-        window.location.href = `product-detail.html`;
-    }
-    
-    // ========== PRODUCT FUNCTIONS ==========
+    // ========== PRODUCT FUNCTIONS - ALL PRODUCTS AT ONCE ==========
     async function getAllProducts() {
         try {
-            const snapshot = await db.collection('products').where('status', '==', 'active').get();
+            const snapshot = await db.collection('products').where('status', '==', 'active').orderBy('createdAt', 'desc').get();
             const products = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
-                products.push({
-                    id: doc.id,
-                    name: data.name,
-                    category: data.category,
-                    price: data.price,
-                    icon: data.icon || 'fa-gem',
-                    badge: data.badge || 'New',
-                    images: data.images || []
-                });
+                products.push({ id: doc.id, name: data.name, category: data.category, price: data.price, icon: data.icon || 'fa-gem', badge: data.badge || 'New', images: data.images || [] });
             });
             return products;
-        } catch (error) {
-            console.error("Error fetching products:", error);
-            return [];
+        } catch (error) { 
+            console.error("Error fetching products:", error); 
+            return []; 
         }
     }
     
@@ -1820,7 +1342,6 @@ Questions? Ask us!`
                 }
             } catch(e) {}
         }
-        
         try {
             let cloudProducts = await getAllProducts();
             if (cloudProducts && cloudProducts.length > 0) {
@@ -1829,9 +1350,7 @@ Questions? Ask us!`
                 filteredProducts = [...allProducts];
                 renderProducts();
             }
-        } catch (error) {
-            console.error("Error loading products:", error);
-        }
+        } catch (error) { console.error("Error loading products:", error); }
         
         if (allProducts.length === 0) {
             allProducts = [
@@ -1847,82 +1366,51 @@ Questions? Ask us!`
         }
     }
     
+    function getFilteredProducts() {
+        let filtered = [...filteredProducts];
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        if (searchTerm) { filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm)); }
+        if (activeCategory !== 'all') { filtered = filtered.filter(p => p.category === activeCategory); }
+        return filtered;
+    }
+    
     function renderProducts() {
         const container = document.getElementById('productsContainer');
         const resultSpan = document.getElementById('resultCount');
         if (!container) return;
         
-        let filtered = [...filteredProducts];
-        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
-        if (searchTerm) {
-            filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm));
-        }
-        if (activeCategory !== 'all') {
-            filtered = filtered.filter(p => p.category === activeCategory);
-        }
+        const filtered = getFilteredProducts();
         
-        const toShow = filtered.slice(0, visibleCount);
-        if (toShow.length === 0) {
+        if (filtered.length === 0) {
             container.innerHTML = `<div style="text-align:center; padding:40px;"><i class="fas fa-search"></i><br>No products found ✨</div>`;
             if (resultSpan) resultSpan.innerText = '0';
             return;
         }
         
         container.innerHTML = '';
-        toShow.forEach(p => {
+        filtered.forEach(p => {
             const hasImage = p.images && p.images.length > 0;
             const firstImage = hasImage ? p.images[0] : null;
-            
-            container.innerHTML += `
-                <div class="product-card" onclick="goToProductDetail('${p.id}')">
-                    <div class="product-img">
-                        ${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}
-                        <div class="badge-offer">${p.badge || 'New'}</div>
-                    </div>
-                    <div class="product-info">
-                        <div class="product-title">${escapeHtml(p.name)}</div>
-                        <div class="product-category">${p.category || 'General'}</div>
-                        <div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div>
-                        <div class="product-buttons">
-                            <button class="buynow-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fas fa-bolt"></i> BUY NOW</button>
-                            <button class="cart-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fa-regular fa-bag-shopping"></i> ADD</button>
-                        </div>
-                    </div>
-                </div>
-            `;
+            container.innerHTML += `<div class="product-card" onclick="goToProductDetail('${p.id}')"><div class="product-img">${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}<div class="badge-offer">${p.badge || 'New'}</div></div><div class="product-info"><div class="product-title">${escapeHtml(p.name)}</div><div class="product-category">${p.category || 'General'}</div><div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div><div class="product-buttons"><button class="buynow-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fas fa-bolt"></i> BUY NOW</button><button class="cart-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fa-regular fa-bag-shopping"></i> ADD</button></div></div></div>`;
         });
         
         if (resultSpan) resultSpan.innerText = filtered.length;
         
         document.querySelectorAll('.cart-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                addToCart({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) });
-            });
+            btn.addEventListener('click', (e) => { e.stopPropagation(); addToCart({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) }); });
         });
-        
         document.querySelectorAll('.buynow-btn').forEach(btn => {
-            btn.addEventListener('click', (e) => {
-                e.stopPropagation();
-                buyNowWithLoginCheck({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) });
-            });
+            btn.addEventListener('click', (e) => { e.stopPropagation(); buyNowWithLoginCheck({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) }); });
         });
-        
-        const viewMoreBtn = document.getElementById('viewMoreBtn');
-        if (viewMoreBtn) {
-            viewMoreBtn.style.display = visibleCount >= filtered.length ? 'none' : 'inline-block';
-        }
     }
     
     function filterByCategory(category) {
         activeCategory = category;
-        visibleCount = 8;
         renderProducts();
     }
     
     // Event Listeners
-    document.getElementById('viewMoreBtn')?.addEventListener('click', () => { visibleCount += 8; renderProducts(); });
-    document.getElementById('searchInput')?.addEventListener('input', () => renderProducts());
+    document.getElementById('searchInput')?.addEventListener('input', () => { renderProducts(); });
     document.querySelectorAll('.filter-btn').forEach(btn => {
         btn.addEventListener('click', () => {
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
@@ -1935,8 +1423,6 @@ Questions? Ask us!`
     document.getElementById('closeCartBtn')?.addEventListener('click', closeCart);
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
     document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWithLoginCheck);
-    
-    // Chatbot event listeners
     document.getElementById('chatbotBtn')?.addEventListener('click', toggleChatbot);
     document.getElementById('closeChatBtn')?.addEventListener('click', toggleChatbot);
     
@@ -1944,20 +1430,12 @@ Questions? Ask us!`
     loadProductsInstantly();
     updateCartUI();
     
-    // Real-time listener
-    db.collection('products').where('status', '==', 'active').onSnapshot((snapshot) => {
+    // Real-time listener with order by createdAt desc
+    db.collection('products').where('status', '==', 'active').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
         const newProducts = [];
         snapshot.forEach(doc => {
             const data = doc.data();
-            newProducts.push({
-                id: doc.id,
-                name: data.name,
-                category: data.category,
-                price: data.price,
-                icon: data.icon || 'fa-gem',
-                badge: data.badge || 'New',
-                images: data.images || []
-            });
+            newProducts.push({ id: doc.id, name: data.name, category: data.category, price: data.price, icon: data.icon || 'fa-gem', badge: data.badge || 'New', images: data.images || [] });
         });
         if (newProducts.length !== allProducts.length) {
             allProducts = newProducts;
@@ -1967,13 +1445,7 @@ Questions? Ask us!`
         }
     });
     
-    window.addEventListener('pageshow', function(event) {
-        if (event.persisted && allProducts.length > 0) {
-            renderProducts();
-        }
-    });
-    
-    // Expose addComboToCart for product detail page
+    window.addEventListener('pageshow', function(event) { if (event.persisted && allProducts.length > 0) { renderProducts(); } });
     window.addComboToCart = addComboToCart;
 </script>
 </body>
