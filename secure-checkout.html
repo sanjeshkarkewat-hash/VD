@@ -6,19 +6,11 @@
   <title>Secure Checkout - Vedanta</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <!-- Razorpay SDK -->
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      -webkit-tap-highlight-color: transparent;
-    }
-
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Space Grotesk', sans-serif;
       background: #050508;
@@ -26,7 +18,6 @@
       overflow-x: hidden;
       min-height: 100vh;
     }
-
     body::before {
       content: '';
       position: fixed;
@@ -38,14 +29,7 @@
       pointer-events: none;
       z-index: -1;
     }
-
-    .checkout-container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 16px;
-    }
-
-    /* Mobile Header */
+    .checkout-container { max-width: 1200px; margin: 0 auto; padding: 16px; }
     .checkout-header {
       display: flex;
       justify-content: space-between;
@@ -64,10 +48,7 @@
       background-clip: text;
       color: transparent;
     }
-    .logo p {
-      font-size: 10px;
-      color: #888;
-    }
+    .logo p { font-size: 10px; color: #888; }
     .secure-badge {
       background: rgba(212,175,55,0.15);
       padding: 6px 14px;
@@ -75,24 +56,9 @@
       font-size: 12px;
       font-weight: 600;
     }
-    .secure-badge i {
-      color: #4CAF50;
-      margin-right: 6px;
-    }
-
-    /* Mobile Main Grid */
-    .checkout-main {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-    @media (min-width: 768px) {
-      .checkout-main { grid-template-columns: 1fr 1fr; gap: 30px; }
-      .checkout-container { padding: 20px; }
-      .logo h1 { font-size: 32px; }
-    }
-
-    /* Mobile Form */
+    .secure-badge i { color: #4CAF50; margin-right: 6px; }
+    .checkout-main { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 768px) { .checkout-main { grid-template-columns: 1fr 1fr; gap: 30px; } .checkout-container { padding: 20px; } .logo h1 { font-size: 32px; } }
     .checkout-form {
       background: rgba(15,15,22,0.7);
       backdrop-filter: blur(10px);
@@ -100,20 +66,13 @@
       padding: 20px;
       border: 1px solid rgba(212,175,55,0.2);
     }
-    @media (min-width: 768px) {
-      .checkout-form { padding: 28px; border-radius: 32px; }
-    }
-    
+    @media (min-width: 768px) { .checkout-form { padding: 28px; border-radius: 32px; } }
     .form-section {
       margin-bottom: 24px;
       padding-bottom: 20px;
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
-    .form-section:last-child {
-      border-bottom: none;
-      padding-bottom: 0;
-      margin-bottom: 0;
-    }
+    .form-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
     .form-section h3 {
       font-size: 18px;
       margin-bottom: 16px;
@@ -122,24 +81,10 @@
       align-items: center;
       gap: 8px;
     }
-    @media (min-width: 768px) {
-      .form-section h3 { font-size: 20px; margin-bottom: 20px; }
-    }
-    
-    .form-group {
-      margin-bottom: 14px;
-    }
-    .form-group label {
-      display: block;
-      margin-bottom: 6px;
-      font-size: 12px;
-      font-weight: 500;
-      color: #CCCCCC;
-    }
-    .form-group label .required {
-      color: #FF4500;
-      margin-left: 4px;
-    }
+    @media (min-width: 768px) { .form-section h3 { font-size: 20px; margin-bottom: 20px; } }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: #CCCCCC; }
+    .form-group label .required { color: #FF4500; margin-left: 4px; }
     .form-group input, .form-group textarea, .form-group select {
       width: 100%;
       padding: 12px 14px;
@@ -151,19 +96,13 @@
       font-family: inherit;
       transition: 0.2s;
     }
-    @media (min-width: 768px) {
-      .form-group input, .form-group textarea, .form-group select { padding: 14px 16px; border-radius: 16px; }
-    }
+    @media (min-width: 768px) { .form-group input, .form-group textarea, .form-group select { padding: 14px 16px; border-radius: 16px; } }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       outline: none;
       border-color: #D4AF37;
       box-shadow: 0 0 10px rgba(212,175,55,0.3);
     }
-    .form-row {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     .location-btn {
       background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.2));
       border: 1px solid rgba(212,175,55,0.4);
@@ -181,18 +120,9 @@
       margin-top: 8px;
       font-size: 13px;
     }
-    @media (min-width: 768px) {
-      .location-btn { padding: 12px; border-radius: 16px; margin-top: 10px; }
-    }
+    @media (min-width: 768px) { .location-btn { padding: 12px; border-radius: 16px; margin-top: 10px; } }
     .location-btn:active { transform: scale(0.98); }
-
-    /* Payment Options */
-    .payment-options {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-      margin-top: 12px;
-    }
+    .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
     .payment-option {
       background: rgba(0,0,0,0.4);
       border: 1px solid rgba(212,175,55,0.3);
@@ -204,32 +134,14 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    @media (min-width: 768px) {
-      .payment-option { padding: 16px 18px; gap: 15px; border-radius: 16px; }
-    }
+    @media (min-width: 768px) { .payment-option { padding: 16px 18px; gap: 15px; border-radius: 16px; } }
     .payment-option:active { transform: scale(0.98); }
-    .payment-option.selected {
-      border-color: #4CAF50;
-      background: rgba(76,175,80,0.1);
-    }
-    .payment-option .payment-icon i {
-      font-size: 24px;
-    }
-    @media (min-width: 768px) {
-      .payment-option .payment-icon i { font-size: 28px; }
-    }
-    .payment-option .payment-info h4 {
-      font-size: 14px;
-      margin-bottom: 2px;
-    }
-    .payment-option .payment-info p {
-      font-size: 10px;
-      color: #888;
-    }
-    @media (min-width: 768px) {
-      .payment-option .payment-info h4 { font-size: 16px; }
-      .payment-option .payment-info p { font-size: 11px; }
-    }
+    .payment-option.selected { border-color: #4CAF50; background: rgba(76,175,80,0.1); }
+    .payment-option .payment-icon i { font-size: 24px; }
+    @media (min-width: 768px) { .payment-option .payment-icon i { font-size: 28px; } }
+    .payment-option .payment-info h4 { font-size: 14px; margin-bottom: 2px; }
+    .payment-option .payment-info p { font-size: 10px; color: #888; }
+    @media (min-width: 768px) { .payment-option .payment-info h4 { font-size: 16px; } .payment-option .payment-info p { font-size: 11px; } }
     .payment-option .radio-circle {
       width: 18px;
       height: 18px;
@@ -240,9 +152,7 @@
       justify-content: center;
       flex-shrink: 0;
     }
-    .payment-option.selected .radio-circle {
-      border-color: #4CAF50;
-    }
+    .payment-option.selected .radio-circle { border-color: #4CAF50; }
     .payment-option.selected .radio-circle::after {
       content: '';
       width: 10px;
@@ -250,18 +160,8 @@
       background: #4CAF50;
       border-radius: 50%;
     }
-
-    .cod-details, .razorpay-section {
-      display: none;
-      margin-top: 12px;
-      padding: 12px;
-      background: rgba(76,175,80,0.1);
-      border-radius: 14px;
-      text-align: center;
-    }
-    .cod-details.show, .razorpay-section.show {
-      display: block;
-    }
+    .cod-details, .razorpay-section { display: none; margin-top: 12px; padding: 12px; background: rgba(76,175,80,0.1); border-radius: 14px; text-align: center; }
+    .cod-details.show, .razorpay-section.show { display: block; }
     .place-order-cod, .pay-razorpay-btn {
       width: 100%;
       background: linear-gradient(135deg, #4CAF50, #45a049);
@@ -279,11 +179,7 @@
       background: linear-gradient(135deg, #D4AF37, #FF8C00);
       color: #050508;
     }
-    .place-order-cod:active, .pay-razorpay-btn:active {
-      transform: scale(0.98);
-    }
-
-    /* Mobile Order Summary */
+    .place-order-cod:active, .pay-razorpay-btn:active { transform: scale(0.98); }
     .order-summary {
       background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8));
       backdrop-filter: blur(10px);
@@ -294,9 +190,7 @@
       top: 10px;
       height: fit-content;
     }
-    @media (min-width: 768px) {
-      .order-summary { padding: 28px; border-radius: 32px; top: 20px; }
-    }
+    @media (min-width: 768px) { .order-summary { padding: 28px; border-radius: 32px; top: 20px; } }
     .order-summary h3 {
       font-size: 18px;
       margin-bottom: 16px;
@@ -305,9 +199,7 @@
       align-items: center;
       gap: 8px;
     }
-    @media (min-width: 768px) {
-      .order-summary h3 { font-size: 22px; margin-bottom: 20px; }
-    }
+    @media (min-width: 768px) { .order-summary h3 { font-size: 22px; margin-bottom: 20px; } }
     .order-item {
       display: flex;
       gap: 12px;
@@ -325,25 +217,11 @@
       overflow: hidden;
       flex-shrink: 0;
     }
-    @media (min-width: 768px) {
-      .order-item-img { width: 70px; height: 70px; border-radius: 16px; }
-    }
-    .order-item-img img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-    .order-item-img i {
-      font-size: 28px;
-      color: #D4AF37;
-    }
-    .order-item-info h4 {
-      font-size: 13px;
-      margin-bottom: 4px;
-    }
-    @media (min-width: 768px) {
-      .order-item-info h4 { font-size: 15px; }
-    }
+    @media (min-width: 768px) { .order-item-img { width: 70px; height: 70px; border-radius: 16px; } }
+    .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .order-item-img i { font-size: 28px; color: #D4AF37; }
+    .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
+    @media (min-width: 768px) { .order-item-info h4 { font-size: 15px; } }
     .order-item-size, .order-item-color {
       display: inline-flex;
       align-items: center;
@@ -356,15 +234,8 @@
       margin-top: 3px;
       margin-right: 6px;
     }
-    @media (min-width: 768px) {
-      .order-item-size, .order-item-color { font-size: 11px; padding: 2px 10px; }
-    }
-    .color-swatch {
-      width: 10px;
-      height: 10px;
-      border-radius: 50%;
-      display: inline-block;
-    }
+    @media (min-width: 768px) { .order-item-size, .order-item-color { font-size: 11px; padding: 2px 10px; } }
+    .color-swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
     .combo-badge {
       background: #4CAF50;
       color: white;
@@ -374,11 +245,7 @@
       display: inline-block;
       margin-top: 4px;
     }
-    .order-item-info p {
-      font-size: 10px;
-      color: #888;
-      margin-top: 3px;
-    }
+    .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
     .order-item-price {
       font-weight: 700;
       color: #D4AF37;
@@ -386,9 +253,7 @@
       font-size: 13px;
       min-width: 70px;
     }
-    @media (min-width: 768px) {
-      .order-item-price { font-size: 15px; min-width: 80px; }
-    }
+    @media (min-width: 768px) { .order-item-price { font-size: 15px; min-width: 80px; } }
     .order-total {
       padding: 16px 0;
       border-top: 2px solid rgba(212,175,55,0.3);
@@ -408,10 +273,7 @@
       padding-top: 12px;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    @media (min-width: 768px) {
-      .total-row { font-size: 14px; margin-bottom: 12px; }
-      .total-row.grand-total { font-size: 22px; margin-top: 15px; padding-top: 15px; }
-    }
+    @media (min-width: 768px) { .total-row { font-size: 14px; margin-bottom: 12px; } .total-row.grand-total { font-size: 22px; margin-top: 15px; padding-top: 15px; } }
     .free-shipping-badge {
       background: rgba(76,175,80,0.15);
       padding: 8px;
@@ -421,9 +283,7 @@
       color: #4CAF50;
       font-size: 11px;
     }
-    @media (min-width: 768px) {
-      .free-shipping-badge { padding: 10px; font-size: 13px; }
-    }
+    @media (min-width: 768px) { .free-shipping-badge { padding: 10px; font-size: 13px; } }
     .back-to-shop {
       display: block;
       text-align: center;
@@ -432,8 +292,6 @@
       text-decoration: none;
       font-size: 12px;
     }
-
-    /* Toast */
     .toast {
       position: fixed;
       bottom: 30px;
@@ -458,9 +316,39 @@
       15% { opacity: 1; transform: translateX(-50%) translateY(0); }
       100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
     }
+    .loading-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.8);
+      z-index: 9999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .loading-overlay.show { display: flex; }
+    .loading-spinner {
+      width: 50px;
+      height: 50px;
+      border: 3px solid rgba(212,175,55,0.3);
+      border-top-color: #D4AF37;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .loading-text { color: #D4AF37; font-size: 14px; }
   </style>
 </head>
 <body>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="loading-spinner"></div>
+  <div class="loading-text">Processing your order...</div>
+</div>
 
 <div class="checkout-container">
   <div class="checkout-header">
@@ -604,7 +492,6 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== FIREBASE CONFIGURATION ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
     authDomain: "vedanta-d0199.firebaseapp.com",
@@ -621,17 +508,14 @@
   
   let cart = [];
   let cartTotal = 0;
-  let selectedPaymentMethod = null;
   let isProcessing = false;
   let productsCache = new Map();
-  let currentOrderId = null;
+  let pendingOrderId = null;
   
   const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
   if (!currentUser || !currentUser.email) {
     showToast('🔐 Please login to continue', true);
-    setTimeout(() => {
-      window.location.href = 'profile.html';
-    }, 1500);
+    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
   }
   
   function showToast(msg, isError = false) {
@@ -640,21 +524,22 @@
     toast.style.background = isError ? '#F44336' : '#D4AF37';
     toast.style.color = isError ? 'white' : '#050508';
     toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 2500);
+    setTimeout(() => toast.classList.remove('show'), 3000);
   }
   
-  // Load products from cache
+  function showLoading(show) {
+    const overlay = document.getElementById('loadingOverlay');
+    if (show) overlay.classList.add('show');
+    else overlay.classList.remove('show');
+  }
+  
   function loadProductsInstantly() {
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
       try {
         const products = JSON.parse(cached);
         products.forEach(p => {
-          productsCache.set(p.id, {
-            images: p.images || [],
-            icon: p.icon || 'fa-gem',
-            name: p.name
-          });
+          productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
         });
         return true;
       } catch(e) {}
@@ -664,47 +549,25 @@
   
   function fetchProductsInBackground() {
     db.collection('products').get().then(snapshot => {
-      let updated = false;
       snapshot.forEach(doc => {
         const p = doc.data();
         if (!productsCache.has(doc.id)) {
-          productsCache.set(doc.id, {
-            images: p.images || [],
-            icon: p.icon || 'fa-gem',
-            name: p.name
-          });
-          updated = true;
+          productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
         }
       });
-      if (updated) {
-        const productsArray = [];
-        productsCache.forEach((value, key) => {
-          productsArray.push({ id: key, images: value.images, icon: value.icon, name: value.name });
-        });
-        localStorage.setItem('vedantaProducts', JSON.stringify(productsArray));
-        renderOrderSummary();
-      }
+      renderOrderSummary();
     }).catch(e => console.log("Background fetch error:", e));
   }
   
-  function getProductImage(productId) {
-    const prod = productsCache.get(productId);
-    return prod?.images?.[0] || null;
-  }
-  
-  function getProductIcon(productId) {
-    const prod = productsCache.get(productId);
-    return prod?.icon || 'fa-gem';
-  }
+  function getProductImage(productId) { return productsCache.get(productId)?.images?.[0] || null; }
+  function getProductIcon(productId) { return productsCache.get(productId)?.icon || 'fa-gem'; }
   
   function getColorCode(colorName) {
     if (!colorName || colorName === 'Not Selected') return '#D4AF37';
     const colorMap = {
       'Red': '#FF0000', 'Blue': '#2196F3', 'Green': '#4CAF50', 'Black': '#000000',
       'White': '#FFFFFF', 'Gold': '#D4AF37', 'Silver': '#C0C0C0', 'Yellow': '#FFEB3B',
-      'Purple': '#9C27B0', 'Pink': '#FF69B4', 'Orange': '#FF9800', 'Brown': '#795548',
-      'Maroon': '#800000', 'Navy': '#000080', 'Teal': '#008080', 'Lavender': '#E6E6FA',
-      'Cyan': '#00FFFF', 'Magenta': '#FF00FF', 'Lime': '#32CD32', 'Indigo': '#4B0082'
+      'Purple': '#9C27B0', 'Pink': '#FF69B4', 'Orange': '#FF9800', 'Brown': '#795548'
     };
     return colorMap[colorName] || '#D4AF37';
   }
@@ -722,38 +585,26 @@
   function renderOrderSummary() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
-    
     cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    
     container.innerHTML = cart.map(item => {
       const productImg = getProductImage(item.id);
       const productIcon = getProductIcon(item.id);
       const colorCode = getColorCode(item.color);
-      
-      let comboDisplay = '';
-      if (item.combo) {
-        comboDisplay = `<div class="combo-badge"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</div>`;
-      } else if (item.isCombo && item.comboMultiplier) {
-        comboDisplay = `<div class="combo-badge"><i class="fas fa-gift"></i> Combo Pack (${item.comboMultiplier} items/pack)</div>`;
-      }
-      
       return `
         <div class="order-item">
           <div class="order-item-img">
-            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}" loading="eager">` : `<i class="fas ${productIcon}"></i>`}
+            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${productIcon}"></i>`}
           </div>
           <div class="order-item-info">
             <h4>${escapeHtml(item.name)}</h4>
             ${item.size && item.size !== 'Default' && item.size !== 'Not Selected' ? `<div class="order-item-size"><i class="fas fa-tshirt"></i> ${escapeHtml(item.size)}</div>` : ''}
             ${item.color && item.color !== '' && item.color !== 'Not Selected' ? `<div class="order-item-color"><span class="color-swatch" style="background: ${colorCode};"></span> ${escapeHtml(item.color)}</div>` : ''}
-            ${comboDisplay}
             <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
           </div>
           <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
         </div>
       `;
     }).join('');
-    
     document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
     document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString()}`;
   }
@@ -765,15 +616,12 @@
     const city = document.getElementById('city').value.trim();
     const state = document.getElementById('state').value.trim();
     const pincode = document.getElementById('pincode').value.trim();
-    
     if (!name) { showToast('❌ Please enter your full name', true); return false; }
-    if (!phone) { showToast('❌ Please enter phone number', true); return false; }
-    if (phone.length < 10) { showToast('❌ Enter valid 10-digit phone number', true); return false; }
+    if (!phone || phone.length < 10) { showToast('❌ Enter valid 10-digit phone number', true); return false; }
     if (!address) { showToast('❌ Please enter address', true); return false; }
     if (!city) { showToast('❌ Please enter city', true); return false; }
     if (!state) { showToast('❌ Please enter state', true); return false; }
     if (!pincode) { showToast('❌ Please enter PIN code', true); return false; }
-    
     return true;
   }
   
@@ -789,6 +637,7 @@
     };
   }
   
+  // ✅ FIXED: Save order to Firebase with proper error handling
   async function saveOrderToFirebase(paymentStatus, paymentMethod, transactionId = null, paymentDetails = null) {
     const details = getCustomerDetails();
     
@@ -805,8 +654,8 @@
       total: item.price * item.quantity
     }));
     
-    const orderId = 'ORD' + Date.now();
-    currentOrderId = orderId;
+    const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
+    pendingOrderId = orderId;
     
     const orderData = {
       orderId: orderId,
@@ -828,68 +677,79 @@
       userEmail: currentUser ? currentUser.email : null
     };
     
+    console.log("Saving order to Firebase:", orderData);
+    
     try {
       await db.collection('orders').doc(orderId).set(orderData);
+      console.log("✅ Order saved successfully! Order ID:", orderId);
       
+      // Save to localStorage as backup
       let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
       orders.push(orderData);
       localStorage.setItem('vedantaOrders', JSON.stringify(orders));
       localStorage.setItem('lastOrder', JSON.stringify(orderData));
       
-      return { success: true, orderId: orderId, orderData: orderData };
+      return { success: true, orderId: orderId };
     } catch (error) {
-      console.error("Firebase Error:", error);
+      console.error("❌ Firebase Error:", error);
+      showToast(`Firebase Error: ${error.message}`, true);
       return { success: false, error: error.message };
     }
   }
   
-  // ✅ FIXED: Redirect to order-success.html (NOT contact.html)
   function redirectToOrderSuccess(orderId) {
     localStorage.removeItem('vedantaCart');
     window.location.href = `order-success.html?orderId=${orderId}`;
   }
   
+  // ✅ COD Order
   async function saveOrderCOD() {
     if (!validateForm()) return;
     if (isProcessing) return;
     isProcessing = true;
     
+    showLoading(true);
     const btn = document.getElementById('placeOrderCodBtn');
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
-    }
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
     
     const result = await saveOrderToFirebase('pending', 'Cash on Delivery');
     
+    showLoading(false);
+    
     if (result.success) {
       showToast(`✅ Order placed! Order ID: ${result.orderId}`);
-      setTimeout(() => {
-        redirectToOrderSuccess(result.orderId);
-      }, 800);
+      setTimeout(() => { redirectToOrderSuccess(result.orderId); }, 1500);
     } else {
       showToast('❌ Failed to place order. Please try again.', true);
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = 'Confirm Order (COD)';
-      }
+      if (btn) { btn.disabled = false; btn.innerHTML = 'Confirm Order (COD)'; }
       isProcessing = false;
     }
   }
   
+  // ✅ Razorpay Payment - ORDER SAVED BEFORE PAYMENT
   async function initiateRazorpayPayment() {
     if (!validateForm()) return;
     if (isProcessing) return;
     isProcessing = true;
     
-    const btn = document.getElementById('payRazorpayBtn');
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...';
+    showLoading(true);
+    
+    // STEP 1: Save order as "pending_payment" FIRST
+    const result = await saveOrderToFirebase('pending_payment', 'Razorpay');
+    
+    if (!result.success) {
+      showLoading(false);
+      showToast('❌ Failed to create order. Please try again.', true);
+      isProcessing = false;
+      return;
     }
     
+    const orderId = result.orderId;
     const details = getCustomerDetails();
     const orderAmount = Math.round(cartTotal);
+    
+    const btn = document.getElementById('payRazorpayBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
     
     try {
       const options = {
@@ -897,7 +757,7 @@
         amount: orderAmount * 100,
         currency: 'INR',
         name: 'VEDANTA',
-        description: `Order Payment - ${cart.length} item(s)`,
+        description: `Order #${orderId}`,
         image: 'https://sanjeshkarkewat-hash.github.io/VD/favicon.ico',
         prefill: {
           name: details.fullName,
@@ -905,22 +765,18 @@
           contact: details.phone
         },
         notes: {
+          orderId: orderId,
           address: details.address,
           city: details.city,
           state: details.state,
-          pincode: details.pincode,
-          items_count: cart.length
+          pincode: details.pincode
         },
-        theme: {
-          color: '#D4AF37'
-        },
+        theme: { color: '#D4AF37' },
         modal: {
           ondismiss: function() {
+            showLoading(false);
             showToast('Payment cancelled', true);
-            if (btn) {
-              btn.disabled = false;
-              btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now';
-            }
+            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now'; }
             isProcessing = false;
           }
         }
@@ -931,39 +787,49 @@
       razorpay.on('payment.success', async function(response) {
         console.log('Payment Success:', response);
         
-        const result = await saveOrderToFirebase(
-          'paid', 
-          'Razorpay', 
-          response.razorpay_payment_id,
-          {
-            orderId: response.razorpay_order_id,
-            paymentId: response.razorpay_payment_id,
-            signature: response.razorpay_signature
+        // STEP 2: Update order with payment details
+        try {
+          await db.collection('orders').doc(orderId).update({
+            paymentStatus: 'paid',
+            status: 'confirmed',
+            transactionId: response.razorpay_payment_id,
+            razorpayDetails: {
+              paymentId: response.razorpay_payment_id,
+              orderId: response.razorpay_order_id,
+              signature: response.razorpay_signature
+            },
+            updatedAt: new Date().toISOString()
+          });
+          
+          // Update localStorage
+          let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
+          const orderIndex = orders.findIndex(o => o.orderId === orderId);
+          if (orderIndex !== -1) {
+            orders[orderIndex].paymentStatus = 'paid';
+            orders[orderIndex].status = 'confirmed';
+            orders[orderIndex].transactionId = response.razorpay_payment_id;
+            localStorage.setItem('vedantaOrders', JSON.stringify(orders));
           }
-        );
-        
-        if (result.success) {
-          showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
-          setTimeout(() => {
-            redirectToOrderSuccess(result.orderId);
-          }, 800);
-        } else {
-          // ✅ FIXED: Changed contact.html to order-success.html
-          showToast('⚠️ Payment successful but order save failed. Please contact support.', true);
-          setTimeout(() => {
-            window.location.href = 'order-success.html';
-          }, 2000);
+          
+          showLoading(false);
+          showToast(`✅ Payment successful! Order ID: ${orderId}`);
+          setTimeout(() => { redirectToOrderSuccess(orderId); }, 1500);
+          
+        } catch (updateError) {
+          console.error('Update Error:', updateError);
+          showLoading(false);
+          showToast('⚠️ Payment successful but order update failed. Please contact support.', true);
+          setTimeout(() => { redirectToOrderSuccess(orderId); }, 2000);
         }
+        
         isProcessing = false;
       });
       
       razorpay.on('payment.error', function(response) {
         console.error('Payment Error:', response);
+        showLoading(false);
         showToast('❌ Payment failed! Please try again.', true);
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now';
-        }
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now'; }
         isProcessing = false;
       });
       
@@ -971,11 +837,9 @@
       
     } catch (error) {
       console.error('Razorpay Error:', error);
+      showLoading(false);
       showToast('❌ Failed to initialize payment. Please try again.', true);
-      if (btn) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now';
-      }
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now'; }
       isProcessing = false;
     }
   }
@@ -989,7 +853,6 @@
   codOption?.addEventListener('click', () => {
     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
     codOption.classList.add('selected');
-    selectedPaymentMethod = 'cod';
     codDetails.classList.add('show');
     razorpaySection.classList.remove('show');
   });
@@ -997,7 +860,6 @@
   razorpayOption?.addEventListener('click', () => {
     document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
     razorpayOption.classList.add('selected');
-    selectedPaymentMethod = 'razorpay';
     codDetails.classList.remove('show');
     razorpaySection.classList.add('show');
   });
@@ -1033,7 +895,6 @@
     return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
   }
   
-  // Initialize
   loadProductsInstantly();
   loadCart();
   fetchProductsInBackground();
