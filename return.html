@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>Return Order - Vedanta</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #050508;
+            color: #FFFFFF;
+            overflow-x: hidden;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            background: rgba(5,5,8,0.98);
+            backdrop-filter: blur(10px);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        .logo h1 {
+            font-size: 20px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .back-btn {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.3);
+            padding: 6px 14px;
+            border-radius: 40px;
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .container { max-width: 600px; margin: 0 auto; padding: 16px; }
+        .card {
+            background: rgba(15,15,22,0.7);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
+            margin-bottom: 16px;
+        }
+        .card h3 {
+            font-size: 18px;
+            color: #D4AF37;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .order-select {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 16px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 16px;
+        }
+        .order-details {
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: none;
+        }
+        .order-details.show { display: block; }
+        .order-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        .return-reason {
+            width: 100%;
+            padding: 14px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 16px;
+            color: white;
+            font-size: 14px;
+            margin-bottom: 16px;
+            font-family: inherit;
+        }
+        .condition-check {
+            background: rgba(76,175,80,0.1);
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .condition-check label {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            cursor: pointer;
+        }
+        .condition-check input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .condition-check p {
+            font-size: 12px;
+            color: #ccc;
+            margin-top: 8px;
+            margin-left: 32px;
+        }
+        .submit-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 700;
+            font-size: 14px;
+            color: #050508;
+            cursor: pointer;
+        }
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .info-text {
+            font-size: 12px;
+            color: #888;
+            text-align: center;
+            margin-top: 12px;
+        }
+        .toast {
+            position: fixed;
+            bottom: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 10px 18px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 10000;
+            font-size: 12px;
+            display: none;
+            text-align: center;
+        }
+        .toast.show { display: block; animation: fadeInOut 2.5s ease; }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        }
+        .bottom-nav {
+            position: fixed;
+            bottom: 12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 50px;
+            padding: 6px 16px;
+            display: flex;
+            gap: 20px;
+            z-index: 1000;
+            border: 1px solid rgba(212,175,55,0.4);
+        }
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 2px;
+            cursor: pointer;
+            padding: 6px 12px;
+            border-radius: 40px;
+        }
+        .nav-item i { font-size: 18px; color: #ccc; }
+        .nav-item span { font-size: 9px; color: #ccc; }
+        .nav-item.active, .nav-item:active { background: rgba(212,175,55,0.2); }
+        .nav-item.active i, .nav-item.active span { color: #D4AF37; }
+        .loader {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #050508;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+        .status-delivered { background: rgba(76,175,80,0.2); color: #4CAF50; }
+        .status-returned { background: rgba(255,152,0,0.2); color: #FF9800; }
+        .status-pending { background: rgba(212,175,55,0.2); color: #D4AF37; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo"><h1>VEDANTA</h1></div>
+    <div class="back-btn" onclick="window.location.href='profile.html'"><i class="fas fa-arrow-left"></i> Back</div>
+</div>
+
+<div class="container" id="container">
+    <div style="text-align: center; padding: 40px;">
+        <div class="loader" style="border-color: #D4AF37; border-top-color: transparent;"></div>
+        <p style="margin-top: 12px;">Loading your orders...</p>
+    </div>
+</div>
+
+<div class="bottom-nav">
+    <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
+    <div class="nav-item" onclick="window.location.href='booking.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
+    <div class="nav-item active" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
+        authDomain: "vedanta-d0199.firebaseapp.com",
+        projectId: "vedanta-d0199",
+        storageBucket: "vedanta-d0199.firebasestorage.app",
+        messagingSenderId: "761061711987",
+        appId: "1:761061711987:web:d59ff32fd53057c395ca06"
+    };
+    
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    
+    let currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+    let deliveredOrders = [];
+    let selectedOrder = null;
+    
+    function showToast(msg, isError = false) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.background = isError ? '#F44336' : '#D4AF37';
+        toast.style.color = isError ? 'white' : '#050508';
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+    
+    // Load only DELIVERED orders from Firebase
+    async function loadDeliveredOrders() {
+        if (!currentUser || !currentUser.email) {
+            window.location.href = 'profile.html';
+            return [];
+        }
+        
+        try {
+            const snapshot = await db.collection('orders')
+                .where('customerEmail', '==', currentUser.email)
+                .where('status', '==', 'delivered')
+                .get();
+            
+            const orders = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                // Check if already returned
+                if (data.returnStatus !== 'returned' && data.returnStatus !== 'approved') {
+                    orders.push({ id: doc.id, ...data });
+                }
+            });
+            
+            // Also check by userEmail
+            const snapshot2 = await db.collection('orders')
+                .where('userEmail', '==', currentUser.email)
+                .where('status', '==', 'delivered')
+                .get();
+            
+            snapshot2.forEach(doc => {
+                if (!orders.some(o => o.id === doc.id)) {
+                    const data = doc.data();
+                    if (data.returnStatus !== 'returned' && data.returnStatus !== 'approved') {
+                        orders.push({ id: doc.id, ...data });
+                    }
+                }
+            });
+            
+            orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+            deliveredOrders = orders;
+            return orders;
+            
+        } catch (error) {
+            console.error("Error loading orders:", error);
+            return [];
+        }
+    }
+    
+    // Check if order can be returned (within 7 days of delivery)
+    function canReturnOrder(order) {
+        if (!order.deliveredDate) {
+            // If no delivered date, assume delivered 1 day after order date
+            const orderDate = new Date(order.orderDate);
+            const daysSinceOrder = (Date.now() - orderDate) / (1000 * 3600 * 24);
+            return daysSinceOrder <= 7;
+        }
+        
+        const deliveredDate = new Date(order.deliveredDate);
+        const daysSinceDelivery = (Date.now() - deliveredDate) / (1000 * 3600 * 24);
+        return daysSinceDelivery <= 7;
+    }
+    
+    // Submit return request
+    async function submitReturnRequest() {
+        const orderSelect = document.getElementById('orderSelect');
+        const reason = document.getElementById('returnReason').value;
+        const conditionCheck = document.getElementById('conditionCheck');
+        
+        if (!orderSelect.value) {
+            showToast('❌ Please select an order', true);
+            return;
+        }
+        
+        if (!reason) {
+            showToast('❌ Please select a return reason', true);
+            return;
+        }
+        
+        if (!conditionCheck.checked) {
+            showToast('❌ Please confirm the return conditions', true);
+            return;
+        }
+        
+        const order = deliveredOrders.find(o => o.orderId === orderSelect.value);
+        
+        if (!order) {
+            showToast('❌ Order not found', true);
+            return;
+        }
+        
+        if (!canReturnOrder(order)) {
+            showToast('❌ Return window expired (only 7 days from delivery)', true);
+            return;
+        }
+        
+        const btn = document.getElementById('submitBtn');
+        btn.disabled = true;
+        btn.innerHTML = '<span class="loader"></span>Submitting...';
+        
+        try {
+            const returnData = {
+                orderId: order.orderId,
+                customerName: order.customerName,
+                customerEmail: order.customerEmail,
+                customerPhone: order.customerPhone,
+                items: order.items,
+                totalAmount: order.total,
+                returnReason: reason,
+                returnStatus: 'pending',
+                requestedDate: new Date().toISOString(),
+                status: 'return_requested'
+            };
+            
+            // Save to returns collection
+            const returnId = `RET_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+            await db.collection('returns').doc(returnId).set(returnData);
+            
+            // Update order with return status
+            await db.collection('orders').doc(order.id).update({
+                returnStatus: 'pending',
+                returnReason: reason,
+                returnRequestedDate: new Date().toISOString(),
+                status: 'return_requested'
+            });
+            
+            showToast('✅ Return request submitted successfully! We will contact you within 24 hours.');
+            
+            setTimeout(() => {
+                window.location.href = 'booking.html';
+            }, 2000);
+            
+        } catch (error) {
+            console.error("Return submission error:", error);
+            showToast('❌ Failed to submit return request. Please try again.', true);
+            btn.disabled = false;
+            btn.innerHTML = 'Submit Return Request';
+        }
+    }
+    
+    // Render return page
+    async function renderReturnPage() {
+        const container = document.getElementById('container');
+        
+        if (!currentUser || !currentUser.email) {
+            container.innerHTML = `
+                <div class="card" style="text-align: center;">
+                    <i class="fas fa-lock" style="font-size: 48px; color: #D4AF37; margin-bottom: 16px;"></i>
+                    <h3>Please Login First</h3>
+                    <p style="color: #888; margin-bottom: 20px;">You need to be logged in to request a return</p>
+                    <button class="submit-btn" onclick="window.location.href='profile.html'">Go to Login</button>
+                </div>
+            `;
+            return;
+        }
+        
+        await loadDeliveredOrders();
+        
+        if (deliveredOrders.length === 0) {
+            container.innerHTML = `
+                <div class="card" style="text-align: center;">
+                    <i class="fas fa-box-open" style="font-size: 48px; color: #D4AF37; margin-bottom: 16px;"></i>
+                    <h3>No Eligible Orders</h3>
+                    <p style="color: #888;">You don't have any delivered orders that can be returned.</p>
+                    <p style="color: #888; font-size: 12px; margin-top: 8px;">Only delivered orders within 7 days can be returned.</p>
+                    <button class="submit-btn" style="margin-top: 20px;" onclick="window.location.href='booking.html'">View My Orders</button>
+                </div>
+            `;
+            return;
+        }
+        
+        container.innerHTML = `
+            <div class="card">
+                <h3><i class="fas fa-undo-alt"></i> Return Request</h3>
+                
+                <select id="orderSelect" class="order-select" onchange="showOrderDetails()">
+                    <option value="">Select Order to Return</option>
+                    ${deliveredOrders.map(order => `
+                        <option value="${order.orderId}">
+                            ${order.orderId} - ₹${order.total} - ${new Date(order.orderDate).toLocaleDateString('en-IN')}
+                        </option>
+                    `).join('')}
+                </select>
+                
+                <div id="orderDetails" class="order-details"></div>
+                
+                <select id="returnReason" class="return-reason">
+                    <option value="">Select Return Reason</option>
+                    <option value="Damaged Product">Damaged Product</option>
+                    <option value="Wrong Size">Wrong Size</option>
+                    <option value="Wrong Product">Wrong Product Received</option>
+                    <option value="Quality Issue">Quality Issue</option>
+                    <option value="Different from Description">Different from Description</option>
+                    <option value="Defective Item">Defective Item</option>
+                    <option value="Other">Other</option>
+                </select>
+                
+                <div class="condition-check">
+                    <label>
+                        <input type="checkbox" id="conditionCheck">
+                        <span>I confirm the return conditions:</span>
+                    </label>
+                    <p>✓ Product must be unused and in original packaging<br>
+                       ✓ Return request within 7 days of delivery<br>
+                       ✓ Original invoice/tag must be attached<br>
+                       ✓ Refund will be processed after quality check</p>
+                </div>
+                
+                <button class="submit-btn" id="submitBtn" onclick="submitReturnRequest()">Submit Return Request</button>
+                <div class="info-text">
+                    <i class="fas fa-clock"></i> Return requests are processed within 24-48 hours
+                </div>
+            </div>
+        `;
+    }
+    
+    function showOrderDetails() {
+        const select = document.getElementById('orderSelect');
+        const orderId = select.value;
+        const detailsDiv = document.getElementById('orderDetails');
+        
+        if (!orderId) {
+            detailsDiv.classList.remove('show');
+            return;
+        }
+        
+        const order = deliveredOrders.find(o => o.orderId === orderId);
+        if (!order) return;
+        
+        const canReturn = canReturnOrder(order);
+        const daysLeft = canReturn ? Math.floor((7 - (Date.now() - new Date(order.deliveredDate || order.orderDate)) / (1000 * 3600 * 24))) : 0;
+        
+        detailsDiv.innerHTML = `
+            <h4 style="margin-bottom: 12px; color: #D4AF37;">Order Items</h4>
+            ${order.items.map(item => `
+                <div class="order-item">
+                    <span>${escapeHtml(item.name)} x ${item.quantity}</span>
+                    <span>₹${item.price * item.quantity}</span>
+                </div>
+            `).join('')}
+            <div class="order-item" style="border-bottom: none; font-weight: bold;">
+                <span>Total Amount</span>
+                <span style="color: #D4AF37;">₹${order.total}</span>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p><i class="fas fa-calendar"></i> Order Date: ${new Date(order.orderDate).toLocaleDateString('en-IN')}</p>
+                <p><i class="fas fa-truck"></i> Status: <span class="status-badge status-delivered">Delivered</span></p>
+                ${!canReturn ? `<p style="color: #FF9800; margin-top: 8px;"><i class="fas fa-exclamation-triangle"></i> Return window expired! Returns only allowed within 7 days of delivery.</p>` : `<p style="color: #4CAF50; margin-top: 8px;"><i class="fas fa-check-circle"></i> Eligible for return (${daysLeft} days left)</p>`}
+            </div>
+        `;
+        detailsDiv.classList.add('show');
+        
+        // Disable submit if cannot return
+        const submitBtn = document.getElementById('submitBtn');
+        if (submitBtn) {
+            submitBtn.disabled = !canReturn;
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
+    }
+    
+    renderReturnPage();
+</script>
+</body>
+</html>

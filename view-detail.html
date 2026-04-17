@@ -31,7 +31,6 @@
             z-index: -1;
         }
         
-        /* Mobile-first header */
         .header {
             display: flex;
             justify-content: space-between;
@@ -75,7 +74,6 @@
             padding: 12px;
         }
         
-        /* Mobile skeleton loading */
         .skeleton-card {
             background: rgba(15,15,22,0.6);
             border-radius: 20px;
@@ -147,7 +145,6 @@
             100% { background-position: -200% 0; }
         }
         
-        /* Mobile status bar */
         .status-bar {
             background: rgba(15,15,22,0.6);
             border-radius: 20px;
@@ -199,7 +196,6 @@
         .step.completed .step-label { color: #4CAF50; }
         .step.active .step-label { color: #D4AF37; font-weight: 600; }
         
-        /* Mobile info cards */
         .info-card {
             background: rgba(15,15,22,0.6);
             border-radius: 20px;
@@ -245,7 +241,6 @@
             font-weight: 700;
         }
         
-        /* Mobile order items */
         .order-item {
             display: flex;
             gap: 12px;
@@ -330,7 +325,6 @@
             margin-top: 4px;
         }
         
-        /* Mobile total section */
         .total-section {
             margin-top: 12px;
             padding-top: 12px;
@@ -351,18 +345,6 @@
             border-top: 1px solid rgba(255,255,255,0.1);
         }
         
-        /* Mobile offer card */
-        .offer-card {
-            background: rgba(76,175,80,0.1);
-            border: 1px solid rgba(76,175,80,0.3);
-            border-radius: 14px;
-            padding: 10px 12px;
-            margin: 8px 0;
-            font-size: 11px;
-        }
-        .offer-card i { color: #4CAF50; margin-right: 6px; }
-        
-        /* Mobile action buttons - fixed at bottom on scroll */
         .action-buttons {
             display: flex;
             gap: 10px;
@@ -404,11 +386,20 @@
             border: 1px solid rgba(244,67,54,0.5);
             color: #F44336;
         }
+        .btn-return {
+            background: rgba(255,152,0,0.15);
+            border: 1px solid rgba(255,152,0,0.5);
+            color: #FF9800;
+        }
+        .btn-return-again {
+            background: rgba(76,175,80,0.15);
+            border: 1px solid rgba(76,175,80,0.5);
+            color: #4CAF50;
+        }
         .btn-primary:active, .btn-secondary:active {
             transform: scale(0.97);
         }
         
-        /* Mobile modal */
         .modal {
             display: none;
             position: fixed;
@@ -441,7 +432,6 @@
         .modal-confirm { background: #F44336; color: white; }
         .modal-cancel { background: rgba(255,255,255,0.1); color: white; }
         
-        /* Mobile toast */
         .toast {
             position: fixed;
             bottom: 80px;
@@ -478,6 +468,55 @@
             border-radius: 14px;
             margin: 12px 0;
         }
+        
+        .return-info {
+            background: rgba(255,152,0,0.1);
+            border: 1px solid rgba(255,152,0,0.3);
+            border-radius: 14px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #FF9800;
+        }
+        .return-approved-info {
+            background: rgba(76,175,80,0.1);
+            border: 1px solid rgba(76,175,80,0.3);
+            border-radius: 14px;
+            padding: 12px;
+            margin-top: 10px;
+        }
+        .return-rejected-info {
+            background: rgba(244,67,54,0.1);
+            border: 1px solid rgba(244,67,54,0.3);
+            border-radius: 14px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #F44336;
+        }
+        .return-expired-info {
+            background: rgba(128,128,128,0.1);
+            border: 1px solid rgba(128,128,128,0.3);
+            border-radius: 14px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 11px;
+            color: #888;
+        }
+        .days-left-badge {
+            background: #4CAF50;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            margin-left: 8px;
+        }
+        .pickup-datetime {
+            font-size: 14px;
+            font-weight: bold;
+            color: #FFD700;
+            margin: 5px 0;
+        }
     </style>
 </head>
 <body>
@@ -488,7 +527,7 @@
 </div>
 
 <div class="container" id="app">
-    <!-- Mobile Skeleton Loaders -->
+    <!-- Skeleton Loaders -->
     <div class="skeleton-card">
         <div class="skeleton-title"></div>
         <div class="skeleton-steps">
@@ -546,13 +585,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
-    // Enable offline persistence
     db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Persistence:", err));
     
     let currentOrder = null;
     let productsCache = new Map();
     
-    // Color code mapping function
     function getColorCode(colorName) {
         if (!colorName || colorName === 'Not Selected') return '#D4AF37';
         const colorMap = {
@@ -586,7 +623,48 @@
         return urlParams.get('orderId');
     }
     
-    // Load products from cache
+    function getDeliveryDate() {
+        if (currentOrder.deliveredDate) {
+            return new Date(currentOrder.deliveredDate);
+        }
+        const orderDate = new Date(currentOrder.orderDate);
+        const estimatedDelivery = new Date(orderDate);
+        estimatedDelivery.setDate(orderDate.getDate() + 7);
+        return estimatedDelivery;
+    }
+    
+    function isWithinReturnPeriod() {
+        if (!currentOrder || currentOrder.status !== 'delivered') return false;
+        const deliveryDate = getDeliveryDate();
+        const today = new Date();
+        const daysDiff = Math.floor((today - deliveryDate) / (1000 * 3600 * 24));
+        return daysDiff <= 7;
+    }
+    
+    function getDaysLeftForReturn() {
+        if (!currentOrder || currentOrder.status !== 'delivered') return 0;
+        const deliveryDate = getDeliveryDate();
+        const today = new Date();
+        const daysDiff = Math.floor((today - deliveryDate) / (1000 * 3600 * 24));
+        const daysLeft = 7 - daysDiff;
+        return daysLeft > 0 ? daysLeft : 0;
+    }
+    
+    function getPickupSchedule() {
+        if (!currentOrder.returnProcessedDate) return null;
+        const approvalDate = new Date(currentOrder.returnProcessedDate);
+        const pickupDate = new Date(approvalDate);
+        pickupDate.setDate(approvalDate.getDate() + 5);
+        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+        const formattedDate = pickupDate.toLocaleDateString('en-IN', options);
+        const hours = Math.floor(Math.random() * 8) + 10;
+        const minutes = Math.random() > 0.5 ? '00' : '30';
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const displayHours = hours > 12 ? hours - 12 : hours;
+        const formattedTime = `${displayHours}:${minutes} ${ampm}`;
+        return { date: formattedDate, time: formattedTime };
+    }
+    
     async function loadProductsFast() {
         const cached = sessionStorage.getItem('vedanta_products_cache');
         if (cached) {
@@ -594,7 +672,6 @@
                 const parsed = JSON.parse(cached);
                 if (parsed && Date.now() - parsed.timestamp < 3600000) {
                     productsCache = new Map(parsed.data);
-                    console.log("✅ Products from cache");
                     return;
                 }
             } catch(e) {}
@@ -618,12 +695,10 @@
         } catch(e) { console.log("Products error:", e); }
     }
     
-    // Load order from cache or Firebase
     async function loadOrderFast() {
         const orderId = getOrderIdFromUrl();
         if (!orderId) return false;
         
-        // Check cached orders
         const cachedOrders = sessionStorage.getItem('vedanta_orders_fast');
         if (cachedOrders) {
             try {
@@ -633,7 +708,6 @@
             } catch(e) {}
         }
         
-        // Fetch from Firebase
         try {
             const doc = await db.collection('orders').doc(orderId).get();
             if (doc.exists) {
@@ -644,7 +718,6 @@
         return false;
     }
     
-    // Background update
     async function updateOrderBackground() {
         const orderId = getOrderIdFromUrl();
         if (!orderId || !currentOrder) return;
@@ -660,7 +733,6 @@
         } catch(e) {}
     }
     
-    // Real-time listener
     function setupRealtime() {
         const orderId = getOrderIdFromUrl();
         if (!orderId) return;
@@ -679,19 +751,47 @@
     }
     
     function canCancel() {
-        return currentOrder && ['pending', 'confirmed', 'processing'].includes(currentOrder.status);
+        return currentOrder && ['pending', 'confirmed'].includes(currentOrder.status);
+    }
+    
+    function canReturn() {
+        if (!currentOrder) return false;
+        if (currentOrder.status !== 'delivered') return false;
+        if (!isWithinReturnPeriod()) return false;
+        if (currentOrder.returnStatus === 'pending') return false;
+        if (currentOrder.returnStatus === 'approved') return false;
+        return true;
+    }
+    
+    function isReturnApproved() {
+        return currentOrder && currentOrder.returnStatus === 'approved';
+    }
+    
+    function isReturnRejected() {
+        return currentOrder && currentOrder.returnStatus === 'rejected';
     }
     
     async function cancelOrder() {
-        if (!canCancel()) { showToast("Cannot cancel this order", true); return; }
+        if (!canCancel()) { showToast("Cannot cancel this order now", true); return; }
         try {
             await db.collection('orders').doc(currentOrder.id).update({
-                status: 'cancelled', cancelledAt: new Date().toISOString()
+                status: 'cancelled', 
+                cancelledAt: new Date().toISOString()
             });
             currentOrder.status = 'cancelled';
             showToast("✅ Order cancelled");
             renderOrderDetails();
         } catch(e) { showToast("Failed to cancel", true); }
+    }
+    
+    // Redirect to return.html with same orderId (preserves original order for new return request)
+    function goToReturn() {
+        const orderId = currentOrder?.orderId || currentOrder?.id;
+        if (orderId) {
+            window.location.href = `return.html?orderId=${orderId}`;
+        } else {
+            showToast("Order ID not found", true);
+        }
     }
     
     function getProductImage(id) {
@@ -710,9 +810,11 @@
         const container = document.getElementById('app');
         const isCancelled = currentOrder.status === 'cancelled';
         const canCancelOrder = canCancel();
+        const canReturnOrder = canReturn();
+        const isReturnWindowExpired = currentOrder.status === 'delivered' && !isWithinReturnPeriod() && !currentOrder.returnStatus;
+        const daysLeft = getDaysLeftForReturn();
         const orderDate = currentOrder.orderDate ? new Date(currentOrder.orderDate).toLocaleString() : 'N/A';
         
-        // Status steps
         const steps = ['pending', 'confirmed', 'processing', 'shipped', 'delivered'];
         let statusHtml = '';
         if (isCancelled) {
@@ -730,22 +832,18 @@
             }).join('')}</div>`;
         }
         
-        // Items HTML with proper color display
         const itemsHtml = (currentOrder.items || []).map(item => {
             const img = getProductImage(item.id);
             const selectedSize = item.size || item.selectedSize || '';
             const selectedColor = item.color || item.selectedColor || '';
             const colorCode = getColorCode(selectedColor);
             const comboInfo = item.combo || '';
-            
-            // Combo display
             let comboHtml = '';
             if (comboInfo) {
                 comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> ${escapeHtml(comboInfo)}</div>`;
             } else if (item.isCombo && item.comboMultiplier) {
                 comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> Combo Pack (${item.comboMultiplier} items per pack)</div>`;
             }
-            
             return `<div class="order-item">
                 <div class="order-item-img">${img ? `<img src="${img}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i class="fas fa-gem"></i>`}</div>
                 <div class="order-item-info">
@@ -763,12 +861,61 @@
             </div>`;
         }).join('');
         
-        const cancelBtnHtml = canCancelOrder ? `<button class="btn-secondary btn-cancel" id="cancelOrderBtn"><i class="fas fa-times-circle"></i> Cancel Order</button>` : '';
+        let actionButtonsHtml = '';
+        
+        if (canCancelOrder) {
+            actionButtonsHtml += `<button class="btn-secondary btn-cancel" id="cancelOrderBtn"><i class="fas fa-times-circle"></i> Cancel Order</button>`;
+        }
+        
+        if (canReturnOrder) {
+            actionButtonsHtml += `<button class="btn-secondary btn-return" id="returnOrderBtn"><i class="fas fa-undo-alt"></i> Return Order <span class="days-left-badge">${daysLeft} days left</span></button>`;
+            actionButtonsHtml += `<div class="return-info"><i class="fas fa-info-circle"></i> You can return this order within ${daysLeft} days (7 days return policy).</div>`;
+        } else if (isReturnWindowExpired && !currentOrder.returnStatus) {
+            actionButtonsHtml += `<div class="return-expired-info"><i class="fas fa-hourglass-end"></i> Return window expired (7 days policy). Cannot return this order now.</div>`;
+        }
+        
+        let returnStatusHtml = '';
+        
+        if (currentOrder.returnStatus === 'pending') {
+            returnStatusHtml = `<div class="return-info" style="background:rgba(255,152,0,0.15);"><i class="fas fa-clock"></i> Return Request Pending - We will contact you within 24 hours.</div>`;
+        } 
+        else if (currentOrder.returnStatus === 'approved') {
+            const pickup = getPickupSchedule();
+            returnStatusHtml = `
+                <div class="return-approved-info">
+                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
+                        <i class="fas fa-check-circle" style="color: #4CAF50; font-size: 18px;"></i>
+                        <strong style="color: #4CAF50;">Return Request Approved! ✅</strong>
+                    </div>
+                    <div class="pickup-datetime">
+                        <i class="fas fa-truck"></i> Pickup Schedule:
+                    </div>
+                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-top: 8px;">
+                        <div><i class="fas fa-calendar-alt"></i> Date: <strong>${pickup.date}</strong></div>
+                        <div style="margin-top: 5px;"><i class="fas fa-clock"></i> Time: <strong>${pickup.time}</strong></div>
+                        <div style="margin-top: 8px; font-size: 10px; color: #ccc;"><i class="fas fa-info-circle"></i> Our delivery partner will visit your address for pickup.</div>
+                    </div>
+                </div>`;
+        } 
+        else if (currentOrder.returnStatus === 'rejected') {
+            const rejectReason = currentOrder.adminNotes || currentOrder.returnRejectReason || 'Not specified';
+            returnStatusHtml = `
+                <div class="return-rejected-info">
+                    <div><i class="fas fa-times-circle"></i> Return Request Rejected</div>
+                    <div style="font-size: 10px; margin-top: 5px; color: #FF8888;">Reason: ${escapeHtml(rejectReason)}</div>
+                    <div style="margin-top: 10px;">
+                        <button class="btn-return-again" id="returnAgainBtn" style="width: 100%; padding: 8px; font-size: 12px;">
+                            <i class="fas fa-redo-alt"></i> Request Return Again
+                        </button>
+                    </div>
+                </div>`;
+        }
         
         container.innerHTML = `
             <div class="status-bar">
                 <div class="card-title"><i class="fas fa-chart-line"></i> Order Status</div>
                 ${statusHtml}
+                ${returnStatusHtml}
             </div>
             
             <div class="info-card">
@@ -805,7 +952,7 @@
             </div>
             
             <div class="action-buttons">
-                ${cancelBtnHtml}
+                ${actionButtonsHtml}
                 <button class="btn-secondary" onclick="window.location.href='booking.html'"><i class="fas fa-list"></i> All Orders</button>
                 <button class="btn-primary" onclick="window.location.href='index.html'"><i class="fas fa-shopping-cart"></i> Shop More</button>
             </div>
@@ -813,6 +960,12 @@
         
         const cancelBtn = document.getElementById('cancelOrderBtn');
         if (cancelBtn) cancelBtn.addEventListener('click', () => document.getElementById('cancelModal').classList.add('show'));
+        
+        const returnBtn = document.getElementById('returnOrderBtn');
+        if (returnBtn) returnBtn.addEventListener('click', goToReturn);
+        
+        const returnAgainBtn = document.getElementById('returnAgainBtn');
+        if (returnAgainBtn) returnAgainBtn.addEventListener('click', goToReturn);
     }
     
     function escapeHtml(str) {
@@ -820,7 +973,6 @@
         return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
     }
     
-    // Event listeners
     document.getElementById('modalCancelBtn')?.addEventListener('click', () => document.getElementById('cancelModal').classList.remove('show'));
     document.getElementById('modalConfirmBtn')?.addEventListener('click', async () => {
         document.getElementById('cancelModal').classList.remove('show');
@@ -828,7 +980,6 @@
     });
     window.addEventListener('click', (e) => { if (e.target === document.getElementById('cancelModal')) document.getElementById('cancelModal').classList.remove('show'); });
     
-    // Init - fast parallel loading
     (async function init() {
         await Promise.all([loadProductsFast(), loadOrderFast()]);
         if (!currentOrder) {
