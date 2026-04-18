@@ -206,6 +206,7 @@
     .logo h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 6px 14px; border-radius: 40px; color: #D4AF37; text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
+    /* ====== FIXED PRODUCT GALLERY - IMAGE FULLY VISIBLE ====== */
     .product-gallery {
       background: rgba(15,15,22,0.6);
       padding: 16px;
@@ -215,7 +216,8 @@
       position: relative;
       background: #0E0E14;
       border-radius: 24px;
-      height: 350px;
+      width: 100%;
+      min-height: 320px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -223,21 +225,24 @@
     }
     .main-image-slider {
       width: 100%;
-      height: 100%;
       display: flex;
       transition: transform 0.3s ease;
     }
     .slide {
       min-width: 100%;
-      height: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
+    /* CRITICAL FIX: Image full dikhegi, cut nahi hogi */
     .slide img {
       width: 100%;
-      height: 100%;
-      object-fit: cover;
+      height: auto;
+      max-height: 400px;
+      object-fit: contain;
+      background: #0E0E14;
+      display: block;
     }
     .slide i {
       font-size: 80px;
@@ -296,8 +301,23 @@
       flex-shrink: 0;
     }
     .thumbnail.active { border-color: #D4AF37; }
-    .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+    .thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #0E0E14;
+    }
     .thumbnail i { font-size: 24px; color: #D4AF37; }
+
+    /* Desktop ke liye thoda adjust */
+    @media (min-width: 768px) {
+      .slide img {
+        max-height: 500px;
+      }
+      .main-image-container {
+        min-height: 450px;
+      }
+    }
 
     .product-info {
       background: rgba(15,15,22,0.6);
@@ -351,7 +371,6 @@
       border-color: #D4AF37;
     }
     
-    /* FIXED COLOR SECTION - Proper color display */
     .color-options {
       display: flex;
       flex-wrap: wrap;
@@ -555,7 +574,7 @@
       margin-bottom: 10px;
       overflow: hidden;
     }
-    .related-img img { width: 100%; height: 100%; object-fit: cover; }
+    .related-img img { width: 100%; height: 100%; object-fit: contain; background: #0E0E14; }
     .related-img i { font-size: 55px; color: #D4AF37; }
     .related-name { font-size: 13px; font-weight: 600; margin-top: 8px; }
     .related-price { font-size: 15px; font-weight: 800; color: #D4AF37; margin-top: 5px; }
@@ -931,7 +950,6 @@
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
   }
   
-  // FIXED: Proper color rendering with actual color circles
   function getColorCode(colorName) {
     const colorMap = {
       'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
