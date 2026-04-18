@@ -3,14 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Product Detail - Vedanta</title>
+  <title>Vedanta | Product Detail</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+    }
     body {
       font-family: 'Space Grotesk', sans-serif;
       background: #050508;
@@ -31,6 +36,7 @@
     }
     .container { width: 100%; max-width: 100%; margin: 0; padding: 0; }
 
+    /* Floating cart */
     .floating-cart {
       position: fixed;
       bottom: 30px;
@@ -70,6 +76,7 @@
       justify-content: center;
     }
 
+    /* Cart sidebar */
     .cart-sidebar {
       position: fixed;
       top: 0;
@@ -191,6 +198,7 @@
     }
     .overlay.show { display: block; }
 
+    /* Header */
     .header {
       display: flex;
       justify-content: space-between;
@@ -206,6 +214,7 @@
     .logo h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 6px 14px; border-radius: 40px; color: #D4AF37; text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
+    /* ====== FIXED GALLERY: FULL IMAGE VISIBLE ON BOTH DESKTOP & MOBILE ====== */
     .product-gallery {
       background: rgba(15,15,22,0.6);
       padding: 16px;
@@ -215,11 +224,14 @@
       position: relative;
       background: #0E0E14;
       border-radius: 24px;
-      height: 350px;
+      /* Responsive aspect ratio - works on all devices */
+      aspect-ratio: 4 / 3;
+      width: 100%;
       display: flex;
       align-items: center;
       justify-content: center;
       overflow: hidden;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.3);
     }
     .main-image-slider {
       width: 100%;
@@ -233,12 +245,18 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      position: relative;
     }
+    /* CRITICAL FIX: object-fit contain ensures FULL image visible without any cropping */
     .slide img {
       width: 100%;
       height: 100%;
-      object-fit: cover;
+      object-fit: contain;
+      background: #0E0E14;
+      display: block;
+      pointer-events: none;
     }
+    /* For fallback icons */
     .slide i {
       font-size: 80px;
       color: #D4AF37;
@@ -248,6 +266,7 @@
       top: 50%;
       transform: translateY(-50%);
       background: rgba(0,0,0,0.6);
+      backdrop-filter: blur(4px);
       border: none;
       width: 36px;
       height: 36px;
@@ -259,6 +278,11 @@
       display: flex;
       align-items: center;
       justify-content: center;
+      transition: all 0.2s;
+    }
+    .slider-btn:hover {
+      background: rgba(212,175,55,0.8);
+      color: #050508;
     }
     .slider-prev { left: 8px; }
     .slider-next { right: 8px; }
@@ -294,11 +318,18 @@
       border: 2px solid transparent;
       overflow: hidden;
       flex-shrink: 0;
+      transition: all 0.2s;
     }
-    .thumbnail.active { border-color: #D4AF37; }
-    .thumbnail img { width: 100%; height: 100%; object-fit: cover; }
+    .thumbnail.active { border-color: #D4AF37; transform: scale(1.05); }
+    .thumbnail img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #0E0E14;
+    }
     .thumbnail i { font-size: 24px; color: #D4AF37; }
 
+    /* Rest of styles (product info, colors, combos etc) */
     .product-info {
       background: rgba(15,15,22,0.6);
       padding: 16px;
@@ -344,6 +375,7 @@
       font-weight: 600;
       cursor: pointer;
       color: #FFFFFF;
+      transition: all 0.2s;
     }
     .size-btn.active, .size-btn:active {
       background: #D4AF37;
@@ -351,7 +383,6 @@
       border-color: #D4AF37;
     }
     
-    /* FIXED COLOR SECTION - Proper color display */
     .color-options {
       display: flex;
       flex-wrap: wrap;
@@ -410,6 +441,7 @@
       cursor: pointer;
       border: 2px solid rgba(212,175,55,0.2);
       transition: all 0.3s ease;
+      position: relative;
     }
     .combo-item.selected {
       border-color: #D4AF37;
@@ -442,7 +474,6 @@
       padding: 2px 8px;
       border-radius: 20px;
     }
-    .combo-item { position: relative; }
 
     .product-detail-section {
       margin: 20px 0;
@@ -517,6 +548,7 @@
       justify-content: center;
       gap: 10px;
       cursor: pointer;
+      transition: all 0.2s;
     }
     .add-cart-btn {
       background: rgba(212,175,55,0.15);
@@ -528,6 +560,7 @@
       border: none;
       color: white;
     }
+    .add-cart-btn:active, .buy-btn:active { transform: scale(0.98); }
 
     .section-title { font-size: 20px; font-weight: 700; margin: 24px 16px 16px; display: flex; align-items: center; gap: 10px; }
     .section-title span { background: #D4AF37; width: 30px; height: 3px; }
@@ -544,7 +577,9 @@
       border-radius: 20px;
       padding: 12px;
       cursor: pointer;
+      transition: transform 0.2s;
     }
+    .related-card:active { transform: scale(0.97); }
     .related-img {
       height: 140px;
       background: #0E0E14;
@@ -555,7 +590,7 @@
       margin-bottom: 10px;
       overflow: hidden;
     }
-    .related-img img { width: 100%; height: 100%; object-fit: cover; }
+    .related-img img { width: 100%; height: 100%; object-fit: contain; background: #0E0E14; }
     .related-img i { font-size: 55px; color: #D4AF37; }
     .related-name { font-size: 13px; font-weight: 600; margin-top: 8px; }
     .related-price { font-size: 15px; font-weight: 800; color: #D4AF37; margin-top: 5px; }
@@ -607,6 +642,32 @@
       margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Desktop specific adjustments */
+    @media (min-width: 768px) {
+      .main-image-container {
+        max-width: 700px;
+        margin: 0 auto;
+      }
+      .product-info {
+        max-width: 700px;
+        margin: 20px auto;
+      }
+      .related-products {
+        max-width: 700px;
+        margin: 0 auto 30px;
+        gap: 20px;
+      }
+      .reviews-section {
+        max-width: 700px;
+        margin: 0 auto 40px;
+      }
+      .section-title {
+        max-width: 700px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+    }
   </style>
 </head>
 <body>
@@ -894,8 +955,8 @@
   function renderImageSlider() {
     const images = currentProduct.images || [];
     const hasImages = images.length > 0;
-    let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
-    let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
+    let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy" alt="${currentProduct.name}"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
+    let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}" alt="thumbnail ${idx+1}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
     
     return `<div class="product-gallery">
       <div class="main-image-container">
@@ -931,7 +992,6 @@
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
   }
   
-  // FIXED: Proper color rendering with actual color circles
   function getColorCode(colorName) {
     const colorMap = {
       'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
@@ -1064,7 +1124,7 @@
     container.innerHTML = related.map(p => {
       const hasImage = p.images && p.images.length > 0;
       return `<div class="related-card" data-product-id="${p.id}">
-        <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div>
+        <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy" alt="${p.name}">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div>
         <div class="related-name">${escapeHtml(p.name)}</div>
         <div class="related-price">₹${p.price.toLocaleString()}</div>
       </div>`;
