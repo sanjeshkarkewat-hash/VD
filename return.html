@@ -201,10 +201,10 @@
             cursor: pointer;
             padding: 6px 12px;
             border-radius: 40px;
+            text-decoration: none;
         }
         .nav-item i { font-size: 18px; color: #ccc; }
         .nav-item span { font-size: 9px; color: #ccc; }
-        .nav-item.active, .nav-item:active { background: rgba(212,175,55,0.2); }
         .nav-item.active i, .nav-item.active span { color: #D4AF37; }
         .loader {
             display: inline-block;
@@ -226,15 +226,34 @@
             font-weight: 600;
         }
         .status-delivered { background: rgba(76,175,80,0.2); color: #4CAF50; }
-        .status-returned { background: rgba(255,152,0,0.2); color: #FF9800; }
-        .status-pending { background: rgba(212,175,55,0.2); color: #D4AF37; }
+        .rejected-warning {
+            background: rgba(244,67,54,0.15);
+            border: 1px solid rgba(244,67,54,0.3);
+            border-radius: 16px;
+            padding: 12px;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 12px;
+            color: #FF8888;
+        }
+        .rejected-warning i { font-size: 18px; }
+        .preselected-badge {
+            background: rgba(212,175,55,0.2);
+            padding: 8px 12px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            font-size: 13px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo"><h1>VEDANTA</h1></div>
-    <div class="back-btn" onclick="window.location.href='profile.html'"><i class="fas fa-arrow-left"></i> Back</div>
+    <div class="back-btn" onclick="window.location.href='booking.html'"><i class="fas fa-arrow-left"></i> Back</div>
 </div>
 
 <div class="container" id="container">
@@ -245,9 +264,9 @@
 </div>
 
 <div class="bottom-nav">
-    <div class="nav-item" onclick="window.location.href='index.html'"><i class="fas fa-home"></i><span>HOME</span></div>
-    <div class="nav-item" onclick="window.location.href='booking.html'"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></div>
-    <div class="nav-item active" onclick="window.location.href='profile.html'"><i class="fas fa-user-circle"></i><span>PROFILE</span></div>
+    <a href="index.html" class="nav-item" id="navHome"><i class="fas fa-home"></i><span>HOME</span></a>
+    <a href="booking.html" class="nav-item" id="navBooking"><i class="fas fa-calendar-alt"></i><span>BOOKING</span></a>
+    <a href="profile.html" class="nav-item" id="navProfile"><i class="fas fa-user-circle"></i><span>PROFILE</span></a>
 </div>
 
 <div class="toast" id="toast"></div>
@@ -266,8 +285,8 @@
     const db = firebase.firestore();
     
     let currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    let deliveredOrders = [];
-    let selectedOrder = null;
+    let eligibleOrders = [];
+    let preselectedOrderId = null;
     
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -278,65 +297,94 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    // Load only DELIVERED orders from Firebase
-    async function loadDeliveredOrders() {
+    // Get orderId from URL (for "Request Return Again" feature)
+    function getOrderIdFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('orderId');
+    }
+    
+    // Check if order can be returned based on delivery date (within 7 days)
+    function isWithinReturnWindow(order) {
+        if (!order.deliveredDate) {
+            const orderDate = new Date(order.orderDate);
+            const daysSinceOrder = (Date.now() - orderDate) / (1000 * 3600 * 24);
+            return daysSinceOrder <= 7;
+        }
+        const deliveredDate = new Date(order.deliveredDate);
+        const daysSinceDelivery = (Date.now() - deliveredDate) / (1000 * 3600 * 24);
+        return daysSinceDelivery <= 7;
+    }
+    
+    // Load eligible orders - INCLUDING rejected ones for re-request
+    async function loadEligibleOrders() {
         if (!currentUser || !currentUser.email) {
-            window.location.href = 'profile.html';
             return [];
         }
         
         try {
+            // Get all orders for this user
             const snapshot = await db.collection('orders')
                 .where('customerEmail', '==', currentUser.email)
-                .where('status', '==', 'delivered')
                 .get();
             
-            const orders = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                // Check if already returned
-                if (data.returnStatus !== 'returned' && data.returnStatus !== 'approved') {
-                    orders.push({ id: doc.id, ...data });
-                }
-            });
-            
-            // Also check by userEmail
             const snapshot2 = await db.collection('orders')
                 .where('userEmail', '==', currentUser.email)
-                .where('status', '==', 'delivered')
                 .get();
             
+            const ordersMap = new Map();
+            
+            snapshot.forEach(doc => {
+                ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
+            });
             snapshot2.forEach(doc => {
-                if (!orders.some(o => o.id === doc.id)) {
-                    const data = doc.data();
-                    if (data.returnStatus !== 'returned' && data.returnStatus !== 'approved') {
-                        orders.push({ id: doc.id, ...data });
-                    }
+                if (!ordersMap.has(doc.id)) {
+                    ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
                 }
             });
             
-            orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-            deliveredOrders = orders;
-            return orders;
+            const orders = Array.from(ordersMap.values());
+            const eligible = [];
+            
+            for (const order of orders) {
+                const returnStatus = order.returnStatus;
+                
+                // Skip if already returned or approved
+                if (returnStatus === 'returned' || returnStatus === 'approved') {
+                    continue;
+                }
+                
+                // Skip if already pending (already requested)
+                if (returnStatus === 'pending') {
+                    continue;
+                }
+                
+                // REJECTED orders - ALWAYS eligible for re-request (even if window expired)
+                if (returnStatus === 'rejected') {
+                    eligible.push({
+                        ...order,
+                        _isRejectedReturn: true,
+                        _rejectReason: order.adminNotes || order.returnRejectReason || 'Not specified'
+                    });
+                    continue;
+                }
+                
+                // Delivered orders within 7 days
+                if (order.status === 'delivered' && isWithinReturnWindow(order)) {
+                    eligible.push({
+                        ...order,
+                        _isRejectedReturn: false
+                    });
+                }
+            }
+            
+            eligible.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+            eligibleOrders = eligible;
+            return eligible;
             
         } catch (error) {
             console.error("Error loading orders:", error);
             return [];
         }
-    }
-    
-    // Check if order can be returned (within 7 days of delivery)
-    function canReturnOrder(order) {
-        if (!order.deliveredDate) {
-            // If no delivered date, assume delivered 1 day after order date
-            const orderDate = new Date(order.orderDate);
-            const daysSinceOrder = (Date.now() - orderDate) / (1000 * 3600 * 24);
-            return daysSinceOrder <= 7;
-        }
-        
-        const deliveredDate = new Date(order.deliveredDate);
-        const daysSinceDelivery = (Date.now() - deliveredDate) / (1000 * 3600 * 24);
-        return daysSinceDelivery <= 7;
     }
     
     // Submit return request
@@ -345,7 +393,9 @@
         const reason = document.getElementById('returnReason').value;
         const conditionCheck = document.getElementById('conditionCheck');
         
-        if (!orderSelect.value) {
+        let selectedOrderId = orderSelect ? orderSelect.value : preselectedOrderId;
+        
+        if (!selectedOrderId) {
             showToast('❌ Please select an order', true);
             return;
         }
@@ -360,15 +410,10 @@
             return;
         }
         
-        const order = deliveredOrders.find(o => o.orderId === orderSelect.value);
+        const order = eligibleOrders.find(o => o.orderId === selectedOrderId);
         
         if (!order) {
             showToast('❌ Order not found', true);
-            return;
-        }
-        
-        if (!canReturnOrder(order)) {
-            showToast('❌ Return window expired (only 7 days from delivery)', true);
             return;
         }
         
@@ -387,19 +432,24 @@
                 returnReason: reason,
                 returnStatus: 'pending',
                 requestedDate: new Date().toISOString(),
-                status: 'return_requested'
+                status: 'return_requested',
+                isReRequest: order._isRejectedReturn || false,
+                previousRejectReason: order._isRejectedReturn ? (order._rejectReason || null) : null
             };
             
-            // Save to returns collection
             const returnId = `RET_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
             await db.collection('returns').doc(returnId).set(returnData);
             
-            // Update order with return status
             await db.collection('orders').doc(order.id).update({
                 returnStatus: 'pending',
                 returnReason: reason,
                 returnRequestedDate: new Date().toISOString(),
-                status: 'return_requested'
+                status: 'return_requested',
+                adminNotes: null,
+                returnRejectReason: null,
+                returnProcessedDate: null,
+                isReRequest: true,
+                previousReturnStatus: order.returnStatus || null
             });
             
             showToast('✅ Return request submitted successfully! We will contact you within 24 hours.');
@@ -416,9 +466,78 @@
         }
     }
     
-    // Render return page
+    // Show order details
+    function showOrderDetails() {
+        const select = document.getElementById('orderSelect');
+        const orderId = select ? select.value : preselectedOrderId;
+        const detailsDiv = document.getElementById('orderDetails');
+        
+        if (!orderId) {
+            if (detailsDiv) detailsDiv.classList.remove('show');
+            return;
+        }
+        
+        const order = eligibleOrders.find(o => o.orderId === orderId);
+        if (!order) return;
+        
+        const isRejectedCase = order._isRejectedReturn === true;
+        
+        let warningHtml = '';
+        if (isRejectedCase) {
+            warningHtml = `
+                <div class="rejected-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <strong>Previous return request was rejected</strong><br>
+                        Reason: ${escapeHtml(order._rejectReason)}<br>
+                        <span style="font-size: 10px;">You can submit a new return request now.</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        detailsDiv.innerHTML = `
+            ${warningHtml}
+            <h4 style="margin-bottom: 12px; color: #D4AF37;">Order Items</h4>
+            ${order.items.map(item => `
+                <div class="order-item">
+                    <span>${escapeHtml(item.name)} x ${item.quantity}</span>
+                    <span>₹${(item.price * item.quantity).toLocaleString('en-IN')}</span>
+                </div>
+            `).join('')}
+            <div class="order-item" style="border-bottom: none; font-weight: bold;">
+                <span>Total Amount</span>
+                <span style="color: #D4AF37;">₹${order.total.toLocaleString('en-IN')}</span>
+            </div>
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
+                <p><i class="fas fa-calendar"></i> Order Date: ${new Date(order.orderDate).toLocaleDateString('en-IN')}</p>
+                <p><i class="fas fa-truck"></i> Status: <span class="status-badge status-delivered">Delivered</span></p>
+                ${isRejectedCase ? 
+                    `<p style="color: #4CAF50; margin-top: 8px;"><i class="fas fa-redo-alt"></i> Re-request eligible - You can submit a new return request</p>` : 
+                    `<p style="color: #4CAF50; margin-top: 8px;"><i class="fas fa-check-circle"></i> Eligible for return</p>`
+                }
+            </div>
+        `;
+        detailsDiv.classList.add('show');
+    }
+    
+    // Main render function
     async function renderReturnPage() {
         const container = document.getElementById('container');
+        
+        // Update active nav based on current page
+        const currentPath = window.location.pathname.split('/').pop();
+        document.querySelectorAll('.nav-item').forEach(item => {
+            const href = item.getAttribute('href');
+            if (href && currentPath.includes(href.replace('.html', ''))) {
+                item.classList.add('active');
+            } else if (currentPath === 'return.html' && item.getAttribute('href') === 'profile.html') {
+                // On return page, profile is active
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
         
         if (!currentUser || !currentUser.email) {
             container.innerHTML = `
@@ -432,32 +551,68 @@
             return;
         }
         
-        await loadDeliveredOrders();
+        await loadEligibleOrders();
         
-        if (deliveredOrders.length === 0) {
+        // Check if an orderId was passed in URL (for "Request Return Again")
+        const urlOrderId = getOrderIdFromUrl();
+        if (urlOrderId) {
+            const matchingOrder = eligibleOrders.find(o => o.orderId === urlOrderId || o.id === urlOrderId);
+            if (matchingOrder) {
+                preselectedOrderId = matchingOrder.orderId;
+            }
+        }
+        
+        if (eligibleOrders.length === 0) {
             container.innerHTML = `
                 <div class="card" style="text-align: center;">
                     <i class="fas fa-box-open" style="font-size: 48px; color: #D4AF37; margin-bottom: 16px;"></i>
                     <h3>No Eligible Orders</h3>
-                    <p style="color: #888;">You don't have any delivered orders that can be returned.</p>
-                    <p style="color: #888; font-size: 12px; margin-top: 8px;">Only delivered orders within 7 days can be returned.</p>
+                    <p style="color: #888;">You don't have any orders that can be returned.</p>
+                    <p style="color: #888; font-size: 12px; margin-top: 8px;">• Delivered orders within 7 days are eligible</p>
+                    <p style="color: #888; font-size: 12px;">• Previously rejected returns can be requested again</p>
                     <button class="submit-btn" style="margin-top: 20px;" onclick="window.location.href='booking.html'">View My Orders</button>
                 </div>
             `;
             return;
         }
         
+        // Build dropdown options
+        let dropdownHtml = '<option value="">Select Order to Return</option>';
+        for (const order of eligibleOrders) {
+            const isRejected = order._isRejectedReturn === true;
+            const orderDate = new Date(order.orderDate).toLocaleDateString('en-IN');
+            const badge = isRejected ? ' [REJECTED - RE-REQUEST]' : '';
+            const selectedAttr = (preselectedOrderId === order.orderId) ? 'selected' : '';
+            dropdownHtml += `<option value="${order.orderId}" ${selectedAttr}>${order.orderId} - ₹${order.total} (${orderDate})${badge}</option>`;
+        }
+        
+        // If preselected, show pre-selection message
+        let preselectedHtml = '';
+        if (preselectedOrderId) {
+            const preselectedOrder = eligibleOrders.find(o => o.orderId === preselectedOrderId);
+            if (preselectedOrder && preselectedOrder._isRejectedReturn) {
+                preselectedHtml = `
+                    <div class="preselected-badge">
+                        <i class="fas fa-redo-alt"></i> Re-requesting return for rejected order: ${preselectedOrderId}
+                    </div>
+                `;
+            } else if (preselectedOrder) {
+                preselectedHtml = `
+                    <div class="preselected-badge">
+                        <i class="fas fa-undo-alt"></i> Return request for order: ${preselectedOrderId}
+                    </div>
+                `;
+            }
+        }
+        
         container.innerHTML = `
             <div class="card">
                 <h3><i class="fas fa-undo-alt"></i> Return Request</h3>
                 
+                ${preselectedHtml}
+                
                 <select id="orderSelect" class="order-select" onchange="showOrderDetails()">
-                    <option value="">Select Order to Return</option>
-                    ${deliveredOrders.map(order => `
-                        <option value="${order.orderId}">
-                            ${order.orderId} - ₹${order.total} - ${new Date(order.orderDate).toLocaleDateString('en-IN')}
-                        </option>
-                    `).join('')}
+                    ${dropdownHtml}
                 </select>
                 
                 <div id="orderDetails" class="order-details"></div>
@@ -479,7 +634,7 @@
                         <span>I confirm the return conditions:</span>
                     </label>
                     <p>✓ Product must be unused and in original packaging<br>
-                       ✓ Return request within 7 days of delivery<br>
+                       ✓ Return request within 7 days of delivery (or re-request after rejection)<br>
                        ✓ Original invoice/tag must be attached<br>
                        ✓ Refund will be processed after quality check</p>
                 </div>
@@ -490,48 +645,20 @@
                 </div>
             </div>
         `;
-    }
-    
-    function showOrderDetails() {
-        const select = document.getElementById('orderSelect');
-        const orderId = select.value;
-        const detailsDiv = document.getElementById('orderDetails');
         
-        if (!orderId) {
-            detailsDiv.classList.remove('show');
-            return;
+        // If preselected, auto-show details
+        if (preselectedOrderId) {
+            showOrderDetails();
+            // Scroll to make it visible
+            setTimeout(() => {
+                document.getElementById('orderDetails')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
         }
         
-        const order = deliveredOrders.find(o => o.orderId === orderId);
-        if (!order) return;
-        
-        const canReturn = canReturnOrder(order);
-        const daysLeft = canReturn ? Math.floor((7 - (Date.now() - new Date(order.deliveredDate || order.orderDate)) / (1000 * 3600 * 24))) : 0;
-        
-        detailsDiv.innerHTML = `
-            <h4 style="margin-bottom: 12px; color: #D4AF37;">Order Items</h4>
-            ${order.items.map(item => `
-                <div class="order-item">
-                    <span>${escapeHtml(item.name)} x ${item.quantity}</span>
-                    <span>₹${item.price * item.quantity}</span>
-                </div>
-            `).join('')}
-            <div class="order-item" style="border-bottom: none; font-weight: bold;">
-                <span>Total Amount</span>
-                <span style="color: #D4AF37;">₹${order.total}</span>
-            </div>
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1);">
-                <p><i class="fas fa-calendar"></i> Order Date: ${new Date(order.orderDate).toLocaleDateString('en-IN')}</p>
-                <p><i class="fas fa-truck"></i> Status: <span class="status-badge status-delivered">Delivered</span></p>
-                ${!canReturn ? `<p style="color: #FF9800; margin-top: 8px;"><i class="fas fa-exclamation-triangle"></i> Return window expired! Returns only allowed within 7 days of delivery.</p>` : `<p style="color: #4CAF50; margin-top: 8px;"><i class="fas fa-check-circle"></i> Eligible for return (${daysLeft} days left)</p>`}
-            </div>
-        `;
-        detailsDiv.classList.add('show');
-        
-        // Disable submit if cannot return
-        const submitBtn = document.getElementById('submitBtn');
-        if (submitBtn) {
-            submitBtn.disabled = !canReturn;
+        // Attach change event for reason dropdown if needed
+        const reasonSelect = document.getElementById('returnReason');
+        if (reasonSelect) {
+            reasonSelect.addEventListener('change', () => {});
         }
     }
     
@@ -539,6 +666,10 @@
         if (!str) return '';
         return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
     }
+    
+    // Expose functions globally
+    window.submitReturnRequest = submitReturnRequest;
+    window.showOrderDetails = showOrderDetails;
     
     renderReturnPage();
 </script>
