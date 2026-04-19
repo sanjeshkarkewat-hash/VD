@@ -1004,9 +1004,9 @@
     
     let allProducts = [];
     let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-    let filteredProducts = [];
     let activeCategory = "all";
     let currentLanguage = "english";
+    let isFirstLoad = true;
     
     function escapeHtml(str) {
         if (!str) return '';
@@ -1018,7 +1018,7 @@
         });
     }
     
-    // ========== DETAILED KNOWLEDGE BASE ==========
+    // ========== DETAILED KNOWLEDGE BASE (SAME AS BEFORE) ==========
     const translations = {
         english: {
             welcome: "✨ Namaste! Welcome to Vedanta Support. How may I assist you today?",
@@ -1099,7 +1099,7 @@
     function t(key) { return translations[currentLanguage][key] || translations.english[key] || key; }
     function getDetailedAnswer(optionKey) { return translations[currentLanguage].detailedAnswers[optionKey] || translations.english.detailedAnswers[optionKey]; }
     
-    // ========== CHATBOT FUNCTIONS ==========
+    // ========== CHATBOT FUNCTIONS (SAME AS BEFORE) ==========
     function addMessage(text, isUser = false, isHtml = false) {
         const chatMessages = document.getElementById('chatMessages');
         if (!chatMessages) return;
@@ -1313,96 +1313,17 @@
     function closeCart() { document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('show'); }
     function goToProductDetail(productId) { localStorage.setItem('vedanta_selected_product_id', productId); window.location.href = `product-detail.html`; }
     
-    // ========== PRODUCT FUNCTIONS - FIXED: GET ALL ACTIVE PRODUCTS ==========
-    async function getAllProducts() {
-        try {
-            // Query only active products and order by createdAt
-            const snapshot = await db.collection('products')
-                .where('status', '==', 'active')
-                .orderBy('createdAt', 'desc')
-                .get();
-            
-            const products = [];
-            snapshot.forEach(doc => {
-                const data = doc.data();
-                products.push({ 
-                    id: doc.id, 
-                    name: data.name, 
-                    category: data.category, 
-                    price: data.price, 
-                    icon: data.icon || 'fa-gem', 
-                    badge: data.badge || 'New', 
-                    images: data.images || [] 
-                });
-            });
-            console.log("✅ Products loaded from Firebase:", products.length);
-            return products;
-        } catch (error) { 
-            console.error("Error fetching products:", error); 
-            return []; 
-        }
-    }
-    
-    async function loadProducts() {
-        const container = document.getElementById('productsContainer');
-        if (container) {
-            container.innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-spinner fa-pulse"></i><br>Loading products...</div>';
-        }
-        
-        try {
-            // Fetch directly from Firebase
-            const cloudProducts = await getAllProducts();
-            
-            if (cloudProducts && cloudProducts.length > 0) {
-                allProducts = cloudProducts;
-                // Save to cache for backup
-                localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-                console.log("✅ Products loaded successfully:", allProducts.length);
-            } else {
-                // Fallback to cache if Firebase empty
-                const cached = localStorage.getItem('vedantaProducts');
-                if (cached) {
-                    allProducts = JSON.parse(cached);
-                    console.log("⚠️ Using cached products:", allProducts.length);
-                } else {
-                    allProducts = [];
-                    console.log("❌ No products found");
-                }
-            }
-            
-            filteredProducts = [...allProducts];
-            renderProducts();
-            
-        } catch (error) {
-            console.error("Error loading products:", error);
-            // Try cache as fallback
-            const cached = localStorage.getItem('vedantaProducts');
-            if (cached) {
-                allProducts = JSON.parse(cached);
-                filteredProducts = [...allProducts];
-                renderProducts();
-            } else {
-                if (document.getElementById('productsContainer')) {
-                    document.getElementById('productsContainer').innerHTML = '<div style="text-align:center; padding:40px;"><i class="fas fa-exclamation-triangle"></i><br>Failed to load products. Please refresh.</div>';
-                }
-            }
-        }
-    }
-    
-    function getFilteredProducts() {
-        let filtered = [...allProducts];
-        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
-        if (searchTerm) { filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm)); }
-        if (activeCategory !== 'all') { filtered = filtered.filter(p => p.category === activeCategory); }
-        return filtered;
-    }
-    
+    // ========== PRODUCT FUNCTIONS - REAL TIME UPDATE ==========
     function renderProducts() {
         const container = document.getElementById('productsContainer');
         const resultSpan = document.getElementById('resultCount');
         if (!container) return;
         
-        const filtered = getFilteredProducts();
+        // Apply filters
+        let filtered = [...allProducts];
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || '';
+        if (searchTerm) { filtered = filtered.filter(p => p.name.toLowerCase().includes(searchTerm)); }
+        if (activeCategory !== 'all') { filtered = filtered.filter(p => p.category === activeCategory); }
         
         if (filtered.length === 0) {
             container.innerHTML = `<div style="text-align:center; padding:40px;"><i class="fas fa-search"></i><br>No products found ✨</div>`;
@@ -1449,28 +1370,43 @@
     document.getElementById('chatbotBtn')?.addEventListener('click', toggleChatbot);
     document.getElementById('closeChatBtn')?.addEventListener('click', toggleChatbot);
     
-    // Initialize - Load products immediately
-    loadProducts();
-    updateCartUI();
-    
-    // Real-time listener for updates
-    db.collection('products').where('status', '==', 'active').orderBy('createdAt', 'desc').onSnapshot((snapshot) => {
-        const newProducts = [];
-        snapshot.forEach(doc => {
-            const data = doc.data();
-            newProducts.push({ id: doc.id, name: data.name, category: data.category, price: data.price, icon: data.icon || 'fa-gem', badge: data.badge || 'New', images: data.images || [] });
-        });
-        if (newProducts.length !== allProducts.length) {
+    // ========== REAL-TIME PRODUCT LISTENER ==========
+    // This listener will update products in real-time without refresh
+    db.collection('products')
+        .where('status', '==', 'active')
+        .orderBy('createdAt', 'desc')
+        .onSnapshot((snapshot) => {
+            const newProducts = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                newProducts.push({ 
+                    id: doc.id, 
+                    name: data.name, 
+                    category: data.category, 
+                    price: data.price, 
+                    icon: data.icon || 'fa-gem', 
+                    badge: data.badge || 'New', 
+                    images: data.images || [] 
+                });
+            });
+            
+            // Update products array and re-render
             allProducts = newProducts;
+            // Update cache
             localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-            filteredProducts = [...allProducts];
             renderProducts();
-            console.log("🔄 Products updated via real-time listener:", allProducts.length);
-        }
-    });
+            
+            // Show toast notification for changes (only after first load)
+            if (!isFirstLoad) {
+                showToastMessage(`🔄 Products updated! ${allProducts.length} items available`);
+            }
+            isFirstLoad = false;
+            
+            console.log("🔄 Real-time update: Products count =", allProducts.length);
+        });
     
-    window.addEventListener('pageshow', function(event) { if (event.persisted && allProducts.length > 0) { renderProducts(); } });
-    window.addComboToCart = addComboToCart;
+    // Initial load - show skeleton until first data arrives
+    updateCartUI();
 </script>
 </body>
 </html>
