@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Product Detail - Vedanta LIVE</title>
+  <title>Product Detail - Vedanta</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Firebase SDKs -->
@@ -604,25 +604,6 @@
       margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .live-badge {
-      position: fixed;
-      bottom: 100px;
-      right: 20px;
-      background: #4CAF50;
-      color: white;
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 9px;
-      font-weight: bold;
-      z-index: 999;
-      animation: pulse 1.5s infinite;
-    }
-    @keyframes pulse {
-      0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.7); }
-      70% { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
-      100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
-    }
   </style>
 </head>
 <body>
@@ -646,8 +627,6 @@
     <button class="checkout-btn" id="checkoutBtn">💰 Proceed to Checkout</button>
   </div>
 </div>
-
-<div class="live-badge"><i class="fas fa-circle" style="font-size: 6px;"></i> LIVE SYNC</div>
 
 <div class="container" id="app">
   <div class="loading-state">
@@ -877,7 +856,7 @@
     return colorMap[colorName] || '#D4AF37';
   }
   
-  // ========== CRITICAL: REAL-TIME PRODUCT LISTENER ==========
+  // ========== REAL-TIME PRODUCT LISTENER (NO VISIBLE BADGE) ==========
   function startRealTimeProductSync() {
     if (unsubscribeProduct) {
       unsubscribeProduct();
@@ -910,39 +889,27 @@
           status: newData.status
         };
         
-        // Check if product is still active
         if (updatedProduct.status !== 'active') {
           showToast("⚠️ This product is no longer available");
           setTimeout(() => window.location.href = 'index.html', 2000);
           return;
         }
         
-        // Check if anything changed
         const priceChanged = currentProduct && currentProduct.price !== updatedProduct.price;
         const nameChanged = currentProduct && currentProduct.name !== updatedProduct.name;
         
-        if (priceChanged) {
-          showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
-        }
-        if (nameChanged) {
-          showToast(`🔄 Product name updated: ${updatedProduct.name}`);
-        }
+        if (priceChanged) showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
+        if (nameChanged) showToast(`🔄 Product name updated: ${updatedProduct.name}`);
         
         currentProduct = ensureProductFields(updatedProduct);
         
-        // Also update in allProducts cache
         const index = allProducts.findIndex(p => p.id == currentProductId);
-        if (index !== -1) {
-          allProducts[index] = currentProduct;
-        } else {
-          allProducts.push(currentProduct);
-        }
+        if (index !== -1) allProducts[index] = currentProduct;
+        else allProducts.push(currentProduct);
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
         
-        // Re-render page with new data
         renderPageContent();
-        
-        console.log(`🔥 LIVE UPDATE: Product ${currentProduct.name} synced`);
+        console.log(`🔥 LIVE UPDATE: ${currentProduct.name} synced`);
       } else {
         showToast("❌ Product not found");
         setTimeout(() => window.location.href = 'index.html', 2000);
@@ -995,7 +962,6 @@
   }
   
   function attachEventsAfterRender() {
-    // Size events
     const sizeBtns = document.querySelectorAll('.size-btn');
     if (sizeBtns.length > 0) {
       sizeBtns.forEach(btn => {
@@ -1011,7 +977,6 @@
       }
     }
     
-    // Color events
     const colorBtns = document.querySelectorAll('.color-btn');
     colorBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -1026,7 +991,6 @@
       selectedColor = colorBtns[0].getAttribute('data-color');
     }
     
-    // Combo events
     const comboItems = document.querySelectorAll('.combo-item');
     comboItems.forEach(combo => {
       combo.addEventListener('click', (e) => {
@@ -1055,7 +1019,6 @@
       });
     });
     
-    // Quantity buttons
     let qty = 1;
     const qtyMinus = document.getElementById('qtyMinus');
     const qtyPlus = document.getElementById('qtyPlus');
@@ -1065,7 +1028,6 @@
       qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
     }
     
-    // Cart buttons
     document.getElementById('addToCartBtn')?.addEventListener('click', () => { 
       const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1);
       addToCart(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
@@ -1213,7 +1175,6 @@
     const urlParams = new URLSearchParams(window.location.search);
     currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
     
-    // Try cache first
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
       allProducts = JSON.parse(cached);
@@ -1224,10 +1185,7 @@
       }
     }
     
-    // Load all products for related items
     loadAllProductsForRelated();
-    
-    // Start real-time listener for current product
     startRealTimeProductSync();
     
     if (sessionStorage.getItem('scrollToTop') === 'true') {
