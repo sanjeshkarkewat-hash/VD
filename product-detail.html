@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Product Detail - Vedanta</title>
+  <title>Product Detail - Vedanta LIVE</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <!-- Firebase SDKs -->
@@ -38,7 +38,6 @@
       left: auto;
       z-index: 1001;
       cursor: pointer;
-      transition: all 0.3s ease;
     }
     .cart-icon-container {
       background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -50,7 +49,6 @@
       justify-content: center;
       position: relative;
       box-shadow: 0 4px 15px rgba(212,175,55,0.4);
-      transition: transform 0.2s;
     }
     .cart-icon-container:active { transform: scale(0.95); }
     .cart-icon-container i { font-size: 26px; color: #050508; }
@@ -101,7 +99,6 @@
       color: white;
       font-size: 28px;
       cursor: pointer;
-      padding: 5px;
     }
     .cart-items {
       flex: 1;
@@ -206,7 +203,6 @@
     .logo h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
     .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 6px 14px; border-radius: 40px; color: #D4AF37; text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
 
-    /* ====== FIXED PRODUCT GALLERY - IMAGE FULLY VISIBLE ====== */
     .product-gallery {
       background: rgba(15,15,22,0.6);
       padding: 16px;
@@ -235,7 +231,6 @@
       justify-content: center;
       position: relative;
     }
-    /* CRITICAL FIX: Image full dikhegi, cut nahi hogi */
     .slide img {
       width: 100%;
       height: auto;
@@ -244,10 +239,7 @@
       background: #0E0E14;
       display: block;
     }
-    .slide i {
-      font-size: 80px;
-      color: #D4AF37;
-    }
+    .slide i { font-size: 80px; color: #D4AF37; }
     .slider-btn {
       position: absolute;
       top: 50%;
@@ -261,9 +253,6 @@
       font-size: 16px;
       cursor: pointer;
       z-index: 10;
-      display: flex;
-      align-items: center;
-      justify-content: center;
     }
     .slider-prev { left: 8px; }
     .slider-next { right: 8px; }
@@ -285,7 +274,6 @@
       margin-top: 12px;
       overflow-x: auto;
       padding: 6px 4px;
-      -webkit-overflow-scrolling: touch;
     }
     .thumbnail {
       width: 55px;
@@ -301,22 +289,12 @@
       flex-shrink: 0;
     }
     .thumbnail.active { border-color: #D4AF37; }
-    .thumbnail img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      background: #0E0E14;
-    }
+    .thumbnail img { width: 100%; height: 100%; object-fit: contain; background: #0E0E14; }
     .thumbnail i { font-size: 24px; color: #D4AF37; }
 
-    /* Desktop ke liye thoda adjust */
     @media (min-width: 768px) {
-      .slide img {
-        max-height: 500px;
-      }
-      .main-image-container {
-        min-height: 450px;
-      }
+      .slide img { max-height: 500px; }
+      .main-image-container { min-height: 450px; }
     }
 
     .product-info {
@@ -626,6 +604,25 @@
       margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+    
+    .live-badge {
+      position: fixed;
+      bottom: 100px;
+      right: 20px;
+      background: #4CAF50;
+      color: white;
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 9px;
+      font-weight: bold;
+      z-index: 999;
+      animation: pulse 1.5s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.7); }
+      70% { box-shadow: 0 0 0 8px rgba(76,175,80,0); }
+      100% { box-shadow: 0 0 0 0 rgba(76,175,80,0); }
+    }
   </style>
 </head>
 <body>
@@ -649,6 +646,8 @@
     <button class="checkout-btn" id="checkoutBtn">💰 Proceed to Checkout</button>
   </div>
 </div>
+
+<div class="live-badge"><i class="fas fa-circle" style="font-size: 6px;"></i> LIVE SYNC</div>
 
 <div class="container" id="app">
   <div class="loading-state">
@@ -683,6 +682,7 @@
   let currentSlide = 0;
   let slideInterval = null;
   let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+  let unsubscribeProduct = null;
   
   function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
   
@@ -864,50 +864,217 @@
     return p;
   }
   
-  function setSelectedProductId(id) { localStorage.setItem('vedanta_selected_product_id', id); }
-  
-  function navigateToRelatedProduct(productId) {
-    if (!productId) return;
-    localStorage.setItem('vedanta_selected_product_id', productId);
-    sessionStorage.setItem('scrollToTop', 'true');
-    window.location.href = window.location.pathname + '?id=' + productId;
+  function getColorCode(colorName) {
+    const colorMap = {
+      'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
+      'Orange': '#FFA500', 'Gold': '#FFD700', 'Yellow': '#FFFF00',
+      'Lime': '#32CD32', 'Green': '#008000', 'Teal': '#008080',
+      'Cyan': '#00FFFF', 'Blue': '#0000FF', 'Navy': '#000080',
+      'Purple': '#800080', 'Magenta': '#FF00FF', 'Pink': '#FF69B4',
+      'HotPink': '#FF1493', 'Brown': '#8B4513', 'Black': '#000000',
+      'White': '#FFFFFF', 'Silver': '#C0C0C0'
+    };
+    return colorMap[colorName] || '#D4AF37';
   }
   
-  async function loadProductData() {
-    const urlParams = new URLSearchParams(window.location.search);
-    currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
-    
-    const cached = localStorage.getItem('vedantaProducts');
-    if (cached) {
-      allProducts = JSON.parse(cached);
-      currentProduct = allProducts.find(p => p.id == currentProductId);
-      if (currentProduct) {
-        currentProduct = ensureProductFields(currentProduct);
-        renderPageContent();
-      }
+  // ========== CRITICAL: REAL-TIME PRODUCT LISTENER ==========
+  function startRealTimeProductSync() {
+    if (unsubscribeProduct) {
+      unsubscribeProduct();
     }
     
-    try {
-      const snapshot = await db.collection('products').get();
+    if (!currentProductId) return;
+    
+    const productRef = db.collection('products').doc(currentProductId);
+    
+    unsubscribeProduct = productRef.onSnapshot({
+      includeMetadataChanges: true
+    }, (docSnapshot) => {
+      if (docSnapshot.exists) {
+        const newData = docSnapshot.data();
+        const updatedProduct = {
+          id: docSnapshot.id,
+          name: newData.name,
+          price: newData.price,
+          originalPrice: newData.originalPrice || Math.round(newData.price * 1.6),
+          category: newData.category,
+          badge: newData.badge || 'New',
+          images: newData.images || [],
+          sizes: newData.sizes || [],
+          colors: newData.colors || [],
+          combos: newData.combos || [],
+          fullDesc: newData.fullDesc || "Premium quality product from Vedanta.",
+          benefits: newData.benefits || ["Premium Quality", "Handcrafted", "Made in India"],
+          rating: newData.rating || 4.5,
+          reviewCount: newData.reviewCount || 500,
+          status: newData.status
+        };
+        
+        // Check if product is still active
+        if (updatedProduct.status !== 'active') {
+          showToast("⚠️ This product is no longer available");
+          setTimeout(() => window.location.href = 'index.html', 2000);
+          return;
+        }
+        
+        // Check if anything changed
+        const priceChanged = currentProduct && currentProduct.price !== updatedProduct.price;
+        const nameChanged = currentProduct && currentProduct.name !== updatedProduct.name;
+        
+        if (priceChanged) {
+          showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
+        }
+        if (nameChanged) {
+          showToast(`🔄 Product name updated: ${updatedProduct.name}`);
+        }
+        
+        currentProduct = ensureProductFields(updatedProduct);
+        
+        // Also update in allProducts cache
+        const index = allProducts.findIndex(p => p.id == currentProductId);
+        if (index !== -1) {
+          allProducts[index] = currentProduct;
+        } else {
+          allProducts.push(currentProduct);
+        }
+        localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+        
+        // Re-render page with new data
+        renderPageContent();
+        
+        console.log(`🔥 LIVE UPDATE: Product ${currentProduct.name} synced`);
+      } else {
+        showToast("❌ Product not found");
+        setTimeout(() => window.location.href = 'index.html', 2000);
+      }
+    }, (error) => {
+      console.error("Real-time listener error:", error);
+    });
+  }
+  
+  function loadAllProductsForRelated() {
+    db.collection('products').where('status', '==', 'active').onSnapshot((snapshot) => {
       const products = [];
-      snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
+      snapshot.forEach(doc => {
+        products.push({ id: doc.id, ...doc.data() });
+      });
       if (products.length > 0) {
         allProducts = products;
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-        const newProduct = allProducts.find(p => p.id == currentProductId);
-        if (newProduct) {
-          currentProduct = ensureProductFields(newProduct);
-          renderPageContent();
-        }
+        renderRelatedProducts();
       }
-    } catch (error) { console.error("Firebase error:", error); }
+    });
+  }
+  
+  function initSliderAfterRender() {
+    const images = currentProduct.images || [];
+    const totalSlides = images.length || 1;
+    if (images.length <= 1) return;
     
-    if (sessionStorage.getItem('scrollToTop') === 'true') {
-      sessionStorage.removeItem('scrollToTop');
-      window.scrollTo(0, 0);
-      document.body.scrollTop = 0;
-      document.documentElement.scrollTop = 0;
+    const slider = document.getElementById('imageSlider');
+    const prevBtn = document.getElementById('prevSlide');
+    const nextBtn = document.getElementById('nextSlide');
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    
+    if (!slider) return;
+    
+    function updateSlider(index) {
+      if (index < 0) index = totalSlides - 1;
+      if (index >= totalSlides) index = 0;
+      currentSlide = index;
+      if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
+      thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active'));
     }
+    
+    prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
+    nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
+    thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
+    
+    if (slideInterval) clearInterval(slideInterval);
+    slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
+  }
+  
+  function attachEventsAfterRender() {
+    // Size events
+    const sizeBtns = document.querySelectorAll('.size-btn');
+    if (sizeBtns.length > 0) {
+      sizeBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+          sizeBtns.forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedSize = btn.dataset.size;
+        });
+      });
+      if (!selectedSize && sizeBtns[0]) {
+        sizeBtns[0].classList.add('active');
+        selectedSize = sizeBtns[0].dataset.size;
+      }
+    }
+    
+    // Color events
+    const colorBtns = document.querySelectorAll('.color-btn');
+    colorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        colorBtns.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        selectedColor = btn.getAttribute('data-color');
+        showToast(`🎨 ${selectedColor} selected`);
+      });
+    });
+    if (colorBtns.length > 0 && !selectedColor) {
+      colorBtns[0].classList.add('active');
+      selectedColor = colorBtns[0].getAttribute('data-color');
+    }
+    
+    // Combo events
+    const comboItems = document.querySelectorAll('.combo-item');
+    comboItems.forEach(combo => {
+      combo.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const comboQty = parseInt(combo.getAttribute('data-combo-qty'));
+        const comboPrice = parseInt(combo.getAttribute('data-combo-price'));
+        
+        if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
+          selectedCombo = null;
+          combo.classList.remove('selected');
+          const icon = combo.querySelector('.combo-select-icon i');
+          if (icon) icon.className = 'fas fa-plus-circle';
+          showToast(`✨ Combo offer removed!`);
+        } else {
+          comboItems.forEach(c => {
+            c.classList.remove('selected');
+            const icon = c.querySelector('.combo-select-icon i');
+            if (icon) icon.className = 'fas fa-plus-circle';
+          });
+          combo.classList.add('selected');
+          const icon = combo.querySelector('.combo-select-icon i');
+          if (icon) icon.className = 'fas fa-check-circle';
+          selectedCombo = { quantity: comboQty, price: comboPrice };
+          showToast(`🎉 Combo selected! ${comboQty} items for ₹${comboPrice}`);
+        }
+      });
+    });
+    
+    // Quantity buttons
+    let qty = 1;
+    const qtyMinus = document.getElementById('qtyMinus');
+    const qtyPlus = document.getElementById('qtyPlus');
+    const qtyInput = document.getElementById('qtyInput');
+    if (qtyMinus && qtyPlus && qtyInput) {
+      qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyInput.value = qty; } });
+      qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
+    }
+    
+    // Cart buttons
+    document.getElementById('addToCartBtn')?.addEventListener('click', () => { 
+      const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1);
+      addToCart(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
+      if (selectedCombo) selectedCombo = null;
+    });
+    document.getElementById('buyNowBtn')?.addEventListener('click', () => { 
+      const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1);
+      buyNowDirect(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
+    });
   }
   
   function renderImageSlider() {
@@ -924,48 +1091,6 @@
       </div>
       <div class="thumbnail-list" id="thumbnailList">${thumbnailsHtml}</div>
     </div>`;
-  }
-  
-  function initSlider() {
-    const images = currentProduct.images || [];
-    const totalSlides = images.length || 1;
-    if (images.length <= 1) return;
-    const slider = document.getElementById('imageSlider');
-    const prevBtn = document.getElementById('prevSlide');
-    const nextBtn = document.getElementById('nextSlide');
-    const thumbnails = document.querySelectorAll('.thumbnail');
-    
-    function updateSlider(index) {
-      if (index < 0) index = totalSlides - 1;
-      if (index >= totalSlides) index = 0;
-      currentSlide = index;
-      if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
-      thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active'));
-    }
-    prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
-    nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
-    thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
-    
-    if (slideInterval) clearInterval(slideInterval);
-    slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
-  }
-  
-  function getColorCode(colorName) {
-    const colorMap = {
-      'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
-      'Orange': '#FFA500', 'Gold': '#FFD700', 'Yellow': '#FFFF00',
-      'Lime': '#32CD32', 'Green': '#008000', 'Teal': '#008080',
-      'Cyan': '#00FFFF', 'Blue': '#0000FF', 'Navy': '#000080',
-      'Purple': '#800080', 'Magenta': '#FF00FF', 'Pink': '#FF69B4',
-      'HotPink': '#FF1493', 'Brown': '#8B4513', 'Black': '#000000',
-      'White': '#FFFFFF', 'Silver': '#C0C0C0', 'Lavender': '#E6E6FA',
-      'Peach': '#FFDAB9', 'Mint': '#98FB98', 'Coral': '#FF7F50',
-      'Turquoise': '#40E0D0', 'Indigo': '#4B0082', 'Violet': '#EE82EE',
-      'Rose': '#FF007F', 'Chocolate': '#D2691E', 'Khaki': '#F0E68C',
-      'Salmon': '#FA8072', 'Plum': '#DDA0DD', 'Tan': '#D2B48C',
-      'Beige': '#F5F5DC', 'Ivory': '#FFFFF0', 'Linen': '#FAF0E6'
-    };
-    return colorMap[colorName] || '#D4AF37';
   }
   
   function renderColors() {
@@ -985,22 +1110,6 @@
         }).join('')}
       </div>
     </div>`;
-  }
-  
-  function attachColorEvents() {
-    const colorBtns = document.querySelectorAll('.color-btn');
-    colorBtns.forEach(btn => {
-      btn.addEventListener('click', () => {
-        colorBtns.forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        selectedColor = btn.getAttribute('data-color');
-        showToast(`🎨 ${selectedColor} selected`);
-      });
-    });
-    if (colorBtns.length > 0 && !selectedColor) {
-      colorBtns[0].classList.add('active');
-      selectedColor = colorBtns[0].getAttribute('data-color');
-    }
   }
   
   function renderComboOffers() {
@@ -1030,54 +1139,10 @@
     </div>`;
   }
   
-  function attachComboEvents() {
-    const comboItems = document.querySelectorAll('.combo-item');
-    comboItems.forEach(combo => {
-      combo.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const comboQty = parseInt(combo.getAttribute('data-combo-qty'));
-        const comboPrice = parseInt(combo.getAttribute('data-combo-price'));
-        
-        if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
-          selectedCombo = null;
-          combo.classList.remove('selected');
-          const icon = combo.querySelector('.combo-select-icon i');
-          if (icon) icon.className = 'fas fa-plus-circle';
-          showToast(`✨ Combo offer removed! Regular price applied.`);
-        } else {
-          comboItems.forEach(c => {
-            c.classList.remove('selected');
-            const icon = c.querySelector('.combo-select-icon i');
-            if (icon) icon.className = 'fas fa-plus-circle';
-          });
-          combo.classList.add('selected');
-          const icon = combo.querySelector('.combo-select-icon i');
-          if (icon) icon.className = 'fas fa-check-circle';
-          selectedCombo = { quantity: comboQty, price: comboPrice };
-          showToast(`🎉 Combo selected! ${comboQty} items for ₹${comboPrice}. Click "ADD TO CART" or "BUY NOW"!`);
-        }
-      });
-    });
-  }
-  
-  function attachSizeEvents() {
-    const sizeBtns = document.querySelectorAll('.size-btn');
-    if (sizeBtns.length > 0) {
-      sizeBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-          sizeBtns.forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-          selectedSize = btn.dataset.size;
-        });
-      });
-      if (!selectedSize) { sizeBtns[0].classList.add('active'); selectedSize = sizeBtns[0].dataset.size; }
-    }
-  }
-  
   function renderRelatedProducts() {
-    const related = allProducts.filter(p => p.category === currentProduct.category && p.id != currentProduct.id).slice(0, 4);
     const container = document.getElementById('relatedProducts');
     if (!container) return;
+    const related = (allProducts || []).filter(p => p.category === currentProduct?.category && p.id != currentProduct?.id && p.status === 'active').slice(0, 4);
     if (related.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No related products</p>'; return; }
     container.innerHTML = related.map(p => {
       const hasImage = p.images && p.images.length > 0;
@@ -1091,7 +1156,8 @@
       card.addEventListener('click', (e) => {
         e.stopPropagation();
         const productId = card.getAttribute('data-product-id');
-        navigateToRelatedProduct(productId);
+        localStorage.setItem('vedanta_selected_product_id', productId);
+        window.location.href = window.location.pathname + '?id=' + productId;
       });
     });
   }
@@ -1105,7 +1171,7 @@
     const sizeHtml = hasSizes ? `<div class="size-section"><div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div><div class="size-options" id="sizeOptions">${currentProduct.sizes.map(size => `<button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}</div></div>` : '';
     const colorsHtml = renderColors();
     const combosHtml = renderComboOffers();
-    const benefitsHtml = `<div class="features-list">${currentProduct.benefits.map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}</div>`;
+    const benefitsHtml = `<div class="features-list">${(currentProduct.benefits || []).map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}</div>`;
     
     const html = `<div class="header">
       <div class="logo"><h1>VEDANTA</h1></div>
@@ -1137,23 +1203,37 @@
     document.getElementById('app').innerHTML = html;
     
     setTimeout(() => {
-      initSlider();
-      attachSizeEvents();
-      attachColorEvents();
-      attachComboEvents();
+      initSliderAfterRender();
+      attachEventsAfterRender();
       renderRelatedProducts();
-      
-      let qty = 1;
-      const qtyMinus = document.getElementById('qtyMinus');
-      const qtyPlus = document.getElementById('qtyPlus');
-      const qtyInput = document.getElementById('qtyInput');
-      if (qtyMinus && qtyPlus && qtyInput) {
-        qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyInput.value = qty; } });
-        qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
-      }
-      document.getElementById('addToCartBtn')?.addEventListener('click', () => { addToCart(currentProduct, qty, selectedSize, selectedColor, selectedCombo); if (selectedCombo) selectedCombo = null; });
-      document.getElementById('buyNowBtn')?.addEventListener('click', () => { buyNowDirect(currentProduct, qty, selectedSize, selectedColor, selectedCombo); });
     }, 50);
+  }
+  
+  async function initialize() {
+    const urlParams = new URLSearchParams(window.location.search);
+    currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
+    
+    // Try cache first
+    const cached = localStorage.getItem('vedantaProducts');
+    if (cached) {
+      allProducts = JSON.parse(cached);
+      const cachedProduct = allProducts.find(p => p.id == currentProductId);
+      if (cachedProduct && cachedProduct.status === 'active') {
+        currentProduct = ensureProductFields(cachedProduct);
+        renderPageContent();
+      }
+    }
+    
+    // Load all products for related items
+    loadAllProductsForRelated();
+    
+    // Start real-time listener for current product
+    startRealTimeProductSync();
+    
+    if (sessionStorage.getItem('scrollToTop') === 'true') {
+      sessionStorage.removeItem('scrollToTop');
+      window.scrollTo(0, 0);
+    }
   }
   
   function attachCartEvents() {
@@ -1163,7 +1243,7 @@
     document.getElementById('checkoutBtn')?.addEventListener('click', () => { if (cart.length === 0) showToast('Cart is empty!'); else window.location.href = 'secure-checkout.html'; });
   }
   
-  loadProductData();
+  initialize();
   updateCartUI();
   attachCartEvents();
 </script>
