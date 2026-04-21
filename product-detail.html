@@ -830,8 +830,13 @@
   function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m)); }
   
+  // FIXED: Ensures originalPrice is taken directly from Firebase without overwriting
   function ensureProductFields(p) {
-    if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
+    // CRITICAL FIX: preserve originalPrice from Firebase if exists, else fallback
+    if (!p.originalPrice || p.originalPrice <= p.price) {
+      // If no originalPrice or it's less than/equal to selling price, generate a reasonable MRP (typically higher)
+      p.originalPrice = p.originalPrice && p.originalPrice > p.price ? p.originalPrice : Math.round(p.price * 1.6);
+    }
     if (!p.rating) p.rating = 4.5;
     if (!p.reviewCount) p.reviewCount = 500;
     if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Crafted with precision and care, this piece embodies luxury and elegance.";
@@ -856,26 +861,23 @@
     return colorMap[colorName] || '#D4AF37';
   }
   
-  // ========== REAL-TIME PRODUCT LISTENER (NO VISIBLE BADGE) ==========
+  // REAL-TIME PRODUCT LISTENER (preserves exact Firebase originalPrice)
   function startRealTimeProductSync() {
-    if (unsubscribeProduct) {
-      unsubscribeProduct();
-    }
-    
+    if (unsubscribeProduct) unsubscribeProduct();
     if (!currentProductId) return;
     
     const productRef = db.collection('products').doc(currentProductId);
-    
     unsubscribeProduct = productRef.onSnapshot({
       includeMetadataChanges: true
     }, (docSnapshot) => {
       if (docSnapshot.exists) {
         const newData = docSnapshot.data();
+        // IMPORTANT: Keep originalPrice exactly as in Firebase, do NOT recalculate
         const updatedProduct = {
           id: docSnapshot.id,
           name: newData.name,
           price: newData.price,
-          originalPrice: newData.originalPrice || Math.round(newData.price * 1.6),
+          originalPrice: newData.originalPrice, // Use Firebase value directly
           category: newData.category,
           badge: newData.badge || 'New',
           images: newData.images || [],
@@ -895,11 +897,18 @@
           return;
         }
         
+        // Ensure originalPrice exists; if not in Firebase, set a sensible MRP but preserve manual input
+        if (!updatedProduct.originalPrice || updatedProduct.originalPrice <= updatedProduct.price) {
+          updatedProduct.originalPrice = updatedProduct.originalPrice && updatedProduct.originalPrice > updatedProduct.price 
+            ? updatedProduct.originalPrice 
+            : Math.round(updatedProduct.price * 1.6);
+        }
+        
         const priceChanged = currentProduct && currentProduct.price !== updatedProduct.price;
-        const nameChanged = currentProduct && currentProduct.name !== updatedProduct.name;
+        const originalPriceChanged = currentProduct && currentProduct.originalPrice !== updatedProduct.originalPrice;
         
         if (priceChanged) showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
-        if (nameChanged) showToast(`🔄 Product name updated: ${updatedProduct.name}`);
+        if (originalPriceChanged) showToast(`🔄 MRP updated: ₹${updatedProduct.originalPrice.toLocaleString()}`);
         
         currentProduct = ensureProductFields(updatedProduct);
         
@@ -909,7 +918,7 @@
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
         
         renderPageContent();
-        console.log(`🔥 LIVE UPDATE: ${currentProduct.name} synced`);
+        console.log(`🔥 LIVE UPDATE: ${currentProduct.name} | Selling: ₹${currentProduct.price} | MRP: ₹${currentProduct.originalPrice}`);
       } else {
         showToast("❌ Product not found");
         setTimeout(() => window.location.href = 'index.html', 2000);
@@ -1180,6 +1189,8 @@
       allProducts = JSON.parse(cached);
       const cachedProduct = allProducts.find(p => p.id == currentProductId);
       if (cachedProduct && cachedProduct.status === 'active') {
+        // Ensure originalPrice from cache is used directly
+        if (!cachedProduct.originalPrice) cachedProduct.originalPrice = Math.round(cachedProduct.price * 1.6);
         currentProduct = ensureProductFields(cachedProduct);
         renderPageContent();
       }
