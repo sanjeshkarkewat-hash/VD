@@ -3,9 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Vedanta - Product Detail</title>
+  <title>Product Detail - Vedanta</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
@@ -603,20 +604,6 @@
       margin: 0 auto 20px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
-    
-    .debug-info {
-      position: fixed;
-      bottom: 10px;
-      left: 10px;
-      background: rgba(0,0,0,0.7);
-      color: #0f0;
-      font-size: 10px;
-      padding: 4px 8px;
-      border-radius: 8px;
-      z-index: 9999;
-      font-family: monospace;
-      display: none;
-    }
   </style>
 </head>
 <body>
@@ -649,7 +636,6 @@
 </div>
 
 <div class="toast" id="toast"></div>
-<div class="debug-info" id="debugInfo"></div>
 
 <script>
   const firebaseConfig = {
@@ -844,11 +830,17 @@
   function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m)); }
   
-  function calculateDiscountPercentage(product) {
-    if (!product.originalPrice || product.originalPrice <= product.price) {
-      return 0;
-    }
-    return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
+  function ensureProductFields(p) {
+    if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
+    if (!p.rating) p.rating = 4.5;
+    if (!p.reviewCount) p.reviewCount = 500;
+    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Crafted with precision and care, this piece embodies luxury and elegance.";
+    if (!p.sizes) p.sizes = [];
+    if (!p.colors) p.colors = [];
+    if (!p.combos) p.combos = [];
+    if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India", "Eco-friendly"];
+    if (!p.images) p.images = [];
+    return p;
   }
   
   function getColorCode(colorName) {
@@ -864,44 +856,26 @@
     return colorMap[colorName] || '#D4AF37';
   }
   
-  // CRITICAL FIX: Direct Firebase fetch - NO CACHE for originalPrice
+  // ========== REAL-TIME PRODUCT LISTENER (NO VISIBLE BADGE) ==========
   function startRealTimeProductSync() {
-    if (unsubscribeProduct) unsubscribeProduct();
+    if (unsubscribeProduct) {
+      unsubscribeProduct();
+    }
+    
     if (!currentProductId) return;
     
     const productRef = db.collection('products').doc(currentProductId);
     
-    // First, clear any cached data for this product to ensure fresh display
     unsubscribeProduct = productRef.onSnapshot({
       includeMetadataChanges: true
     }, (docSnapshot) => {
       if (docSnapshot.exists) {
         const newData = docSnapshot.data();
-        
-        // CRITICAL: Take originalPrice DIRECTLY from Firebase, NO modifications
-        let firebaseOriginalPrice = newData.originalPrice;
-        
-        // Debug log to see what's coming from Firebase
-        console.log("🔥🔥🔥 FIREBASE RAW DATA:", {
-          name: newData.name,
-          price: newData.price,
-          originalPrice: firebaseOriginalPrice,
-          type: typeof firebaseOriginalPrice
-        });
-        
-        // Show debug info on page
-        const debugEl = document.getElementById('debugInfo');
-        if (debugEl) {
-          debugEl.style.display = 'block';
-          debugEl.innerHTML = `Firebase: price=₹${newData.price}, original=₹${firebaseOriginalPrice}`;
-          setTimeout(() => { if(debugEl) debugEl.style.display = 'none'; }, 5000);
-        }
-        
         const updatedProduct = {
           id: docSnapshot.id,
-          name: newData.name || "Product",
-          price: newData.price || 0,
-          originalPrice: firebaseOriginalPrice,  // DIRECT from Firebase - NO OVERWRITE
+          name: newData.name,
+          price: newData.price,
+          originalPrice: newData.originalPrice || Math.round(newData.price * 1.6),
           category: newData.category,
           badge: newData.badge || 'New',
           images: newData.images || [],
@@ -921,35 +895,27 @@
           return;
         }
         
-        // ABSOLUTELY NO modification of originalPrice here
-        // If admin didn't set it, only then use fallback
-        if (updatedProduct.originalPrice === undefined || updatedProduct.originalPrice === null || updatedProduct.originalPrice <= updatedProduct.price) {
-          updatedProduct.originalPrice = updatedProduct.price * 1.6;
-          console.log("⚠️ originalPrice missing in Firebase, using fallback:", updatedProduct.originalPrice);
-        }
+        const priceChanged = currentProduct && currentProduct.price !== updatedProduct.price;
+        const nameChanged = currentProduct && currentProduct.name !== updatedProduct.name;
         
-        currentProduct = updatedProduct;
+        if (priceChanged) showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
+        if (nameChanged) showToast(`🔄 Product name updated: ${updatedProduct.name}`);
         
-        console.log("✅ FINAL PRODUCT DISPLAY:", {
-          name: currentProduct.name,
-          price: currentProduct.price,
-          originalPrice: currentProduct.originalPrice,
-          discount: calculateDiscountPercentage(currentProduct)
-        });
+        currentProduct = ensureProductFields(updatedProduct);
         
-        // Update cache but with correct values
         const index = allProducts.findIndex(p => p.id == currentProductId);
         if (index !== -1) allProducts[index] = currentProduct;
         else allProducts.push(currentProduct);
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
         
         renderPageContent();
+        console.log(`🔥 LIVE UPDATE: ${currentProduct.name} synced`);
       } else {
         showToast("❌ Product not found");
         setTimeout(() => window.location.href = 'index.html', 2000);
       }
     }, (error) => {
-      console.error("Real-time error:", error);
+      console.error("Real-time listener error:", error);
     });
   }
   
@@ -971,11 +937,14 @@
     const images = currentProduct.images || [];
     const totalSlides = images.length || 1;
     if (images.length <= 1) return;
+    
     const slider = document.getElementById('imageSlider');
     const prevBtn = document.getElementById('prevSlide');
     const nextBtn = document.getElementById('nextSlide');
     const thumbnails = document.querySelectorAll('.thumbnail');
+    
     if (!slider) return;
+    
     function updateSlider(index) {
       if (index < 0) index = totalSlides - 1;
       if (index >= totalSlides) index = 0;
@@ -983,9 +952,11 @@
       if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
       thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active'));
     }
+    
     prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
     nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
     thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
+    
     if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
   }
@@ -1026,6 +997,7 @@
         e.stopPropagation();
         const comboQty = parseInt(combo.getAttribute('data-combo-qty'));
         const comboPrice = parseInt(combo.getAttribute('data-combo-price'));
+        
         if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
           selectedCombo = null;
           combo.classList.remove('selected');
@@ -1072,6 +1044,7 @@
     const hasImages = images.length > 0;
     let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
     let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
+    
     return `<div class="product-gallery">
       <div class="main-image-container">
         <div class="badge">${currentProduct.badge || 'New'}</div>
@@ -1085,6 +1058,7 @@
   function renderColors() {
     const colors = currentProduct.colors || [];
     if (colors.length === 0) return '';
+    
     return `<div class="color-section">
       <div class="color-title"><i class="fas fa-palette"></i> Select Color:</div>
       <div class="color-options" id="colorOptions">
@@ -1103,6 +1077,7 @@
   function renderComboOffers() {
     const combos = currentProduct.combos || [];
     if (combos.length === 0) return '';
+    
     return `<div class="combo-section">
       <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS</div>
       <div class="combo-list" id="comboList">
@@ -1140,7 +1115,8 @@
       </div>`;
     }).join('');
     document.querySelectorAll('.related-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
         const productId = card.getAttribute('data-product-id');
         localStorage.setItem('vedanta_selected_product_id', productId);
         window.location.href = window.location.pathname + '?id=' + productId;
@@ -1151,9 +1127,7 @@
   function renderPageContent() {
     if (!currentProduct) return;
     
-    const originalPriceValue = currentProduct.originalPrice;
-    const discountPercent = calculateDiscountPercentage(currentProduct);
-    
+    const discountPercent = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
     const galleryHtml = renderImageSlider();
     const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
     const sizeHtml = hasSizes ? `<div class="size-section"><div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div><div class="size-options" id="sizeOptions">${currentProduct.sizes.map(size => `<button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}</div></div>` : '';
@@ -1170,11 +1144,7 @@
       <div class="product-brand">VEDANTA EXCLUSIVE</div>
       <div class="product-name">${escapeHtml(currentProduct.name)}</div>
       <div class="rating"><div class="stars">★★★★★</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div>
-      <div class="price-section">
-        <span class="current-price">₹${currentProduct.price.toLocaleString()}</span>
-        <span class="original-price">₹${originalPriceValue.toLocaleString()}</span>
-        ${discountPercent > 0 ? `<span class="discount">${discountPercent}% OFF</span>` : ''}
-      </div>
+      <div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString()}</span><span class="original-price">₹${currentProduct.originalPrice.toLocaleString()}</span><span class="discount">${discountPercent}% OFF</span></div>
       ${sizeHtml}
       ${colorsHtml}
       ${combosHtml}
@@ -1191,7 +1161,9 @@
       <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Priya Sharma <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Absolutely stunning product! The quality is amazing."</div><div class="review-date">15 Mar 2025</div></div>
       <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Amit Kumar <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Worth every penny. Premium finish and fast delivery."</div><div class="review-date">10 Mar 2025</div></div>
     </div>`;
+    
     document.getElementById('app').innerHTML = html;
+    
     setTimeout(() => {
       initSliderAfterRender();
       attachEventsAfterRender();
@@ -1203,10 +1175,14 @@
     const urlParams = new URLSearchParams(window.location.search);
     currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
     
-    // Clear any cached data for this product to ensure fresh fetch
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
       allProducts = JSON.parse(cached);
+      const cachedProduct = allProducts.find(p => p.id == currentProductId);
+      if (cachedProduct && cachedProduct.status === 'active') {
+        currentProduct = ensureProductFields(cachedProduct);
+        renderPageContent();
+      }
     }
     
     loadAllProductsForRelated();
