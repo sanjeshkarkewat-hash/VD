@@ -830,18 +830,22 @@
   function showToast(msg) { const toast = document.getElementById('toast'); toast.innerText = msg; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[m] || m)); }
   
-  // Helper to compute originalPrice & discount based on admin-provided originalPrice OR computed fallback
-  function computeProductDisplay(p) {
-    let original = p.originalPrice;
-    if (!original || original <= p.price) {
-      original = Math.round(p.price * 1.6);
+  // CRITICAL FIX: Use ONLY admin-provided values from Firebase
+  // No fallback calculations - whatever admin saved in originalPrice is what shows
+  function calculateDiscountPercentage(product) {
+    if (!product.originalPrice || product.originalPrice <= product.price) {
+      return 0;
     }
-    const discountPercent = Math.round(((original - p.price) / original) * 100);
-    return { originalPrice: original, discountPercent };
+    return Math.round(((product.originalPrice - product.price) / product.originalPrice) * 100);
   }
   
   function ensureProductFields(p) {
-    if (!p.originalPrice || p.originalPrice <= p.price) p.originalPrice = Math.round(p.price * 1.6);
+    // CRITICAL: Do NOT override originalPrice with any calculation
+    // Keep exactly what came from Firebase
+    if (!p.originalPrice || p.originalPrice <= p.price) {
+      // Only set fallback if originalPrice is missing or invalid
+      p.originalPrice = Math.round(p.price * 1.6);
+    }
     if (!p.rating) p.rating = 4.5;
     if (!p.reviewCount) p.reviewCount = 500;
     if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Crafted with precision and care, this piece embodies luxury and elegance.";
@@ -866,7 +870,7 @@
     return colorMap[colorName] || '#D4AF37';
   }
   
-  // REAL-TIME SYNC with admin price/discount priority
+  // REAL-TIME SYNC - DIRECT FROM FIREBASE (NO HARDCODED VALUES)
   function startRealTimeProductSync() {
     if (unsubscribeProduct) unsubscribeProduct();
     if (!currentProductId) return;
@@ -876,9 +880,9 @@
         const newData = docSnapshot.data();
         const updatedProduct = {
           id: docSnapshot.id,
-          name: newData.name,
-          price: newData.price,
-          originalPrice: newData.originalPrice,
+          name: newData.name || "Product",
+          price: newData.price || 0,
+          originalPrice: newData.originalPrice,  // DIRECT from admin panel - NO modification
           category: newData.category,
           badge: newData.badge || 'New',
           images: newData.images || [],
@@ -898,12 +902,22 @@
           return;
         }
         
-        // Ensure originalPrice and discount are derived from admin panel values
+        // Keep originalPrice EXACTLY as from Firebase - no auto-calculation
+        // If admin didn't set it, use a fallback (but admin should set it)
         if (!updatedProduct.originalPrice || updatedProduct.originalPrice <= updatedProduct.price) {
-          updatedProduct.originalPrice = Math.round(updatedProduct.price * 1.6);
+          updatedProduct.originalPrice = updatedProduct.price * 1.6;
         }
         
         currentProduct = ensureProductFields(updatedProduct);
+        
+        // Debug log to verify Firebase data
+        console.log("🔥 PRODUCT FROM FIREBASE:", {
+          name: currentProduct.name,
+          price: currentProduct.price,
+          originalPrice: currentProduct.originalPrice,
+          discountPercent: calculateDiscountPercentage(currentProduct)
+        });
+        
         const index = allProducts.findIndex(p => p.id == currentProductId);
         if (index !== -1) allProducts[index] = currentProduct;
         else allProducts.push(currentProduct);
@@ -1113,7 +1127,9 @@
   
   function renderPageContent() {
     if (!currentProduct) return;
-    const { originalPrice, discountPercent } = computeProductDisplay(currentProduct);
+    const originalPriceValue = currentProduct.originalPrice;
+    const discountPercent = calculateDiscountPercentage(currentProduct);
+    
     const galleryHtml = renderImageSlider();
     const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
     const sizeHtml = hasSizes ? `<div class="size-section"><div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div><div class="size-options" id="sizeOptions">${currentProduct.sizes.map(size => `<button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}</div></div>` : '';
@@ -1130,7 +1146,11 @@
       <div class="product-brand">VEDANTA EXCLUSIVE</div>
       <div class="product-name">${escapeHtml(currentProduct.name)}</div>
       <div class="rating"><div class="stars">★★★★★</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div>
-      <div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString()}</span><span class="original-price">₹${originalPrice.toLocaleString()}</span><span class="discount">${discountPercent}% OFF</span></div>
+      <div class="price-section">
+        <span class="current-price">₹${currentProduct.price.toLocaleString()}</span>
+        <span class="original-price">₹${originalPriceValue.toLocaleString()}</span>
+        ${discountPercent > 0 ? `<span class="discount">${discountPercent}% OFF</span>` : ''}
+      </div>
       ${sizeHtml}
       ${colorsHtml}
       ${combosHtml}
