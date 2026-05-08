@@ -628,11 +628,8 @@
   let productsCache = new Map();
   let selectedPaymentMethod = 'cod';
   
-  const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-  if (!currentUser || !currentUser.email) {
-    showToast('🔐 Please login to continue', true);
-    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
-  }
+  // ========== NO LOGIN REQUIREMENT - REMOVED ==========
+  // Guest users can checkout directly without any login check
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -845,7 +842,7 @@
     return {
       fullName: document.getElementById('fullName').value.trim(),
       phone: document.getElementById('phone').value.trim(),
-      email: document.getElementById('email').value.trim() || (currentUser ? currentUser.email : ''),
+      email: document.getElementById('email').value.trim() || 'guest@vedanta.com',
       address: document.getElementById('address').value,
       city: document.getElementById('city').value,
       state: document.getElementById('state').value,
@@ -853,7 +850,7 @@
     };
   }
   
-  // ✅ FIXED: Order ONLY saves after successful payment
+  // Save order after successful payment
   async function saveOrderToFirebaseAfterPayment(paymentMethod, transactionId, paymentDetails) {
     const details = getCustomerDetails();
     
@@ -890,9 +887,7 @@
       discountPercent: (paymentMethod === 'Razorpay' && discountAmount > 0) ? ONLINE_DISCOUNT_PERCENT : 0,
       total: finalTotal,
       orderDate: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: currentUser ? currentUser.uid : null,
-      userEmail: currentUser ? currentUser.email : null
+      updatedAt: new Date().toISOString()
     };
     
     console.log("Saving order to Firebase after payment:", orderData);
@@ -918,7 +913,7 @@
     window.location.href = `order-success.html?orderId=${orderId}`;
   }
   
-  // ✅ COD Order - Saves immediately (no payment verification needed)
+  // COD Order
   async function saveOrderCOD() {
     if (!validateForm()) return;
     if (isProcessing) return;
@@ -950,9 +945,7 @@
       status: 'pending',
       total: cartTotal,
       orderDate: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: currentUser ? currentUser.uid : null,
-      userEmail: currentUser ? currentUser.email : null
+      updatedAt: new Date().toISOString()
     };
     
     try {
@@ -976,7 +969,7 @@
     }
   }
   
-  // ✅ Razorpay Payment - Order saves ONLY after successful payment
+  // Razorpay Payment
   async function initiateRazorpayPayment() {
     if (!validateForm()) return;
     if (isProcessing) return;
@@ -1037,11 +1030,9 @@
       
       const razorpay = new Razorpay(options);
       
-      // ✅ Order saves ONLY after successful payment
       razorpay.on('payment.success', async function(response) {
         console.log('Payment Success:', response);
         
-        // Save order to Firebase only after successful payment
         const result = await saveOrderToFirebaseAfterPayment(
           'Razorpay',
           response.razorpay_payment_id,
@@ -1123,6 +1114,7 @@
     return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
   }
   
+  // Initialize - No login check!
   loadProductsInstantly();
   loadCart();
   fetchProductsInBackground();
