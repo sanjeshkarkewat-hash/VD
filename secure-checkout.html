@@ -104,6 +104,90 @@
       box-shadow: 0 0 10px rgba(212,175,55,0.3);
     }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    
+    /* Address Selection Styles */
+    .address-selector {
+      background: rgba(0,0,0,0.3);
+      border-radius: 16px;
+      padding: 12px;
+      margin-bottom: 16px;
+    }
+    .saved-addresses {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .address-card {
+      background: rgba(20,20,30,0.6);
+      border: 1px solid rgba(212,175,55,0.2);
+      border-radius: 14px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+      position: relative;
+    }
+    .address-card:hover {
+      border-color: #D4AF37;
+      background: rgba(212,175,55,0.1);
+    }
+    .address-card.selected {
+      border-color: #4CAF50;
+      background: rgba(76,175,80,0.1);
+    }
+    .address-card .address-name {
+      font-weight: 700;
+      color: #D4AF37;
+      margin-bottom: 6px;
+      font-size: 13px;
+    }
+    .address-card .address-detail {
+      font-size: 11px;
+      color: #aaa;
+      line-height: 1.4;
+    }
+    .address-card .address-phone {
+      font-size: 10px;
+      color: #888;
+      margin-top: 6px;
+    }
+    .address-card .delete-address {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      background: rgba(244,67,54,0.2);
+      border: none;
+      color: #F44336;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 12px;
+    }
+    .add-new-address-btn {
+      width: 100%;
+      background: rgba(212,175,55,0.15);
+      border: 1px dashed rgba(212,175,55,0.5);
+      padding: 12px;
+      border-radius: 14px;
+      color: #D4AF37;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+    .new-address-form {
+      display: none;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.1);
+    }
+    .new-address-form.show {
+      display: block;
+    }
+    
     .location-btn {
       background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.2));
       border: 1px solid rgba(212,175,55,0.4);
@@ -121,8 +205,8 @@
       margin-top: 8px;
       font-size: 13px;
     }
-    @media (min-width: 768px) { .location-btn { padding: 14px; border-radius: 16px; margin-top: 10px; } }
     .location-btn:active { transform: scale(0.98); }
+    
     .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
     .payment-option {
       background: rgba(0,0,0,0.4);
@@ -432,6 +516,32 @@
       color: #ccc;
       cursor: pointer;
     }
+    
+    /* Autofill hidden styles */
+    .auto-fill-info {
+      background: rgba(212,175,55,0.1);
+      border-radius: 14px;
+      padding: 12px;
+      margin-bottom: 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .auto-fill-info .info-text {
+      font-size: 12px;
+      color: #D4AF37;
+    }
+    .edit-info-btn {
+      background: rgba(212,175,55,0.2);
+      border: 1px solid #D4AF37;
+      padding: 6px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      color: #D4AF37;
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
@@ -470,52 +580,80 @@
 
   <div class="checkout-main">
     <div class="checkout-form">
+      <!-- Auto-fill Info Section (Phone & Email - Readonly) -->
+      <div class="auto-fill-info" id="autoFillInfo">
+        <div class="info-text">
+          <i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span>
+        </div>
+        <button class="edit-info-btn" id="editInfoBtn" style="display:none;">Edit</button>
+      </div>
+
       <div class="form-section">
         <h3><i class="fas fa-user-circle"></i> Contact Information</h3>
         <div class="form-group">
           <label>Full Name <span class="required">*</span></label>
           <input type="text" id="fullName" placeholder="Enter your full name" required>
         </div>
-        <div class="form-group">
-          <label>Phone Number <span class="required">*</span></label>
-          <input type="tel" id="phone" placeholder="Enter 10-digit mobile number" required>
-          <p style="font-size: 10px; color: #888; margin-top: 4px;">We'll send order updates here</p>
-        </div>
-        <div class="form-group">
-          <label>Email Address</label>
-          <input type="email" id="email" placeholder="your@email.com">
-        </div>
+        <!-- Phone and Email are auto-filled and hidden from user input -->
+        <input type="hidden" id="phone">
+        <input type="hidden" id="email">
       </div>
 
       <div class="form-section">
         <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
-        <div class="form-group">
-          <label>Street Address <span class="required">*</span></label>
-          <input type="text" id="address" placeholder="House number, building, street" required>
+        
+        <!-- Saved Addresses Section -->
+        <div class="address-selector" id="addressSelector">
+          <div class="saved-addresses" id="savedAddressesList"></div>
+          <button class="add-new-address-btn" id="addNewAddressBtn">
+            <i class="fas fa-plus-circle"></i> Add New Address
+          </button>
+          <div class="new-address-form" id="newAddressForm">
+            <div class="form-group">
+              <label>Full Name <span class="required">*</span></label>
+              <input type="text" id="newAddressName" placeholder="Recipient name">
+            </div>
+            <div class="form-group">
+              <label>Street Address <span class="required">*</span></label>
+              <input type="text" id="newAddressStreet" placeholder="House number, building, street">
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>City <span class="required">*</span></label>
+                <input type="text" id="newAddressCity" placeholder="City">
+              </div>
+              <div class="form-group">
+                <label>State <span class="required">*</span></label>
+                <input type="text" id="newAddressState" placeholder="State">
+              </div>
+            </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Pincode <span class="required">*</span></label>
+                <input type="text" id="newAddressPincode" placeholder="6-digit pincode">
+              </div>
+              <div class="form-group">
+                <label>Landmark (Optional)</label>
+                <input type="text" id="newAddressLandmark" placeholder="Near...">
+              </div>
+            </div>
+            <div class="form-group">
+              <label>Phone Number</label>
+              <input type="tel" id="newAddressPhone" placeholder="Alternative phone number">
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 10px;">
+              <button class="location-btn" id="useCurrentLocationBtn" style="flex:1; margin-top:0;">
+                <i class="fas fa-location-dot"></i> Use Current Location
+              </button>
+              <button class="location-btn" id="saveAddressBtn" style="flex:1; margin-top:0; background:#4CAF50;">
+                <i class="fas fa-save"></i> Save Address
+              </button>
+              <button class="location-btn" id="cancelAddressBtn" style="flex:0.5; margin-top:0; background:#F44336;">
+                Cancel
+              </button>
+            </div>
+          </div>
         </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>City <span class="required">*</span></label>
-            <input type="text" id="city" placeholder="City" required>
-          </div>
-          <div class="form-group">
-            <label>State <span class="required">*</span></label>
-            <input type="text" id="state" placeholder="State" required>
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Pincode <span class="required">*</span></label>
-            <input type="text" id="pincode" placeholder="6-digit pincode" required>
-          </div>
-          <div class="form-group">
-            <label>Landmark (Optional)</label>
-            <input type="text" id="landmark" placeholder="Near...">
-          </div>
-        </div>
-        <button class="location-btn" id="getLocationBtn">
-          <i class="fas fa-location-dot"></i> Use My Current Location
-        </button>
       </div>
 
       <div class="form-section">
@@ -606,7 +744,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== 🔥 NEW FIREBASE CONFIG (nexi-53897) ==========
+  // ========== 🔥 FIREBASE CONFIG ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
     authDomain: "nexi-53897.firebaseapp.com",
@@ -617,7 +755,6 @@
     measurementId: "G-W6N519LBPH"
   };
   
-  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
@@ -632,15 +769,10 @@
   let isProcessing = false;
   let productsCache = new Map();
   let selectedPaymentMethod = 'cod';
-  
-  // Get current user
-  let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
-  
-  // Check if user is logged in
-  if (!currentUser || !currentUser.phone) {
-    showToast('🔐 Please login to continue', true);
-    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
-  }
+  let currentUser = null;
+  let userAddresses = [];
+  let selectedAddressId = null;
+  let isNewAddressFormOpen = false;
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -657,7 +789,6 @@
     else overlay.classList.remove('show');
   }
   
-  // Location functions
   function showLocationModal() {
     document.getElementById('locationModal').classList.add('show');
   }
@@ -666,198 +797,348 @@
     document.getElementById('locationModal').classList.remove('show');
   }
   
-  async function getCurrentLocation() {
-    const btn = document.getElementById('getLocationBtn');
-    const originalText = btn.innerHTML;
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Getting location...';
+  // ========== IMPROVED LOCATION FUNCTION ==========
+  async function getDetailedCurrentLocation() {
+    const btn = document.getElementById('useCurrentLocationBtn') || document.getElementById('getLocationBtn');
+    const originalText = btn ? btn.innerHTML : '';
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Getting location...';
+    }
+    
+    showToast('📍 Getting your location with detailed address...');
     
     if (!navigator.geolocation) {
-      showToast('❌ Geolocation is not supported by your browser', true);
-      btn.disabled = false;
-      btn.innerHTML = originalText;
-      return;
+      showToast('❌ Geolocation not supported', true);
+      if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+      return null;
     }
     
-    showToast('📍 Getting your location...');
-    
-    navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
-        showToast('📍 Getting address...');
-        
-        try {
-          const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en`);
-          const data = await response.json();
+    return new Promise((resolve) => {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords;
+          showToast('📍 Fetching address...');
           
-          if (data && data.address) {
-            const addr = data.address;
-            let fullAddress = '';
-            if (addr.house_number) fullAddress += addr.house_number + ' ';
-            if (addr.road) fullAddress += addr.road;
-            if (fullAddress.trim()) document.getElementById('address').value = fullAddress;
-            if (addr.city || addr.town || addr.village) document.getElementById('city').value = addr.city || addr.town || addr.village;
-            if (addr.state) document.getElementById('state').value = addr.state;
-            if (addr.postcode) document.getElementById('pincode').value = addr.postcode;
-            showToast(`✅ Location found`);
-          } else {
-            showToast('⚠️ Could not get address', true);
+          try {
+            // Using OpenStreetMap Nominatim for detailed address
+            const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en&zoom=18`);
+            const data = await response.json();
+            
+            if (data && data.address) {
+              const addr = data.address;
+              
+              // Build detailed address components
+              let houseNumber = addr.house_number || '';
+              let road = addr.road || addr.street || '';
+              let building = addr.building || '';
+              let suburb = addr.suburb || '';
+              let city = addr.city || addr.town || addr.village || '';
+              let state = addr.state || '';
+              let pincode = addr.postcode || '';
+              let country = addr.country || '';
+              
+              // Build full street address
+              let streetAddress = '';
+              if (building) streetAddress += building + ', ';
+              if (houseNumber) streetAddress += houseNumber + ', ';
+              if (road) streetAddress += road;
+              if (suburb && !streetAddress.includes(suburb)) streetAddress += streetAddress ? ', ' + suburb : suburb;
+              
+              const addressData = {
+                street: streetAddress.trim(),
+                city: city,
+                state: state,
+                pincode: pincode,
+                landmark: addr.neighbourhood || addr.suburb || '',
+                fullAddress: `${streetAddress}, ${city}, ${state} - ${pincode}, ${country}`,
+                latitude: latitude,
+                longitude: longitude
+              };
+              
+              showToast(`✅ Location found: ${city || 'Address found'}`);
+              if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+              resolve(addressData);
+            } else {
+              showToast('⚠️ Could not get detailed address', true);
+              if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+              resolve(null);
+            }
+          } catch (error) {
+            console.error("Geocoding error:", error);
+            showToast('⚠️ Network error getting address', true);
+            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            resolve(null);
           }
-        } catch (error) {
-          showToast('⚠️ Network error', true);
+        },
+        (error) => {
+          if (error.code === error.PERMISSION_DENIED) {
+            showToast('❌ Location permission denied', true);
+            showLocationModal();
+          } else {
+            showToast('❌ Failed to get location', true);
+          }
+          if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+          resolve(null);
+        },
+        { enableHighAccuracy: true, timeout: 10000 }
+      );
+    });
+  }
+  
+  async function fillAddressWithLocation() {
+    const locationData = await getDetailedCurrentLocation();
+    if (locationData) {
+      // Fill the new address form if open, otherwise create new address
+      if (isNewAddressFormOpen) {
+        document.getElementById('newAddressStreet').value = locationData.street;
+        document.getElementById('newAddressCity').value = locationData.city;
+        document.getElementById('newAddressState').value = locationData.state;
+        document.getElementById('newAddressPincode').value = locationData.pincode;
+        document.getElementById('newAddressLandmark').value = locationData.landmark;
+        showToast('✅ Address details filled!');
+      } else {
+        // Auto-create a new address with current location
+        document.getElementById('newAddressName').value = document.getElementById('fullName').value;
+        document.getElementById('newAddressStreet').value = locationData.street;
+        document.getElementById('newAddressCity').value = locationData.city;
+        document.getElementById('newAddressState').value = locationData.state;
+        document.getElementById('newAddressPincode').value = locationData.pincode;
+        document.getElementById('newAddressLandmark').value = locationData.landmark;
+        document.getElementById('newAddressPhone').value = currentUser?.phone || '';
+        
+        // Show new address form and fill
+        if (!isNewAddressFormOpen) {
+          document.getElementById('newAddressForm').classList.add('show');
+          isNewAddressFormOpen = true;
+          document.getElementById('addNewAddressBtn').style.display = 'none';
         }
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-      },
-      (error) => {
-        if (error.code === error.PERMISSION_DENIED) {
-          showToast('❌ Location permission denied', true);
-          showLocationModal();
-        } else {
-          showToast('❌ Failed to get location', true);
-        }
-        btn.disabled = false;
-        btn.innerHTML = originalText;
+        showToast('📍 Location captured! Click Save Address to store it.');
       }
-    );
-  }
-  
-  function openLocationSettings() {
-    hideLocationModal();
-    showToast('📍 Please enable location in settings', true);
-  }
-  
-  // Discount calculation
-  function calculateOnlineDiscount() {
-    if (selectedPaymentMethod === 'razorpay') {
-      discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100);
-      discountedTotal = cartTotal - discountAmount;
-    } else {
-      discountAmount = 0;
-      discountedTotal = cartTotal;
     }
-    updateTotalDisplay();
   }
   
-  function updateTotalDisplay() {
-    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
-    const discountRow = document.getElementById('discountRow');
-    const discountAmountSpan = document.getElementById('discountAmount');
+  // ========== ADDRESS MANAGEMENT FUNCTIONS ==========
+  async function loadUserAddresses() {
+    if (!currentUser || !currentUser.uid) return;
     
-    if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) {
-      discountRow.style.display = 'flex';
-      discountAmountSpan.innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`;
-      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`;
-    } else {
-      discountRow.style.display = 'none';
-      document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
-    }
-  }
-  
-  // Product functions
-  function loadProductsInstantly() {
-    const cached = localStorage.getItem('vedantaProducts');
-    if (cached) {
-      try {
-        const products = JSON.parse(cached);
-        products.forEach(p => productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name }));
-        return true;
-      } catch(e) {}
-    }
-    return false;
-  }
-  
-  function fetchProductsInBackground() {
-    db.collection('products').get().then(snapshot => {
+    try {
+      const snapshot = await db.collection('addresses')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('isDefault', 'desc')
+        .get();
+      
+      userAddresses = [];
       snapshot.forEach(doc => {
-        const p = doc.data();
-        if (!productsCache.has(doc.id)) productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+        userAddresses.push({ id: doc.id, ...doc.data() });
       });
-      renderOrderSummary();
-    }).catch(e => console.log("Background fetch error:", e));
-  }
-  
-  function getProductImage(productId) { return productsCache.get(productId)?.images?.[0] || null; }
-  function getProductIcon(productId) { return productsCache.get(productId)?.icon || 'fa-gem'; }
-  
-  function getColorCode(colorName) {
-    const colorMap = {
-      'Red': '#FF0000', 'Blue': '#2196F3', 'Green': '#4CAF50', 'Black': '#000000',
-      'White': '#FFFFFF', 'Gold': '#D4AF37', 'Silver': '#C0C0C0', 'Yellow': '#FFEB3B',
-      'Purple': '#9C27B0', 'Pink': '#FF69B4', 'Orange': '#FF9800', 'Brown': '#795548'
-    };
-    return colorMap[colorName] || '#D4AF37';
-  }
-  
-  function loadCart() {
-    cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-    if (cart.length === 0) {
-      showToast('🛒 Your cart is empty! Redirecting...', true);
-      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
-      return;
+      
+      renderAddressList();
+      
+      // Auto-select default address if exists
+      const defaultAddr = userAddresses.find(a => a.isDefault);
+      if (defaultAddr && !selectedAddressId) {
+        selectAddress(defaultAddr.id);
+      }
+    } catch(e) {
+      console.error("Error loading addresses:", e);
     }
-    cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-    calculateOnlineDiscount();
-    renderOrderSummary();
   }
   
-  function renderOrderSummary() {
-    const container = document.getElementById('orderItemsList');
+  function renderAddressList() {
+    const container = document.getElementById('savedAddressesList');
     if (!container) return;
     
-    container.innerHTML = cart.map(item => {
-      const productImg = getProductImage(item.id);
-      const productIcon = getProductIcon(item.id);
-      const colorCode = getColorCode(item.color);
-      return `
-        <div class="order-item">
-          <div class="order-item-img">
-            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${productIcon}"></i>`}
-          </div>
-          <div class="order-item-info">
-            <h4>${escapeHtml(item.name)}</h4>
-            ${item.size && item.size !== 'Default' && item.size !== 'Not Selected' ? `<div class="order-item-size"><i class="fas fa-tshirt"></i> ${escapeHtml(item.size)}</div>` : ''}
-            ${item.color && item.color !== '' && item.color !== 'Not Selected' ? `<div class="order-item-color"><span class="color-swatch" style="background: ${colorCode};"></span> ${escapeHtml(item.color)}</div>` : ''}
-            <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
-          </div>
-          <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
-        </div>
-      `;
-    }).join('');
-    updateTotalDisplay();
+    if (userAddresses.length === 0) {
+      container.innerHTML = '<div style="color:#888; text-align:center; padding:10px;">No saved addresses. Add a new address to continue.</div>';
+      return;
+    }
+    
+    container.innerHTML = userAddresses.map(addr => `
+      <div class="address-card ${selectedAddressId === addr.id ? 'selected' : ''}" data-id="${addr.id}">
+        <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
+        <div class="address-detail">${escapeHtml(addr.street)}</div>
+        <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
+        ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
+        <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
+        <button class="delete-address" data-id="${addr.id}" onclick="event.stopPropagation(); deleteAddress('${addr.id}')">✕</button>
+      </div>
+    `).join('');
+    
+    // Add click listeners
+    document.querySelectorAll('.address-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        selectAddress(id);
+      });
+    });
   }
   
-  function validateForm() {
+  function selectAddress(addressId) {
+    selectedAddressId = addressId;
+    renderAddressList();
+    const address = userAddresses.find(a => a.id === addressId);
+    if (address) {
+      // Also fill the hidden fields for order
+      document.getElementById('fullName').value = address.name;
+      showToast(`✅ Using address: ${address.name}, ${address.city}`);
+    }
+  }
+  
+  async function saveNewAddress() {
+    const name = document.getElementById('newAddressName').value.trim();
+    const street = document.getElementById('newAddressStreet').value.trim();
+    const city = document.getElementById('newAddressCity').value.trim();
+    const state = document.getElementById('newAddressState').value.trim();
+    const pincode = document.getElementById('newAddressPincode').value.trim();
+    const landmark = document.getElementById('newAddressLandmark').value.trim();
+    const phone = document.getElementById('newAddressPhone').value.trim();
+    
+    if (!name || !street || !city || !state || !pincode) {
+      showToast('❌ Please fill all required fields', true);
+      return;
+    }
+    
+    if (pincode.length !== 6) {
+      showToast('❌ Enter valid 6-digit pincode', true);
+      return;
+    }
+    
+    showLoading(true);
+    
+    const addressData = {
+      userId: currentUser.uid,
+      name: name,
+      street: street,
+      city: city,
+      state: state,
+      pincode: pincode,
+      landmark: landmark || '',
+      phone: phone || currentUser.phone,
+      isDefault: userAddresses.length === 0,
+      createdAt: new Date().toISOString()
+    };
+    
+    try {
+      const docRef = await db.collection('addresses').add(addressData);
+      addressData.id = docRef.id;
+      userAddresses.push(addressData);
+      
+      // Clear form
+      document.getElementById('newAddressName').value = '';
+      document.getElementById('newAddressStreet').value = '';
+      document.getElementById('newAddressCity').value = '';
+      document.getElementById('newAddressState').value = '';
+      document.getElementById('newAddressPincode').value = '';
+      document.getElementById('newAddressLandmark').value = '';
+      document.getElementById('newAddressPhone').value = '';
+      
+      // Close form
+      document.getElementById('newAddressForm').classList.remove('show');
+      isNewAddressFormOpen = false;
+      document.getElementById('addNewAddressBtn').style.display = 'flex';
+      
+      renderAddressList();
+      
+      // Auto-select the new address
+      selectAddress(docRef.id);
+      
+      showToast('✅ Address saved successfully!');
+    } catch(e) {
+      console.error("Save address error:", e);
+      showToast('❌ Failed to save address', true);
+    }
+    
+    showLoading(false);
+  }
+  
+  async function deleteAddress(addressId) {
+    if (!confirm('Delete this address?')) return;
+    
+    try {
+      await db.collection('addresses').doc(addressId).delete();
+      userAddresses = userAddresses.filter(a => a.id !== addressId);
+      if (selectedAddressId === addressId) {
+        selectedAddressId = null;
+      }
+      renderAddressList();
+      showToast('✅ Address deleted');
+    } catch(e) {
+      showToast('❌ Failed to delete address', true);
+    }
+  }
+  
+  function showNewAddressForm() {
+    document.getElementById('newAddressForm').classList.add('show');
+    isNewAddressFormOpen = true;
+    document.getElementById('addNewAddressBtn').style.display = 'none';
+    
+    // Pre-fill name from full name
+    document.getElementById('newAddressName').value = document.getElementById('fullName').value;
+    document.getElementById('newAddressPhone').value = currentUser?.phone || '';
+  }
+  
+  function cancelNewAddress() {
+    document.getElementById('newAddressForm').classList.remove('show');
+    isNewAddressFormOpen = false;
+    document.getElementById('addNewAddressBtn').style.display = 'flex';
+    
+    // Clear form
+    document.getElementById('newAddressName').value = '';
+    document.getElementById('newAddressStreet').value = '';
+    document.getElementById('newAddressCity').value = '';
+    document.getElementById('newAddressState').value = '';
+    document.getElementById('newAddressPincode').value = '';
+    document.getElementById('newAddressLandmark').value = '';
+    document.getElementById('newAddressPhone').value = '';
+  }
+  
+  // ========== ORDER FUNCTIONS ==========
+  function getSelectedAddress() {
+    if (!selectedAddressId) return null;
+    return userAddresses.find(a => a.id === selectedAddressId);
+  }
+  
+  function getOrderAddress() {
+    const selectedAddr = getSelectedAddress();
+    if (selectedAddr) {
+      return {
+        fullName: selectedAddr.name,
+        phone: selectedAddr.phone || currentUser.phone,
+        email: currentUser.email,
+        address: selectedAddr.street,
+        city: selectedAddr.city,
+        state: selectedAddr.state,
+        pincode: selectedAddr.pincode,
+        landmark: selectedAddr.landmark || ''
+      };
+    }
+    return null;
+  }
+  
+  function validateOrder() {
     const name = document.getElementById('fullName').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const address = document.getElementById('address').value.trim();
-    const city = document.getElementById('city').value.trim();
-    const state = document.getElementById('state').value.trim();
-    const pincode = document.getElementById('pincode').value.trim();
-    if (!name) { showToast('❌ Please enter your full name', true); return false; }
-    if (!phone || phone.length < 10) { showToast('❌ Enter valid 10-digit phone number', true); return false; }
-    if (!address) { showToast('❌ Please enter address', true); return false; }
-    if (!city) { showToast('❌ Please enter city', true); return false; }
-    if (!state) { showToast('❌ Please enter state', true); return false; }
-    if (!pincode || pincode.length < 6) { showToast('❌ Please enter valid PIN code', true); return false; }
+    if (!name) {
+      showToast('❌ Please enter your full name', true);
+      return false;
+    }
+    
+    const selectedAddr = getSelectedAddress();
+    if (!selectedAddr) {
+      showToast('❌ Please select or add a shipping address', true);
+      return false;
+    }
+    
     return true;
   }
   
-  function getCustomerDetails() {
-    return {
-      fullName: document.getElementById('fullName').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      email: document.getElementById('email').value.trim() || (currentUser ? currentUser.email : ''),
-      address: document.getElementById('address').value,
-      city: document.getElementById('city').value,
-      state: document.getElementById('state').value,
-      pincode: document.getElementById('pincode').value
-    };
-  }
-  
-  // ========== ORDER SAVE FUNCTION - FIXED ==========
-  async function saveOrderToFirebase(paymentMethod, transactionId = null, paymentDetails = null) {
-    const details = getCustomerDetails();
+  // ========== FIREBASE ORDER SAVE ==========
+  async function saveOrderToFirebase(paymentMethod, transactionId = null) {
+    const address = getOrderAddress();
+    if (!address) {
+      showToast('❌ Please select shipping address', true);
+      return { success: false };
+    }
     
     const itemsWithDetails = cart.map(item => ({
       id: item.id,
@@ -877,14 +1158,15 @@
     
     const orderData = {
       orderId: orderId,
-      customerName: details.fullName,
-      customerPhone: details.phone,
-      customerEmail: details.email,
-      shippingAddress: { 
-        address: details.address, 
-        city: details.city, 
-        state: details.state, 
-        pincode: details.pincode 
+      customerName: address.fullName,
+      customerPhone: address.phone,
+      customerEmail: address.email,
+      shippingAddress: {
+        address: address.address,
+        city: address.city,
+        state: address.state,
+        pincode: address.pincode,
+        landmark: address.landmark
       },
       items: itemsWithDetails,
       paymentMethod: paymentMethod,
@@ -898,37 +1180,20 @@
       orderDate: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: currentUser ? currentUser.uid : null,
-      userPhone: currentUser ? currentUser.phone : details.phone
+      userPhone: currentUser ? currentUser.phone : address.phone
     };
     
-    console.log("💾 Saving order to Firebase (nexi-53897):", orderData);
+    console.log("💾 Saving order:", orderData);
     
     try {
-      // Try to save using set with document ID
       await db.collection('orders').doc(orderId).set(orderData);
-      console.log("✅ ORDER SAVED SUCCESSFULLY! Order ID:", orderId);
+      console.log("✅ ORDER SAVED! Order ID:", orderId);
       
-      // Backup to localStorage
-      let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
-      orders.push(orderData);
-      localStorage.setItem('vedantaOrders', JSON.stringify(orders));
       localStorage.setItem('lastOrder', JSON.stringify(orderData));
-      
       return { success: true, orderId: orderId };
     } catch (error) {
-      console.error("❌ Firebase SAVE ERROR:", error);
-      console.error("Error code:", error.code);
-      console.error("Error message:", error.message);
-      
-      // Try alternative save method (add instead of set)
-      try {
-        const docRef = await db.collection('orders').add(orderData);
-        console.log("✅ ORDER SAVED via add()! Order ID:", docRef.id);
-        return { success: true, orderId: docRef.id };
-      } catch (error2) {
-        console.error("❌ Both save methods failed:", error2);
-        return { success: false, error: error2.message };
-      }
+      console.error("❌ SAVE ERROR:", error);
+      return { success: false, error: error.message };
     }
   }
   
@@ -937,9 +1202,8 @@
     window.location.href = `order-success.html?orderId=${orderId}`;
   }
   
-  // COD Order
   async function saveOrderCOD() {
-    if (!validateForm()) return;
+    if (!validateOrder()) return;
     if (isProcessing) return;
     isProcessing = true;
     
@@ -961,9 +1225,8 @@
     }
   }
   
-  // Razorpay Payment
   async function initiateRazorpayPayment() {
-    if (!validateForm()) return;
+    if (!validateOrder()) return;
     if (isProcessing) return;
     isProcessing = true;
     
@@ -977,7 +1240,7 @@
       return;
     }
     
-    const details = getCustomerDetails();
+    const address = getOrderAddress();
     const orderAmount = Math.round(finalAmount);
     
     const btn = document.getElementById('payRazorpayBtn');
@@ -990,18 +1253,10 @@
         currency: 'INR',
         name: 'VEDANTA',
         description: `Order Payment (5% Discount Applied)`,
-        image: 'https://sanjeshkarkewat-hash.github.io/VD/favicon.ico',
         prefill: {
-          name: details.fullName,
-          email: details.email,
-          contact: details.phone
-        },
-        notes: {
-          customerName: details.fullName,
-          customerPhone: details.phone,
-          discountApplied: `${ONLINE_DISCOUNT_PERCENT}%`,
-          originalAmount: cartTotal,
-          discountedAmount: finalAmount
+          name: address.fullName,
+          email: address.email,
+          contact: address.phone
         },
         theme: { color: '#D4AF37' },
         modal: {
@@ -1019,11 +1274,7 @@
       razorpay.on('payment.success', async function(response) {
         console.log('✅ Payment Success:', response);
         
-        const result = await saveOrderToFirebase(
-          'Razorpay',
-          response.razorpay_payment_id,
-          { paymentId: response.razorpay_payment_id }
-        );
+        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id);
         
         showLoading(false);
         
@@ -1055,49 +1306,190 @@
     }
   }
   
-  // Event Listeners
-  const codOption = document.getElementById('codOption');
-  const razorpayOption = document.getElementById('razorpayOption');
-  const codDetails = document.getElementById('codDetails');
-  const razorpaySection = document.getElementById('razorpaySection');
+  // ========== CART & PRODUCT FUNCTIONS ==========
+  function loadProductsInstantly() {
+    const cached = localStorage.getItem('vedantaProducts');
+    if (cached) {
+      try {
+        const products = JSON.parse(cached);
+        products.forEach(p => productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name }));
+        return true;
+      } catch(e) {}
+    }
+    return false;
+  }
   
-  codOption?.addEventListener('click', () => {
-    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-    codOption.classList.add('selected');
-    selectedPaymentMethod = 'cod';
-    codDetails.classList.add('show');
-    razorpaySection.classList.remove('show');
+  function fetchProductsInBackground() {
+    db.collection('products').get().then(snapshot => {
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        if (!productsCache.has(doc.id)) productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
+      });
+      renderOrderSummary();
+    }).catch(e => console.log("Background fetch error:", e));
+  }
+  
+  function getProductImage(productId) { return productsCache.get(productId)?.images?.[0] || null; }
+  function getProductIcon(productId) { return productsCache.get(productId)?.icon || 'fa-gem'; }
+  
+  function loadCart() {
+    cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+    if (cart.length === 0) {
+      showToast('🛒 Your cart is empty! Redirecting...', true);
+      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      return;
+    }
+    cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
     calculateOnlineDiscount();
-  });
+    renderOrderSummary();
+  }
   
-  razorpayOption?.addEventListener('click', () => {
-    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-    razorpayOption.classList.add('selected');
-    selectedPaymentMethod = 'razorpay';
-    codDetails.classList.remove('show');
-    razorpaySection.classList.add('show');
-    calculateOnlineDiscount();
-  });
+  function calculateOnlineDiscount() {
+    if (selectedPaymentMethod === 'razorpay') {
+      discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100);
+      discountedTotal = cartTotal - discountAmount;
+    } else {
+      discountAmount = 0;
+      discountedTotal = cartTotal;
+    }
+    updateTotalDisplay();
+  }
   
-  document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
-  document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
-  document.getElementById('getLocationBtn')?.addEventListener('click', getCurrentLocation);
-  document.getElementById('openSettingsBtn')?.addEventListener('click', openLocationSettings);
-  document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
-  document.getElementById('backToShopBtn')?.addEventListener('click', (e) => {
-    e.preventDefault();
-    window.location.href = 'index.html';
-  });
+  function updateTotalDisplay() {
+    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
+    const discountRow = document.getElementById('discountRow');
+    const discountAmountSpan = document.getElementById('discountAmount');
+    
+    if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) {
+      discountRow.style.display = 'flex';
+      discountAmountSpan.innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`;
+      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`;
+    } else {
+      discountRow.style.display = 'none';
+      document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
+    }
+  }
+  
+  function renderOrderSummary() {
+    const container = document.getElementById('orderItemsList');
+    if (!container) return;
+    
+    container.innerHTML = cart.map(item => {
+      const productImg = getProductImage(item.id);
+      const productIcon = getProductIcon(item.id);
+      return `
+        <div class="order-item">
+          <div class="order-item-img">
+            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${productIcon}"></i>`}
+          </div>
+          <div class="order-item-info">
+            <h4>${escapeHtml(item.name)}</h4>
+            <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
+          </div>
+          <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
+        </div>
+      `;
+    }).join('');
+    updateTotalDisplay();
+  }
   
   function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
   }
   
-  // Initialize
-  loadProductsInstantly();
-  loadCart();
-  fetchProductsInBackground();
+  // ========== INITIALIZATION ==========
+  async function initialize() {
+    // Get current user from Firebase Auth
+    const user = auth.currentUser;
+    const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
+    
+    if (user) {
+      currentUser = {
+        uid: user.uid,
+        phone: user.phoneNumber,
+        email: user.email || storedUser?.email || `${user.uid}@vedanta.com`,
+        name: storedUser?.name || `User${user.phoneNumber?.slice(-4) || '001'}`
+      };
+      localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
+    } else if (storedUser) {
+      currentUser = storedUser;
+    } else {
+      showToast('🔐 Please login to continue', true);
+      setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
+      return;
+    }
+    
+    // Auto-fill phone and email displays
+    document.getElementById('displayPhone').innerText = currentUser.phone || 'No phone';
+    document.getElementById('displayEmail').innerText = currentUser.email || 'No email';
+    document.getElementById('phone').value = currentUser.phone || '';
+    document.getElementById('email').value = currentUser.email || '';
+    document.getElementById('fullName').value = currentUser.name || '';
+    document.getElementById('newAddressName').value = currentUser.name || '';
+    document.getElementById('newAddressPhone').value = currentUser.phone || '';
+    
+    // Load user addresses
+    await loadUserAddresses();
+    
+    // Load cart
+    loadCart();
+    loadProductsInstantly();
+    fetchProductsInBackground();
+    
+    // Setup event listeners
+    setupEventListeners();
+  }
+  
+  function setupEventListeners() {
+    // Payment method selection
+    const codOption = document.getElementById('codOption');
+    const razorpayOption = document.getElementById('razorpayOption');
+    const codDetails = document.getElementById('codDetails');
+    const razorpaySection = document.getElementById('razorpaySection');
+    
+    codOption?.addEventListener('click', () => {
+      document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+      codOption.classList.add('selected');
+      selectedPaymentMethod = 'cod';
+      codDetails.classList.add('show');
+      razorpaySection.classList.remove('show');
+      calculateOnlineDiscount();
+    });
+    
+    razorpayOption?.addEventListener('click', () => {
+      document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+      razorpayOption.classList.add('selected');
+      selectedPaymentMethod = 'razorpay';
+      codDetails.classList.remove('show');
+      razorpaySection.classList.add('show');
+      calculateOnlineDiscount();
+    });
+    
+    // Address management
+    document.getElementById('addNewAddressBtn')?.addEventListener('click', showNewAddressForm);
+    document.getElementById('saveAddressBtn')?.addEventListener('click', saveNewAddress);
+    document.getElementById('cancelAddressBtn')?.addEventListener('click', cancelNewAddress);
+    document.getElementById('useCurrentLocationBtn')?.addEventListener('click', fillAddressWithLocation);
+    
+    // Order buttons
+    document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
+    document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
+    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      window.location.href = 'index.html';
+    });
+    
+    // Location modal
+    document.getElementById('openSettingsBtn')?.addEventListener('click', () => {
+      hideLocationModal();
+      showToast('📍 Please enable location in browser settings', true);
+    });
+    document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
+  }
+  
+  // Start the app
+  initialize();
 </script>
 </body>
 </html>
