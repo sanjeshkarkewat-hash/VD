@@ -9,7 +9,9 @@
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
+    /* All existing styles remain same - no changes needed */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Space Grotesk', sans-serif;
@@ -605,17 +607,20 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ========== 🔥 UPDATED FIREBASE CONFIG - NEW CONFIG ==========
   const firebaseConfig = {
-    apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
-    authDomain: "vedanta-d0199.firebaseapp.com",
-    projectId: "vedanta-d0199",
-    storageBucket: "vedanta-d0199.firebasestorage.app",
-    messagingSenderId: "761061711987",
-    appId: "1:761061711987:web:d59ff32fd53057c395ca06"
+    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+    authDomain: "nexi-53897.firebaseapp.com",
+    projectId: "nexi-53897",
+    storageBucket: "nexi-53897.firebasestorage.app",
+    messagingSenderId: "337349382612",
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
+    measurementId: "G-W6N519LBPH"
   };
   
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const auth = firebase.auth();
   
   const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   const ONLINE_DISCOUNT_PERCENT = 5;
@@ -628,11 +633,21 @@
   let productsCache = new Map();
   let selectedPaymentMethod = 'cod';
   
-  const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-  if (!currentUser || !currentUser.email) {
-    showToast('🔐 Please login to continue', true);
-    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
-  }
+  // Get current user from localStorage or Firebase Auth
+  let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
+  
+  // Also check Firebase Auth for user
+  auth.onAuthStateChanged((user) => {
+    if (user && !currentUser) {
+      currentUser = {
+        uid: user.uid,
+        phone: user.phoneNumber,
+        email: user.email || `${user.uid}@vedanta.com`,
+        name: user.displayName || `User${user.phoneNumber?.slice(-4) || '001'}`
+      };
+      localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
+    }
+  });
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -837,7 +852,7 @@
     if (!address) { showToast('❌ Please enter address', true); return false; }
     if (!city) { showToast('❌ Please enter city', true); return false; }
     if (!state) { showToast('❌ Please enter state', true); return false; }
-    if (!pincode) { showToast('❌ Please enter PIN code', true); return false; }
+    if (!pincode || pincode.length < 6) { showToast('❌ Please enter valid PIN code', true); return false; }
     return true;
   }
   
@@ -853,8 +868,8 @@
     };
   }
   
-  // ✅ FIXED: Order ONLY saves after successful payment
-  async function saveOrderToFirebaseAfterPayment(paymentMethod, transactionId, paymentDetails) {
+  // ✅ FIXED: Order saves to Firebase
+  async function saveOrderToFirebase(paymentMethod, transactionId = null, paymentDetails = null) {
     const details = getCustomerDetails();
     
     const itemsWithDetails = cart.map(item => ({
@@ -878,11 +893,16 @@
       customerName: details.fullName,
       customerPhone: details.phone,
       customerEmail: details.email,
-      shippingAddress: { address: details.address, city: details.city, state: details.state, pincode: details.pincode },
+      shippingAddress: { 
+        address: details.address, 
+        city: details.city, 
+        state: details.state, 
+        pincode: details.pincode 
+      },
       items: itemsWithDetails,
       paymentMethod: paymentMethod,
-      paymentStatus: 'paid',
-      status: 'confirmed',
+      paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending',
+      status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending',
       transactionId: transactionId,
       razorpayDetails: paymentDetails,
       subtotal: cartTotal,
@@ -892,15 +912,18 @@
       orderDate: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: currentUser ? currentUser.uid : null,
-      userEmail: currentUser ? currentUser.email : null
+      userPhone: currentUser ? currentUser.phone : details.phone,
+      userEmail: currentUser ? currentUser.email : details.email
     };
     
-    console.log("Saving order to Firebase after payment:", orderData);
+    console.log("💾 Saving order to Firebase:", orderData);
     
     try {
+      // Use set with orderId as document ID
       await db.collection('orders').doc(orderId).set(orderData);
       console.log("✅ Order saved successfully! Order ID:", orderId);
       
+      // Also save to localStorage backup
       let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
       orders.push(orderData);
       localStorage.setItem('vedantaOrders', JSON.stringify(orders));
@@ -909,6 +932,8 @@
       return { success: true, orderId: orderId };
     } catch (error) {
       console.error("❌ Firebase Error:", error);
+      console.error("Error code:", error.code);
+      console.error("Error message:", error.message);
       return { success: false, error: error.message };
     }
   }
@@ -918,7 +943,7 @@
     window.location.href = `order-success.html?orderId=${orderId}`;
   }
   
-  // ✅ COD Order - Saves immediately (no payment verification needed)
+  // ✅ COD Order - Saves immediately
   async function saveOrderCOD() {
     if (!validateForm()) return;
     if (isProcessing) return;
@@ -928,55 +953,21 @@
     const btn = document.getElementById('placeOrderCodBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
     
-    const details = getCustomerDetails();
-    const itemsWithDetails = cart.map(item => ({
-      id: item.id, name: item.name, price: item.price, quantity: item.quantity,
-      size: item.size || 'Not Selected', color: item.color || 'Not Selected',
-      combo: item.combo || null, isCombo: item.isCombo || false,
-      comboMultiplier: item.comboMultiplier || null, total: item.price * item.quantity
-    }));
+    const result = await saveOrderToFirebase('Cash on Delivery');
     
-    const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
+    showLoading(false);
     
-    const orderData = {
-      orderId: orderId,
-      customerName: details.fullName,
-      customerPhone: details.phone,
-      customerEmail: details.email,
-      shippingAddress: { address: details.address, city: details.city, state: details.state, pincode: details.pincode },
-      items: itemsWithDetails,
-      paymentMethod: 'Cash on Delivery',
-      paymentStatus: 'pending',
-      status: 'pending',
-      total: cartTotal,
-      orderDate: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: currentUser ? currentUser.uid : null,
-      userEmail: currentUser ? currentUser.email : null
-    };
-    
-    try {
-      await db.collection('orders').doc(orderId).set(orderData);
-      console.log("✅ COD Order saved! Order ID:", orderId);
-      
-      let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
-      orders.push(orderData);
-      localStorage.setItem('vedantaOrders', JSON.stringify(orders));
-      localStorage.setItem('lastOrder', JSON.stringify(orderData));
-      
-      showLoading(false);
-      showToast(`✅ Order placed! Order ID: ${orderId}`);
-      setTimeout(() => { redirectToOrderSuccess(orderId); }, 1500);
-      
-    } catch (error) {
-      showLoading(false);
+    if (result.success) {
+      showToast(`✅ Order placed! Order ID: ${result.orderId}`);
+      setTimeout(() => { redirectToOrderSuccess(result.orderId); }, 1500);
+    } else {
       showToast('❌ Failed to place order. Please try again.', true);
       if (btn) { btn.disabled = false; btn.innerHTML = 'Confirm Order (COD)'; }
       isProcessing = false;
     }
   }
   
-  // ✅ Razorpay Payment - Order saves ONLY after successful payment
+  // ✅ Razorpay Payment - Order saves AFTER successful payment
   async function initiateRazorpayPayment() {
     if (!validateForm()) return;
     if (isProcessing) return;
@@ -1037,12 +1028,11 @@
       
       const razorpay = new Razorpay(options);
       
-      // ✅ Order saves ONLY after successful payment
       razorpay.on('payment.success', async function(response) {
-        console.log('Payment Success:', response);
+        console.log('✅ Payment Success:', response);
         
-        // Save order to Firebase only after successful payment
-        const result = await saveOrderToFirebaseAfterPayment(
+        // Save order to Firebase after successful payment
+        const result = await saveOrderToFirebase(
           'Razorpay',
           response.razorpay_payment_id,
           {
@@ -1065,7 +1055,7 @@
       });
       
       razorpay.on('payment.error', function(response) {
-        console.error('Payment Error:', response);
+        console.error('❌ Payment Error:', response);
         showLoading(false);
         showToast('❌ Payment failed! Order not placed. Please try again.', true);
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
@@ -1123,6 +1113,7 @@
     return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
   }
   
+  // Initialize
   loadProductsInstantly();
   loadCart();
   fetchProductsInBackground();
