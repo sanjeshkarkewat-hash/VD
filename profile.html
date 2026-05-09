@@ -6,10 +6,9 @@
     <title>Login - Vedanta</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- EmailJS SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -98,8 +97,8 @@
         .login-title { font-size: 20px; font-weight: 700; text-align: center; margin-bottom: 6px; }
         .login-subtitle { text-align: center; color: #888; font-size: 11px; margin-bottom: 20px; }
         
-        .email-input-group { display: flex; gap: 10px; margin-bottom: 16px; flex-direction: column; }
-        .email-input-group input {
+        .input-group { margin-bottom: 16px; }
+        .input-group input {
             width: 100%;
             padding: 14px;
             background: rgba(0,0,0,0.5);
@@ -109,50 +108,44 @@
             font-size: 15px;
             font-family: inherit;
             -webkit-appearance: none;
+            text-align: center;
         }
-        .email-input-group input:focus { outline: none; border-color: #D4AF37; }
-        .send-otp-btn {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 14px;
+        .input-group input:focus { outline: none; border-color: #D4AF37; }
+        
+        .otp-row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .otp-row input {
+            flex: 1;
+        }
+        .otp-row button {
+            background: rgba(212,175,55,0.2);
+            border: 1px solid #D4AF37;
+            padding: 14px 16px;
             border-radius: 18px;
-            font-weight: 700;
-            color: #050508;
+            color: #D4AF37;
             cursor: pointer;
-            font-size: 14px;
-            width: 100%;
+            font-weight: 600;
+            white-space: nowrap;
         }
         
-        .otp-group { margin-bottom: 16px; display: none; }
-        .otp-group.show { display: block; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-8px); } to { opacity: 1; transform: translateY(0); } }
-        .otp-input {
-            width: 100%;
-            padding: 14px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 18px;
-            color: white;
-            font-size: 18px;
-            text-align: center;
-            letter-spacing: 6px;
-            font-weight: 600;
-            -webkit-appearance: none;
-        }
-        .verify-btn {
-            width: 100%;
+        .login-btn {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             border: none;
             padding: 14px;
             border-radius: 18px;
             font-weight: 700;
-            font-size: 14px;
             color: #050508;
             cursor: pointer;
-            margin-top: 12px;
+            font-size: 14px;
+            width: 100%;
         }
-        .resend-otp { text-align: center; margin-top: 10px; }
-        .resend-otp button { background: none; border: none; color: #D4AF37; font-size: 12px; cursor: pointer; padding: 8px; }
+        .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
         
         .benefits-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
         .benefits-list { display: flex; flex-direction: column; gap: 8px; }
@@ -250,56 +243,32 @@
         .nav-item.active, .nav-item:active { background: rgba(212,175,55,0.2); }
         .nav-item.active i, .nav-item.active span { color: #D4AF37; }
         
-        .loader {
-            display: inline-block;
-            width: 14px;
-            height: 14px;
-            border: 2px solid #050508;
-            border-top-color: transparent;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 6px;
-            vertical-align: middle;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
-        button:disabled { opacity: 0.6; cursor: not-allowed; }
-        .setup-info {
-            background: rgba(212,175,55,0.08);
-            border-radius: 14px;
-            padding: 10px;
-            margin-top: 12px;
-            text-align: center;
-            font-size: 10px;
-            color: #D4AF37;
-        }
-        .countdown {
-            font-size: 11px;
-            color: #888;
-            margin-top: 8px;
-            text-align: center;
-        }
-        
-        button, .menu-item, .nav-item, .back-btn {
-            cursor: pointer;
-            transition: transform 0.05s;
-        }
-        button:active, .menu-item:active, .nav-item:active, .back-btn:active {
-            transform: scale(0.97);
-        }
-        
-        input[type="number"]::-webkit-inner-spin-button,
-        input[type="number"]::-webkit-outer-spin-button {
-            -webkit-appearance: none;
-            margin: 0;
-        }
+        button:active { transform: scale(0.97); }
         
         @media (min-width: 768px) {
             .profile-container { padding: 20px; }
-            .email-input-group { flex-direction: row; }
-            .send-otp-btn { width: auto; padding: 0 24px; }
             .bottom-nav { gap: 40px; padding: 8px 28px; }
             .nav-item { padding: 8px 20px; }
+        }
+        
+        .timer-text {
+            font-size: 11px;
+            color: #888;
+            text-align: center;
+            margin-top: 10px;
+        }
+        
+        /* Hidden recaptcha container - visible but positioned offscreen */
+        #recaptcha-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            visibility: visible;
+            opacity: 0.01;
+            pointer-events: none;
         }
     </style>
 </head>
@@ -312,7 +281,7 @@
 
 <div class="profile-container" id="profileContainer">
     <div style="text-align: center; padding: 40px;">
-        <div class="loader" style="border-color: #D4AF37; border-top-color: transparent;"></div>
+        <div class="logo-glow" style="font-size: 28px;">VEDANTA</div>
         <p style="margin-top: 12px; font-size: 12px; color: #888;">Loading...</p>
     </div>
 </div>
@@ -325,34 +294,33 @@
 
 <div class="toast" id="toast"></div>
 
+<!-- Hidden recaptcha container - required for phone auth -->
+<div id="recaptcha-container"></div>
+
 <script>
     // ========== 🔥 FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
-        apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
-        authDomain: "vedanta-d0199.firebaseapp.com",
-        projectId: "vedanta-d0199",
-        storageBucket: "vedanta-d0199.firebasestorage.app",
-        messagingSenderId: "761061711987",
-        appId: "1:761061711987:web:d59ff32fd53057c395ca06",
-        measurementId: "G-RQMQZVGK75"
+        apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+        authDomain: "nexi-53897.firebaseapp.com",
+        projectId: "nexi-53897",
+        storageBucket: "nexi-53897.firebasestorage.app",
+        messagingSenderId: "337349382612",
+        appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
+        measurementId: "G-W6N519LBPH"
     };
     
     firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
     const db = firebase.firestore();
     
-    // ==================== 🔐 EMAILJS CONFIGURATION ====================
-    const EMAILJS_PUBLIC_KEY = "5q9t5zkkRRxC2JvRD";
-    const EMAILJS_SERVICE_ID = "service_6ucrgd9";
-    const EMAILJS_TEMPLATE_ID = "template_kniixfj";
+    // Enable phone auth persistence
+    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     
-    emailjs.init(EMAILJS_PUBLIC_KEY);
-    
-    let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
-    let generatedOTP = null;
-    let otpEmail = null;
-    let countdownInterval = null;
-    let resendCooldown = false;
+    let currentUserData = JSON.parse(localStorage.getItem('vedantaUser')) || null;
     let userOrders = [];
+    let countdownTimer = null;
+    let recaptchaVerifier = null;
+    let confirmationResult = null;
     
     function showToast(msg, isError = false) {
         const toast = document.getElementById('toast');
@@ -360,163 +328,231 @@
         toast.style.background = isError ? '#F44336' : '#D4AF37';
         toast.style.color = isError ? 'white' : '#050508';
         toast.classList.add('show');
-        setTimeout(() => toast.classList.remove('show'), 2500);
+        setTimeout(() => toast.classList.remove('show'), 3000);
     }
     
-    // ✅ FIXED: Load ALL orders from Firebase (same as booking.html)
-    async function loadUserOrdersFromFirebase(email) {
-        if (!email) return [];
-        
-        try {
-            console.log("Fetching orders for email:", email);
-            
-            // Query 1: By customerEmail
-            const emailSnapshot = await db.collection('orders')
-                .where('customerEmail', '==', email)
-                .get();
-            
-            // Query 2: By userEmail (for older orders)
-            const userEmailSnapshot = await db.collection('orders')
-                .where('userEmail', '==', email)
-                .get();
-            
-            // Query 3: By userId (for Firebase Auth users)
-            let userIdSnapshot = { docs: [] };
-            if (currentUser && currentUser.uid) {
-                userIdSnapshot = await db.collection('orders')
-                    .where('userId', '==', currentUser.uid)
-                    .get();
+    // Format phone number to E.164 format
+    function formatPhoneNumber(number) {
+        let num = number.trim();
+        // Remove any spaces or special characters
+        num = num.replace(/[\s\-\(\)]/g, '');
+        if (!num.startsWith('+')) {
+            if (num.startsWith('0')) {
+                num = '+91' + num.substring(1);
+            } else if (num.length === 10) {
+                num = '+91' + num;
+            } else if (num.length === 12 && num.startsWith('91')) {
+                num = '+' + num;
             }
-            
-            // Merge all orders without duplicates
-            const ordersMap = new Map();
-            
-            emailSnapshot.forEach(doc => {
-                ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
-            });
-            
-            userEmailSnapshot.forEach(doc => {
-                if (!ordersMap.has(doc.id)) {
-                    ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
-                }
-            });
-            
-            userIdSnapshot.forEach(doc => {
-                if (!ordersMap.has(doc.id)) {
-                    ordersMap.set(doc.id, { id: doc.id, ...doc.data() });
-                }
-            });
-            
-            // Convert to array and sort by date (newest first)
-            let orders = Array.from(ordersMap.values());
-            orders.sort((a, b) => {
-                const dateA = a.orderDate ? new Date(a.orderDate) : new Date(0);
-                const dateB = b.orderDate ? new Date(b.orderDate) : new Date(0);
-                return dateB - dateA;
-            });
-            
-            console.log("Total orders found:", orders.length);
-            console.log("Orders:", orders.map(o => ({ id: o.orderId, status: o.status, total: o.total })));
-            
-            return orders;
-            
-        } catch (error) {
-            console.error("Error loading orders:", error);
-            return [];
         }
+        return num;
     }
     
-    // Send OTP via EmailJS
-    async function sendEmailOTP(email) {
+    // Setup reCAPTCHA - FIXED VERSION
+    function setupRecaptcha() {
+        return new Promise((resolve, reject) => {
+            try {
+                // Clear existing verifier if any
+                if (recaptchaVerifier) {
+                    recaptchaVerifier.clear();
+                }
+                // Create new verifier with the container
+                recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    size: 'invisible',
+                    callback: () => {
+                        console.log("reCAPTCHA resolved");
+                        resolve(true);
+                    }
+                });
+                // Render the reCAPTCHA
+                recaptchaVerifier.render().then(() => {
+                    console.log("reCAPTCHA rendered successfully");
+                    resolve(true);
+                }).catch(reject);
+            } catch(e) {
+                console.error("reCAPTCHA setup error:", e);
+                reject(e);
+            }
+        });
+    }
+    
+    // Send OTP
+    async function sendOTP() {
+        const phoneInput = document.getElementById('phoneInput');
+        const sendOtpBtn = document.getElementById('sendOtpBtn');
+        const phone = phoneInput.value.trim();
+        
+        if (!phone || phone.length < 10) {
+            showToast('❌ Please enter valid phone number', true);
+            return;
+        }
+        
+        const formattedPhone = formatPhoneNumber(phone);
+        console.log("Sending OTP to:", formattedPhone);
+        
+        sendOtpBtn.disabled = true;
+        sendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending...';
+        
         try {
-            generatedOTP = Math.floor(100000 + Math.random() * 900000).toString();
-            otpEmail = email;
+            // Setup reCAPTCHA first
+            await setupRecaptcha();
             
-            const templateParams = {
-                to_email: email,
-                otp_code: generatedOTP,
-                app_name: "Vedanta",
-                expiry_time: "5 minutes"
-            };
+            // Send OTP
+            confirmationResult = await auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier);
+            console.log("OTP sent successfully");
+            showToast('✅ OTP sent successfully!');
             
-            await emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, templateParams);
+            // Show OTP input section
+            document.getElementById('otpSection').style.display = 'block';
+            document.getElementById('phoneSection').style.display = 'none';
             
-            showToast(`✅ OTP sent to ${email}`);
-            return { success: true };
+            // Start timer
+            startTimer();
             
-        } catch (error) {
-            console.error("EmailJS Error:", error);
-            showToast(`❌ Failed to send OTP. Please try again.`, true);
-            return { success: false };
+        } catch(error) {
+            console.error("Error sending OTP:", error);
+            let errorMsg = 'Failed to send OTP';
+            if (error.code === 'auth/invalid-phone-number') {
+                errorMsg = 'Invalid phone number format';
+            } else if (error.code === 'auth/too-many-requests') {
+                errorMsg = 'Too many requests. Please try again later';
+            } else if (error.code === 'auth/network-request-failed') {
+                errorMsg = 'Network error. Check your connection';
+            }
+            showToast(errorMsg, true);
+            sendOtpBtn.disabled = false;
+            sendOtpBtn.innerHTML = 'Send OTP';
         }
     }
     
-    // Verify OTP
-    async function verifyEmailOTP(enteredOTP) {
-        if (!generatedOTP) {
-            showToast("❌ Please request OTP first", true);
-            return false;
-        }
+    // Start countdown timer for resend
+    function startTimer() {
+        let timeLeft = 60;
+        const timerSpan = document.getElementById('timer');
+        const resendBtn = document.getElementById('resendOtpBtn');
         
-        if (enteredOTP === generatedOTP) {
-            const userData = {
-                uid: `email_${Date.now()}`,
-                email: otpEmail,
-                name: otpEmail.split('@')[0],
-                joinDate: new Date().toISOString(),
-                phone: ''
-            };
-            
-            localStorage.setItem('vedantaUser', JSON.stringify(userData));
-            currentUser = userData;
-            
-            showToast("✅ Login successful! Welcome!");
-            await renderProfilePage();
-            return true;
-        } else {
-            showToast("❌ Invalid OTP. Please try again.", true);
-            return false;
-        }
-    }
-    
-    async function resendEmailOTP(email) {
-        if (resendCooldown) {
-            showToast("⏳ Please wait 30 seconds", true);
-            return false;
-        }
+        if (countdownTimer) clearInterval(countdownTimer);
         
-        if (!email) {
-            showToast("❌ Please enter email first", true);
-            return false;
-        }
-        
-        resendCooldown = true;
-        startCountdown(30);
-        return await sendEmailOTP(email);
-    }
-    
-    function startCountdown(seconds) {
-        const countdownEl = document.getElementById('countdown');
-        if (!countdownEl) return;
-        
-        let remaining = seconds;
-        countdownEl.style.display = 'block';
-        countdownEl.innerHTML = `Resend available in ${remaining}s`;
-        
-        if (countdownInterval) clearInterval(countdownInterval);
-        
-        countdownInterval = setInterval(() => {
-            remaining--;
-            if (remaining <= 0) {
-                clearInterval(countdownInterval);
-                countdownEl.style.display = 'none';
-                resendCooldown = false;
+        countdownTimer = setInterval(() => {
+            if (timeLeft <= 0) {
+                clearInterval(countdownTimer);
+                if (timerSpan) timerSpan.textContent = '';
+                if (resendBtn) {
+                    resendBtn.style.display = 'inline-block';
+                    resendBtn.disabled = false;
+                }
             } else {
-                countdownEl.innerHTML = `Resend available in ${remaining}s`;
+                if (timerSpan) timerSpan.textContent = `${timeLeft}s`;
+                if (resendBtn) resendBtn.style.display = 'none';
+                timeLeft--;
             }
         }, 1000);
     }
     
+    // Verify OTP and Login
+    async function verifyOTP() {
+        const otpInput = document.getElementById('otpInput');
+        const otp = otpInput.value.trim();
+        const verifyBtn = document.getElementById('verifyBtn');
+        
+        if (!otp || otp.length < 6) {
+            showToast('❌ Please enter 6-digit OTP', true);
+            return;
+        }
+        
+        verifyBtn.disabled = true;
+        verifyBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verifying...';
+        
+        try {
+            const result = await confirmationResult.confirm(otp);
+            const user = result.user;
+            console.log("User verified:", user.uid);
+            
+            // Save user data
+            const userData = {
+                uid: user.uid,
+                phone: user.phoneNumber,
+                name: `User${user.phoneNumber.slice(-4)}`,
+                email: `${user.uid}@vedanta.com`,
+                joinDate: new Date().toISOString()
+            };
+            
+            localStorage.setItem('vedantaUser', JSON.stringify(userData));
+            currentUserData = userData;
+            
+            // Save to Firestore
+            try {
+                await db.collection('users').doc(user.uid).set(userData, { merge: true });
+            } catch(e) {
+                console.log("Firestore save error:", e);
+            }
+            
+            showToast(`✅ Welcome ${userData.name}!`);
+            renderProfilePage();
+            
+        } catch(error) {
+            console.error("OTP verification error:", error);
+            let errorMsg = 'Invalid OTP. Please try again.';
+            if (error.code === 'auth/code-expired') {
+                errorMsg = 'OTP expired. Request new OTP.';
+            } else if (error.code === 'auth/invalid-verification-code') {
+                errorMsg = 'Invalid OTP code';
+            }
+            showToast(errorMsg, true);
+            verifyBtn.disabled = false;
+            verifyBtn.innerHTML = 'Verify OTP';
+        }
+    }
+    
+    // Resend OTP
+    async function resendOTP() {
+        const phoneInput = document.getElementById('phoneInput');
+        const phone = phoneInput.value.trim();
+        const formattedPhone = formatPhoneNumber(phone);
+        
+        const resendBtn = document.getElementById('resendOtpBtn');
+        resendBtn.disabled = true;
+        resendBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
+        
+        try {
+            confirmationResult = await auth.signInWithPhoneNumber(formattedPhone, recaptchaVerifier);
+            showToast('✅ OTP resent!');
+            startTimer();
+            resendBtn.style.display = 'none';
+        } catch(error) {
+            console.error("Resend error:", error);
+            showToast('Failed to resend OTP', true);
+        }
+        resendBtn.disabled = false;
+        resendBtn.innerHTML = 'Resend OTP';
+    }
+    
+    // Go back to phone input
+    function goBackToPhone() {
+        document.getElementById('phoneSection').style.display = 'block';
+        document.getElementById('otpSection').style.display = 'none';
+        document.getElementById('otpInput').value = '';
+        if (countdownTimer) clearInterval(countdownTimer);
+    }
+    
+    // Logout function
+    function logout() {
+        auth.signOut().then(() => {
+            localStorage.removeItem('vedantaUser');
+            currentUserData = null;
+            userOrders = [];
+            showToast('👋 Logged out successfully');
+            renderLoginPage();
+        }).catch(() => {
+            localStorage.removeItem('vedantaUser');
+            currentUserData = null;
+            userOrders = [];
+            showToast('👋 Logged out');
+            renderLoginPage();
+        });
+    }
+    
+    // Render Login Page with OTP
     function renderLoginPage() {
         const container = document.getElementById('profileContainer');
         container.innerHTML = `
@@ -526,23 +562,32 @@
             </div>
             
             <div class="card">
-                <div class="login-title">🔐 Email OTP Login</div>
-                <div class="login-subtitle">Enter your email to receive OTP</div>
+                <div class="login-title">📱 Login to Vedanta</div>
+                <div class="login-subtitle">Verify your mobile number with OTP</div>
                 
-                <div class="email-input-group">
-                    <input type="email" id="emailInput" placeholder="your@email.com" autocomplete="email">
-                    <button class="send-otp-btn" id="sendOtpBtn">Send OTP</button>
+                <div id="phoneSection">
+                    <div class="input-group">
+                        <input type="tel" id="phoneInput" placeholder="+91 9876543210" autocomplete="off">
+                    </div>
+                    <button class="login-btn" id="sendOtpBtn">Send OTP</button>
                 </div>
                 
-                <div class="otp-group" id="otpGroup">
-                    <input type="tel" id="otpInput" class="otp-input" placeholder="000000" maxlength="6" inputmode="numeric" pattern="[0-9]*">
-                    <button class="verify-btn" id="verifyBtn">Verify & Login</button>
-                    <div class="resend-otp"><button id="resendOtpBtn">Resend OTP</button></div>
-                    <div id="countdown" class="countdown" style="display:none"></div>
+                <div id="otpSection" style="display: none;">
+                    <div class="input-group">
+                        <input type="text" id="otpInput" placeholder="Enter 6-digit OTP" maxlength="6" autocomplete="off">
+                    </div>
+                    <div class="otp-row">
+                        <button class="login-btn" id="verifyBtn" style="flex:1;">Verify OTP</button>
+                    </div>
+                    <div style="display: flex; gap: 10px; margin-top: 10px;">
+                        <button class="login-btn" id="resendOtpBtn" style="background: rgba(212,175,55,0.2); color: #D4AF37; display: none;">Resend OTP</button>
+                        <button class="login-btn" id="backToPhoneBtn" style="background: rgba(255,255,255,0.1); color: white;" onclick="goBackToPhone()">← Back</button>
+                    </div>
+                    <div class="timer-text"><i class="fas fa-clock"></i> Resend available in <span id="timer">60s</span></div>
                 </div>
                 
-                <div class="setup-info">
-                    <i class="fas fa-envelope"></i> OTP will be sent to your email inbox
+                <div class="setup-info" style="margin-top: 16px; text-align: center; font-size: 11px; color: #D4AF37; background: rgba(212,175,55,0.08); padding: 10px; border-radius: 14px;">
+                    <i class="fas fa-info-circle"></i> We'll send a 6-digit OTP to verify your number
                 </div>
             </div>
             
@@ -557,128 +602,64 @@
                 </div>
             </div>
         `;
-
-        let currentEmail = '';
-
-        document.getElementById('sendOtpBtn')?.addEventListener('click', async () => {
-            const email = document.getElementById('emailInput').value.trim();
-            if (!email || !email.includes('@')) {
-                showToast('❌ Please enter a valid email', true);
-                return;
-            }
-            
-            const btn = document.getElementById('sendOtpBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loader"></span>Sending...';
-            
-            currentEmail = email;
-            const result = await sendEmailOTP(email);
-            
-            btn.disabled = false;
-            btn.innerHTML = 'Send OTP';
-            
-            if (result.success) {
-                document.getElementById('otpGroup').classList.add('show');
-                startCountdown(30);
-            }
-        });
-
-        document.getElementById('verifyBtn')?.addEventListener('click', async () => {
-            const otp = document.getElementById('otpInput').value.trim();
-            if (!otp) { showToast('❌ Please enter OTP', true); return; }
-            if (otp.length !== 6) { showToast('❌ Enter 6-digit OTP', true); return; }
-            
-            const btn = document.getElementById('verifyBtn');
-            btn.disabled = true;
-            btn.innerHTML = '<span class="loader"></span>Verifying...';
-            
-            await verifyEmailOTP(otp);
-            
-            btn.disabled = false;
-            btn.innerHTML = 'Verify & Login';
-        });
-
-        document.getElementById('resendOtpBtn')?.addEventListener('click', async () => {
-            if (!currentEmail) {
-                const email = document.getElementById('emailInput').value.trim();
-                if (!email || !email.includes('@')) {
-                    showToast('❌ Enter valid email first', true);
-                    return;
-                }
-                currentEmail = email;
-            }
-            
-            const btn = document.getElementById('resendOtpBtn');
-            btn.disabled = true;
-            btn.innerHTML = 'Sending...';
-            
-            await resendEmailOTP(currentEmail);
-            
-            btn.disabled = false;
-            btn.innerHTML = 'Resend OTP';
-        });
         
-        setTimeout(() => {
-            document.getElementById('emailInput')?.focus();
-        }, 100);
+        // Attach event listeners
+        document.getElementById('sendOtpBtn')?.addEventListener('click', sendOTP);
+        document.getElementById('verifyBtn')?.addEventListener('click', verifyOTP);
+        document.getElementById('resendOtpBtn')?.addEventListener('click', resendOTP);
+        
+        document.getElementById('phoneInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendOTP();
+        });
+        document.getElementById('otpInput')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') verifyOTP();
+        });
     }
     
-    // ✅ FIXED: Render Profile Page with CORRECT statistics
-    async function renderProfilePage() {
+    // Load user orders from Firestore
+    async function loadUserOrders() {
+        if (!currentUserData || !currentUserData.phone) return;
+        try {
+            const snapshot = await db.collection('orders')
+                .where('customerPhone', '==', currentUserData.phone)
+                .orderBy('orderDate', 'desc')
+                .get();
+            
+            userOrders = [];
+            snapshot.forEach(doc => {
+                userOrders.push({ id: doc.id, ...doc.data() });
+            });
+            renderProfilePage();
+        } catch(e) {
+            console.log("Orders load error:", e);
+        }
+    }
+    
+    function escapeHtml(str) {
+        if (!str) return '';
+        return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
+    }
+    
+    // Render Profile Page
+    function renderProfilePage() {
         const container = document.getElementById('profileContainer');
         
-        container.innerHTML = `<div style="text-align: center; padding: 40px;"><div class="loader" style="border-color: #D4AF37; border-top-color: transparent;"></div><p style="margin-top: 12px; font-size: 12px;">Loading profile...</p></div>`;
-        
-        if (currentUser && currentUser.email) {
-            userOrders = await loadUserOrdersFromFirebase(currentUser.email);
-        }
-        
-        // ✅ CORRECT ORDER STATUS CALCULATION
-        // Total Orders = All orders in Firebase for this user
         const totalOrders = userOrders.length;
-        
-        // Active Orders = Orders that are NOT cancelled and NOT delivered
-        // Statuses: pending, confirmed, processing, shipped, paid
-        const activeStatuses = ['pending', 'confirmed', 'processing', 'shipped', 'paid'];
-        const activeOrders = userOrders.filter(o => {
-            const status = o.status?.toLowerCase() || '';
-            return activeStatuses.includes(status);
-        }).length;
-        
-        // Cancelled Orders
-        const cancelledOrders = userOrders.filter(o => o.status?.toLowerCase() === 'cancelled').length;
-        
-        // Delivered Orders
-        const deliveredOrders = userOrders.filter(o => o.status?.toLowerCase() === 'delivered' || o.status?.toLowerCase() === 'completed').length;
-        
-        // Total Spent (excluding cancelled orders)
-        const totalSpent = userOrders
-            .filter(o => o.status?.toLowerCase() !== 'cancelled')
-            .reduce((sum, o) => sum + (o.total || 0), 0);
-        
-        // Coins = totalSpent / 100
+        const activeOrders = userOrders.filter(o => o.status !== 'delivered' && o.status !== 'cancelled').length;
+        const deliveredOrders = userOrders.filter(o => o.status === 'delivered').length;
+        const totalSpent = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
         const coinsEarned = Math.floor(totalSpent / 100);
+        const joinDate = currentUserData.joinDate ? new Date(currentUserData.joinDate).toLocaleDateString('en-IN') : 'Today';
         
-        const joinDate = currentUser.joinDate ? new Date(currentUser.joinDate).toLocaleDateString('en-IN') : 'Today';
-        
-        console.log("Profile Stats:", {
-            totalOrders,
-            activeOrders,
-            cancelledOrders,
-            deliveredOrders,
-            totalSpent,
-            coinsEarned,
-            allOrders: userOrders.map(o => ({ id: o.orderId, status: o.status }))
-        });
-
         container.innerHTML = `
             <div class="card">
                 <div class="profile-header">
                     <div class="profile-avatar"><i class="fas fa-user"></i></div>
                     <div class="profile-info">
-                        <h3>${escapeHtml(currentUser.name || 'Valued Customer')}</h3>
-                        <p><i class="fas fa-envelope"></i> ${escapeHtml(currentUser.email || 'No email')}</p>
-                        <p><i class="fas fa-calendar"></i> Joined ${joinDate}</p>
+                        <h3>${escapeHtml(currentUserData.name || 'Valued Customer')}</h3>
+                        <p><i class="fas fa-phone"></i> ${escapeHtml(currentUserData.phone || 'No phone')}</p>
+                        <p><i class="fas fa-envelope"></i> ${escapeHtml(currentUserData.email || 'No email')}</p>
+                        <p><i class="fas fa-calendar"></i> Member since ${joinDate}</p>
                     </div>
                 </div>
             </div>
@@ -717,25 +698,42 @@
             </div>
         `;
         
-        document.getElementById('logoutBtn')?.addEventListener('click', () => {
-            localStorage.removeItem('vedantaUser');
-            currentUser = null;
-            generatedOTP = null;
-            otpEmail = null;
-            userOrders = [];
-            if (countdownInterval) clearInterval(countdownInterval);
-            showToast('👋 Logged out successfully');
+        document.getElementById('logoutBtn')?.addEventListener('click', logout);
+    }
+    
+    // Make goBackToPhone global for onclick
+    window.goBackToPhone = goBackToPhone;
+    
+    // Check if user is logged in
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            const storedUser = localStorage.getItem('vedantaUser');
+            if (storedUser) {
+                currentUserData = JSON.parse(storedUser);
+            } else {
+                currentUserData = {
+                    uid: user.uid,
+                    phone: user.phoneNumber,
+                    name: `User${user.phoneNumber.slice(-4)}`,
+                    email: `${user.uid}@vedanta.com`,
+                    joinDate: new Date().toISOString()
+                };
+                localStorage.setItem('vedantaUser', JSON.stringify(currentUserData));
+            }
+            loadUserOrders();
+        } else {
+            if (currentUserData) {
+                currentUserData = null;
+                userOrders = [];
+            }
             renderLoginPage();
-        });
-    }
+        }
+    });
     
-    function escapeHtml(str) {
-        if (!str) return '';
-        return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
-    }
-    
-    if (currentUser && currentUser.email) {
+    // Initial render
+    if (currentUserData) {
         renderProfilePage();
+        loadUserOrders();
     } else {
         renderLoginPage();
     }

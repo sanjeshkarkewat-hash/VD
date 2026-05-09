@@ -638,13 +638,15 @@
 <div class="toast" id="toast"></div>
 
 <script>
+  // ========== 🔥 FIREBASE CONFIGURATION - UPDATED (NEW CONFIG) ==========
   const firebaseConfig = {
-    apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
-    authDomain: "vedanta-d0199.firebaseapp.com",
-    projectId: "vedanta-d0199",
-    storageBucket: "vedanta-d0199.firebasestorage.app",
-    messagingSenderId: "761061711987",
-    appId: "1:761061711987:web:d59ff32fd53057c395ca06"
+    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+    authDomain: "nexi-53897.firebaseapp.com",
+    projectId: "nexi-53897",
+    storageBucket: "nexi-53897.firebasestorage.app",
+    messagingSenderId: "337349382612",
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
+    measurementId: "G-W6N519LBPH"
   };
   
   firebase.initializeApp(firebaseConfig);
@@ -730,8 +732,13 @@
   
   function removeFromCart(index) { cart.splice(index, 1); saveCart(); }
   
-  // ========== BUY NOW - NO LOGIN REQUIRED ==========
   function buyNowDirect(product, qty, size, color, combo = null) {
+    const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+    if (!currentUser || !currentUser.email) {
+      showToast('🔐 Please login first');
+      setTimeout(() => window.location.href = 'profile.html', 800);
+      return;
+    }
     let finalPrice = product.price;
     let finalQty = qty;
     let comboInfo = null;
@@ -851,11 +858,19 @@
     return colorMap[colorName] || '#D4AF37';
   }
   
+  // ========== REAL-TIME PRODUCT LISTENER ==========
   function startRealTimeProductSync() {
-    if (unsubscribeProduct) unsubscribeProduct();
+    if (unsubscribeProduct) {
+      unsubscribeProduct();
+    }
+    
     if (!currentProductId) return;
+    
     const productRef = db.collection('products').doc(currentProductId);
-    unsubscribeProduct = productRef.onSnapshot({ includeMetadataChanges: true }, (docSnapshot) => {
+    
+    unsubscribeProduct = productRef.onSnapshot({
+      includeMetadataChanges: true
+    }, (docSnapshot) => {
       if (docSnapshot.exists) {
         const newData = docSnapshot.data();
         const updatedProduct = {
@@ -875,34 +890,48 @@
           reviewCount: newData.reviewCount || 500,
           status: newData.status
         };
+        
         if (updatedProduct.status !== 'active') {
           showToast("⚠️ This product is no longer available");
           setTimeout(() => window.location.href = 'index.html', 2000);
           return;
         }
+        
         const priceChanged = currentProduct && currentProduct.price !== updatedProduct.price;
         const nameChanged = currentProduct && currentProduct.name !== updatedProduct.name;
+        
         if (priceChanged) showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
         if (nameChanged) showToast(`🔄 Product name updated: ${updatedProduct.name}`);
+        
         currentProduct = ensureProductFields(updatedProduct);
+        
         const index = allProducts.findIndex(p => p.id == currentProductId);
         if (index !== -1) allProducts[index] = currentProduct;
         else allProducts.push(currentProduct);
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+        
         renderPageContent();
         console.log(`🔥 LIVE UPDATE: ${currentProduct.name} synced`);
       } else {
         showToast("❌ Product not found");
         setTimeout(() => window.location.href = 'index.html', 2000);
       }
-    }, (error) => { console.error("Real-time listener error:", error); });
+    }, (error) => {
+      console.error("Real-time listener error:", error);
+    });
   }
   
   function loadAllProductsForRelated() {
     db.collection('products').where('status', '==', 'active').onSnapshot((snapshot) => {
       const products = [];
-      snapshot.forEach(doc => { products.push({ id: doc.id, ...doc.data() }); });
-      if (products.length > 0) { allProducts = products; localStorage.setItem('vedantaProducts', JSON.stringify(allProducts)); renderRelatedProducts(); }
+      snapshot.forEach(doc => {
+        products.push({ id: doc.id, ...doc.data() });
+      });
+      if (products.length > 0) {
+        allProducts = products;
+        localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
+        renderRelatedProducts();
+      }
     });
   }
   
@@ -910,11 +939,14 @@
     const images = currentProduct.images || [];
     const totalSlides = images.length || 1;
     if (images.length <= 1) return;
+    
     const slider = document.getElementById('imageSlider');
     const prevBtn = document.getElementById('prevSlide');
     const nextBtn = document.getElementById('nextSlide');
     const thumbnails = document.querySelectorAll('.thumbnail');
+    
     if (!slider) return;
+    
     function updateSlider(index) {
       if (index < 0) index = totalSlides - 1;
       if (index >= totalSlides) index = 0;
@@ -922,9 +954,11 @@
       if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
       thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active'));
     }
+    
     prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
     nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
     thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
+    
     if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
   }
@@ -939,8 +973,12 @@
           selectedSize = btn.dataset.size;
         });
       });
-      if (!selectedSize && sizeBtns[0]) { sizeBtns[0].classList.add('active'); selectedSize = sizeBtns[0].dataset.size; }
+      if (!selectedSize && sizeBtns[0]) {
+        sizeBtns[0].classList.add('active');
+        selectedSize = sizeBtns[0].dataset.size;
+      }
     }
+    
     const colorBtns = document.querySelectorAll('.color-btn');
     colorBtns.forEach(btn => {
       btn.addEventListener('click', () => {
@@ -950,13 +988,18 @@
         showToast(`🎨 ${selectedColor} selected`);
       });
     });
-    if (colorBtns.length > 0 && !selectedColor) { colorBtns[0].classList.add('active'); selectedColor = colorBtns[0].getAttribute('data-color'); }
+    if (colorBtns.length > 0 && !selectedColor) {
+      colorBtns[0].classList.add('active');
+      selectedColor = colorBtns[0].getAttribute('data-color');
+    }
+    
     const comboItems = document.querySelectorAll('.combo-item');
     comboItems.forEach(combo => {
       combo.addEventListener('click', (e) => {
         e.stopPropagation();
         const comboQty = parseInt(combo.getAttribute('data-combo-qty'));
         const comboPrice = parseInt(combo.getAttribute('data-combo-price'));
+        
         if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
           selectedCombo = null;
           combo.classList.remove('selected');
@@ -964,7 +1007,11 @@
           if (icon) icon.className = 'fas fa-plus-circle';
           showToast(`✨ Combo offer removed!`);
         } else {
-          comboItems.forEach(c => { c.classList.remove('selected'); const icon = c.querySelector('.combo-select-icon i'); if (icon) icon.className = 'fas fa-plus-circle'; });
+          comboItems.forEach(c => {
+            c.classList.remove('selected');
+            const icon = c.querySelector('.combo-select-icon i');
+            if (icon) icon.className = 'fas fa-plus-circle';
+          });
           combo.classList.add('selected');
           const icon = combo.querySelector('.combo-select-icon i');
           if (icon) icon.className = 'fas fa-check-circle';
@@ -973,6 +1020,7 @@
         }
       });
     });
+    
     let qty = 1;
     const qtyMinus = document.getElementById('qtyMinus');
     const qtyPlus = document.getElementById('qtyPlus');
@@ -981,8 +1029,16 @@
       qtyMinus.addEventListener('click', () => { if (qty > 1) { qty--; qtyInput.value = qty; } });
       qtyPlus.addEventListener('click', () => { qty++; qtyInput.value = qty; });
     }
-    document.getElementById('addToCartBtn')?.addEventListener('click', () => { const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1); addToCart(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); if (selectedCombo) selectedCombo = null; });
-    document.getElementById('buyNowBtn')?.addEventListener('click', () => { const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1); buyNowDirect(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); });
+    
+    document.getElementById('addToCartBtn')?.addEventListener('click', () => { 
+      const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1);
+      addToCart(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
+      if (selectedCombo) selectedCombo = null;
+    });
+    document.getElementById('buyNowBtn')?.addEventListener('click', () => { 
+      const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1);
+      buyNowDirect(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
+    });
   }
   
   function renderImageSlider() {
@@ -990,6 +1046,7 @@
     const hasImages = images.length > 0;
     let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
     let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
+    
     return `<div class="product-gallery">
       <div class="main-image-container">
         <div class="badge">${currentProduct.badge || 'New'}</div>
@@ -1003,10 +1060,18 @@
   function renderColors() {
     const colors = currentProduct.colors || [];
     if (colors.length === 0) return '';
+    
     return `<div class="color-section">
       <div class="color-title"><i class="fas fa-palette"></i> Select Color:</div>
       <div class="color-options" id="colorOptions">
-        ${colors.map(color => { const colorName = typeof color === 'object' ? color.name : color; const colorCode = (typeof color === 'object' && color.code) ? color.code : getColorCode(colorName); return `<div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}"><div class="color-circle" style="background: ${colorCode};"></div><span class="color-name">${colorName}</span></div>`; }).join('')}
+        ${colors.map(color => {
+          const colorName = typeof color === 'object' ? color.name : color;
+          const colorCode = (typeof color === 'object' && color.code) ? color.code : getColorCode(colorName);
+          return `<div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}">
+            <div class="color-circle" style="background: ${colorCode};"></div>
+            <span class="color-name">${colorName}</span>
+          </div>`;
+        }).join('')}
       </div>
     </div>`;
   }
@@ -1014,10 +1079,26 @@
   function renderComboOffers() {
     const combos = currentProduct.combos || [];
     if (combos.length === 0) return '';
+    
     return `<div class="combo-section">
       <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS</div>
       <div class="combo-list" id="comboList">
-        ${combos.map((combo, idx) => { const savePercent = Math.round(((combo.quantity * currentProduct.price) - combo.price) / (combo.quantity * currentProduct.price) * 100); const isSelected = selectedCombo && selectedCombo.quantity === combo.quantity && selectedCombo.price === combo.price; return `<div class="combo-item ${isSelected ? 'selected' : ''}" data-combo-index="${idx}" data-combo-qty="${combo.quantity}" data-combo-price="${combo.price}"><div class="combo-item-info"><div class="combo-quantity"><i class="fas fa-boxes"></i> Buy ${combo.quantity} Items</div><div class="combo-save">🔥 Save ${savePercent}%</div></div><div class="combo-price"><div class="price-big">₹${combo.price}</div><div class="per-piece">₹${Math.round(combo.price / combo.quantity)}/piece</div></div><div class="combo-select-icon"><i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}"></i></div><div class="combo-badge">BEST VALUE</div></div>`; }).join('')}
+        ${combos.map((combo, idx) => {
+          const savePercent = Math.round(((combo.quantity * currentProduct.price) - combo.price) / (combo.quantity * currentProduct.price) * 100);
+          const isSelected = selectedCombo && selectedCombo.quantity === combo.quantity && selectedCombo.price === combo.price;
+          return `<div class="combo-item ${isSelected ? 'selected' : ''}" data-combo-index="${idx}" data-combo-qty="${combo.quantity}" data-combo-price="${combo.price}">
+            <div class="combo-item-info">
+              <div class="combo-quantity"><i class="fas fa-boxes"></i> Buy ${combo.quantity} Items</div>
+              <div class="combo-save">🔥 Save ${savePercent}%</div>
+            </div>
+            <div class="combo-price">
+              <div class="price-big">₹${combo.price}</div>
+              <div class="per-piece">₹${Math.round(combo.price / combo.quantity)}/piece</div>
+            </div>
+            <div class="combo-select-icon"><i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}"></i></div>
+            <div class="combo-badge">BEST VALUE</div>
+          </div>`;
+        }).join('')}
       </div>
     </div>`;
   }
@@ -1027,12 +1108,27 @@
     if (!container) return;
     const related = (allProducts || []).filter(p => p.category === currentProduct?.category && p.id != currentProduct?.id && p.status === 'active').slice(0, 4);
     if (related.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No related products</p>'; return; }
-    container.innerHTML = related.map(p => { const hasImage = p.images && p.images.length > 0; return `<div class="related-card" data-product-id="${p.id}"><div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div><div class="related-name">${escapeHtml(p.name)}</div><div class="related-price">₹${p.price.toLocaleString()}</div></div>`; }).join('');
-    document.querySelectorAll('.related-card').forEach(card => { card.addEventListener('click', (e) => { e.stopPropagation(); const productId = card.getAttribute('data-product-id'); localStorage.setItem('vedanta_selected_product_id', productId); window.location.href = window.location.pathname + '?id=' + productId; }); });
+    container.innerHTML = related.map(p => {
+      const hasImage = p.images && p.images.length > 0;
+      return `<div class="related-card" data-product-id="${p.id}">
+        <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div>
+        <div class="related-name">${escapeHtml(p.name)}</div>
+        <div class="related-price">₹${p.price.toLocaleString()}</div>
+      </div>`;
+    }).join('');
+    document.querySelectorAll('.related-card').forEach(card => {
+      card.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const productId = card.getAttribute('data-product-id');
+        localStorage.setItem('vedanta_selected_product_id', productId);
+        window.location.href = window.location.pathname + '?id=' + productId;
+      });
+    });
   }
   
   function renderPageContent() {
     if (!currentProduct) return;
+    
     const discountPercent = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
     const galleryHtml = renderImageSlider();
     const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
@@ -1040,7 +1136,11 @@
     const colorsHtml = renderColors();
     const combosHtml = renderComboOffers();
     const benefitsHtml = `<div class="features-list">${(currentProduct.benefits || []).map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}</div>`;
-    const html = `<div class="header"><div class="logo"><h1>VEDANTA</h1></div><div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div></div>
+    
+    const html = `<div class="header">
+      <div class="logo"><h1>VEDANTA</h1></div>
+      <div class="back-btn" onclick="window.location.href='index.html'"><i class="fas fa-arrow-left"></i> Back</div>
+    </div>
     ${galleryHtml}
     <div class="product-info">
       <div class="product-brand">VEDANTA EXCLUSIVE</div>
@@ -1063,22 +1163,37 @@
       <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Priya Sharma <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Absolutely stunning product! The quality is amazing."</div><div class="review-date">15 Mar 2025</div></div>
       <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Amit Kumar <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Worth every penny. Premium finish and fast delivery."</div><div class="review-date">10 Mar 2025</div></div>
     </div>`;
+    
     document.getElementById('app').innerHTML = html;
-    setTimeout(() => { initSliderAfterRender(); attachEventsAfterRender(); renderRelatedProducts(); }, 50);
+    
+    setTimeout(() => {
+      initSliderAfterRender();
+      attachEventsAfterRender();
+      renderRelatedProducts();
+    }, 50);
   }
   
   async function initialize() {
     const urlParams = new URLSearchParams(window.location.search);
     currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
+    
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
       allProducts = JSON.parse(cached);
       const cachedProduct = allProducts.find(p => p.id == currentProductId);
-      if (cachedProduct && cachedProduct.status === 'active') { currentProduct = ensureProductFields(cachedProduct); renderPageContent(); }
+      if (cachedProduct && cachedProduct.status === 'active') {
+        currentProduct = ensureProductFields(cachedProduct);
+        renderPageContent();
+      }
     }
+    
     loadAllProductsForRelated();
     startRealTimeProductSync();
-    if (sessionStorage.getItem('scrollToTop') === 'true') { sessionStorage.removeItem('scrollToTop'); window.scrollTo(0, 0); }
+    
+    if (sessionStorage.getItem('scrollToTop') === 'true') {
+      sessionStorage.removeItem('scrollToTop');
+      window.scrollTo(0, 0);
+    }
   }
   
   function attachCartEvents() {
