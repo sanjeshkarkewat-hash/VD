@@ -1,22 +1,22 @@
 // firebase-init.js - 🔥 FIREBASE CONFIGURATION FILE 🔥
 // Ye file sab pages mein include hogi
 
-// Firebase Configuration (Aapki di hui values)
+// Firebase Configuration (UPDATED - New Config)
 const firebaseConfig = {
-    apiKey: "AIzaSyCMPUAV50FOsqpyTKY3lioeAgbQvxQzLnM",
-    authDomain: "vedanta-d0199.firebaseapp.com",
-    projectId: "vedanta-d0199",
-    storageBucket: "vedanta-d0199.firebasestorage.app",
-    messagingSenderId: "761061711987",
-    appId: "1:761061711987:web:d59ff32fd53057c395ca06",
-    measurementId: "G-RQMQZVGK75"
+    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+    authDomain: "nexi-53897.firebaseapp.com",
+    projectId: "nexi-53897",
+    storageBucket: "nexi-53897.firebasestorage.app",
+    messagingSenderId: "337349382612",
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
+    measurementId: "G-W6N519LBPH"
 };
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-console.log("🔥 Firebase Connected! Project: vedanta-d0199");
+console.log("🔥 Firebase Connected! Project: nexi-53897");
 
 // ========== PRODUCTS FUNCTIONS ==========
 
