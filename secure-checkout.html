@@ -106,21 +106,21 @@
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     
     /* Address Selection Styles */
-    .address-selector {
+    .address-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
       padding: 12px;
-      margin-bottom: 16px;
+      margin-bottom: 10px;
     }
-    .saved-addresses {
+    .saved-addresses-list {
       display: flex;
       flex-direction: column;
       gap: 10px;
       margin-bottom: 12px;
-      max-height: 300px;
+      max-height: 280px;
       overflow-y: auto;
     }
-    .address-card {
+    .saved-address-card {
       background: rgba(20,20,30,0.6);
       border: 1px solid rgba(212,175,55,0.2);
       border-radius: 14px;
@@ -129,31 +129,31 @@
       transition: all 0.2s;
       position: relative;
     }
-    .address-card:hover {
+    .saved-address-card:hover {
       border-color: #D4AF37;
       background: rgba(212,175,55,0.1);
     }
-    .address-card.selected {
+    .saved-address-card.selected {
       border-color: #4CAF50;
       background: rgba(76,175,80,0.1);
     }
-    .address-card .address-name {
+    .saved-address-card .address-name {
       font-weight: 700;
       color: #D4AF37;
       margin-bottom: 6px;
       font-size: 13px;
     }
-    .address-card .address-detail {
+    .saved-address-card .address-detail {
       font-size: 11px;
       color: #aaa;
       line-height: 1.4;
     }
-    .address-card .address-phone {
+    .saved-address-card .address-phone {
       font-size: 10px;
       color: #888;
       margin-top: 6px;
     }
-    .address-card .delete-address {
+    .delete-address-btn {
       position: absolute;
       top: 8px;
       right: 12px;
@@ -166,7 +166,7 @@
       cursor: pointer;
       font-size: 12px;
     }
-    .add-new-address-btn {
+    .add-new-address-trigger {
       width: 100%;
       background: rgba(212,175,55,0.15);
       border: 1px dashed rgba(212,175,55,0.5);
@@ -179,15 +179,17 @@
       justify-content: center;
       gap: 8px;
       font-size: 13px;
+      margin-top: 8px;
     }
-    .new-address-form {
-      display: none;
+    
+    /* Manual Address Form (when no address or adding new) */
+    .manual-address-form {
       margin-top: 12px;
       padding-top: 12px;
       border-top: 1px solid rgba(255,255,255,0.1);
     }
-    .new-address-form.show {
-      display: block;
+    .manual-address-form.hide {
+      display: none;
     }
     
     .location-btn {
@@ -268,7 +270,6 @@
     }
     .place-order-cod:active, .pay-razorpay-btn:active { transform: scale(0.98); }
     
-    /* Order Summary */
     .order-summary {
       background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8));
       backdrop-filter: blur(10px);
@@ -522,7 +523,7 @@
       cursor: pointer;
     }
     
-    .auto-fill-info {
+    .user-info-bar {
       background: rgba(212,175,55,0.1);
       border-radius: 14px;
       padding: 12px;
@@ -533,17 +534,26 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .auto-fill-info .info-text {
+    .user-info-bar .info-text {
       font-size: 12px;
       color: #D4AF37;
     }
     
-    /* Manual Address Form (when no saved address) */
-    .manual-address-form {
-      display: block;
+    /* Action buttons for new address */
+    .action-buttons-row {
+      display: flex;
+      gap: 10px;
+      margin-top: 12px;
     }
-    .manual-address-form.hide {
-      display: none;
+    .save-address-btn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+    }
+    .cancel-address-btn {
+      background: #F44336;
+      color: white;
+      border: none;
     }
   </style>
 </head>
@@ -583,7 +593,7 @@
 
   <div class="checkout-main">
     <div class="checkout-form">
-      <div class="auto-fill-info" id="autoFillInfo">
+      <div class="user-info-bar">
         <div class="info-text">
           <i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span>
         </div>
@@ -602,19 +612,21 @@
       <div class="form-section" id="addressSection">
         <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
         
-        <!-- Saved Addresses Selector (shows only if user has saved addresses) -->
-        <div class="address-selector" id="addressSelector" style="display: none;">
-          <div class="saved-addresses" id="savedAddressesList"></div>
-          <button class="add-new-address-btn" id="addNewAddressBtn">
-            <i class="fas fa-plus-circle"></i> Add New Address
-          </button>
+        <!-- Saved Addresses Section -->
+        <div id="savedAddressesSection" style="display: none;">
+          <div class="address-section">
+            <div class="saved-addresses-list" id="savedAddressesList"></div>
+            <button class="add-new-address-trigger" id="addNewAddressTrigger">
+              <i class="fas fa-plus-circle"></i> Add New Address
+            </button>
+          </div>
         </div>
 
-        <!-- Manual Address Form (shows when no saved address OR user clicks Add New) -->
-        <div class="manual-address-form" id="manualAddressForm">
+        <!-- Manual Address Form (for first time or adding new) -->
+        <div id="manualAddressForm" class="manual-address-form">
           <div class="form-group">
             <label>Full Name <span class="required">*</span></label>
-            <input type="text" id="manualFullName" placeholder="Recipient full name">
+            <input type="text" id="manualName" placeholder="Recipient full name">
           </div>
           <div class="form-group">
             <label>Street Address <span class="required">*</span></label>
@@ -644,53 +656,14 @@
             <label>Phone Number</label>
             <input type="tel" id="manualPhone" placeholder="Alternative phone number">
           </div>
-          <button class="location-btn" id="useCurrentLocationManualBtn" style="margin-top: 0;">
+          <button class="location-btn" id="useCurrentLocationBtn">
             <i class="fas fa-location-dot"></i> Use My Current Location
           </button>
-        </div>
-
-        <!-- New Address Form (hidden by default, shows when Add New Address clicked) -->
-        <div class="new-address-form" id="newAddressForm">
-          <div class="form-group">
-            <label>Full Name <span class="required">*</span></label>
-            <input type="text" id="newAddressName" placeholder="Recipient full name">
-          </div>
-          <div class="form-group">
-            <label>Street Address <span class="required">*</span></label>
-            <input type="text" id="newAddressStreet" placeholder="House number, building, street">
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>City <span class="required">*</span></label>
-              <input type="text" id="newAddressCity" placeholder="City">
-            </div>
-            <div class="form-group">
-              <label>State <span class="required">*</span></label>
-              <input type="text" id="newAddressState" placeholder="State">
-            </div>
-          </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Pincode <span class="required">*</span></label>
-              <input type="text" id="newAddressPincode" placeholder="6-digit pincode">
-            </div>
-            <div class="form-group">
-              <label>Landmark (Optional)</label>
-              <input type="text" id="newAddressLandmark" placeholder="Near...">
-            </div>
-          </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="newAddressPhone" placeholder="Alternative phone number">
-          </div>
-          <div style="display: flex; gap: 10px; margin-top: 10px;">
-            <button class="location-btn" id="useCurrentLocationNewBtn" style="flex:1; margin-top:0;">
-              <i class="fas fa-location-dot"></i> Use Current Location
+          <div class="action-buttons-row">
+            <button class="location-btn save-address-btn" id="saveManualAddressBtn" style="flex:1;">
+              <i class="fas fa-save"></i> Save & Continue
             </button>
-            <button class="location-btn" id="saveNewAddressBtn" style="flex:1; margin-top:0; background:#4CAF50;">
-              <i class="fas fa-save"></i> Save & Use This Address
-            </button>
-            <button class="location-btn" id="cancelNewAddressBtn" style="flex:0.5; margin-top:0; background:#F44336;">
+            <button class="location-btn cancel-address-btn" id="cancelManualAddressBtn" style="flex:0.5; display: none;">
               Cancel
             </button>
           </div>
@@ -767,10 +740,7 @@
         <div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div>
         <div class="total-row"><span>Packaging Charge</span><span style="color: #4CAF50;">FREE</span></div>
         <div class="total-row"><span>GST / Tax (0%)</span><span style="color: #4CAF50;">₹0</span></div>
-        <div class="total-row" id="discountRow" style="display: none;">
-          <span>Online Payment Discount (5%)</span>
-          <span style="color: #4CAF50;" id="discountAmount">-₹0</span>
-        </div>
+        <div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div>
         <div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
       </div>
 
@@ -836,7 +806,6 @@
   
   // ========== LOCATION FUNCTION ==========
   async function getDetailedCurrentLocation() {
-    const btn = document.activeElement;
     showToast('📍 Getting your location...');
     
     if (!navigator.geolocation) {
@@ -848,7 +817,6 @@
       navigator.geolocation.getCurrentPosition(
         async (position) => {
           const { latitude, longitude } = position.coords;
-          showToast('📍 Fetching address...');
           
           try {
             const response = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&addressdetails=1&accept-language=en&zoom=18`);
@@ -870,22 +838,17 @@
               if (road) streetAddress += road;
               if (suburb && !streetAddress.includes(suburb)) streetAddress += streetAddress ? ', ' + suburb : suburb;
               
-              const addressData = {
+              resolve({
                 street: streetAddress.trim(),
                 city: city,
                 state: state,
                 pincode: pincode,
                 landmark: addr.neighbourhood || addr.suburb || ''
-              };
-              
-              showToast(`✅ Location found`);
-              resolve(addressData);
+              });
             } else {
-              showToast('⚠️ Could not get detailed address', true);
               resolve(null);
             }
           } catch (error) {
-            showToast('⚠️ Network error', true);
             resolve(null);
           }
         },
@@ -915,25 +878,8 @@
     }
   }
   
-  async function fillNewFormWithLocation() {
-    const locationData = await getDetailedCurrentLocation();
-    if (locationData) {
-      document.getElementById('newAddressStreet').value = locationData.street;
-      document.getElementById('newAddressCity').value = locationData.city;
-      document.getElementById('newAddressState').value = locationData.state;
-      document.getElementById('newAddressPincode').value = locationData.pincode;
-      document.getElementById('newAddressLandmark').value = locationData.landmark;
-      showToast('✅ Address filled!');
-    }
-  }
-  
-  function showLocationModal() {
-    document.getElementById('locationModal').classList.add('show');
-  }
-  
-  function hideLocationModal() {
-    document.getElementById('locationModal').classList.remove('show');
-  }
+  function showLocationModal() { document.getElementById('locationModal').classList.add('show'); }
+  function hideLocationModal() { document.getElementById('locationModal').classList.remove('show'); }
   
   // ========== ADDRESS MANAGEMENT ==========
   async function loadUserAddresses() {
@@ -957,42 +903,49 @@
     }
   }
   
-  function renderSavedAddresses() {
-    const container = document.getElementById('savedAddressesList');
-    const selectorDiv = document.getElementById('addressSelector');
+  function renderUI() {
+    const savedSection = document.getElementById('savedAddressesSection');
     const manualForm = document.getElementById('manualAddressForm');
     
-    if (userAddresses.length === 0) {
-      // No saved addresses - show manual form
-      selectorDiv.style.display = 'none';
-      manualForm.classList.remove('hide');
-      document.getElementById('newAddressForm').classList.remove('show');
-      isAddingNewAddress = false;
-    } else {
-      // Has saved addresses - show selector
-      selectorDiv.style.display = 'block';
+    if (userAddresses.length > 0 && !isAddingNewAddress) {
+      // Show saved addresses
+      savedSection.style.display = 'block';
       manualForm.classList.add('hide');
-      document.getElementById('newAddressForm').classList.remove('show');
-      isAddingNewAddress = false;
+      renderSavedAddressesList();
+    } else {
+      // Show manual form
+      savedSection.style.display = 'none';
+      manualForm.classList.remove('hide');
       
-      container.innerHTML = userAddresses.map(addr => `
-        <div class="address-card ${selectedAddressId === addr.id ? 'selected' : ''}" data-id="${addr.id}">
-          <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
-          <div class="address-detail">${escapeHtml(addr.street)}</div>
-          <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
-          ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
-          <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
-          <button class="delete-address" data-id="${addr.id}" onclick="event.stopPropagation(); deleteAddress('${addr.id}')">✕</button>
-        </div>
-      `).join('');
-      
-      document.querySelectorAll('.address-card').forEach(card => {
-        card.addEventListener('click', () => {
-          const id = card.getAttribute('data-id');
-          selectAddress(id);
-        });
-      });
+      // Pre-fill with user data for first time
+      if (userAddresses.length === 0 && !isAddingNewAddress) {
+        document.getElementById('manualName').value = currentUser?.name || '';
+        document.getElementById('manualPhone').value = currentUser?.phone || '';
+      }
     }
+  }
+  
+  function renderSavedAddressesList() {
+    const container = document.getElementById('savedAddressesList');
+    if (!container) return;
+    
+    container.innerHTML = userAddresses.map(addr => `
+      <div class="saved-address-card ${selectedAddressId === addr.id ? 'selected' : ''}" data-id="${addr.id}">
+        <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
+        <div class="address-detail">${escapeHtml(addr.street)}</div>
+        <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
+        ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
+        <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
+        <button class="delete-address-btn" data-id="${addr.id}" onclick="event.stopPropagation(); deleteAddress('${addr.id}')">✕</button>
+      </div>
+    `).join('');
+    
+    document.querySelectorAll('.saved-address-card').forEach(card => {
+      card.addEventListener('click', () => {
+        const id = card.getAttribute('data-id');
+        selectAddress(id);
+      });
+    });
   }
   
   function selectAddress(addressId) {
@@ -1000,52 +953,52 @@
     const address = userAddresses.find(a => a.id === addressId);
     if (address) {
       document.getElementById('fullName').value = address.name;
-      renderSavedAddresses();
+      renderSavedAddressesList();
       showToast(`✅ Using address: ${address.name}`);
     }
   }
   
-  function showAddNewAddressForm() {
+  function showAddNewAddress() {
     isAddingNewAddress = true;
-    document.getElementById('addressSelector').style.display = 'none';
-    document.getElementById('manualAddressForm').classList.add('hide');
-    document.getElementById('newAddressForm').classList.add('show');
-    
-    // Pre-fill with user data
-    document.getElementById('newAddressName').value = document.getElementById('fullName').value || currentUser?.name || '';
-    document.getElementById('newAddressPhone').value = currentUser?.phone || '';
+    renderUI();
+    // Clear manual form for new address
+    document.getElementById('manualName').value = currentUser?.name || '';
+    document.getElementById('manualStreet').value = '';
+    document.getElementById('manualCity').value = '';
+    document.getElementById('manualState').value = '';
+    document.getElementById('manualPincode').value = '';
+    document.getElementById('manualLandmark').value = '';
+    document.getElementById('manualPhone').value = currentUser?.phone || '';
+    document.getElementById('cancelManualAddressBtn').style.display = 'block';
+    document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save New Address';
   }
   
-  function cancelNewAddress() {
-    isAddingNewAddress = false;
-    document.getElementById('newAddressForm').classList.remove('show');
-    
-    if (userAddresses.length === 0) {
-      document.getElementById('addressSelector').style.display = 'none';
-      document.getElementById('manualAddressForm').classList.remove('hide');
+  function cancelAddNewAddress() {
+    if (userAddresses.length > 0) {
+      isAddingNewAddress = false;
+      renderUI();
+      document.getElementById('cancelManualAddressBtn').style.display = 'none';
+      document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save & Continue';
     } else {
-      document.getElementById('addressSelector').style.display = 'block';
-      document.getElementById('manualAddressForm').classList.add('hide');
+      // If no addresses, just clear form
+      document.getElementById('manualName').value = currentUser?.name || '';
+      document.getElementById('manualStreet').value = '';
+      document.getElementById('manualCity').value = '';
+      document.getElementById('manualState').value = '';
+      document.getElementById('manualPincode').value = '';
+      document.getElementById('manualLandmark').value = '';
+      document.getElementById('manualPhone').value = currentUser?.phone || '';
     }
-    
-    // Clear new address form
-    document.getElementById('newAddressName').value = '';
-    document.getElementById('newAddressStreet').value = '';
-    document.getElementById('newAddressCity').value = '';
-    document.getElementById('newAddressState').value = '';
-    document.getElementById('newAddressPincode').value = '';
-    document.getElementById('newAddressLandmark').value = '';
-    document.getElementById('newAddressPhone').value = '';
   }
   
-  async function saveNewAddressAndUse() {
-    const name = document.getElementById('newAddressName').value.trim();
-    const street = document.getElementById('newAddressStreet').value.trim();
-    const city = document.getElementById('newAddressCity').value.trim();
-    const state = document.getElementById('newAddressState').value.trim();
-    const pincode = document.getElementById('newAddressPincode').value.trim();
-    const landmark = document.getElementById('newAddressLandmark').value.trim();
-    const phone = document.getElementById('newAddressPhone').value.trim();
+  async function saveNewAddress() {
+    const name = document.getElementById('manualName').value.trim();
+    const street = document.getElementById('manualStreet').value.trim();
+    const city = document.getElementById('manualCity').value.trim();
+    const state = document.getElementById('manualState').value.trim();
+    const pincode = document.getElementById('manualPincode').value.trim();
+    const landmark = document.getElementById('manualLandmark').value.trim();
+    const phone = document.getElementById('manualPhone').value.trim();
     
     if (!name || !street || !city || !state || !pincode) {
       showToast('❌ Please fill all required fields', true);
@@ -1075,27 +1028,22 @@
     try {
       const docRef = await db.collection('addresses').add(addressData);
       addressData.id = docRef.id;
-      userAddresses.push(addressData);
       
-      // Clear form
-      document.getElementById('newAddressName').value = '';
-      document.getElementById('newAddressStreet').value = '';
-      document.getElementById('newAddressCity').value = '';
-      document.getElementById('newAddressState').value = '';
-      document.getElementById('newAddressPincode').value = '';
-      document.getElementById('newAddressLandmark').value = '';
-      document.getElementById('newAddressPhone').value = '';
-      
-      cancelNewAddress();
-      
-      // Reload and select new address
       await loadUserAddresses();
-      renderSavedAddresses();
-      selectAddress(docRef.id);
+      
+      if (userAddresses.length > 0) {
+        isAddingNewAddress = false;
+        renderUI();
+        selectAddress(docRef.id);
+        document.getElementById('cancelManualAddressBtn').style.display = 'none';
+        document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save & Continue';
+      } else {
+        renderUI();
+        selectAddress(docRef.id);
+      }
       
       showToast('✅ Address saved successfully!');
     } catch(e) {
-      console.error("Save address error:", e);
       showToast('❌ Failed to save address', true);
     }
     
@@ -1107,20 +1055,16 @@
     
     try {
       await db.collection('addresses').doc(addressId).delete();
-      userAddresses = userAddresses.filter(a => a.id !== addressId);
+      await loadUserAddresses();
       if (selectedAddressId === addressId) {
         selectedAddressId = null;
-      }
-      
-      if (userAddresses.length === 0) {
-        // No addresses left, show manual form
-        document.getElementById('addressSelector').style.display = 'none';
-        document.getElementById('manualAddressForm').classList.remove('hide');
         document.getElementById('fullName').value = currentUser?.name || '';
-      } else {
-        renderSavedAddresses();
       }
-      
+      renderUI();
+      if (userAddresses.length === 0) {
+        document.getElementById('fullName').value = currentUser?.name || '';
+        document.getElementById('manualName').value = currentUser?.name || '';
+      }
       showToast('✅ Address deleted');
     } catch(e) {
       showToast('❌ Failed to delete address', true);
@@ -1129,7 +1073,6 @@
   
   // ========== GET ADDRESS FOR ORDER ==========
   function getOrderAddress() {
-    // If user selected a saved address
     if (selectedAddressId) {
       const addr = userAddresses.find(a => a.id === selectedAddressId);
       if (addr) {
@@ -1146,15 +1089,13 @@
       }
     }
     
-    // Otherwise get from manual form
-    const name = document.getElementById('manualFullName').value.trim();
+    const name = document.getElementById('manualName').value.trim();
     const street = document.getElementById('manualStreet').value.trim();
     const city = document.getElementById('manualCity').value.trim();
     const state = document.getElementById('manualState').value.trim();
     const pincode = document.getElementById('manualPincode').value.trim();
     const landmark = document.getElementById('manualLandmark').value.trim();
     const phone = document.getElementById('manualPhone').value.trim();
-    
     const fullName = name || document.getElementById('fullName').value.trim();
     
     if (!fullName || !street || !city || !state || !pincode) {
@@ -1177,7 +1118,6 @@
     const address = getOrderAddress();
     if (!address) return null;
     
-    // Check if address already exists
     const exists = userAddresses.some(a => 
       a.street === address.address && 
       a.city === address.city && 
@@ -1205,12 +1145,11 @@
       userAddresses.push(addressData);
       return docRef.id;
     } catch(e) {
-      console.error("Auto-save address error:", e);
       return null;
     }
   }
   
-  // ========== ORDER FUNCTIONS ==========
+  // ========== ORDER VALIDATION ==========
   function validateOrder() {
     const address = getOrderAddress();
     if (!address) {
@@ -1222,22 +1161,13 @@
   
   async function saveOrderToFirebase(paymentMethod, transactionId = null, address = null) {
     const orderAddress = address || getOrderAddress();
-    if (!orderAddress) {
-      showToast('❌ Please fill address details', true);
-      return { success: false };
-    }
+    if (!orderAddress) return { success: false };
     
     const itemsWithDetails = cart.map(item => ({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      quantity: item.quantity,
-      size: item.size || 'Not Selected',
-      color: item.color || 'Not Selected',
-      combo: item.combo || null,
-      isCombo: item.isCombo || false,
-      comboMultiplier: item.comboMultiplier || null,
-      total: item.price * item.quantity
+      id: item.id, name: item.name, price: item.price, quantity: item.quantity,
+      size: item.size || 'Not Selected', color: item.color || 'Not Selected',
+      combo: item.combo || null, isCombo: item.isCombo || false,
+      comboMultiplier: item.comboMultiplier || null, total: item.price * item.quantity
     }));
     
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
@@ -1249,11 +1179,8 @@
       customerPhone: orderAddress.phone,
       customerEmail: orderAddress.email,
       shippingAddress: {
-        address: orderAddress.address,
-        city: orderAddress.city,
-        state: orderAddress.state,
-        pincode: orderAddress.pincode,
-        landmark: orderAddress.landmark
+        address: orderAddress.address, city: orderAddress.city,
+        state: orderAddress.state, pincode: orderAddress.pincode, landmark: orderAddress.landmark
       },
       items: itemsWithDetails,
       paymentMethod: paymentMethod,
@@ -1275,7 +1202,6 @@
       await db.collection('orders').doc(orderId).set(orderData);
       return { success: true, orderId: orderId };
     } catch (error) {
-      console.error("SAVE ERROR:", error);
       return { success: false, error: error.message };
     }
   }
@@ -1296,22 +1222,20 @@
     
     const address = getOrderAddress();
     
-    // Save address for future if manual entry
     if (!selectedAddressId && address) {
       await saveAddressFromManualOrder();
       await loadUserAddresses();
-      renderSavedAddresses();
+      renderUI();
     }
     
     const result = await saveOrderToFirebase('Cash on Delivery', null, address);
-    
     showLoading(false);
     
     if (result.success) {
       showToast(`✅ Order placed! Order ID: ${result.orderId}`);
-      setTimeout(() => { processOrderAfterSave(result.orderId); }, 1500);
+      setTimeout(() => processOrderAfterSave(result.orderId), 1500);
     } else {
-      showToast('❌ Failed to place order. Please try again.', true);
+      showToast('❌ Failed to place order', true);
       if (btn) { btn.disabled = false; btn.innerHTML = 'Confirm Order (COD)'; }
       isProcessing = false;
     }
@@ -1323,7 +1247,6 @@
     isProcessing = true;
     
     showLoading(true);
-    
     const finalAmount = discountedTotal;
     if (finalAmount <= 0) {
       showToast('❌ Invalid order amount', true);
@@ -1334,71 +1257,49 @@
     
     const address = getOrderAddress();
     const orderAmount = Math.round(finalAmount);
-    
     const btn = document.getElementById('payRazorpayBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
     
     try {
       const options = {
-        key: RAZORPAY_KEY_ID,
-        amount: orderAmount * 100,
-        currency: 'INR',
-        name: 'VEDANTA',
-        description: `Order Payment (5% Discount Applied)`,
-        prefill: {
-          name: address.fullName,
-          email: address.email,
-          contact: address.phone
-        },
+        key: RAZORPAY_KEY_ID, amount: orderAmount * 100, currency: 'INR',
+        name: 'VEDANTA', description: `Order Payment`,
+        prefill: { name: address.fullName, email: address.email, contact: address.phone },
         theme: { color: '#D4AF37' },
-        modal: {
-          ondismiss: function() {
-            showLoading(false);
-            showToast('Payment cancelled', true);
-            if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
-            isProcessing = false;
-          }
-        }
+        modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); if(btn){btn.disabled=false;btn.innerHTML='Pay Now';} isProcessing=false; } }
       };
       
       const razorpay = new Razorpay(options);
       
-      razorpay.on('payment.success', async function(response) {
-        // Save address for future if manual entry
+      razorpay.on('payment.success', async (response) => {
         if (!selectedAddressId && address) {
           await saveAddressFromManualOrder();
           await loadUserAddresses();
-          renderSavedAddresses();
+          renderUI();
         }
-        
         const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id, address);
-        
         showLoading(false);
-        
         if (result.success) {
           showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
-          setTimeout(() => { processOrderAfterSave(result.orderId); }, 1500);
+          setTimeout(() => processOrderAfterSave(result.orderId), 1500);
         } else {
-          showToast('⚠️ Payment successful but order save failed. Contact support.', true);
+          showToast('⚠️ Payment but save failed', true);
         }
         isProcessing = false;
       });
       
-      razorpay.on('payment.error', function(response) {
-        console.error('Payment Error:', response);
+      razorpay.on('payment.error', (response) => {
         showLoading(false);
-        showToast('❌ Payment failed! Please try again.', true);
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
+        showToast('❌ Payment failed!', true);
+        if(btn){btn.disabled=false;btn.innerHTML='Pay Now';}
         isProcessing = false;
       });
       
       razorpay.open();
-      
-    } catch (error) {
-      console.error('Razorpay Error:', error);
+    } catch(error) {
       showLoading(false);
       showToast('❌ Failed to initialize payment', true);
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
+      if(btn){btn.disabled=false;btn.innerHTML='Pay Now';}
       isProcessing = false;
     }
   }
@@ -1407,36 +1308,29 @@
   function loadProductsInstantly() {
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
-      try {
-        const products = JSON.parse(cached);
-        products.forEach(p => productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name }));
-        return true;
-      } catch(e) {}
+      try { JSON.parse(cached).forEach(p => productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name })); return true; } catch(e){}
     }
     return false;
   }
   
   function fetchProductsInBackground() {
     db.collection('products').get().then(snapshot => {
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        if (!productsCache.has(doc.id)) productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name });
-      });
+      snapshot.forEach(doc => { const p = doc.data(); if(!productsCache.has(doc.id)) productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name }); });
       renderOrderSummary();
     }).catch(e => console.log("Background fetch error:", e));
   }
   
-  function getProductImage(productId) { return productsCache.get(productId)?.images?.[0] || null; }
-  function getProductIcon(productId) { return productsCache.get(productId)?.icon || 'fa-gem'; }
+  function getProductImage(id) { return productsCache.get(id)?.images?.[0] || null; }
+  function getProductIcon(id) { return productsCache.get(id)?.icon || 'fa-gem'; }
   
   function loadCart() {
     cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
     if (cart.length === 0) {
-      showToast('🛒 Your cart is empty! Redirecting...', true);
-      setTimeout(() => { window.location.href = 'index.html'; }, 1500);
+      showToast('🛒 Cart empty! Redirecting...', true);
+      setTimeout(() => window.location.href = 'index.html', 1500);
       return;
     }
-    cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    cartTotal = cart.reduce((s,i) => s + (i.price * i.quantity), 0);
     calculateOnlineDiscount();
     renderOrderSummary();
   }
@@ -1445,27 +1339,21 @@
     if (selectedPaymentMethod === 'razorpay') {
       discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100);
       discountedTotal = cartTotal - discountAmount;
-    } else {
-      discountAmount = 0;
-      discountedTotal = cartTotal;
-    }
+    } else { discountAmount = 0; discountedTotal = cartTotal; }
     updateTotalDisplay();
   }
   
   function updateTotalDisplay() {
     document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
     const discountRow = document.getElementById('discountRow');
-    const discountAmountSpan = document.getElementById('discountAmount');
-    
     if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) {
       discountRow.style.display = 'flex';
-      discountAmountSpan.innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`;
+      document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`;
       document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`;
     } else {
       discountRow.style.display = 'none';
       document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
     }
-    
     const finalTotal = selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal;
     document.getElementById('rewardPoints').innerHTML = Math.floor(finalTotal / 100);
   }
@@ -1473,30 +1361,15 @@
   function renderOrderSummary() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
-    
     container.innerHTML = cart.map(item => {
-      const productImg = getProductImage(item.id);
-      const productIcon = getProductIcon(item.id);
-      return `
-        <div class="order-item">
-          <div class="order-item-img">
-            ${productImg ? `<img src="${productImg}" alt="${escapeHtml(item.name)}">` : `<i class="fas ${productIcon}"></i>`}
-          </div>
-          <div class="order-item-info">
-            <h4>${escapeHtml(item.name)}</h4>
-            <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
-          </div>
-          <div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div>
-        </div>
-      `;
+      const img = getProductImage(item.id);
+      const icon = getProductIcon(item.id);
+      return `<div class="order-item"><div class="order-item-img">${img ? `<img src="${img}">` : `<i class="fas ${icon}"></i>`}</div><div class="order-item-info"><h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p></div><div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div></div>`;
     }).join('');
     updateTotalDisplay();
   }
   
-  function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m));
-  }
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
   
   // ========== INITIALIZATION ==========
   async function initialize() {
@@ -1505,77 +1378,60 @@
     
     if (user) {
       currentUser = {
-        uid: user.uid,
-        phone: user.phoneNumber,
+        uid: user.uid, phone: user.phoneNumber,
         email: user.email || storedUser?.email || `${user.uid}@vedanta.com`,
         name: storedUser?.name || `User${user.phoneNumber?.slice(-4) || '001'}`
       };
       localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
-    } else if (storedUser) {
-      currentUser = storedUser;
-    } else {
+    } else if (storedUser) { currentUser = storedUser; }
+    else {
       showToast('🔐 Please login to continue', true);
-      setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
+      setTimeout(() => window.location.href = 'profile.html', 1500);
       return;
     }
     
-    document.getElementById('displayPhone').innerText = currentUser.phone || 'No phone';
-    document.getElementById('displayEmail').innerText = currentUser.email || 'No email';
+    document.getElementById('displayPhone').innerText = currentUser.phone || '';
+    document.getElementById('displayEmail').innerText = currentUser.email || '';
     document.getElementById('phone').value = currentUser.phone || '';
     document.getElementById('email').value = currentUser.email || '';
     document.getElementById('fullName').value = currentUser.name || '';
-    document.getElementById('manualFullName').value = currentUser.name || '';
+    document.getElementById('manualName').value = currentUser.name || '';
     document.getElementById('manualPhone').value = currentUser.phone || '';
     
     await loadUserAddresses();
-    renderSavedAddresses();
+    renderUI();
     
     loadCart();
     loadProductsInstantly();
     fetchProductsInBackground();
     
-    setupEventListeners();
-  }
-  
-  function setupEventListeners() {
-    const codOption = document.getElementById('codOption');
-    const razorpayOption = document.getElementById('razorpayOption');
-    
-    codOption?.addEventListener('click', () => {
+    // Event Listeners
+    document.getElementById('codOption')?.addEventListener('click', () => {
       document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-      codOption.classList.add('selected');
+      document.getElementById('codOption').classList.add('selected');
       selectedPaymentMethod = 'cod';
       document.getElementById('codDetails').classList.add('show');
       document.getElementById('razorpaySection').classList.remove('show');
       calculateOnlineDiscount();
     });
     
-    razorpayOption?.addEventListener('click', () => {
+    document.getElementById('razorpayOption')?.addEventListener('click', () => {
       document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
-      razorpayOption.classList.add('selected');
+      document.getElementById('razorpayOption').classList.add('selected');
       selectedPaymentMethod = 'razorpay';
       document.getElementById('codDetails').classList.remove('show');
       document.getElementById('razorpaySection').classList.add('show');
       calculateOnlineDiscount();
     });
     
-    document.getElementById('addNewAddressBtn')?.addEventListener('click', showAddNewAddressForm);
-    document.getElementById('saveNewAddressBtn')?.addEventListener('click', saveNewAddressAndUse);
-    document.getElementById('cancelNewAddressBtn')?.addEventListener('click', cancelNewAddress);
-    document.getElementById('useCurrentLocationManualBtn')?.addEventListener('click', fillManualFormWithLocation);
-    document.getElementById('useCurrentLocationNewBtn')?.addEventListener('click', fillNewFormWithLocation);
-    
+    document.getElementById('addNewAddressTrigger')?.addEventListener('click', showAddNewAddress);
+    document.getElementById('saveManualAddressBtn')?.addEventListener('click', saveNewAddress);
+    document.getElementById('cancelManualAddressBtn')?.addEventListener('click', cancelAddNewAddress);
+    document.getElementById('useCurrentLocationBtn')?.addEventListener('click', fillManualFormWithLocation);
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
-    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => {
-      e.preventDefault();
-      window.location.href = 'index.html';
-    });
-    
-    document.getElementById('openSettingsBtn')?.addEventListener('click', () => {
-      hideLocationModal();
-      showToast('📍 Please enable location in browser settings', true);
-    });
+    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
+    document.getElementById('openSettingsBtn')?.addEventListener('click', () => { hideLocationModal(); showToast('📍 Enable location in browser settings', true); });
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
   }
   
