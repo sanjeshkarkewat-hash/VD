@@ -355,7 +355,6 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         
-        /* Skeleton loading effect */
         .skeleton-card {
             background: rgba(15,15,22,0.7);
             border-radius: 28px;
@@ -408,7 +407,6 @@
 </div>
 
 <div class="orders-container" id="ordersContainer">
-    <!-- Skeleton loaders for better UX -->
     <div class="skeleton-card">
         <div style="display: flex; gap: 16px;">
             <div class="skeleton-img"></div>
@@ -440,7 +438,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    // ========== 🔥 FIREBASE CONFIGURATION - UPDATED (NEW CONFIG) ==========
+    // ========== 🔥 FIREBASE CONFIGURATION - NEW CONFIG ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
         authDomain: "nexi-53897.firebaseapp.com",
@@ -454,7 +452,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
     
-    // Enable Firestore caching for faster subsequent loads
     db.enablePersistence({ synchronizeTabs: true }).catch(err => {
         console.log("Persistence error (non-critical):", err);
     });
@@ -486,16 +483,14 @@
         return null;
     }
     
-    // Load products once and cache them
     async function loadProducts() {
         if (productsCache.size > 0) return productsCache;
         
         try {
-            // Check sessionStorage for cached products (faster than Firestore)
             const cached = sessionStorage.getItem('vedanta_products_cache');
             if (cached) {
                 const parsed = JSON.parse(cached);
-                if (parsed && Date.now() - parsed.timestamp < 3600000) { // 1 hour cache
+                if (parsed && Date.now() - parsed.timestamp < 3600000) {
                     productsCache = new Map(parsed.data);
                     console.log("✅ Products loaded from cache:", productsCache.size);
                     return productsCache;
@@ -514,7 +509,6 @@
                 productsArray.push([p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name || 'Product' }]);
             });
             
-            // Cache in sessionStorage
             sessionStorage.setItem('vedanta_products_cache', JSON.stringify({
                 timestamp: Date.now(),
                 data: productsArray
@@ -569,6 +563,72 @@
             if (m === '>') return '&gt;';
             return m;
         });
+    }
+    
+    // ✅ FIXED: Fetch orders by phone number and email
+    async function fetchOrdersByUser() {
+        if (!currentUser) return [];
+        
+        const orders = [];
+        const seenOrderIds = new Set();
+        
+        try {
+            // Query 1: By customerPhone (most reliable)
+            if (currentUser.phone) {
+                const phoneQuery = await db.collection('orders')
+                    .where('customerPhone', '==', currentUser.phone)
+                    .orderBy('orderDate', 'desc')
+                    .get();
+                
+                phoneQuery.forEach(doc => {
+                    if (!seenOrderIds.has(doc.id)) {
+                        seenOrderIds.add(doc.id);
+                        orders.push({ id: doc.id, ...doc.data() });
+                    }
+                });
+                console.log(`✅ Found ${phoneQuery.size} orders by phone: ${currentUser.phone}`);
+            }
+            
+            // Query 2: By customerEmail
+            if (currentUser.email) {
+                const emailQuery = await db.collection('orders')
+                    .where('customerEmail', '==', currentUser.email)
+                    .orderBy('orderDate', 'desc')
+                    .get();
+                
+                emailQuery.forEach(doc => {
+                    if (!seenOrderIds.has(doc.id)) {
+                        seenOrderIds.add(doc.id);
+                        orders.push({ id: doc.id, ...doc.data() });
+                    }
+                });
+                console.log(`✅ Found ${emailQuery.size} orders by email: ${currentUser.email}`);
+            }
+            
+            // Query 3: By userEmail
+            if (currentUser.email) {
+                const userEmailQuery = await db.collection('orders')
+                    .where('userEmail', '==', currentUser.email)
+                    .orderBy('orderDate', 'desc')
+                    .get();
+                
+                userEmailQuery.forEach(doc => {
+                    if (!seenOrderIds.has(doc.id)) {
+                        seenOrderIds.add(doc.id);
+                        orders.push({ id: doc.id, ...doc.data() });
+                    }
+                });
+                console.log(`✅ Found ${userEmailQuery.size} orders by userEmail`);
+            }
+            
+        } catch(e) {
+            console.error("Error fetching orders:", e);
+        }
+        
+        // Sort by orderDate descending
+        orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
+        
+        return orders;
     }
     
     function renderOrders() {
@@ -651,7 +711,7 @@
                     </div>
                     
                     <div class="card-actions">
-                        <a href="view-detail.html?orderId=${encodeURIComponent(orderIdDisplay)}" class="btn-view">
+                        <a href="order-details.html?orderId=${encodeURIComponent(orderIdDisplay)}" class="btn-view">
                             <i class="fas fa-eye"></i> View Details
                         </a>
                     </div>
@@ -672,11 +732,11 @@
         });
     }
     
-    // Main initialization - parallel loading for speed
+    // Main initialization
     (async function init() {
         currentUser = getCurrentUser();
         
-        if (!currentUser || !currentUser.email) {
+        if (!currentUser) {
             document.getElementById('ordersContainer').innerHTML = `
                 <div class="empty-state">
                     <i class="fas fa-sign-in-alt"></i>
@@ -690,84 +750,39 @@
             return;
         }
         
-        console.log("👤 Current User Email:", currentUser.email);
+        console.log("👤 Current User:", currentUser);
+        console.log("   Phone:", currentUser.phone);
+        console.log("   Email:", currentUser.email);
         
-        // Start parallel loading: products + orders
-        const productsPromise = loadProducts();
+        // Load products first
+        await loadProducts();
         
-        // Fetch orders with a single optimized query
-        const fetchOrders = async () => {
-            try {
-                // Try userEmail first
-                let query = db.collection('orders')
-                    .where('userEmail', '==', currentUser.email)
-                    .orderBy('orderDate', 'desc')
-                    .limit(50); // Limit to recent 50 orders for speed
-                
-                let snapshot = await query.get();
-                let orders = [];
-                
-                snapshot.forEach(doc => {
-                    orders.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // If no orders, try customerEmail
-                if (orders.length === 0) {
-                    query = db.collection('orders')
-                        .where('customerEmail', '==', currentUser.email)
-                        .orderBy('orderDate', 'desc')
-                        .limit(50);
-                    
-                    snapshot = await query.get();
-                    snapshot.forEach(doc => {
-                        orders.push({ id: doc.id, ...doc.data() });
-                    });
-                }
-                
-                return orders;
-            } catch(e) {
-                console.error("Error fetching orders:", e);
-                return [];
-            }
-        };
-        
-        // Wait for both products and orders in parallel
-        const [_, orders] = await Promise.all([productsPromise, fetchOrders()]);
+        // Fetch orders by phone/email
+        const orders = await fetchOrdersByUser();
         
         allOrders = orders;
         isLoading = false;
         renderOrders();
         initFilters();
         
-        console.log(`✅ Loaded ${orders.length} orders in ${performance.now()}ms`);
+        console.log(`✅ Loaded ${orders.length} total orders`);
         
-        // Set up real-time listener for updates (but don't block initial load)
-        setTimeout(() => {
+        if (orders.length === 0) {
+            showToastMessage("No orders found yet. Start shopping!", false);
+        }
+        
+        // Set up real-time listener
+        if (currentUser.phone) {
             db.collection('orders')
-                .where('userEmail', '==', currentUser.email)
-                .orderBy('orderDate', 'desc')
-                .onSnapshot((snapshot) => {
-                    const freshOrders = [];
-                    snapshot.forEach(doc => freshOrders.push({ id: doc.id, ...doc.data() }));
-                    
-                    if (freshOrders.length === 0) {
-                        db.collection('orders')
-                            .where('customerEmail', '==', currentUser.email)
-                            .orderBy('orderDate', 'desc')
-                            .onSnapshot((snap2) => {
-                                const orders2 = [];
-                                snap2.forEach(doc => orders2.push({ id: doc.id, ...doc.data() }));
-                                if (orders2.length > 0 || allOrders.length > 0) {
-                                    allOrders = orders2;
-                                    renderOrders();
-                                }
-                            });
-                    } else if (freshOrders.length > 0 || allOrders.length > 0) {
-                        allOrders = freshOrders;
+                .where('customerPhone', '==', currentUser.phone)
+                .onSnapshot(() => {
+                    fetchOrdersByUser().then(newOrders => {
+                        allOrders = newOrders;
                         renderOrders();
-                    }
+                        console.log(`🔄 Real-time update: ${newOrders.length} orders`);
+                    });
                 });
-        }, 100);
+        }
     })();
 </script>
 </body>
