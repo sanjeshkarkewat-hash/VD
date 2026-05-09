@@ -11,7 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
-    /* All existing styles remain same - no changes needed */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Space Grotesk', sans-serif;
@@ -607,7 +606,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== 🔥 UPDATED FIREBASE CONFIG - NEW CONFIG ==========
+  // ========== 🔥 NEW FIREBASE CONFIG (nexi-53897) ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
     authDomain: "nexi-53897.firebaseapp.com",
@@ -618,6 +617,7 @@
     measurementId: "G-W6N519LBPH"
   };
   
+  // Initialize Firebase
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
@@ -633,21 +633,14 @@
   let productsCache = new Map();
   let selectedPaymentMethod = 'cod';
   
-  // Get current user from localStorage or Firebase Auth
+  // Get current user
   let currentUser = JSON.parse(localStorage.getItem('vedantaUser')) || null;
   
-  // Also check Firebase Auth for user
-  auth.onAuthStateChanged((user) => {
-    if (user && !currentUser) {
-      currentUser = {
-        uid: user.uid,
-        phone: user.phoneNumber,
-        email: user.email || `${user.uid}@vedanta.com`,
-        name: user.displayName || `User${user.phoneNumber?.slice(-4) || '001'}`
-      };
-      localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
-    }
-  });
+  // Check if user is logged in
+  if (!currentUser || !currentUser.phone) {
+    showToast('🔐 Please login to continue', true);
+    setTimeout(() => { window.location.href = 'profile.html'; }, 1500);
+  }
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -664,6 +657,7 @@
     else overlay.classList.remove('show');
   }
   
+  // Location functions
   function showLocationModal() {
     document.getElementById('locationModal').classList.add('show');
   }
@@ -698,27 +692,20 @@
           
           if (data && data.address) {
             const addr = data.address;
-            
             let fullAddress = '';
             if (addr.house_number) fullAddress += addr.house_number + ' ';
             if (addr.road) fullAddress += addr.road;
-            if (addr.suburb && !fullAddress.includes(addr.suburb)) fullAddress += fullAddress ? ', ' + addr.suburb : addr.suburb;
-            
             if (fullAddress.trim()) document.getElementById('address').value = fullAddress;
-            
-            let city = addr.city || addr.town || addr.village;
-            if (city) document.getElementById('city').value = city;
+            if (addr.city || addr.town || addr.village) document.getElementById('city').value = addr.city || addr.town || addr.village;
             if (addr.state) document.getElementById('state').value = addr.state;
             if (addr.postcode) document.getElementById('pincode').value = addr.postcode;
-            
             showToast(`✅ Location found`);
           } else {
-            showToast('⚠️ Could not get address. Please fill manually.', true);
+            showToast('⚠️ Could not get address', true);
           }
         } catch (error) {
-          showToast('⚠️ Network error. Please fill address manually.', true);
+          showToast('⚠️ Network error', true);
         }
-        
         btn.disabled = false;
         btn.innerHTML = originalText;
       },
@@ -731,8 +718,7 @@
         }
         btn.disabled = false;
         btn.innerHTML = originalText;
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
+      }
     );
   }
   
@@ -741,6 +727,7 @@
     showToast('📍 Please enable location in settings', true);
   }
   
+  // Discount calculation
   function calculateOnlineDiscount() {
     if (selectedPaymentMethod === 'razorpay') {
       discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100);
@@ -767,6 +754,7 @@
     }
   }
   
+  // Product functions
   function loadProductsInstantly() {
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
@@ -793,7 +781,6 @@
   function getProductIcon(productId) { return productsCache.get(productId)?.icon || 'fa-gem'; }
   
   function getColorCode(colorName) {
-    if (!colorName || colorName === 'Not Selected') return '#D4AF37';
     const colorMap = {
       'Red': '#FF0000', 'Blue': '#2196F3', 'Green': '#4CAF50', 'Black': '#000000',
       'White': '#FFFFFF', 'Gold': '#D4AF37', 'Silver': '#C0C0C0', 'Yellow': '#FFEB3B',
@@ -868,7 +855,7 @@
     };
   }
   
-  // ✅ FIXED: Order saves to Firebase
+  // ========== ORDER SAVE FUNCTION - FIXED ==========
   async function saveOrderToFirebase(paymentMethod, transactionId = null, paymentDetails = null) {
     const details = getCustomerDetails();
     
@@ -904,7 +891,6 @@
       paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending',
       status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending',
       transactionId: transactionId,
-      razorpayDetails: paymentDetails,
       subtotal: cartTotal,
       discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0,
       discountPercent: (paymentMethod === 'Razorpay' && discountAmount > 0) ? ONLINE_DISCOUNT_PERCENT : 0,
@@ -912,18 +898,17 @@
       orderDate: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: currentUser ? currentUser.uid : null,
-      userPhone: currentUser ? currentUser.phone : details.phone,
-      userEmail: currentUser ? currentUser.email : details.email
+      userPhone: currentUser ? currentUser.phone : details.phone
     };
     
-    console.log("💾 Saving order to Firebase:", orderData);
+    console.log("💾 Saving order to Firebase (nexi-53897):", orderData);
     
     try {
-      // Use set with orderId as document ID
+      // Try to save using set with document ID
       await db.collection('orders').doc(orderId).set(orderData);
-      console.log("✅ Order saved successfully! Order ID:", orderId);
+      console.log("✅ ORDER SAVED SUCCESSFULLY! Order ID:", orderId);
       
-      // Also save to localStorage backup
+      // Backup to localStorage
       let orders = JSON.parse(localStorage.getItem('vedantaOrders')) || [];
       orders.push(orderData);
       localStorage.setItem('vedantaOrders', JSON.stringify(orders));
@@ -931,10 +916,19 @@
       
       return { success: true, orderId: orderId };
     } catch (error) {
-      console.error("❌ Firebase Error:", error);
+      console.error("❌ Firebase SAVE ERROR:", error);
       console.error("Error code:", error.code);
       console.error("Error message:", error.message);
-      return { success: false, error: error.message };
+      
+      // Try alternative save method (add instead of set)
+      try {
+        const docRef = await db.collection('orders').add(orderData);
+        console.log("✅ ORDER SAVED via add()! Order ID:", docRef.id);
+        return { success: true, orderId: docRef.id };
+      } catch (error2) {
+        console.error("❌ Both save methods failed:", error2);
+        return { success: false, error: error2.message };
+      }
     }
   }
   
@@ -943,7 +937,7 @@
     window.location.href = `order-success.html?orderId=${orderId}`;
   }
   
-  // ✅ COD Order - Saves immediately
+  // COD Order
   async function saveOrderCOD() {
     if (!validateForm()) return;
     if (isProcessing) return;
@@ -967,7 +961,7 @@
     }
   }
   
-  // ✅ Razorpay Payment - Order saves AFTER successful payment
+  // Razorpay Payment
   async function initiateRazorpayPayment() {
     if (!validateForm()) return;
     if (isProcessing) return;
@@ -1005,21 +999,15 @@
         notes: {
           customerName: details.fullName,
           customerPhone: details.phone,
-          customerEmail: details.email,
-          address: details.address,
-          city: details.city,
-          state: details.state,
-          pincode: details.pincode,
           discountApplied: `${ONLINE_DISCOUNT_PERCENT}%`,
           originalAmount: cartTotal,
-          discountedAmount: finalAmount,
-          items: JSON.stringify(cart.map(i => ({ name: i.name, qty: i.quantity, price: i.price })))
+          discountedAmount: finalAmount
         },
         theme: { color: '#D4AF37' },
         modal: {
           ondismiss: function() {
             showLoading(false);
-            showToast('Payment cancelled. Order not placed.', true);
+            showToast('Payment cancelled', true);
             if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
             isProcessing = false;
           }
@@ -1031,15 +1019,10 @@
       razorpay.on('payment.success', async function(response) {
         console.log('✅ Payment Success:', response);
         
-        // Save order to Firebase after successful payment
         const result = await saveOrderToFirebase(
           'Razorpay',
           response.razorpay_payment_id,
-          {
-            paymentId: response.razorpay_payment_id,
-            orderId: response.razorpay_order_id,
-            signature: response.razorpay_signature
-          }
+          { paymentId: response.razorpay_payment_id }
         );
         
         showLoading(false);
@@ -1048,16 +1031,15 @@
           showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
           setTimeout(() => { redirectToOrderSuccess(result.orderId); }, 1500);
         } else {
-          showToast('⚠️ Payment successful but order save failed. Please contact support.', true);
+          showToast('⚠️ Payment successful but order save failed. Contact support.', true);
         }
-        
         isProcessing = false;
       });
       
       razorpay.on('payment.error', function(response) {
         console.error('❌ Payment Error:', response);
         showLoading(false);
-        showToast('❌ Payment failed! Order not placed. Please try again.', true);
+        showToast('❌ Payment failed! Please try again.', true);
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
         isProcessing = false;
       });
@@ -1067,7 +1049,7 @@
     } catch (error) {
       console.error('Razorpay Error:', error);
       showLoading(false);
-      showToast('❌ Failed to initialize payment. Please try again.', true);
+      showToast('❌ Failed to initialize payment', true);
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
       isProcessing = false;
     }
@@ -1102,7 +1084,6 @@
   document.getElementById('getLocationBtn')?.addEventListener('click', getCurrentLocation);
   document.getElementById('openSettingsBtn')?.addEventListener('click', openLocationSettings);
   document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
-  
   document.getElementById('backToShopBtn')?.addEventListener('click', (e) => {
     e.preventDefault();
     window.location.href = 'index.html';
