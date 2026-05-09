@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -452,7 +451,6 @@
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    const auth = firebase.auth();
     
     db.enablePersistence({ synchronizeTabs: true }).catch(err => {
         console.log("Persistence error (non-critical):", err);
@@ -567,7 +565,7 @@
         });
     }
     
-    // ✅ FIXED: Better order fetching by phone and email
+    // ✅ FIXED: Phone number se bhi orders fetch honge
     async function fetchOrdersForUser() {
         if (!currentUser) return [];
         
@@ -575,79 +573,60 @@
         const seenOrderIds = new Set();
         
         try {
-            console.log("🔍 Fetching orders for:", currentUser);
-            console.log("   Phone:", currentUser.phone);
-            console.log("   Email:", currentUser.email);
-            console.log("   UID:", currentUser.uid);
-            
-            // Query 1: By customerPhone (most important)
+            // Query 1: By customerPhone (most common)
             if (currentUser.phone) {
-                const phoneQuery = await db.collection('orders')
+                const phoneSnapshot = await db.collection('orders')
                     .where('customerPhone', '==', currentUser.phone)
+                    .orderBy('orderDate', 'desc')
                     .get();
                 
-                phoneQuery.forEach(doc => {
+                phoneSnapshot.forEach(doc => {
                     if (!seenOrderIds.has(doc.id)) {
                         seenOrderIds.add(doc.id);
                         orders.push({ id: doc.id, ...doc.data() });
                     }
                 });
-                console.log(`✅ Found ${phoneQuery.size} orders by phone: ${currentUser.phone}`);
+                console.log(`✅ Found ${phoneSnapshot.size} orders by phone: ${currentUser.phone}`);
             }
             
             // Query 2: By customerEmail
             if (currentUser.email) {
-                const emailQuery = await db.collection('orders')
+                const emailSnapshot = await db.collection('orders')
                     .where('customerEmail', '==', currentUser.email)
+                    .orderBy('orderDate', 'desc')
                     .get();
                 
-                emailQuery.forEach(doc => {
+                emailSnapshot.forEach(doc => {
                     if (!seenOrderIds.has(doc.id)) {
                         seenOrderIds.add(doc.id);
                         orders.push({ id: doc.id, ...doc.data() });
                     }
                 });
-                console.log(`✅ Found ${emailQuery.size} orders by email: ${currentUser.email}`);
+                console.log(`✅ Found ${emailSnapshot.size} orders by email: ${currentUser.email}`);
             }
             
-            // Query 3: By userEmail
+            // Query 3: By userEmail (optional)
             if (currentUser.email) {
-                const userEmailQuery = await db.collection('orders')
+                const userEmailSnapshot = await db.collection('orders')
                     .where('userEmail', '==', currentUser.email)
+                    .orderBy('orderDate', 'desc')
                     .get();
                 
-                userEmailQuery.forEach(doc => {
+                userEmailSnapshot.forEach(doc => {
                     if (!seenOrderIds.has(doc.id)) {
                         seenOrderIds.add(doc.id);
                         orders.push({ id: doc.id, ...doc.data() });
                     }
                 });
-                console.log(`✅ Found ${userEmailQuery.size} orders by userEmail`);
-            }
-            
-            // Query 4: By userId
-            if (currentUser.uid) {
-                const userIdQuery = await db.collection('orders')
-                    .where('userId', '==', currentUser.uid)
-                    .get();
-                
-                userIdQuery.forEach(doc => {
-                    if (!seenOrderIds.has(doc.id)) {
-                        seenOrderIds.add(doc.id);
-                        orders.push({ id: doc.id, ...doc.data() });
-                    }
-                });
-                console.log(`✅ Found ${userIdQuery.size} orders by userId`);
+                console.log(`✅ Found ${userEmailSnapshot.size} orders by userEmail`);
             }
             
         } catch(e) {
             console.error("Error fetching orders:", e);
         }
         
-        // Sort by orderDate descending
+        // Sort by date descending
         orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        
-        console.log(`📦 Total unique orders found: ${orders.length}`);
         
         return orders;
     }
@@ -754,58 +733,55 @@
     }
     
     // Main initialization
-    async function init() {
-        // Wait for auth to be ready
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
-                currentUser = {
-                    uid: user.uid,
-                    phone: user.phoneNumber,
-                    email: user.email || storedUser?.email,
-                    name: storedUser?.name || user.displayName
-                };
-                if (!storedUser) {
-                    localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
-                }
-            } else {
-                currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-            }
-            
-            if (!currentUser) {
-                document.getElementById('ordersContainer').innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <h3>Login Required</h3>
-                        <p>Please login to view your bookings.</p>
-                        <button class="shop-now-btn" onclick="window.location.href='profile.html'">
-                            <i class="fas fa-user"></i> Login Now
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-            
-            console.log("👤 Current User:", currentUser);
-            
-            await loadProducts();
-            
-            const orders = await fetchOrdersForUser();
-            
-            allOrders = orders;
-            isLoading = false;
-            renderOrders();
-            initFilters();
-            
-            if (orders.length === 0) {
-                showToastMessage("No orders found yet", false);
-            } else {
-                showToastMessage(`Found ${orders.length} order(s)`, false);
-            }
-        });
-    }
-    
-    init();
+    (async function init() {
+        currentUser = getCurrentUser();
+        
+        if (!currentUser) {
+            document.getElementById('ordersContainer').innerHTML = `
+                <div class="empty-state">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <h3>Login Required</h3>
+                    <p>Please login to view your bookings.</p>
+                    <button class="shop-now-btn" onclick="window.location.href='profile.html'">
+                        <i class="fas fa-user"></i> Login Now
+                    </button>
+                </div>
+            `;
+            return;
+        }
+        
+        console.log("👤 Current User:", currentUser);
+        console.log("   Phone:", currentUser.phone);
+        console.log("   Email:", currentUser.email);
+        
+        await loadProducts();
+        
+        const orders = await fetchOrdersForUser();
+        
+        allOrders = orders;
+        isLoading = false;
+        renderOrders();
+        initFilters();
+        
+        console.log(`✅ Loaded ${orders.length} total orders`);
+        
+        if (orders.length === 0) {
+            console.log("No orders found for this user");
+        }
+        
+        // Real-time listener for phone number
+        if (currentUser.phone) {
+            db.collection('orders')
+                .where('customerPhone', '==', currentUser.phone)
+                .onSnapshot(() => {
+                    fetchOrdersForUser().then(newOrders => {
+                        allOrders = newOrders;
+                        renderOrders();
+                        console.log(`🔄 Real-time update: ${newOrders.length} orders`);
+                    });
+                });
+        }
+    })();
 </script>
 </body>
 </html>
