@@ -117,7 +117,7 @@
       flex-direction: column;
       gap: 10px;
       margin-bottom: 12px;
-      max-height: 250px;
+      max-height: 300px;
       overflow-y: auto;
     }
     .address-card {
@@ -268,7 +268,7 @@
     }
     .place-order-cod:active, .pay-razorpay-btn:active { transform: scale(0.98); }
     
-    /* Enhanced Order Summary */
+    /* Order Summary */
     .order-summary {
       background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8));
       backdrop-filter: blur(10px);
@@ -310,30 +310,6 @@
     .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
     .order-item-img i { font-size: 28px; color: #D4AF37; }
     .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
-    @media (min-width: 768px) { .order-item-info h4 { font-size: 15px; } }
-    .order-item-size, .order-item-color {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: rgba(212,175,55,0.15);
-      padding: 2px 8px;
-      border-radius: 20px;
-      font-size: 9px;
-      color: #D4AF37;
-      margin-top: 3px;
-      margin-right: 6px;
-    }
-    @media (min-width: 768px) { .order-item-size, .order-item-color { font-size: 11px; padding: 2px 10px; } }
-    .color-swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
-    .combo-badge {
-      background: #4CAF50;
-      color: white;
-      font-size: 9px;
-      padding: 2px 6px;
-      border-radius: 20px;
-      display: inline-block;
-      margin-top: 4px;
-    }
     .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
     .order-item-price {
       font-weight: 700;
@@ -342,7 +318,6 @@
       font-size: 13px;
       min-width: 70px;
     }
-    @media (min-width: 768px) { .order-item-price { font-size: 15px; min-width: 80px; } }
     .order-total {
       padding: 16px 0;
       border-top: 2px solid rgba(212,175,55,0.3);
@@ -382,24 +357,6 @@
       padding-top: 12px;
       border-top: 2px solid rgba(212,175,55,0.3);
     }
-    .savings-badge {
-      background: rgba(76,175,80,0.15);
-      color: #4CAF50;
-      padding: 6px 10px;
-      border-radius: 20px;
-      font-size: 10px;
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-    }
-    .rewards-points {
-      background: rgba(212,175,55,0.1);
-      border-radius: 12px;
-      padding: 10px;
-      margin-top: 12px;
-      text-align: center;
-      font-size: 11px;
-    }
     .free-shipping-badge {
       background: rgba(76,175,80,0.15);
       padding: 8px;
@@ -407,6 +364,14 @@
       text-align: center;
       margin: 12px 0;
       color: #4CAF50;
+      font-size: 11px;
+    }
+    .rewards-points {
+      background: rgba(212,175,55,0.1);
+      border-radius: 12px;
+      padding: 10px;
+      margin-top: 12px;
+      text-align: center;
       font-size: 11px;
     }
     .back-to-shop {
@@ -572,6 +537,14 @@
       font-size: 12px;
       color: #D4AF37;
     }
+    
+    /* Manual Address Form (when no saved address) */
+    .manual-address-form {
+      display: block;
+    }
+    .manual-address-form.hide {
+      display: none;
+    }
   </style>
 </head>
 <body>
@@ -610,7 +583,6 @@
 
   <div class="checkout-main">
     <div class="checkout-form">
-      <!-- Auto-fill Info Section -->
       <div class="auto-fill-info" id="autoFillInfo">
         <div class="info-text">
           <i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span>
@@ -627,58 +599,100 @@
         <input type="hidden" id="email">
       </div>
 
-      <div class="form-section">
+      <div class="form-section" id="addressSection">
         <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
         
-        <div class="address-selector" id="addressSelector">
+        <!-- Saved Addresses Selector (shows only if user has saved addresses) -->
+        <div class="address-selector" id="addressSelector" style="display: none;">
           <div class="saved-addresses" id="savedAddressesList"></div>
           <button class="add-new-address-btn" id="addNewAddressBtn">
             <i class="fas fa-plus-circle"></i> Add New Address
           </button>
-          <div class="new-address-form" id="newAddressForm">
+        </div>
+
+        <!-- Manual Address Form (shows when no saved address OR user clicks Add New) -->
+        <div class="manual-address-form" id="manualAddressForm">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" id="manualFullName" placeholder="Recipient full name">
+          </div>
+          <div class="form-group">
+            <label>Street Address <span class="required">*</span></label>
+            <input type="text" id="manualStreet" placeholder="House number, building, street">
+          </div>
+          <div class="form-row">
             <div class="form-group">
-              <label>Full Name <span class="required">*</span></label>
-              <input type="text" id="newAddressName" placeholder="Recipient name">
-            </div>
-            <div class="form-group">
-              <label>Street Address <span class="required">*</span></label>
-              <input type="text" id="newAddressStreet" placeholder="House number, building, street">
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>City <span class="required">*</span></label>
-                <input type="text" id="newAddressCity" placeholder="City">
-              </div>
-              <div class="form-group">
-                <label>State <span class="required">*</span></label>
-                <input type="text" id="newAddressState" placeholder="State">
-              </div>
-            </div>
-            <div class="form-row">
-              <div class="form-group">
-                <label>Pincode <span class="required">*</span></label>
-                <input type="text" id="newAddressPincode" placeholder="6-digit pincode">
-              </div>
-              <div class="form-group">
-                <label>Landmark (Optional)</label>
-                <input type="text" id="newAddressLandmark" placeholder="Near...">
-              </div>
+              <label>City <span class="required">*</span></label>
+              <input type="text" id="manualCity" placeholder="City">
             </div>
             <div class="form-group">
-              <label>Phone Number</label>
-              <input type="tel" id="newAddressPhone" placeholder="Alternative phone number">
+              <label>State <span class="required">*</span></label>
+              <input type="text" id="manualState" placeholder="State">
             </div>
-            <div style="display: flex; gap: 10px; margin-top: 10px;">
-              <button class="location-btn" id="useCurrentLocationBtn" style="flex:1; margin-top:0;">
-                <i class="fas fa-location-dot"></i> Use Current Location
-              </button>
-              <button class="location-btn" id="saveAddressBtn" style="flex:1; margin-top:0; background:#4CAF50;">
-                <i class="fas fa-save"></i> Save Address
-              </button>
-              <button class="location-btn" id="cancelAddressBtn" style="flex:0.5; margin-top:0; background:#F44336;">
-                Cancel
-              </button>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pincode <span class="required">*</span></label>
+              <input type="text" id="manualPincode" placeholder="6-digit pincode">
             </div>
+            <div class="form-group">
+              <label>Landmark (Optional)</label>
+              <input type="text" id="manualLandmark" placeholder="Near...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="manualPhone" placeholder="Alternative phone number">
+          </div>
+          <button class="location-btn" id="useCurrentLocationManualBtn" style="margin-top: 0;">
+            <i class="fas fa-location-dot"></i> Use My Current Location
+          </button>
+        </div>
+
+        <!-- New Address Form (hidden by default, shows when Add New Address clicked) -->
+        <div class="new-address-form" id="newAddressForm">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" id="newAddressName" placeholder="Recipient full name">
+          </div>
+          <div class="form-group">
+            <label>Street Address <span class="required">*</span></label>
+            <input type="text" id="newAddressStreet" placeholder="House number, building, street">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>City <span class="required">*</span></label>
+              <input type="text" id="newAddressCity" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>State <span class="required">*</span></label>
+              <input type="text" id="newAddressState" placeholder="State">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pincode <span class="required">*</span></label>
+              <input type="text" id="newAddressPincode" placeholder="6-digit pincode">
+            </div>
+            <div class="form-group">
+              <label>Landmark (Optional)</label>
+              <input type="text" id="newAddressLandmark" placeholder="Near...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="newAddressPhone" placeholder="Alternative phone number">
+          </div>
+          <div style="display: flex; gap: 10px; margin-top: 10px;">
+            <button class="location-btn" id="useCurrentLocationNewBtn" style="flex:1; margin-top:0;">
+              <i class="fas fa-location-dot"></i> Use Current Location
+            </button>
+            <button class="location-btn" id="saveNewAddressBtn" style="flex:1; margin-top:0; background:#4CAF50;">
+              <i class="fas fa-save"></i> Save & Use This Address
+            </button>
+            <button class="location-btn" id="cancelNewAddressBtn" style="flex:0.5; margin-top:0; background:#F44336;">
+              Cancel
+            </button>
           </div>
         </div>
       </div>
@@ -736,28 +750,12 @@
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
       <div id="orderItemsList"></div>
       
-      <!-- Delivery Benefits - Attractive -->
       <div class="delivery-benefits">
-        <div class="benefit-row">
-          <i class="fas fa-truck"></i>
-          <span>🚚 <strong>Free Express Shipping</strong> - Delivered in 3-5 business days</span>
-        </div>
-        <div class="benefit-row">
-          <i class="fas fa-box-open"></i>
-          <span>📦 <strong>Free Premium Packaging</strong> - Luxury unboxing experience</span>
-        </div>
-        <div class="benefit-row">
-          <i class="fas fa-percent"></i>
-          <span>💰 <strong>0% GST / Tax</strong> - No hidden charges</span>
-        </div>
-        <div class="benefit-row">
-          <i class="fas fa-shield-alt"></i>
-          <span>🛡️ <strong>Free Insurance</strong> - Transit insurance included</span>
-        </div>
-        <div class="benefit-row">
-          <i class="fas fa-undo-alt"></i>
-          <span>🔄 <strong>15-Day Easy Returns</strong> - Free pickup & refund</span>
-        </div>
+        <div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div>
+        <div class="benefit-row"><i class="fas fa-box-open"></i><span>📦 <strong>Free Premium Packaging</strong> - Luxury unboxing</span></div>
+        <div class="benefit-row"><i class="fas fa-percent"></i><span>💰 <strong>0% GST / Tax</strong> - No hidden charges</span></div>
+        <div class="benefit-row"><i class="fas fa-shield-alt"></i><span>🛡️ <strong>Free Insurance</strong> - Transit insurance included</span></div>
+        <div class="benefit-row"><i class="fas fa-undo-alt"></i><span>🔄 <strong>15-Day Easy Returns</strong> - Free pickup & refund</span></div>
       </div>
       
       <div class="free-shipping-badge">
@@ -765,42 +763,20 @@
       </div>
       
       <div class="order-total">
-        <div class="total-row">
-          <span>Subtotal</span>
-          <span id="subtotal">₹0</span>
-        </div>
-        <div class="total-row">
-          <span>Shipping Charge</span>
-          <span style="color: #4CAF50;">FREE</span>
-        </div>
-        <div class="total-row">
-          <span>Packaging Charge</span>
-          <span style="color: #4CAF50;">FREE</span>
-        </div>
-        <div class="total-row">
-          <span>GST / Tax (0%)</span>
-          <span style="color: #4CAF50;">₹0</span>
-        </div>
+        <div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+        <div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div>
+        <div class="total-row"><span>Packaging Charge</span><span style="color: #4CAF50;">FREE</span></div>
+        <div class="total-row"><span>GST / Tax (0%)</span><span style="color: #4CAF50;">₹0</span></div>
         <div class="total-row" id="discountRow" style="display: none;">
           <span>Online Payment Discount (5%)</span>
           <span style="color: #4CAF50;" id="discountAmount">-₹0</span>
         </div>
-        <div class="total-row grand-total">
-          <span>Total Amount</span>
-          <span id="grandTotal">₹0</span>
-        </div>
+        <div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
       </div>
 
       <div class="rewards-points">
         <i class="fas fa-coins" style="color: #D4AF37;"></i> 
-        You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins on this order 
-        <span style="font-size: 10px; color: #888;">(1 coin = ₹1 off on next order)</span>
-      </div>
-
-      <div style="margin-top: 12px; padding: 10px; background: rgba(212,175,55,0.08); border-radius: 14px;">
-        <p style="font-size: 11px; color: #D4AF37; text-align: center;">
-          <i class="fas fa-gift"></i> Free gift on orders above ₹4999!
-        </p>
+        You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins on this order
       </div>
       
       <a href="#" class="back-to-shop" id="backToShopBtn">
@@ -841,7 +817,7 @@
   let currentUser = null;
   let userAddresses = [];
   let selectedAddressId = null;
-  let isNewAddressFormOpen = false;
+  let isAddingNewAddress = false;
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -858,28 +834,13 @@
     else overlay.classList.remove('show');
   }
   
-  function showLocationModal() {
-    document.getElementById('locationModal').classList.add('show');
-  }
-  
-  function hideLocationModal() {
-    document.getElementById('locationModal').classList.remove('show');
-  }
-  
   // ========== LOCATION FUNCTION ==========
   async function getDetailedCurrentLocation() {
-    const btn = document.getElementById('useCurrentLocationBtn');
-    const originalText = btn ? btn.innerHTML : '';
-    if (btn) {
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Getting location...';
-    }
-    
+    const btn = document.activeElement;
     showToast('📍 Getting your location...');
     
     if (!navigator.geolocation) {
       showToast('❌ Geolocation not supported', true);
-      if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
       return null;
     }
     
@@ -895,7 +856,6 @@
             
             if (data && data.address) {
               const addr = data.address;
-              
               let houseNumber = addr.house_number || '';
               let road = addr.road || addr.street || '';
               let building = addr.building || '';
@@ -918,29 +878,24 @@
                 landmark: addr.neighbourhood || addr.suburb || ''
               };
               
-              showToast(`✅ Location found: ${city || 'Address found'}`);
-              if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+              showToast(`✅ Location found`);
               resolve(addressData);
             } else {
               showToast('⚠️ Could not get detailed address', true);
-              if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
               resolve(null);
             }
           } catch (error) {
-            console.error("Geocoding error:", error);
-            showToast('⚠️ Network error getting address', true);
-            if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
+            showToast('⚠️ Network error', true);
             resolve(null);
           }
         },
         (error) => {
           if (error.code === error.PERMISSION_DENIED) {
             showToast('❌ Location permission denied', true);
-            showLocationModal();
+            document.getElementById('locationModal').classList.add('show');
           } else {
             showToast('❌ Failed to get location', true);
           }
-          if (btn) { btn.disabled = false; btn.innerHTML = originalText; }
           resolve(null);
         },
         { enableHighAccuracy: true, timeout: 10000 }
@@ -948,38 +903,41 @@
     });
   }
   
-  async function fillAddressWithLocation() {
+  async function fillManualFormWithLocation() {
     const locationData = await getDetailedCurrentLocation();
     if (locationData) {
-      if (isNewAddressFormOpen) {
-        document.getElementById('newAddressStreet').value = locationData.street;
-        document.getElementById('newAddressCity').value = locationData.city;
-        document.getElementById('newAddressState').value = locationData.state;
-        document.getElementById('newAddressPincode').value = locationData.pincode;
-        document.getElementById('newAddressLandmark').value = locationData.landmark;
-        showToast('✅ Address details filled!');
-      } else {
-        document.getElementById('newAddressName').value = document.getElementById('fullName').value;
-        document.getElementById('newAddressStreet').value = locationData.street;
-        document.getElementById('newAddressCity').value = locationData.city;
-        document.getElementById('newAddressState').value = locationData.state;
-        document.getElementById('newAddressPincode').value = locationData.pincode;
-        document.getElementById('newAddressLandmark').value = locationData.landmark;
-        document.getElementById('newAddressPhone').value = currentUser?.phone || '';
-        
-        if (!isNewAddressFormOpen) {
-          document.getElementById('newAddressForm').classList.add('show');
-          isNewAddressFormOpen = true;
-          document.getElementById('addNewAddressBtn').style.display = 'none';
-        }
-        showToast('📍 Location captured! Click Save Address to store it.');
-      }
+      document.getElementById('manualStreet').value = locationData.street;
+      document.getElementById('manualCity').value = locationData.city;
+      document.getElementById('manualState').value = locationData.state;
+      document.getElementById('manualPincode').value = locationData.pincode;
+      document.getElementById('manualLandmark').value = locationData.landmark;
+      showToast('✅ Address filled!');
     }
+  }
+  
+  async function fillNewFormWithLocation() {
+    const locationData = await getDetailedCurrentLocation();
+    if (locationData) {
+      document.getElementById('newAddressStreet').value = locationData.street;
+      document.getElementById('newAddressCity').value = locationData.city;
+      document.getElementById('newAddressState').value = locationData.state;
+      document.getElementById('newAddressPincode').value = locationData.pincode;
+      document.getElementById('newAddressLandmark').value = locationData.landmark;
+      showToast('✅ Address filled!');
+    }
+  }
+  
+  function showLocationModal() {
+    document.getElementById('locationModal').classList.add('show');
+  }
+  
+  function hideLocationModal() {
+    document.getElementById('locationModal').classList.remove('show');
   }
   
   // ========== ADDRESS MANAGEMENT ==========
   async function loadUserAddresses() {
-    if (!currentUser || !currentUser.uid) return;
+    if (!currentUser || !currentUser.uid) return [];
     
     try {
       const snapshot = await db.collection('addresses')
@@ -992,56 +950,95 @@
         userAddresses.push({ id: doc.id, ...doc.data() });
       });
       
-      renderAddressList();
-      
-      const defaultAddr = userAddresses.find(a => a.isDefault);
-      if (defaultAddr && !selectedAddressId) {
-        selectAddress(defaultAddr.id);
-      }
+      return userAddresses;
     } catch(e) {
       console.error("Error loading addresses:", e);
+      return [];
     }
   }
   
-  function renderAddressList() {
+  function renderSavedAddresses() {
     const container = document.getElementById('savedAddressesList');
-    if (!container) return;
+    const selectorDiv = document.getElementById('addressSelector');
+    const manualForm = document.getElementById('manualAddressForm');
     
     if (userAddresses.length === 0) {
-      container.innerHTML = '<div style="color:#888; text-align:center; padding:10px;">No saved addresses. Click "Add New Address" to continue.</div>';
-      return;
-    }
-    
-    container.innerHTML = userAddresses.map(addr => `
-      <div class="address-card ${selectedAddressId === addr.id ? 'selected' : ''}" data-id="${addr.id}">
-        <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
-        <div class="address-detail">${escapeHtml(addr.street)}</div>
-        <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
-        ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
-        <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
-        <button class="delete-address" data-id="${addr.id}" onclick="event.stopPropagation(); deleteAddress('${addr.id}')">✕</button>
-      </div>
-    `).join('');
-    
-    document.querySelectorAll('.address-card').forEach(card => {
-      card.addEventListener('click', () => {
-        const id = card.getAttribute('data-id');
-        selectAddress(id);
+      // No saved addresses - show manual form
+      selectorDiv.style.display = 'none';
+      manualForm.classList.remove('hide');
+      document.getElementById('newAddressForm').classList.remove('show');
+      isAddingNewAddress = false;
+    } else {
+      // Has saved addresses - show selector
+      selectorDiv.style.display = 'block';
+      manualForm.classList.add('hide');
+      document.getElementById('newAddressForm').classList.remove('show');
+      isAddingNewAddress = false;
+      
+      container.innerHTML = userAddresses.map(addr => `
+        <div class="address-card ${selectedAddressId === addr.id ? 'selected' : ''}" data-id="${addr.id}">
+          <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
+          <div class="address-detail">${escapeHtml(addr.street)}</div>
+          <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
+          ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
+          <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
+          <button class="delete-address" data-id="${addr.id}" onclick="event.stopPropagation(); deleteAddress('${addr.id}')">✕</button>
+        </div>
+      `).join('');
+      
+      document.querySelectorAll('.address-card').forEach(card => {
+        card.addEventListener('click', () => {
+          const id = card.getAttribute('data-id');
+          selectAddress(id);
+        });
       });
-    });
+    }
   }
   
   function selectAddress(addressId) {
     selectedAddressId = addressId;
-    renderAddressList();
     const address = userAddresses.find(a => a.id === addressId);
     if (address) {
       document.getElementById('fullName').value = address.name;
-      showToast(`✅ Using address: ${address.name}, ${address.city}`);
+      renderSavedAddresses();
+      showToast(`✅ Using address: ${address.name}`);
     }
   }
   
-  async function saveNewAddress() {
+  function showAddNewAddressForm() {
+    isAddingNewAddress = true;
+    document.getElementById('addressSelector').style.display = 'none';
+    document.getElementById('manualAddressForm').classList.add('hide');
+    document.getElementById('newAddressForm').classList.add('show');
+    
+    // Pre-fill with user data
+    document.getElementById('newAddressName').value = document.getElementById('fullName').value || currentUser?.name || '';
+    document.getElementById('newAddressPhone').value = currentUser?.phone || '';
+  }
+  
+  function cancelNewAddress() {
+    isAddingNewAddress = false;
+    document.getElementById('newAddressForm').classList.remove('show');
+    
+    if (userAddresses.length === 0) {
+      document.getElementById('addressSelector').style.display = 'none';
+      document.getElementById('manualAddressForm').classList.remove('hide');
+    } else {
+      document.getElementById('addressSelector').style.display = 'block';
+      document.getElementById('manualAddressForm').classList.add('hide');
+    }
+    
+    // Clear new address form
+    document.getElementById('newAddressName').value = '';
+    document.getElementById('newAddressStreet').value = '';
+    document.getElementById('newAddressCity').value = '';
+    document.getElementById('newAddressState').value = '';
+    document.getElementById('newAddressPincode').value = '';
+    document.getElementById('newAddressLandmark').value = '';
+    document.getElementById('newAddressPhone').value = '';
+  }
+  
+  async function saveNewAddressAndUse() {
     const name = document.getElementById('newAddressName').value.trim();
     const street = document.getElementById('newAddressStreet').value.trim();
     const city = document.getElementById('newAddressCity').value.trim();
@@ -1080,6 +1077,7 @@
       addressData.id = docRef.id;
       userAddresses.push(addressData);
       
+      // Clear form
       document.getElementById('newAddressName').value = '';
       document.getElementById('newAddressStreet').value = '';
       document.getElementById('newAddressCity').value = '';
@@ -1088,11 +1086,11 @@
       document.getElementById('newAddressLandmark').value = '';
       document.getElementById('newAddressPhone').value = '';
       
-      document.getElementById('newAddressForm').classList.remove('show');
-      isNewAddressFormOpen = false;
-      document.getElementById('addNewAddressBtn').style.display = 'flex';
+      cancelNewAddress();
       
-      renderAddressList();
+      // Reload and select new address
+      await loadUserAddresses();
+      renderSavedAddresses();
       selectAddress(docRef.id);
       
       showToast('✅ Address saved successfully!');
@@ -1113,79 +1111,119 @@
       if (selectedAddressId === addressId) {
         selectedAddressId = null;
       }
-      renderAddressList();
+      
+      if (userAddresses.length === 0) {
+        // No addresses left, show manual form
+        document.getElementById('addressSelector').style.display = 'none';
+        document.getElementById('manualAddressForm').classList.remove('hide');
+        document.getElementById('fullName').value = currentUser?.name || '';
+      } else {
+        renderSavedAddresses();
+      }
+      
       showToast('✅ Address deleted');
     } catch(e) {
       showToast('❌ Failed to delete address', true);
     }
   }
   
-  function showNewAddressForm() {
-    document.getElementById('newAddressForm').classList.add('show');
-    isNewAddressFormOpen = true;
-    document.getElementById('addNewAddressBtn').style.display = 'none';
-    document.getElementById('newAddressName').value = document.getElementById('fullName').value;
-    document.getElementById('newAddressPhone').value = currentUser?.phone || '';
+  // ========== GET ADDRESS FOR ORDER ==========
+  function getOrderAddress() {
+    // If user selected a saved address
+    if (selectedAddressId) {
+      const addr = userAddresses.find(a => a.id === selectedAddressId);
+      if (addr) {
+        return {
+          fullName: addr.name,
+          phone: addr.phone || currentUser.phone,
+          email: currentUser.email,
+          address: addr.street,
+          city: addr.city,
+          state: addr.state,
+          pincode: addr.pincode,
+          landmark: addr.landmark || ''
+        };
+      }
+    }
+    
+    // Otherwise get from manual form
+    const name = document.getElementById('manualFullName').value.trim();
+    const street = document.getElementById('manualStreet').value.trim();
+    const city = document.getElementById('manualCity').value.trim();
+    const state = document.getElementById('manualState').value.trim();
+    const pincode = document.getElementById('manualPincode').value.trim();
+    const landmark = document.getElementById('manualLandmark').value.trim();
+    const phone = document.getElementById('manualPhone').value.trim();
+    
+    const fullName = name || document.getElementById('fullName').value.trim();
+    
+    if (!fullName || !street || !city || !state || !pincode) {
+      return null;
+    }
+    
+    return {
+      fullName: fullName,
+      phone: phone || currentUser.phone,
+      email: currentUser.email,
+      address: street,
+      city: city,
+      state: state,
+      pincode: pincode,
+      landmark: landmark || ''
+    };
   }
   
-  function cancelNewAddress() {
-    document.getElementById('newAddressForm').classList.remove('show');
-    isNewAddressFormOpen = false;
-    document.getElementById('addNewAddressBtn').style.display = 'flex';
+  async function saveAddressFromManualOrder() {
+    const address = getOrderAddress();
+    if (!address) return null;
     
-    document.getElementById('newAddressName').value = '';
-    document.getElementById('newAddressStreet').value = '';
-    document.getElementById('newAddressCity').value = '';
-    document.getElementById('newAddressState').value = '';
-    document.getElementById('newAddressPincode').value = '';
-    document.getElementById('newAddressLandmark').value = '';
-    document.getElementById('newAddressPhone').value = '';
+    // Check if address already exists
+    const exists = userAddresses.some(a => 
+      a.street === address.address && 
+      a.city === address.city && 
+      a.pincode === address.pincode
+    );
+    
+    if (exists) return null;
+    
+    const addressData = {
+      userId: currentUser.uid,
+      name: address.fullName,
+      street: address.address,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+      landmark: address.landmark,
+      phone: address.phone,
+      isDefault: userAddresses.length === 0,
+      createdAt: new Date().toISOString()
+    };
+    
+    try {
+      const docRef = await db.collection('addresses').add(addressData);
+      addressData.id = docRef.id;
+      userAddresses.push(addressData);
+      return docRef.id;
+    } catch(e) {
+      console.error("Auto-save address error:", e);
+      return null;
+    }
   }
   
   // ========== ORDER FUNCTIONS ==========
-  function getSelectedAddress() {
-    if (!selectedAddressId) return null;
-    return userAddresses.find(a => a.id === selectedAddressId);
-  }
-  
-  function getOrderAddress() {
-    const selectedAddr = getSelectedAddress();
-    if (selectedAddr) {
-      return {
-        fullName: selectedAddr.name,
-        phone: selectedAddr.phone || currentUser.phone,
-        email: currentUser.email,
-        address: selectedAddr.street,
-        city: selectedAddr.city,
-        state: selectedAddr.state,
-        pincode: selectedAddr.pincode,
-        landmark: selectedAddr.landmark || ''
-      };
-    }
-    return null;
-  }
-  
   function validateOrder() {
-    const name = document.getElementById('fullName').value.trim();
-    if (!name) {
-      showToast('❌ Please enter your full name', true);
+    const address = getOrderAddress();
+    if (!address) {
+      showToast('❌ Please fill all address details', true);
       return false;
     }
-    
-    const selectedAddr = getSelectedAddress();
-    if (!selectedAddr) {
-      showToast('❌ Please select or add a shipping address', true);
-      return false;
-    }
-    
     return true;
   }
   
-  // ========== FIREBASE ORDER SAVE ==========
-  async function saveOrderToFirebase(paymentMethod, transactionId = null) {
-    const address = getOrderAddress();
-    if (!address) {
-      showToast('❌ Please select shipping address', true);
+  async function saveOrderToFirebase(paymentMethod, transactionId = null, address = null) {
+    const orderAddress = address || getOrderAddress();
+    if (!orderAddress) {
+      showToast('❌ Please fill address details', true);
       return { success: false };
     }
     
@@ -1207,15 +1245,15 @@
     
     const orderData = {
       orderId: orderId,
-      customerName: address.fullName,
-      customerPhone: address.phone,
-      customerEmail: address.email,
+      customerName: orderAddress.fullName,
+      customerPhone: orderAddress.phone,
+      customerEmail: orderAddress.email,
       shippingAddress: {
-        address: address.address,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
-        landmark: address.landmark
+        address: orderAddress.address,
+        city: orderAddress.city,
+        state: orderAddress.state,
+        pincode: orderAddress.pincode,
+        landmark: orderAddress.landmark
       },
       items: itemsWithDetails,
       paymentMethod: paymentMethod,
@@ -1229,25 +1267,20 @@
       orderDate: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       userId: currentUser ? currentUser.uid : null,
-      userPhone: currentUser ? currentUser.phone : address.phone,
+      userPhone: currentUser ? currentUser.phone : orderAddress.phone,
       rewardPointsEarned: Math.floor(finalTotal / 100)
     };
     
-    console.log("💾 Saving order:", orderData);
-    
     try {
       await db.collection('orders').doc(orderId).set(orderData);
-      console.log("✅ ORDER SAVED! Order ID:", orderId);
-      
-      localStorage.setItem('lastOrder', JSON.stringify(orderData));
       return { success: true, orderId: orderId };
     } catch (error) {
-      console.error("❌ SAVE ERROR:", error);
+      console.error("SAVE ERROR:", error);
       return { success: false, error: error.message };
     }
   }
   
-  function redirectToOrderSuccess(orderId) {
+  async function processOrderAfterSave(orderId) {
     localStorage.removeItem('vedantaCart');
     window.location.href = `order-success.html?orderId=${orderId}`;
   }
@@ -1261,13 +1294,22 @@
     const btn = document.getElementById('placeOrderCodBtn');
     if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
     
-    const result = await saveOrderToFirebase('Cash on Delivery');
+    const address = getOrderAddress();
+    
+    // Save address for future if manual entry
+    if (!selectedAddressId && address) {
+      await saveAddressFromManualOrder();
+      await loadUserAddresses();
+      renderSavedAddresses();
+    }
+    
+    const result = await saveOrderToFirebase('Cash on Delivery', null, address);
     
     showLoading(false);
     
     if (result.success) {
       showToast(`✅ Order placed! Order ID: ${result.orderId}`);
-      setTimeout(() => { redirectToOrderSuccess(result.orderId); }, 1500);
+      setTimeout(() => { processOrderAfterSave(result.orderId); }, 1500);
     } else {
       showToast('❌ Failed to place order. Please try again.', true);
       if (btn) { btn.disabled = false; btn.innerHTML = 'Confirm Order (COD)'; }
@@ -1322,15 +1364,20 @@
       const razorpay = new Razorpay(options);
       
       razorpay.on('payment.success', async function(response) {
-        console.log('✅ Payment Success:', response);
+        // Save address for future if manual entry
+        if (!selectedAddressId && address) {
+          await saveAddressFromManualOrder();
+          await loadUserAddresses();
+          renderSavedAddresses();
+        }
         
-        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id);
+        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id, address);
         
         showLoading(false);
         
         if (result.success) {
           showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
-          setTimeout(() => { redirectToOrderSuccess(result.orderId); }, 1500);
+          setTimeout(() => { processOrderAfterSave(result.orderId); }, 1500);
         } else {
           showToast('⚠️ Payment successful but order save failed. Contact support.', true);
         }
@@ -1338,7 +1385,7 @@
       });
       
       razorpay.on('payment.error', function(response) {
-        console.error('❌ Payment Error:', response);
+        console.error('Payment Error:', response);
         showLoading(false);
         showToast('❌ Payment failed! Please try again.', true);
         if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-lock"></i> Pay Now with 5% OFF'; }
@@ -1419,10 +1466,8 @@
       document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
     }
     
-    // Update reward points display
     const finalTotal = selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal;
-    const rewardPoints = Math.floor(finalTotal / 100);
-    document.getElementById('rewardPoints').innerHTML = rewardPoints;
+    document.getElementById('rewardPoints').innerHTML = Math.floor(finalTotal / 100);
   }
   
   function renderOrderSummary() {
@@ -1479,8 +1524,11 @@
     document.getElementById('phone').value = currentUser.phone || '';
     document.getElementById('email').value = currentUser.email || '';
     document.getElementById('fullName').value = currentUser.name || '';
+    document.getElementById('manualFullName').value = currentUser.name || '';
+    document.getElementById('manualPhone').value = currentUser.phone || '';
     
     await loadUserAddresses();
+    renderSavedAddresses();
     
     loadCart();
     loadProductsInstantly();
@@ -1492,15 +1540,13 @@
   function setupEventListeners() {
     const codOption = document.getElementById('codOption');
     const razorpayOption = document.getElementById('razorpayOption');
-    const codDetails = document.getElementById('codDetails');
-    const razorpaySection = document.getElementById('razorpaySection');
     
     codOption?.addEventListener('click', () => {
       document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
       codOption.classList.add('selected');
       selectedPaymentMethod = 'cod';
-      codDetails.classList.add('show');
-      razorpaySection.classList.remove('show');
+      document.getElementById('codDetails').classList.add('show');
+      document.getElementById('razorpaySection').classList.remove('show');
       calculateOnlineDiscount();
     });
     
@@ -1508,15 +1554,16 @@
       document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
       razorpayOption.classList.add('selected');
       selectedPaymentMethod = 'razorpay';
-      codDetails.classList.remove('show');
-      razorpaySection.classList.add('show');
+      document.getElementById('codDetails').classList.remove('show');
+      document.getElementById('razorpaySection').classList.add('show');
       calculateOnlineDiscount();
     });
     
-    document.getElementById('addNewAddressBtn')?.addEventListener('click', showNewAddressForm);
-    document.getElementById('saveAddressBtn')?.addEventListener('click', saveNewAddress);
-    document.getElementById('cancelAddressBtn')?.addEventListener('click', cancelNewAddress);
-    document.getElementById('useCurrentLocationBtn')?.addEventListener('click', fillAddressWithLocation);
+    document.getElementById('addNewAddressBtn')?.addEventListener('click', showAddNewAddressForm);
+    document.getElementById('saveNewAddressBtn')?.addEventListener('click', saveNewAddressAndUse);
+    document.getElementById('cancelNewAddressBtn')?.addEventListener('click', cancelNewAddress);
+    document.getElementById('useCurrentLocationManualBtn')?.addEventListener('click', fillManualFormWithLocation);
+    document.getElementById('useCurrentLocationNewBtn')?.addEventListener('click', fillNewFormWithLocation);
     
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
