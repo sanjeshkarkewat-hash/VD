@@ -11,7 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <style>
-    /* ... existing styles ... */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Space Grotesk', sans-serif;
@@ -121,7 +120,6 @@
       cursor: pointer;
       transition: all 0.2s;
       margin-bottom: 10px;
-      position: relative;
     }
     .saved-address-card:hover {
       border-color: #D4AF37;
@@ -148,19 +146,13 @@
       color: #888;
       margin-top: 8px;
     }
-    .address-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .edit-address-btn {
-      background: rgba(33,150,243,0.2);
-      border: 1px solid rgba(33,150,243,0.5);
-      padding: 6px 12px;
+    .saved-address-card .address-label {
+      display: inline-block;
+      background: rgba(212,175,55,0.2);
+      padding: 2px 10px;
       border-radius: 20px;
-      font-size: 11px;
-      color: #2196F3;
-      cursor: pointer;
+      font-size: 10px;
+      margin-top: 8px;
     }
     .option-divider {
       text-align: center;
@@ -210,75 +202,6 @@
     }
     .new-address-form.show {
       display: block;
-    }
-    
-    /* Edit Address Modal */
-    .edit-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 20001;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .edit-modal.show {
-      display: flex;
-    }
-    .edit-modal-content {
-      background: rgba(15,15,22,0.98);
-      backdrop-filter: blur(20px);
-      border-radius: 32px;
-      padding: 28px;
-      max-width: 500px;
-      width: 100%;
-      border: 1px solid rgba(212,175,55,0.3);
-    }
-    .edit-modal-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 20px;
-    }
-    .edit-modal-header h3 {
-      color: #D4AF37;
-      font-size: 20px;
-    }
-    .close-edit-modal {
-      background: none;
-      border: none;
-      color: white;
-      font-size: 28px;
-      cursor: pointer;
-    }
-    .edit-modal-buttons {
-      display: flex;
-      gap: 12px;
-      margin-top: 20px;
-    }
-    .save-edit-btn {
-      flex: 1;
-      background: linear-gradient(135deg, #4CAF50, #45a049);
-      border: none;
-      padding: 12px;
-      border-radius: 30px;
-      font-weight: 700;
-      color: white;
-      cursor: pointer;
-    }
-    .cancel-edit-btn {
-      flex: 1;
-      background: rgba(244,67,54,0.2);
-      border: 1px solid #F44336;
-      padding: 12px;
-      border-radius: 30px;
-      font-weight: 700;
-      color: #F44336;
-      cursor: pointer;
     }
     
     .location-btn {
@@ -643,6 +566,26 @@
       color: white !important;
       border: none !important;
     }
+    
+    /* Back button */
+    .back-to-checkout {
+      background: rgba(212,175,55,0.15);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 10px 16px;
+      border-radius: 40px;
+      color: #D4AF37;
+      text-decoration: none;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .save-and-continue-btn {
+      background: linear-gradient(135deg, #4CAF50, #45a049) !important;
+    }
   </style>
 </head>
 <body>
@@ -664,52 +607,6 @@
       <button class="location-cancel-btn" id="closeLocationModalBtn">
         Cancel
       </button>
-    </div>
-  </div>
-</div>
-
-<!-- Edit Address Modal -->
-<div class="edit-modal" id="editAddressModal">
-  <div class="edit-modal-content">
-    <div class="edit-modal-header">
-      <h3><i class="fas fa-edit"></i> Edit Address</h3>
-      <button class="close-edit-modal" id="closeEditModalBtn">&times;</button>
-    </div>
-    <div class="form-group">
-      <label>Full Name <span class="required">*</span></label>
-      <input type="text" id="editFullName" placeholder="Recipient full name">
-    </div>
-    <div class="form-group">
-      <label>Street Address <span class="required">*</span></label>
-      <input type="text" id="editStreet" placeholder="House number, building, street">
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>City <span class="required">*</span></label>
-        <input type="text" id="editCity" placeholder="City">
-      </div>
-      <div class="form-group">
-        <label>State <span class="required">*</span></label>
-        <input type="text" id="editState" placeholder="State">
-      </div>
-    </div>
-    <div class="form-row">
-      <div class="form-group">
-        <label>Pincode <span class="required">*</span></label>
-        <input type="text" id="editPincode" placeholder="6-digit pincode">
-      </div>
-      <div class="form-group">
-        <label>Landmark (Optional)</label>
-        <input type="text" id="editLandmark" placeholder="Near...">
-      </div>
-    </div>
-    <div class="form-group">
-      <label>Phone Number</label>
-      <input type="tel" id="editPhone" placeholder="Phone number">
-    </div>
-    <div class="edit-modal-buttons">
-      <button class="save-edit-btn" id="saveEditBtn">Save Changes</button>
-      <button class="cancel-edit-btn" id="cancelEditBtn">Cancel</button>
     </div>
   </div>
 </div>
@@ -748,6 +645,7 @@
         
         <!-- Address Selection Area -->
         <div id="addressSelectionArea">
+          <!-- Loading indicator -->
           <div id="addressLoading" style="text-align:center; padding:20px;">
             <i class="fas fa-spinner fa-pulse"></i> Loading your saved address...
           </div>
@@ -843,7 +741,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== FIREBASE CONFIG ==========
+  // ========== 🔥 FIREBASE CONFIG - NEW CONFIG ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
     authDomain: "nexi-53897.firebaseapp.com",
@@ -869,9 +767,9 @@
   let productsCache = new Map();
   let selectedPaymentMethod = 'cod';
   let currentUser = null;
-  let userAddresses = [];
-  let selectedAddressId = null;
-  let currentEditingAddressId = null;
+  let savedAddress = null;
+  let isUsingSavedAddress = false;
+  let isAddingNewAddress = false;
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -954,60 +852,205 @@
   function hideLocationModal() { document.getElementById('locationModal').classList.remove('show'); }
   
   // ========== ADDRESS FUNCTIONS ==========
-  async function loadUserAddresses() {
-    if (!currentUser || !currentUser.uid) return;
+  async function fetchSavedAddressFromPhone() {
+    if (!currentUser || !currentUser.phone) return null;
     
     try {
-      const snapshot = await db.collection('addresses')
-        .where('userId', '==', currentUser.uid)
-        .orderBy('isDefault', 'desc')
+      // Get all orders for this user's phone
+      const snapshot = await db.collection('orders')
+        .where('customerPhone', '==', currentUser.phone)
+        .orderBy('orderDate', 'desc')
+        .limit(1)
         .get();
       
-      userAddresses = [];
-      snapshot.forEach(doc => {
-        userAddresses.push({ id: doc.id, ...doc.data() });
-      });
-      
-      // Also check orders for saved address
-      if (userAddresses.length === 0) {
-        const orderSnapshot = await db.collection('orders')
-          .where('customerPhone', '==', currentUser.phone)
-          .orderBy('orderDate', 'desc')
-          .limit(1)
-          .get();
-        
-        if (!orderSnapshot.empty) {
-          const lastOrder = orderSnapshot.docs[0].data();
-          if (lastOrder.shippingAddress) {
-            const addressFromOrder = {
-              id: null,
-              name: lastOrder.customerName,
-              street: lastOrder.shippingAddress.address,
-              city: lastOrder.shippingAddress.city,
-              state: lastOrder.shippingAddress.state,
-              pincode: lastOrder.shippingAddress.pincode,
-              landmark: lastOrder.shippingAddress.landmark || '',
-              phone: lastOrder.customerPhone,
-              isFromOrder: true
-            };
-            userAddresses.push(addressFromOrder);
-          }
+      if (!snapshot.empty) {
+        const lastOrder = snapshot.docs[0].data();
+        if (lastOrder.shippingAddress) {
+          return {
+            fullName: lastOrder.customerName,
+            street: lastOrder.shippingAddress.address,
+            city: lastOrder.shippingAddress.city,
+            state: lastOrder.shippingAddress.state,
+            pincode: lastOrder.shippingAddress.pincode,
+            landmark: lastOrder.shippingAddress.landmark || '',
+            phone: lastOrder.customerPhone,
+            email: lastOrder.customerEmail
+          };
         }
       }
       
-      renderAddressSelection();
+      // Also check addresses collection
+      const addrSnapshot = await db.collection('addresses')
+        .where('userId', '==', currentUser.uid)
+        .orderBy('isDefault', 'desc')
+        .limit(1)
+        .get();
+      
+      if (!addrSnapshot.empty) {
+        const addr = addrSnapshot.docs[0].data();
+        return {
+          fullName: addr.name,
+          street: addr.street,
+          city: addr.city,
+          state: addr.state,
+          pincode: addr.pincode,
+          landmark: addr.landmark || '',
+          phone: addr.phone || currentUser.phone,
+          email: currentUser.email
+        };
+      }
+      
+      return null;
     } catch(e) {
-      console.error("Error loading addresses:", e);
-      renderAddressSelection();
+      console.error("Error fetching saved address:", e);
+      return null;
     }
   }
   
-  function renderAddressSelection() {
+  async function saveNewAddressToFirebase(addressData) {
+    if (!currentUser || !currentUser.uid) return null;
+    
+    const addressToSave = {
+      userId: currentUser.uid,
+      name: addressData.fullName,
+      street: addressData.street,
+      city: addressData.city,
+      state: addressData.state,
+      pincode: addressData.pincode,
+      landmark: addressData.landmark || '',
+      phone: addressData.phone || currentUser.phone,
+      isDefault: true,
+      createdAt: new Date().toISOString()
+    };
+    
+    try {
+      const docRef = await db.collection('addresses').add(addressToSave);
+      return docRef.id;
+    } catch(e) {
+      console.error("Error saving address:", e);
+      return null;
+    }
+  }
+  
+  // ========== RENDER ADDRESS SELECTION UI ==========
+  async function loadAndRenderAddressSelection() {
     const container = document.getElementById('addressSelectionArea');
     if (!container) return;
     
-    if (userAddresses.length === 0) {
-      // No saved address - show new address form
+    showLoading(true);
+    
+    const address = await fetchSavedAddressFromPhone();
+    
+    showLoading(false);
+    
+    if (address) {
+      // Show saved address with options
+      container.innerHTML = `
+        <div class="address-selection-card">
+          <div class="saved-address-card" id="useSavedAddressBtn">
+            <div class="address-name">
+              <i class="fas fa-star-of-life" style="color: #D4AF37;"></i> Previously Used Address
+            </div>
+            <div class="address-detail">${escapeHtml(address.fullName)}</div>
+            <div class="address-detail">${escapeHtml(address.street)}</div>
+            <div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>
+            ${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}
+            <div class="address-phone">📞 ${escapeHtml(address.phone)}</div>
+            <div class="address-label">✓ Deliver to this address</div>
+          </div>
+          
+          <div class="option-divider">
+            <span>OR</span>
+          </div>
+          
+          <button class="add-new-address-btn" id="showNewAddressFormBtn">
+            <i class="fas fa-plus-circle"></i> Add New Address
+          </button>
+        </div>
+        
+        <div class="new-address-form" id="newAddressFormSection">
+          <div class="form-group">
+            <label>Full Name <span class="required">*</span></label>
+            <input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(address.fullName)}">
+          </div>
+          <div class="form-group">
+            <label>Street Address <span class="required">*</span></label>
+            <input type="text" id="newStreet" placeholder="House number, building, street">
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>City <span class="required">*</span></label>
+              <input type="text" id="newCity" placeholder="City">
+            </div>
+            <div class="form-group">
+              <label>State <span class="required">*</span></label>
+              <input type="text" id="newState" placeholder="State">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Pincode <span class="required">*</span></label>
+              <input type="text" id="newPincode" placeholder="6-digit pincode">
+            </div>
+            <div class="form-group">
+              <label>Landmark (Optional)</label>
+              <input type="text" id="newLandmark" placeholder="Near...">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Phone Number</label>
+            <input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}">
+          </div>
+          <button class="location-btn" id="useCurrentLocationForNewBtn">
+            <i class="fas fa-location-dot"></i> Use My Current Location
+          </button>
+          <div class="action-buttons-row">
+            <button class="location-btn save-address-btn" id="saveNewAddressAndOrderBtn" style="flex:1;">
+              <i class="fas fa-save"></i> Save & Continue
+            </button>
+            <button class="location-btn cancel-address-btn" id="cancelNewAddressFormBtn" style="flex:0.5;">
+              Cancel
+            </button>
+          </div>
+        </div>
+      `;
+      
+      // Store saved address data globally
+      window.savedAddressData = address;
+      
+      // Setup event listeners
+      document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => {
+        useSavedAddress(address);
+      });
+      
+      document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => {
+        document.getElementById('newAddressFormSection').classList.add('show');
+        document.querySelector('.address-selection-card .saved-address-card').style.opacity = '0.5';
+      });
+      
+      document.getElementById('saveNewAddressAndOrderBtn')?.addEventListener('click', () => {
+        saveAndUseNewAddress();
+      });
+      
+      document.getElementById('cancelNewAddressFormBtn')?.addEventListener('click', () => {
+        document.getElementById('newAddressFormSection').classList.remove('show');
+        document.querySelector('.address-selection-card .saved-address-card').style.opacity = '1';
+      });
+      
+      document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', async () => {
+        const location = await getDetailedCurrentLocation();
+        if (location) {
+          document.getElementById('newStreet').value = location.street;
+          document.getElementById('newCity').value = location.city;
+          document.getElementById('newState').value = location.state;
+          document.getElementById('newPincode').value = location.pincode;
+          document.getElementById('newLandmark').value = location.landmark;
+          showToast('✅ Address filled from location!');
+        }
+      });
+      
+    } else {
+      // No saved address - show new address form directly
       container.innerHTML = `
         <div class="new-address-form show" id="newAddressFormSection">
           <div class="form-group">
@@ -1046,14 +1089,17 @@
             <i class="fas fa-location-dot"></i> Use My Current Location
           </button>
           <div class="action-buttons-row">
-            <button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;">
+            <button class="location-btn save-address-btn" id="saveNewAddressAndOrderBtn" style="flex:1;">
               <i class="fas fa-save"></i> Save & Continue
             </button>
           </div>
         </div>
       `;
       
-      document.getElementById('saveNewAddressBtn')?.addEventListener('click', saveNewAddress);
+      document.getElementById('saveNewAddressAndOrderBtn')?.addEventListener('click', () => {
+        saveAndUseNewAddress();
+      });
+      
       document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', async () => {
         const location = await getDetailedCurrentLocation();
         if (location) {
@@ -1065,239 +1111,35 @@
           showToast('✅ Address filled from location!');
         }
       });
-      return;
-    }
-    
-    // Show saved addresses with select and edit options
-    let addressesHtml = '<div class="address-selection-card">';
-    userAddresses.forEach(addr => {
-      const isSelected = selectedAddressId === addr.id;
-      addressesHtml += `
-        <div class="saved-address-card ${isSelected ? 'selected' : ''}" data-id="${addr.id}">
-          <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
-          <div class="address-detail">${escapeHtml(addr.street)}</div>
-          <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
-          ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
-          <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
-          <div class="address-actions">
-            <button class="edit-address-btn" data-id="${addr.id}" data-name="${escapeHtml(addr.name)}" data-street="${escapeHtml(addr.street)}" data-city="${escapeHtml(addr.city)}" data-state="${escapeHtml(addr.state)}" data-pincode="${escapeHtml(addr.pincode)}" data-landmark="${escapeHtml(addr.landmark || '')}" data-phone="${escapeHtml(addr.phone || currentUser?.phone || '')}">
-              <i class="fas fa-edit"></i> Edit
-            </button>
-          </div>
-        </div>
-      `;
-    });
-    
-    addressesHtml += `
-        <div class="option-divider"><span>OR</span></div>
-        <button class="add-new-address-btn" id="showNewAddressBtn">
-          <i class="fas fa-plus-circle"></i> Add New Address
-        </button>
-      </div>
-      <div class="new-address-form" id="newAddressFormSection">
-        <div class="form-group">
-          <label>Full Name <span class="required">*</span></label>
-          <input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}">
-        </div>
-        <div class="form-group">
-          <label>Street Address <span class="required">*</span></label>
-          <input type="text" id="newStreet" placeholder="House number, building, street">
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>City <span class="required">*</span></label>
-            <input type="text" id="newCity" placeholder="City">
-          </div>
-          <div class="form-group">
-            <label>State <span class="required">*</span></label>
-            <input type="text" id="newState" placeholder="State">
-          </div>
-        </div>
-        <div class="form-row">
-          <div class="form-group">
-            <label>Pincode <span class="required">*</span></label>
-            <input type="text" id="newPincode" placeholder="6-digit pincode">
-          </div>
-          <div class="form-group">
-            <label>Landmark (Optional)</label>
-            <input type="text" id="newLandmark" placeholder="Near...">
-          </div>
-        </div>
-        <div class="form-group">
-          <label>Phone Number</label>
-          <input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}">
-        </div>
-        <button class="location-btn" id="useCurrentLocationForNewBtn2">
-          <i class="fas fa-location-dot"></i> Use My Current Location
-        </button>
-        <div class="action-buttons-row">
-          <button class="location-btn save-address-btn" id="saveNewAddressBtn2" style="flex:1;">
-            <i class="fas fa-save"></i> Save Address
-          </button>
-          <button class="location-btn cancel-address-btn" id="cancelNewAddressBtn" style="flex:0.5;">
-            Cancel
-          </button>
-        </div>
-      </div>
-    `;
-    
-    container.innerHTML = addressesHtml;
-    
-    // Add click listeners for address selection
-    document.querySelectorAll('.saved-address-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.classList.contains('edit-address-btn')) return;
-        const id = card.getAttribute('data-id');
-        selectAddress(id);
-      });
-    });
-    
-    // Add edit listeners
-    document.querySelectorAll('.edit-address-btn').forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const id = btn.getAttribute('data-id');
-        const name = btn.getAttribute('data-name');
-        const street = btn.getAttribute('data-street');
-        const city = btn.getAttribute('data-city');
-        const state = btn.getAttribute('data-state');
-        const pincode = btn.getAttribute('data-pincode');
-        const landmark = btn.getAttribute('data-landmark');
-        const phone = btn.getAttribute('data-phone');
-        openEditModal(id, name, street, city, state, pincode, landmark, phone);
-      });
-    });
-    
-    document.getElementById('showNewAddressBtn')?.addEventListener('click', () => {
-      document.getElementById('newAddressFormSection').classList.add('show');
-    });
-    
-    document.getElementById('cancelNewAddressBtn')?.addEventListener('click', () => {
-      document.getElementById('newAddressFormSection').classList.remove('show');
-    });
-    
-    document.getElementById('saveNewAddressBtn2')?.addEventListener('click', saveNewAddress);
-    document.getElementById('useCurrentLocationForNewBtn2')?.addEventListener('click', async () => {
-      const location = await getDetailedCurrentLocation();
-      if (location) {
-        document.getElementById('newStreet').value = location.street;
-        document.getElementById('newCity').value = location.city;
-        document.getElementById('newState').value = location.state;
-        document.getElementById('newPincode').value = location.pincode;
-        document.getElementById('newLandmark').value = location.landmark;
-        showToast('✅ Address filled from location!');
-      }
-    });
-  }
-  
-  function selectAddress(addressId) {
-    selectedAddressId = addressId;
-    const address = userAddresses.find(a => a.id === addressId);
-    if (address) {
-      document.getElementById('fullName').value = address.name;
-      window.selectedAddress = {
-        fullName: address.name,
-        phone: address.phone || currentUser.phone,
-        email: currentUser.email,
-        address: address.street,
-        city: address.city,
-        state: address.state,
-        pincode: address.pincode,
-        landmark: address.landmark || ''
-      };
-      renderAddressSelection();
-      showToast(`✅ Using address: ${address.name}`);
     }
   }
   
-  function openEditModal(id, name, street, city, state, pincode, landmark, phone) {
-    currentEditingAddressId = id;
-    document.getElementById('editFullName').value = name;
-    document.getElementById('editStreet').value = street;
-    document.getElementById('editCity').value = city;
-    document.getElementById('editState').value = state;
-    document.getElementById('editPincode').value = pincode;
-    document.getElementById('editLandmark').value = landmark;
-    document.getElementById('editPhone').value = phone;
-    document.getElementById('editAddressModal').classList.add('show');
+  function useSavedAddress(address) {
+    isUsingSavedAddress = true;
+    isAddingNewAddress = false;
+    
+    document.getElementById('fullName').value = address.fullName;
+    showToast(`✅ Using address: ${address.fullName}`);
+    
+    // Store address for order
+    window.selectedAddress = {
+      fullName: address.fullName,
+      phone: address.phone,
+      email: currentUser.email,
+      address: address.street,
+      city: address.city,
+      state: address.state,
+      pincode: address.pincode,
+      landmark: address.landmark || ''
+    };
+    
+    // Highlight selected
+    const savedCard = document.querySelector('.saved-address-card');
+    if (savedCard) savedCard.classList.add('selected');
   }
   
-  async function saveEditedAddress() {
-    const name = document.getElementById('editFullName').value.trim();
-    const street = document.getElementById('editStreet').value.trim();
-    const city = document.getElementById('editCity').value.trim();
-    const state = document.getElementById('editState').value.trim();
-    const pincode = document.getElementById('editPincode').value.trim();
-    const landmark = document.getElementById('editLandmark').value.trim();
-    const phone = document.getElementById('editPhone').value.trim();
-    
-    if (!name || !street || !city || !state || !pincode) {
-      showToast('❌ Please fill all required fields', true);
-      return;
-    }
-    
-    if (pincode.length !== 6) {
-      showToast('❌ Enter valid 6-digit pincode', true);
-      return;
-    }
-    
-    showLoading(true);
-    
-    try {
-      await db.collection('addresses').doc(currentEditingAddressId).update({
-        name: name,
-        street: street,
-        city: city,
-        state: state,
-        pincode: pincode,
-        landmark: landmark,
-        phone: phone || currentUser.phone,
-        updatedAt: new Date().toISOString()
-      });
-      
-      // Update local array
-      const addrIndex = userAddresses.findIndex(a => a.id === currentEditingAddressId);
-      if (addrIndex !== -1) {
-        userAddresses[addrIndex] = {
-          ...userAddresses[addrIndex],
-          name: name,
-          street: street,
-          city: city,
-          state: state,
-          pincode: pincode,
-          landmark: landmark,
-          phone: phone || currentUser.phone
-        };
-      }
-      
-      // If this was the selected address, update selected address
-      if (selectedAddressId === currentEditingAddressId) {
-        window.selectedAddress = {
-          fullName: name,
-          phone: phone || currentUser.phone,
-          email: currentUser.email,
-          address: street,
-          city: city,
-          state: state,
-          pincode: pincode,
-          landmark: landmark
-        };
-        document.getElementById('fullName').value = name;
-      }
-      
-      closeEditModal();
-      renderAddressSelection();
-      showToast('✅ Address updated successfully!');
-    } catch(e) {
-      console.error("Error updating address:", e);
-      showToast('❌ Failed to update address', true);
-    }
-    
-    showLoading(false);
-  }
-  
-  async function saveNewAddress() {
-    const name = document.getElementById('newFullName').value.trim();
+  async function saveAndUseNewAddress() {
+    const fullName = document.getElementById('newFullName').value.trim();
     const street = document.getElementById('newStreet').value.trim();
     const city = document.getElementById('newCity').value.trim();
     const state = document.getElementById('newState').value.trim();
@@ -1305,7 +1147,7 @@
     const landmark = document.getElementById('newLandmark').value.trim();
     const phone = document.getElementById('newPhone').value.trim();
     
-    if (!name || !street || !city || !state || !pincode) {
+    if (!fullName || !street || !city || !state || !pincode) {
       showToast('❌ Please fill all required fields', true);
       return;
     }
@@ -1317,48 +1159,27 @@
     
     showLoading(true);
     
-    const addressData = {
-      userId: currentUser.uid,
-      name: name,
-      street: street,
+    const newAddress = {
+      fullName: fullName,
+      phone: phone || currentUser.phone,
+      email: currentUser.email,
+      address: street,
       city: city,
       state: state,
       pincode: pincode,
-      landmark: landmark || '',
-      phone: phone || currentUser.phone,
-      isDefault: userAddresses.length === 0,
-      createdAt: new Date().toISOString()
+      landmark: landmark
     };
     
-    try {
-      const docRef = await db.collection('addresses').add(addressData);
-      addressData.id = docRef.id;
-      userAddresses.push(addressData);
-      
-      // Clear form
-      document.getElementById('newFullName').value = '';
-      document.getElementById('newStreet').value = '';
-      document.getElementById('newCity').value = '';
-      document.getElementById('newState').value = '';
-      document.getElementById('newPincode').value = '';
-      document.getElementById('newLandmark').value = '';
-      document.getElementById('newPhone').value = '';
-      
-      document.getElementById('newAddressFormSection').classList.remove('show');
-      
-      selectAddress(docRef.id);
-      showToast('✅ Address saved successfully!');
-    } catch(e) {
-      console.error("Save address error:", e);
-      showToast('❌ Failed to save address', true);
-    }
+    // Save to Firebase for future use
+    await saveNewAddressToFirebase(newAddress);
+    
+    window.selectedAddress = newAddress;
+    document.getElementById('fullName').value = fullName;
+    isUsingSavedAddress = true;
+    isAddingNewAddress = false;
     
     showLoading(false);
-  }
-  
-  function closeEditModal() {
-    document.getElementById('editAddressModal').classList.remove('show');
-    currentEditingAddressId = null;
+    showToast('✅ New address saved! Continue with order.');
   }
   
   // ========== GET ADDRESS FOR ORDER ==========
@@ -1373,6 +1194,11 @@
     const address = getSelectedAddress();
     if (!address) {
       showToast('❌ Please select or add a shipping address', true);
+      return false;
+    }
+    const name = document.getElementById('fullName').value.trim();
+    if (!name) {
+      showToast('❌ Please enter your full name', true);
       return false;
     }
     return true;
@@ -1604,7 +1430,7 @@
     document.getElementById('email').value = currentUser.email || '';
     document.getElementById('fullName').value = currentUser.name || '';
     
-    await loadUserAddresses();
+    await loadAndRenderAddressSelection();
     
     loadCart();
     loadProductsInstantly();
@@ -1634,11 +1460,6 @@
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => { hideLocationModal(); showToast('📍 Enable location in browser settings', true); });
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
-    
-    // Edit modal listeners
-    document.getElementById('saveEditBtn')?.addEventListener('click', saveEditedAddress);
-    document.getElementById('cancelEditBtn')?.addEventListener('click', closeEditModal);
-    document.getElementById('closeEditModalBtn')?.addEventListener('click', closeEditModal);
   }
   
   initialize();
