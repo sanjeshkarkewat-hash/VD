@@ -11,7 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <style>
-    /* ... existing styles ... */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body {
       font-family: 'Space Grotesk', sans-serif;
@@ -37,7 +36,6 @@
       position: fixed;
       bottom: 30px;
       right: 16px;
-      left: auto;
       z-index: 1001;
       cursor: pointer;
     }
@@ -51,8 +49,9 @@
       justify-content: center;
       position: relative;
       box-shadow: 0 4px 15px rgba(212,175,55,0.4);
+      transition: transform 0.3s;
     }
-    .cart-icon-container:active { transform: scale(0.95); }
+    .cart-icon-container:hover { transform: scale(1.05); }
     .cart-icon-container i { font-size: 26px; color: #050508; }
     .cart-count {
       position: absolute;
@@ -74,7 +73,6 @@
       position: fixed;
       top: 0;
       right: -100%;
-      left: auto;
       width: 85%;
       max-width: 380px;
       height: 100%;
@@ -86,7 +84,7 @@
       display: flex;
       flex-direction: column;
     }
-    .cart-sidebar.open { right: 0; left: auto; }
+    .cart-sidebar.open { right: 0; }
     .cart-header {
       padding: 20px;
       border-bottom: 1px solid rgba(212,175,55,0.3);
@@ -301,28 +299,151 @@
 
     .product-info {
       background: rgba(15,15,22,0.6);
-      padding: 16px;
+      padding: 20px 16px;
       margin: 12px;
-      border-radius: 24px;
+      border-radius: 28px;
+      border: 1px solid rgba(212,175,55,0.2);
     }
     .product-brand { color: #D4AF37; font-size: 11px; letter-spacing: 2px; margin-bottom: 6px; }
-    .product-name { font-size: 20px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
-    .rating { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-    .stars { color: #FFB800; font-size: 12px; letter-spacing: 2px; }
-    .review-count { color: #888; font-size: 11px; }
-    .price-section { margin-bottom: 16px; }
-    .current-price { font-size: 28px; font-weight: 800; color: #D4AF37; }
-    .original-price { font-size: 16px; color: #888; text-decoration: line-through; margin-left: 8px; }
-    .discount { background: #FF4500; padding: 3px 8px; border-radius: 25px; font-size: 11px; font-weight: 600; margin-left: 8px; }
+    .product-name { font-size: 22px; font-weight: 700; margin-bottom: 10px; line-height: 1.3; }
+    @media (min-width: 768px) { .product-name { font-size: 28px; } }
+    
+    .rating {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .stars { color: #FFB800; font-size: 13px; letter-spacing: 2px; }
+    .review-count { color: #888; font-size: 12px; }
+    .rating-badge { background: rgba(76,175,80,0.15); padding: 2px 8px; border-radius: 20px; font-size: 10px; color: #4CAF50; }
+    
+    .price-section {
+      margin-bottom: 16px;
+      display: flex;
+      align-items: baseline;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .current-price { font-size: 32px; font-weight: 800; color: #D4AF37; }
+    .original-price { font-size: 16px; color: #888; text-decoration: line-through; }
+    .discount { background: #FF4500; padding: 3px 8px; border-radius: 25px; font-size: 11px; font-weight: 600; }
+    .tax-info { font-size: 11px; color: #888; width: 100%; margin-top: 4px; }
+    
+    .trust-badges {
+      background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(76,175,80,0.05));
+      border-radius: 20px;
+      padding: 16px;
+      margin: 16px 0;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (min-width: 768px) { .trust-badges { grid-template-columns: repeat(4, 1fr); } }
+    .trust-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(0,0,0,0.3);
+      padding: 10px;
+      border-radius: 16px;
+      transition: 0.2s;
+    }
+    .trust-item:hover { background: rgba(212,175,55,0.1); transform: translateY(-2px); }
+    .trust-item i { font-size: 20px; color: #4CAF50; min-width: 32px; }
+    .trust-item div h4 { font-size: 11px; font-weight: 700; color: #D4AF37; margin-bottom: 2px; }
+    .trust-item div p { font-size: 9px; color: #888; }
+    
+    .delivery-info {
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      padding: 12px 16px;
+      margin: 16px 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .delivery-date {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .delivery-date i { font-size: 20px; color: #D4AF37; }
+    .delivery-date .date-text { font-size: 14px; font-weight: 600; color: #4CAF50; }
+    .delivery-date .pincode-text { font-size: 11px; color: #888; }
+    .stock-status { font-size: 12px; color: #4CAF50; display: flex; align-items: center; gap: 5px; }
+    
+    /* Product Specifications - Points Style with View More */
+    .specifications-section {
+      background: rgba(0,0,0,0.2);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .spec-title {
+      font-size: 16px;
+      font-weight: 700;
+      color: #D4AF37;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-left: 3px solid #D4AF37;
+      padding-left: 12px;
+    }
+    .specs-list {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .spec-point {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 6px 0;
+    }
+    .spec-point i {
+      color: #D4AF37;
+      font-size: 14px;
+      margin-top: 2px;
+      min-width: 20px;
+    }
+    .spec-point strong {
+      color: #D4AF37;
+      font-weight: 600;
+      min-width: 120px;
+    }
+    .spec-point span {
+      color: #cccccc;
+      font-size: 13px;
+    }
+    .spec-point.hidden {
+      display: none;
+    }
+    .specs-view-more-btn {
+      background: none;
+      border: none;
+      color: #D4AF37;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 12px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
     
     .size-section, .color-section, .combo-section {
       margin: 16px 0;
       background: rgba(0,0,0,0.3);
-      border-radius: 16px;
+      border-radius: 20px;
       padding: 12px;
     }
     .size-title, .color-title, .combo-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       color: #D4AF37;
       margin-bottom: 12px;
@@ -333,23 +454,20 @@
     .size-options {
       display: flex;
       flex-wrap: wrap;
-      gap: 12px;
+      gap: 10px;
     }
     .size-btn {
       background: rgba(212,175,55,0.15);
       border: 1px solid rgba(212,175,55,0.3);
-      padding: 10px 24px;
+      padding: 8px 20px;
       border-radius: 40px;
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       cursor: pointer;
       color: #FFFFFF;
+      transition: 0.2s;
     }
-    .size-btn.active, .size-btn:active {
-      background: #D4AF37;
-      color: #050508;
-      border-color: #D4AF37;
-    }
+    .size-btn.active, .size-btn:hover { background: #D4AF37; color: #050508; border-color: #D4AF37; }
     
     .color-options {
       display: flex;
@@ -367,32 +485,18 @@
       transition: all 0.2s ease;
       min-width: 60px;
     }
-    .color-btn.active {
-      background: rgba(212,175,55,0.25);
-      transform: scale(1.05);
-    }
+    .color-btn.active { background: rgba(212,175,55,0.25); transform: scale(1.05); }
     .color-circle {
-      width: 45px;
-      height: 45px;
+      width: 42px;
+      height: 42px;
       border-radius: 50%;
       border: 2px solid rgba(255,255,255,0.3);
       transition: all 0.2s ease;
       box-shadow: 0 2px 8px rgba(0,0,0,0.2);
     }
-    .color-btn.active .color-circle {
-      border-color: #D4AF37;
-      box-shadow: 0 0 15px rgba(212,175,55,0.6);
-      transform: scale(1.05);
-    }
-    .color-name {
-      font-size: 11px;
-      color: #aaa;
-      font-weight: 500;
-    }
-    .color-btn.active .color-name {
-      color: #D4AF37;
-      font-weight: 700;
-    }
+    .color-btn.active .color-circle { border-color: #D4AF37; box-shadow: 0 0 15px rgba(212,175,55,0.6); transform: scale(1.05); }
+    .color-name { font-size: 11px; color: #aaa; font-weight: 500; }
+    .color-btn.active .color-name { color: #D4AF37; font-weight: 700; }
 
     .combo-list {
       display: flex;
@@ -402,26 +506,26 @@
     .combo-item {
       background: rgba(0,0,0,0.4);
       border-radius: 20px;
-      padding: 16px;
+      padding: 14px;
       display: flex;
       justify-content: space-between;
       align-items: center;
       cursor: pointer;
       border: 2px solid rgba(212,175,55,0.2);
       transition: all 0.3s ease;
+      position: relative;
     }
     .combo-item.selected {
       border-color: #D4AF37;
       background: linear-gradient(135deg, rgba(212,175,55,0.25), rgba(76,175,80,0.15));
     }
-    .combo-quantity { font-size: 18px; font-weight: 800; color: #4CAF50; display: flex; align-items: center; gap: 8px; }
+    .combo-quantity { font-size: 16px; font-weight: 800; color: #4CAF50; display: flex; align-items: center; gap: 8px; }
     .combo-save { font-size: 11px; color: #FFB800; background: rgba(255,184,0,0.15); padding: 2px 8px; border-radius: 20px; display: inline-block; margin-top: 4px; }
-    .combo-price { text-align: right; }
-    .combo-price .price-big { font-size: 20px; font-weight: 800; color: #D4AF37; }
+    .combo-price .price-big { font-size: 18px; font-weight: 800; color: #D4AF37; }
     .combo-price .per-piece { font-size: 10px; color: #4CAF50; }
     .combo-select-icon {
-      width: 32px;
-      height: 32px;
+      width: 30px;
+      height: 30px;
       border-radius: 50%;
       background: rgba(212,175,55,0.2);
       display: flex;
@@ -430,18 +534,8 @@
       margin-left: 12px;
     }
     .combo-item.selected .combo-select-icon { background: #4CAF50; }
-    .combo-select-icon i { font-size: 16px; color: white; }
-    .combo-badge {
-      position: absolute;
-      top: -8px;
-      right: 12px;
-      background: #FF4500;
-      color: white;
-      font-size: 9px;
-      padding: 2px 8px;
-      border-radius: 20px;
-    }
-    .combo-item { position: relative; }
+    .combo-select-icon i { font-size: 14px; color: white; }
+    .combo-badge { position: absolute; top: -8px; right: 12px; background: #FF4500; color: white; font-size: 9px; padding: 2px 8px; border-radius: 20px; }
 
     .product-detail-section {
       margin: 20px 0;
@@ -450,7 +544,7 @@
       padding: 16px;
     }
     .detail-title {
-      font-size: 18px;
+      font-size: 16px;
       font-weight: 700;
       color: #D4AF37;
       margin-bottom: 12px;
@@ -461,14 +555,152 @@
       padding-left: 12px;
     }
     .full-description { color: #CCCCCC; line-height: 1.7; font-size: 14px; text-align: justify; }
-    .features-list { margin-top: 16px; background: rgba(212,175,55,0.05); border-radius: 16px; padding: 12px; }
-    .feature-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-    .feature-item:last-child { border-bottom: none; }
+    
+    /* Description with line clamp - 5 lines */
+    .desc-short {
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      line-clamp: 5;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+    .desc-full {
+      display: none;
+    }
+    .desc-full.show {
+      display: block;
+    }
+    .view-more-btn {
+      background: none;
+      border: none;
+      color: #D4AF37;
+      font-size: 12px;
+      font-weight: 600;
+      margin-top: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    
+    .features-list {
+      margin-top: 16px;
+      background: rgba(212,175,55,0.05);
+      border-radius: 16px;
+      padding: 12px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+    }
+    @media (min-width: 768px) { .features-list { grid-template-columns: repeat(2, 1fr); } }
+    .feature-item { display: flex; align-items: center; gap: 10px; padding: 8px 0; }
     .feature-item i { width: 24px; color: #D4AF37; font-size: 14px; }
-    .feature-item span { font-size: 13px; color: #AAAAAA; }
+    .feature-item span { font-size: 12px; color: #AAAAAA; }
 
-    .offer-tag { background: rgba(212,175,55,0.1); padding: 12px; border-radius: 16px; margin: 16px 0; text-align: center; font-size: 13px; }
-    .quantity-selector { display: flex; align-items: center; gap: 15px; margin: 20px 0; }
+    .care-section {
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      padding: 16px;
+      margin: 16px 0;
+    }
+    .care-title {
+      font-size: 14px;
+      font-weight: 700;
+      color: #D4AF37;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .care-items {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    .care-item {
+      background: rgba(212,175,55,0.1);
+      border: 1px solid rgba(212,175,55,0.2);
+      padding: 6px 12px;
+      border-radius: 30px;
+      font-size: 11px;
+      color: #ccc;
+    }
+
+    .size-guide-btn {
+      background: rgba(212,175,55,0.15);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 8px 20px;
+      border-radius: 40px;
+      color: #D4AF37;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .size-guide-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 20001;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .size-guide-modal.show { display: flex; }
+    .size-guide-modal-content {
+      background: rgba(15,15,22,0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 28px;
+      padding: 24px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      border: 1px solid rgba(212,175,55,0.3);
+    }
+    .size-guide-modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+    .size-guide-modal-header h3 { color: #D4AF37; }
+    .close-size-modal {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 24px;
+      cursor: pointer;
+    }
+    .size-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+    .size-table th, .size-table td {
+      border: 1px solid rgba(212,175,55,0.2);
+      padding: 10px;
+      text-align: center;
+      color: #ccc;
+      font-size: 13px;
+    }
+    .size-table th {
+      background: rgba(212,175,55,0.1);
+      color: #D4AF37;
+    }
+
+    .quantity-selector {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      margin: 20px 0;
+    }
     .qty-btn {
       background: rgba(212,175,55,0.15);
       border: 1px solid rgba(212,175,55,0.3);
@@ -496,7 +728,6 @@
       position: sticky;
       bottom: 0;
       display: flex;
-      flex-direction: column;
       gap: 12px;
       margin-top: 20px;
       padding: 12px;
@@ -506,31 +737,114 @@
       z-index: 99;
     }
     .add-cart-btn, .buy-btn {
-      width: 100%;
+      flex: 1;
       padding: 15px;
       border-radius: 50px;
       font-weight: 700;
-      font-size: 15px;
+      font-size: 14px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 8px;
       cursor: pointer;
+      transition: transform 0.2s;
     }
-    .add-cart-btn {
-      background: rgba(212,175,55,0.15);
-      border: 1px solid rgba(212,175,55,0.5);
+    .add-cart-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.5); color: #D4AF37; }
+    .buy-btn { background: linear-gradient(135deg, #FF4500, #FF8C00); border: none; color: white; }
+    .add-cart-btn:active, .buy-btn:active { transform: scale(0.98); }
+
+    .section-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin: 28px 16px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
       color: #D4AF37;
     }
-    .buy-btn {
-      background: linear-gradient(135deg, #FF4500, #FF8C00);
-      border: none;
-      color: white;
+    .section-title span { background: #D4AF37; width: 40px; height: 3px; border-radius: 3px; }
+
+    .reviews-section {
+      padding: 0 16px;
+      margin: 20px 0 30px;
     }
-
-    .section-title { font-size: 20px; font-weight: 700; margin: 24px 16px 16px; display: flex; align-items: center; gap: 10px; }
-    .section-title span { background: #D4AF37; width: 30px; height: 3px; }
-
+    .review-card {
+      background: rgba(20,20,30,0.7);
+      backdrop-filter: blur(10px);
+      border-radius: 24px;
+      padding: 20px;
+      margin-bottom: 16px;
+      border: 1px solid rgba(212,175,55,0.15);
+      transition: all 0.2s;
+    }
+    .review-card:hover { transform: translateY(-3px); border-color: rgba(212,175,55,0.4); background: rgba(212,175,55,0.05); }
+    .review-header { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+    .review-avatar {
+      width: 50px;
+      height: 50px;
+      background: linear-gradient(135deg, #D4AF37, #FF8C00);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      font-weight: 800;
+      color: #050508;
+    }
+    .review-user-info { flex: 1; }
+    .review-user-name { font-size: 15px; font-weight: 700; color: #D4AF37; margin-bottom: 4px; }
+    .review-date { font-size: 10px; color: #888; }
+    .review-stars { color: #FFB800; font-size: 13px; letter-spacing: 2px; margin: 10px 0; }
+    .review-text { font-size: 13px; line-height: 1.6; color: #ddd; margin-top: 8px; }
+    .review-helpful { display: flex; align-items: center; gap: 15px; margin-top: 12px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.08); }
+    .helpful-btn { background: none; border: none; color: #888; font-size: 11px; cursor: pointer; display: flex; align-items: center; gap: 5px; transition: 0.2s; }
+    .helpful-btn:hover { color: #D4AF37; }
+    
+    .view-all-reviews-btn {
+      width: 100%;
+      background: rgba(212,175,55,0.15);
+      border: 1px solid rgba(212,175,55,0.3);
+      padding: 14px;
+      border-radius: 40px;
+      color: #D4AF37;
+      font-weight: 600;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    
+    .reviews-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.95);
+      z-index: 20000;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .reviews-modal.show { display: flex; }
+    .reviews-modal-content {
+      background: rgba(15,15,22,0.98);
+      backdrop-filter: blur(20px);
+      border-radius: 32px;
+      width: 100%;
+      max-width: 700px;
+      max-height: 85vh;
+      overflow: hidden;
+      border: 1px solid rgba(212,175,55,0.3);
+    }
+    .reviews-modal-header { display: flex; justify-content: space-between; align-items: center; padding: 20px 24px; border-bottom: 1px solid rgba(212,175,55,0.2); }
+    .reviews-modal-header h3 { color: #D4AF37; font-size: 20px; }
+    .close-reviews-modal { background: none; border: none; color: white; font-size: 28px; cursor: pointer; }
+    .reviews-modal-body { padding: 20px 24px; overflow-y: auto; max-height: calc(85vh - 80px); }
+    
     .related-products {
       display: grid;
       grid-template-columns: repeat(2, 1fr);
@@ -538,12 +852,16 @@
       padding: 0 16px;
       margin-bottom: 30px;
     }
+    @media (min-width: 768px) { .related-products { grid-template-columns: repeat(4, 1fr); gap: 20px; } }
     .related-card {
       background: rgba(15,15,22,0.6);
       border-radius: 20px;
       padding: 12px;
       cursor: pointer;
+      transition: 0.2s;
+      border: 1px solid rgba(212,175,55,0.15);
     }
+    .related-card:hover { transform: translateY(-3px); border-color: #D4AF37; }
     .related-img {
       height: 140px;
       background: #0E0E14;
@@ -559,17 +877,90 @@
     .related-name { font-size: 13px; font-weight: 600; margin-top: 8px; }
     .related-price { font-size: 15px; font-weight: 800; color: #D4AF37; margin-top: 5px; }
 
-    .reviews-section { padding: 0 16px; margin-bottom: 40px; }
-    .review-card {
-      background: rgba(15,15,22,0.4);
-      border-radius: 20px;
-      padding: 16px;
-      margin-bottom: 12px;
+    .footer-benefits {
+      background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(0,0,0,0.3));
+      border-radius: 24px;
+      padding: 24px 20px;
+      margin: 40px 16px 20px;
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
     }
-    .reviewer { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; margin-bottom: 8px; }
-    .review-stars-small { color: #FFB800; font-size: 11px; margin-bottom: 8px; }
-    .review-text { font-size: 12px; line-height: 1.5; color: #CCCCCC; }
-    .review-date { font-size: 10px; color: #888; margin-top: 8px; }
+    @media (min-width: 768px) { .footer-benefits { grid-template-columns: repeat(4, 1fr); } }
+    .footer-benefit-item {
+      text-align: center;
+      padding: 12px;
+      background: rgba(0,0,0,0.3);
+      border-radius: 20px;
+      transition: 0.2s;
+    }
+    .footer-benefit-item:hover { transform: translateY(-3px); background: rgba(212,175,55,0.1); }
+    .footer-benefit-item i { font-size: 28px; color: #D4AF37; margin-bottom: 10px; display: block; }
+    .footer-benefit-item h4 { font-size: 13px; font-weight: 700; color: #D4AF37; margin-bottom: 4px; }
+    .footer-benefit-item p { font-size: 10px; color: #888; }
+
+    .social-section {
+      text-align: center;
+      margin: 30px 16px 40px;
+      padding: 24px;
+      background: rgba(15,15,22,0.6);
+      border-radius: 28px;
+      border: 1px solid rgba(212,175,55,0.2);
+    }
+    .social-section h3 {
+      font-size: 18px;
+      color: #D4AF37;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .social-links {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      flex-wrap: wrap;
+    }
+    .social-link {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      transition: 0.2s;
+    }
+    .social-link:hover { transform: translateY(-5px); }
+    .social-icon {
+      width: 55px;
+      height: 55px;
+      background: rgba(212,175,55,0.15);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      transition: 0.2s;
+    }
+    .social-link:hover .social-icon {
+      background: #D4AF37;
+      color: #050508;
+    }
+    .social-link span {
+      font-size: 11px;
+      color: #888;
+    }
+    .social-link:hover span {
+      color: #D4AF37;
+    }
+    .fa-instagram { color: #E4405F; }
+    .fa-facebook-f { color: #1877F2; }
+    .fa-youtube { color: #FF0000; }
+    .fa-twitter { color: #1DA1F2; }
+    .social-link:hover .fa-instagram,
+    .social-link:hover .fa-facebook-f,
+    .social-link:hover .fa-youtube,
+    .social-link:hover .fa-twitter { color: #050508; }
 
     .toast {
       position: fixed;
@@ -607,7 +998,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     
-    /* Login Modal Styles */
     .login-modal {
       display: none;
       position: fixed;
@@ -621,9 +1011,7 @@
       justify-content: center;
       padding: 20px;
     }
-    .login-modal.show {
-      display: flex;
-    }
+    .login-modal.show { display: flex; }
     .login-modal-content {
       background: rgba(15,15,22,0.98);
       backdrop-filter: blur(20px);
@@ -634,16 +1022,8 @@
       border: 1px solid rgba(212,175,55,0.3);
       text-align: center;
     }
-    .login-modal-content h3 {
-      color: #D4AF37;
-      font-size: 24px;
-      margin-bottom: 8px;
-    }
-    .login-modal-content p {
-      color: #888;
-      font-size: 12px;
-      margin-bottom: 20px;
-    }
+    .login-modal-content h3 { color: #D4AF37; font-size: 24px; margin-bottom: 8px; }
+    .login-modal-content p { color: #888; font-size: 12px; margin-bottom: 20px; }
     .login-modal-input {
       width: 100%;
       padding: 14px;
@@ -655,12 +1035,8 @@
       text-align: center;
       margin-bottom: 16px;
     }
-    .otp-section {
-      display: none;
-    }
-    .otp-section.show {
-      display: block;
-    }
+    .otp-section { display: none; }
+    .otp-section.show { display: block; }
     .login-modal-btn {
       width: 100%;
       background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -673,23 +1049,9 @@
       font-size: 14px;
       margin-bottom: 12px;
     }
-    .login-modal-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    .resend-otp {
-      background: none;
-      border: none;
-      color: #D4AF37;
-      font-size: 12px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-    .timer-text {
-      font-size: 11px;
-      color: #888;
-      margin-top: 10px;
-    }
+    .login-modal-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+    .resend-otp { background: none; border: none; color: #D4AF37; font-size: 12px; cursor: pointer; margin-top: 10px; }
+    .timer-text { font-size: 11px; color: #888; margin-top: 10px; }
     .close-modal {
       background: none;
       border: none;
@@ -741,7 +1103,7 @@
   </div>
 </div>
 
-<!-- LOGIN MODAL POPUP -->
+<!-- LOGIN MODAL -->
 <div class="login-modal" id="loginModal">
   <div class="login-modal-content">
     <button class="close-modal" id="closeModalBtn">&times;</button>
@@ -762,6 +1124,29 @@
   </div>
 </div>
 
+<!-- REVIEWS MODAL -->
+<div class="reviews-modal" id="reviewsModal">
+  <div class="reviews-modal-content">
+    <div class="reviews-modal-header">
+      <h3><i class="fas fa-star"></i> All Customer Reviews</h3>
+      <button class="close-reviews-modal" id="closeReviewsModalBtn">&times;</button>
+    </div>
+    <div class="reviews-modal-body" id="reviewsModalBody"></div>
+  </div>
+</div>
+
+<!-- SIZE GUIDE MODAL -->
+<div class="size-guide-modal" id="sizeGuideModal">
+  <div class="size-guide-modal-content">
+    <div class="size-guide-modal-header">
+      <h3><i class="fas fa-chart-simple"></i> Size Guide (Inches)</h3>
+      <button class="close-size-modal" id="closeSizeModalBtn">&times;</button>
+    </div>
+    <div id="sizeGuideTableContent"></div>
+    <p style="font-size: 11px; color: #888; margin-top: 16px;">* Please allow 1-2 cm difference due to manual measurement</p>
+  </div>
+</div>
+
 <div class="container" id="app">
   <div class="loading-state">
     <div class="loading-spinner"></div>
@@ -772,7 +1157,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== 🔥 FIREBASE CONFIGURATION - NEW CONFIG ==========
+  // ========== FIREBASE CONFIGURATION ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
     authDomain: "nexi-53897.firebaseapp.com",
@@ -800,6 +1185,18 @@
   let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
   let unsubscribeProduct = null;
   
+  // Sample reviews data
+  let productReviews = [
+    { id: 1, userName: "Priya Sharma", userAvatar: "P", rating: 5, date: "15 Mar 2025", reviewText: "Absolutely stunning product! The quality is exceptional and the packaging was luxurious. Highly recommend this to everyone looking for premium quality. Delivery was also quick.", helpful: 124 },
+    { id: 2, userName: "Amit Kumar", userAvatar: "A", rating: 5, date: "10 Mar 2025", reviewText: "Worth every penny! Premium finish and very comfortable. The material quality is top-notch. Fast delivery and great customer service.", helpful: 89 },
+    { id: 3, userName: "Neha Singh", userAvatar: "N", rating: 4, date: "05 Mar 2025", reviewText: "Very good product. Design is beautiful and exactly as shown in pictures. Slightly expensive but quality justifies the price.", helpful: 56 },
+    { id: 4, userName: "Rajesh Gupta", userAvatar: "R", rating: 5, date: "28 Feb 2025", reviewText: "Excellent product! Very satisfied with my purchase. Will definitely buy again from Vedanta. The spiritual energy of this product is amazing.", helpful: 78 },
+    { id: 5, userName: "Sneha Patel", userAvatar: "S", rating: 5, date: "20 Feb 2025", reviewText: "Beautiful craftsmanship! The details are perfect. Shipping was on time and packaging was impressive. 5 stars!", helpful: 45 }
+  ];
+  
+  const INITIAL_REVIEWS_COUNT = 4;
+  const INITIAL_SPECS_COUNT = 4; // Only show 4 specifications initially
+  
   // Login Modal Variables
   let modalRecaptchaVerifier = null;
   let modalConfirmationResult = null;
@@ -809,81 +1206,37 @@
   // ========== CHECK IF USER HAS SAVED ADDRESS ==========
   async function checkUserHasSavedAddress() {
     const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    
-    if (!currentUser || !currentUser.uid) {
-      return false;
-    }
-    
+    if (!currentUser || !currentUser.uid) return false;
     try {
-      const addrSnapshot = await db.collection('addresses')
-        .where('userId', '==', currentUser.uid)
-        .limit(1)
-        .get();
-      
-      if (!addrSnapshot.empty) {
-        console.log("✅ User has saved address in addresses collection");
-        return true;
-      }
-      
-      const orderSnapshot = await db.collection('orders')
-        .where('customerPhone', '==', currentUser.phone)
-        .limit(1)
-        .get();
-      
-      if (!orderSnapshot.empty) {
-        console.log("✅ User has placed previous orders");
-        return true;
-      }
-      
-      console.log("❌ First time user - no saved address");
-      return false;
-    } catch(e) {
-      console.error("Error checking saved address:", e);
-      return false;
-    }
+      const addrSnapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).limit(1).get();
+      if (!addrSnapshot.empty) return true;
+      const orderSnapshot = await db.collection('orders').where('customerPhone', '==', currentUser.phone).limit(1).get();
+      return !orderSnapshot.empty;
+    } catch(e) { return false; }
   }
   
-  // ========== SMART BUY NOW WITH POPUP LOGIN ==========
+  // ========== SMART BUY NOW ==========
   async function buyNowWithSmartRedirect(product, qty, size, color, combo) {
     const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    
-    let finalPrice = product.price;
-    let finalQty = qty;
-    let comboInfo = null;
-    let comboMultiplier = 1;
-    
+    let finalPrice = product.price, finalQty = qty, comboInfo = null, comboMultiplier = 1;
     if (combo) {
       finalPrice = combo.price / combo.quantity;
       comboInfo = `${combo.quantity} for ₹${combo.price}`;
       finalQty = combo.quantity;
       comboMultiplier = combo.quantity;
     }
-    
-    const tempCart = [{ 
-      id: product.id, 
-      name: product.name, 
-      price: finalPrice, 
-      quantity: finalQty, 
-      size: size || 'Default', 
-      color: color || '', 
-      combo: comboInfo,
-      isCombo: !!combo,
-      comboMultiplier: comboMultiplier
-    }];
+    const tempCart = [{ id: product.id, name: product.name, price: finalPrice, quantity: finalQty, size: size || 'Default', color: color || '', combo: comboInfo, isCombo: !!combo, comboMultiplier: comboMultiplier }];
     localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-    
     if (currentUser && currentUser.uid) {
-      // User already logged in, check saved address
       const hasSavedAddress = await checkUserHasSavedAddress();
       if (hasSavedAddress) {
-        showToast(`💳 Redirecting to checkout (Saved address available)`);
+        showToast(`💳 Redirecting to checkout`);
         setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 300);
       } else {
-        showToast(`💳 Proceeding to checkout with ${product.name}`);
+        showToast(`💳 Proceeding to checkout`);
         setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 300);
       }
     } else {
-      // User not logged in, show popup login
       pendingBuyProduct = product;
       openLoginModal();
     }
@@ -892,18 +1245,11 @@
   // ========== LOGIN MODAL FUNCTIONS ==========
   function setupModalRecaptcha() {
     return new Promise((resolve, reject) => {
-      if (modalRecaptchaVerifier) {
-        modalRecaptchaVerifier.clear();
-      }
+      if (modalRecaptchaVerifier) modalRecaptchaVerifier.clear();
       try {
-        modalRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-modal', {
-          size: 'invisible',
-          callback: () => resolve(true)
-        });
+        modalRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-modal', { size: 'invisible', callback: () => resolve(true) });
         resolve(true);
-      } catch(e) {
-        reject(e);
-      }
+      } catch(e) { reject(e); }
     });
   }
   
@@ -911,17 +1257,10 @@
     const phoneInput = document.getElementById('modalPhoneInput');
     const phone = phoneInput.value.trim();
     const sendBtn = document.getElementById('modalSendOtpBtn');
-    
-    if (!phone || phone.length < 10) {
-      showToast('❌ Please enter valid phone number', true);
-      return;
-    }
-    
+    if (!phone || phone.length < 10) { showToast('❌ Please enter valid phone number', true); return; }
     const formattedPhone = formatPhoneNumber(phone);
-    
     sendBtn.disabled = true;
     sendBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending...';
-    
     try {
       await setupModalRecaptcha();
       modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier);
@@ -930,7 +1269,6 @@
       document.getElementById('modalOtpSection').classList.add('show');
       startModalTimer();
     } catch(error) {
-      console.error("Error sending OTP:", error);
       let errorMsg = 'Failed to send OTP';
       if (error.code === 'auth/invalid-phone-number') errorMsg = 'Invalid phone number';
       else if (error.code === 'auth/too-many-requests') errorMsg = 'Too many requests. Try later';
@@ -945,17 +1283,12 @@
     let timeLeft = 60;
     const timerSpan = document.getElementById('modalTimer');
     const resendBtn = document.getElementById('modalResendBtn');
-    
     if (modalCountdownTimer) clearInterval(modalCountdownTimer);
-    
     modalCountdownTimer = setInterval(() => {
       if (timeLeft <= 0) {
         clearInterval(modalCountdownTimer);
         if (timerSpan) timerSpan.textContent = '';
-        if (resendBtn) {
-          resendBtn.style.display = 'inline-block';
-          resendBtn.disabled = false;
-        }
+        if (resendBtn) { resendBtn.style.display = 'inline-block'; resendBtn.disabled = false; }
       } else {
         if (timerSpan) timerSpan.textContent = `Resend available in ${timeLeft}s`;
         if (resendBtn) resendBtn.style.display = 'none';
@@ -968,43 +1301,21 @@
     const otpInput = document.getElementById('modalOtpInput');
     const otp = otpInput.value.trim();
     const verifyBtn = document.getElementById('modalVerifyBtn');
-    
-    if (!otp || otp.length < 6) {
-      showToast('❌ Please enter 6-digit OTP', true);
-      return;
-    }
-    
+    if (!otp || otp.length < 6) { showToast('❌ Please enter 6-digit OTP', true); return; }
     verifyBtn.disabled = true;
     verifyBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verifying...';
-    
     try {
       const result = await modalConfirmationResult.confirm(otp);
       const user = result.user;
-      
-      const userData = {
-        uid: user.uid,
-        phone: user.phoneNumber,
-        name: `User${user.phoneNumber.slice(-4)}`,
-        email: `${user.uid}@vedanta.com`,
-        joinDate: new Date().toISOString()
-      };
-      
+      const userData = { uid: user.uid, phone: user.phoneNumber, name: `User${user.phoneNumber.slice(-4)}`, email: `${user.uid}@vedanta.com`, joinDate: new Date().toISOString() };
       localStorage.setItem('vedantaUser', JSON.stringify(userData));
       await db.collection('users').doc(user.uid).set(userData, { merge: true });
-      
-      showToast(`✅ Welcome! Redirecting to checkout...`);
+      showToast(`✅ Welcome! Redirecting...`);
       closeLoginModal();
-      
-      // After successful login, check if user has saved address
       const hasSavedAddress = await checkUserHasSavedAddress();
-      if (hasSavedAddress) {
-        setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 500);
-      } else {
-        setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 500);
-      }
-      
+      if (hasSavedAddress) { setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 500); }
+      else { setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 500); }
     } catch(error) {
-      console.error("OTP verification error:", error);
       let errorMsg = 'Invalid OTP. Please try again.';
       if (error.code === 'auth/code-expired') errorMsg = 'OTP expired. Request new OTP.';
       else if (error.code === 'auth/invalid-verification-code') errorMsg = 'Invalid OTP code';
@@ -1019,18 +1330,14 @@
     const phoneInput = document.getElementById('modalPhoneInput');
     const phone = phoneInput.value.trim();
     const formattedPhone = formatPhoneNumber(phone);
-    
     const resendBtn = document.getElementById('modalResendBtn');
     resendBtn.disabled = true;
     resendBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
-    
     try {
       modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier);
       showToast('✅ OTP resent!');
       startModalTimer();
-    } catch(error) {
-      showToast('Failed to resend OTP', true);
-    }
+    } catch(error) { showToast('Failed to resend OTP', true); }
     resendBtn.disabled = false;
     resendBtn.innerHTML = 'Resend OTP';
   }
@@ -1053,19 +1360,15 @@
   }
   
   function closeLoginModal() {
-    const modal = document.getElementById('loginModal');
-    modal.classList.remove('show');
+    document.getElementById('loginModal').classList.remove('show');
     if (modalCountdownTimer) clearInterval(modalCountdownTimer);
   }
   
   function formatPhoneNumber(number) {
     let num = number.trim();
     if (!num.startsWith('+')) {
-      if (num.startsWith('0')) {
-        num = '+91' + num.substring(1);
-      } else if (num.length === 10) {
-        num = '+91' + num;
-      }
+      if (num.startsWith('0')) num = '+91' + num.substring(1);
+      else if (num.length === 10) num = '+91' + num;
     }
     return num;
   }
@@ -1074,42 +1377,19 @@
   function saveCart() { localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
   
   function addToCart(product, qty, size, color, combo = null) {
-    let finalPrice = product.price;
-    let comboInfo = null;
-    let comboQtyMultiplier = 1;
-    
+    let finalPrice = product.price, comboInfo = null, comboQtyMultiplier = 1;
     if (combo) {
       finalPrice = combo.price / combo.quantity;
       comboInfo = `${combo.quantity} for ₹${combo.price}`;
       comboQtyMultiplier = combo.quantity;
       qty = combo.quantity;
     }
-    
-    const existingIndex = cart.findIndex(item => 
-      item.id === product.id && 
-      item.size === size && 
-      item.color === color && 
-      item.combo === comboInfo
-    );
-    
+    const existingIndex = cart.findIndex(item => item.id === product.id && item.size === size && item.color === color && item.combo === comboInfo);
     if (existingIndex !== -1) {
-      if (combo) {
-        cart[existingIndex].quantity += combo.quantity;
-      } else {
-        cart[existingIndex].quantity += qty;
-      }
+      if (combo) cart[existingIndex].quantity += combo.quantity;
+      else cart[existingIndex].quantity += qty;
     } else {
-      cart.push({ 
-        id: product.id, 
-        name: product.name, 
-        price: finalPrice, 
-        quantity: qty, 
-        size: size || 'Default', 
-        color: color || '', 
-        combo: comboInfo,
-        isCombo: !!combo,
-        comboMultiplier: comboQtyMultiplier
-      });
+      cart.push({ id: product.id, name: product.name, price: finalPrice, quantity: qty, size: size || 'Default', color: color || '', combo: comboInfo, isCombo: !!combo, comboMultiplier: comboQtyMultiplier });
     }
     saveCart();
     showToast(combo ? `🎉 Combo Pack: ${combo.quantity} items for ₹${combo.price} added!` : `🛍️ ${product.name} added!`);
@@ -1119,19 +1399,12 @@
   function updateCartQuantity(index, newQuantity) {
     const item = cart[index];
     if (item.isCombo && item.comboMultiplier) {
-      const currentMultiples = item.quantity / item.comboMultiplier;
       const newMultiples = newQuantity / item.comboMultiplier;
-      if (newMultiples < 1) {
-        cart.splice(index, 1);
-      } else {
-        item.quantity = newMultiples * item.comboMultiplier;
-      }
+      if (newMultiples < 1) cart.splice(index, 1);
+      else item.quantity = newMultiples * item.comboMultiplier;
     } else {
-      if (newQuantity < 1) {
-        cart.splice(index, 1);
-      } else {
-        cart[index].quantity = newQuantity;
-      }
+      if (newQuantity < 1) cart.splice(index, 1);
+      else cart[index].quantity = newQuantity;
     }
     saveCart();
   }
@@ -1175,17 +1448,11 @@
         const action = btn.dataset.action;
         const item = cart[idx];
         if (action === 'incr') {
-          if (item.isCombo && item.comboMultiplier) {
-            updateCartQuantity(idx, item.quantity + item.comboMultiplier);
-          } else {
-            updateCartQuantity(idx, item.quantity + 1);
-          }
+          if (item.isCombo && item.comboMultiplier) updateCartQuantity(idx, item.quantity + item.comboMultiplier);
+          else updateCartQuantity(idx, item.quantity + 1);
         } else if (action === 'decr') {
-          if (item.isCombo && item.comboMultiplier) {
-            updateCartQuantity(idx, item.quantity - item.comboMultiplier);
-          } else {
-            updateCartQuantity(idx, item.quantity - 1);
-          }
+          if (item.isCombo && item.comboMultiplier) updateCartQuantity(idx, item.quantity - item.comboMultiplier);
+          else updateCartQuantity(idx, item.quantity - 1);
         }
       });
     });
@@ -1214,48 +1481,247 @@
     if (!p.originalPrice) p.originalPrice = Math.round(p.price * 1.6);
     if (!p.rating) p.rating = 4.5;
     if (!p.reviewCount) p.reviewCount = 500;
-    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Crafted with precision and care, this piece embodies luxury and elegance.";
+    if (!p.fullDesc) p.fullDesc = "Premium quality product from Vedanta. Crafted with precision and care.";
     if (!p.sizes) p.sizes = [];
     if (!p.colors) p.colors = [];
     if (!p.combos) p.combos = [];
     if (!p.benefits) p.benefits = ["Premium Quality", "Handcrafted", "Made in India", "Eco-friendly"];
     if (!p.images) p.images = [];
+    if (!p.specifications) p.specifications = [];
+    if (!p.sizeGuide) p.sizeGuide = [];
+    if (!p.careInstructions) p.careInstructions = ["Machine Wash Cold", "Do Not Bleach", "Tumble Dry Low", "Iron Medium"];
     return p;
   }
   
   function getColorCode(colorName) {
     const colorMap = {
-      'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000',
-      'Orange': '#FFA500', 'Gold': '#FFD700', 'Yellow': '#FFFF00',
-      'Lime': '#32CD32', 'Green': '#008000', 'Teal': '#008080',
-      'Cyan': '#00FFFF', 'Blue': '#0000FF', 'Navy': '#000080',
-      'Purple': '#800080', 'Magenta': '#FF00FF', 'Pink': '#FF69B4',
-      'HotPink': '#FF1493', 'Brown': '#8B4513', 'Black': '#000000',
+      'Red': '#FF0000', 'Crimson': '#DC143C', 'Maroon': '#800000', 'Orange': '#FFA500',
+      'Gold': '#FFD700', 'Yellow': '#FFFF00', 'Lime': '#32CD32', 'Green': '#008000',
+      'Teal': '#008080', 'Cyan': '#00FFFF', 'Blue': '#0000FF', 'Navy': '#000080',
+      'Navy Blue': '#000080', 'Charcoal': '#36454F', 'Purple': '#800080', 'Magenta': '#FF00FF',
+      'Pink': '#FF69B4', 'HotPink': '#FF1493', 'Brown': '#8B4513', 'Black': '#000000',
       'White': '#FFFFFF', 'Silver': '#C0C0C0'
     };
     return colorMap[colorName] || '#D4AF37';
   }
   
-  // ========== REAL-TIME PRODUCT LISTENER ==========
-  function startRealTimeProductSync() {
-    if (unsubscribeProduct) {
-      unsubscribeProduct();
+  // ========== REVIEW FUNCTIONS ==========
+  function getStarsHtml(rating) {
+    let stars = '';
+    for (let i = 1; i <= 5; i++) {
+      if (i <= rating) stars += '<i class="fas fa-star"></i>';
+      else if (i - 0.5 <= rating) stars += '<i class="fas fa-star-half-alt"></i>';
+      else stars += '<i class="far fa-star"></i>';
+    }
+    return stars;
+  }
+  
+  function renderReviews(showAll = false) {
+    const container = document.getElementById('reviewsContainer');
+    if (!container) return;
+    const reviewsToShow = showAll ? productReviews : productReviews.slice(0, INITIAL_REVIEWS_COUNT);
+    const hasMoreReviews = productReviews.length > INITIAL_REVIEWS_COUNT;
+    container.innerHTML = reviewsToShow.map(review => `
+      <div class="review-card">
+        <div class="review-header">
+          <div class="review-avatar">${review.userAvatar}</div>
+          <div class="review-user-info">
+            <div class="review-user-name">${escapeHtml(review.userName)}</div>
+            <div class="review-date">${escapeHtml(review.date)}</div>
+          </div>
+        </div>
+        <div class="review-stars">${getStarsHtml(review.rating)}</div>
+        <div class="review-text">${escapeHtml(review.reviewText)}</div>
+        <div class="review-helpful">
+          <button class="helpful-btn" data-id="${review.id}"><i class="far fa-thumbs-up"></i> Helpful (${review.helpful})</button>
+        </div>
+      </div>
+    `).join('');
+    if (hasMoreReviews && !showAll) {
+      if (!document.getElementById('viewAllReviewsBtn')) {
+        const btnHtml = `<button class="view-all-reviews-btn" id="viewAllReviewsBtn"><i class="fas fa-arrow-right"></i> View All ${productReviews.length} Reviews</button>`;
+        container.insertAdjacentHTML('afterend', btnHtml);
+        document.getElementById('viewAllReviewsBtn')?.addEventListener('click', openReviewsModal);
+      }
+    } else {
+      const existingBtn = document.getElementById('viewAllReviewsBtn');
+      if (existingBtn) existingBtn.remove();
+    }
+  }
+  
+  function openReviewsModal() {
+    const modal = document.getElementById('reviewsModal');
+    const modalBody = document.getElementById('reviewsModalBody');
+    modalBody.innerHTML = productReviews.map(review => `
+      <div class="review-card" style="margin-bottom: 16px;">
+        <div class="review-header">
+          <div class="review-avatar">${review.userAvatar}</div>
+          <div class="review-user-info">
+            <div class="review-user-name">${escapeHtml(review.userName)}</div>
+            <div class="review-date">${escapeHtml(review.date)}</div>
+          </div>
+        </div>
+        <div class="review-stars">${getStarsHtml(review.rating)}</div>
+        <div class="review-text">${escapeHtml(review.reviewText)}</div>
+        <div class="review-helpful">
+          <button class="helpful-btn"><i class="far fa-thumbs-up"></i> Helpful (${review.helpful})</button>
+        </div>
+      </div>
+    `).join('');
+    modal.classList.add('show');
+  }
+  
+  function closeReviewsModal() { document.getElementById('reviewsModal').classList.remove('show'); }
+  
+  // ========== DYNAMIC RENDER FUNCTIONS ==========
+  function renderDynamicSpecifications(specs) {
+    if (!specs || specs.length === 0) return '';
+    
+    const displayCount = Math.min(INITIAL_SPECS_COUNT, specs.length);
+    const hasMoreSpecs = specs.length > INITIAL_SPECS_COUNT;
+    
+    let specsHtml = `
+      <div class="specifications-section">
+        <div class="spec-title"><i class="fas fa-list-ul"></i> Product Specifications</div>
+        <div class="specs-list" id="specsList">
+    `;
+    
+    specs.forEach((spec, index) => {
+      const hiddenClass = index >= INITIAL_SPECS_COUNT ? 'hidden' : '';
+      specsHtml += `
+        <div class="spec-point ${hiddenClass}" data-spec-index="${index}">
+          <i class="fas fa-check-circle"></i>
+          <strong>${escapeHtml(spec.label)}:</strong>
+          <span>${escapeHtml(spec.value)}</span>
+        </div>
+      `;
+    });
+    
+    specsHtml += `</div>`;
+    
+    if (hasMoreSpecs) {
+      specsHtml += `
+        <button class="specs-view-more-btn" id="specsViewMoreBtn">View More Specifications <i class="fas fa-chevron-down"></i></button>
+      `;
     }
     
+    specsHtml += `</div>`;
+    return specsHtml;
+  }
+  
+  function renderDynamicBenefits(benefits) {
+    if (!benefits || benefits.length === 0) {
+      return `
+        <div class="features-list">
+          <div class="feature-item"><i class="fas fa-check-circle"></i><span>Premium Quality</span></div>
+          <div class="feature-item"><i class="fas fa-tshirt"></i><span>Comfort Fit</span></div>
+          <div class="feature-item"><i class="fas fa-truck-fast"></i><span>Free Shipping</span></div>
+          <div class="feature-item"><i class="fas fa-undo-alt"></i><span>Easy Returns</span></div>
+        </div>
+      `;
+    }
+    return `
+      <div class="features-list">
+        ${benefits.map(benefit => `
+          <div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(benefit)}</span></div>
+        `).join('')}
+      </div>
+    `;
+  }
+  
+  function renderDynamicCareInstructions(instructions) {
+    if (!instructions || instructions.length === 0) {
+      instructions = ["Machine Wash Cold", "Do Not Bleach", "Tumble Dry Low", "Iron Medium"];
+    }
+    return `
+      <div class="care-section">
+        <div class="care-title"><i class="fas fa-hand-sparkles"></i> Care Instructions</div>
+        <div class="care-items">
+          ${instructions.map(instruction => `<span class="care-item">${escapeHtml(instruction)}</span>`).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  function renderDynamicSizes(sizes) {
+    if (!sizes || sizes.length === 0) return '';
+    if (!selectedSize && sizes.length > 0) selectedSize = sizes[0];
+    return `
+      <div class="size-section">
+        <div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div>
+        <div class="size-options" id="sizeOptions">
+          ${sizes.map(size => `
+            <button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>
+          `).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  function renderDynamicColors(colors) {
+    if (!colors || colors.length === 0) return '';
+    if (!selectedColor && colors.length > 0) selectedColor = colors[0];
+    return `
+      <div class="color-section">
+        <div class="color-title"><i class="fas fa-palette"></i> Select Color:</div>
+        <div class="color-options" id="colorOptions">
+          ${colors.map(color => {
+            const colorName = typeof color === 'object' ? color.name : color;
+            const colorCode = (typeof color === 'object' && color.code) ? color.code : getColorCode(colorName);
+            return `
+              <div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}">
+                <div class="color-circle" style="background: ${colorCode};"></div>
+                <span class="color-name">${colorName}</span>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  function renderDynamicCombos(combos) {
+    if (!combos || combos.length === 0) return '';
+    return `
+      <div class="combo-section">
+        <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS</div>
+        <div class="combo-list" id="comboList">
+          ${combos.map((combo, idx) => {
+            const savePercent = Math.round(((combo.quantity * currentProduct.price) - combo.price) / (combo.quantity * currentProduct.price) * 100);
+            const isSelected = selectedCombo && selectedCombo.quantity === combo.quantity && selectedCombo.price === combo.price;
+            return `
+              <div class="combo-item ${isSelected ? 'selected' : ''}" data-combo-index="${idx}" data-combo-qty="${combo.quantity}" data-combo-price="${combo.price}">
+                <div class="combo-item-info">
+                  <div class="combo-quantity"><i class="fas fa-boxes"></i> Buy ${combo.quantity} Items</div>
+                  <div class="combo-save">🔥 Save ${savePercent}%</div>
+                </div>
+                <div class="combo-price">
+                  <div class="price-big">₹${combo.price}</div>
+                  <div class="per-piece">₹${Math.round(combo.price / combo.quantity)}/piece</div>
+                </div>
+                <div class="combo-select-icon"><i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}"></i></div>
+                <div class="combo-badge">BEST VALUE</div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      </div>
+    `;
+  }
+  
+  // ========== REAL-TIME PRODUCT LISTENER ==========
+  function startRealTimeProductSync() {
+    if (unsubscribeProduct) unsubscribeProduct();
     if (!currentProductId) return;
-    
     const productRef = db.collection('products').doc(currentProductId);
-    
-    unsubscribeProduct = productRef.onSnapshot({
-      includeMetadataChanges: true
-    }, (docSnapshot) => {
+    unsubscribeProduct = productRef.onSnapshot({ includeMetadataChanges: true }, (docSnapshot) => {
       if (docSnapshot.exists) {
         const newData = docSnapshot.data();
-        const updatedProduct = {
+        currentProduct = ensureProductFields({
           id: docSnapshot.id,
           name: newData.name,
           price: newData.price,
-          originalPrice: newData.originalPrice || Math.round(newData.price * 1.6),
+          originalPrice: newData.comparePrice || Math.round(newData.price * 1.6),
           category: newData.category,
           badge: newData.badge || 'New',
           images: newData.images || [],
@@ -1263,48 +1729,29 @@
           colors: newData.colors || [],
           combos: newData.combos || [],
           fullDesc: newData.fullDesc || "Premium quality product from Vedanta.",
-          benefits: newData.benefits || ["Premium Quality", "Handcrafted", "Made in India"],
-          rating: newData.rating || 4.5,
-          reviewCount: newData.reviewCount || 500,
+          benefits: newData.benefits || [],
+          specifications: newData.specifications || [],
+          sizeGuide: newData.sizeGuide || [],
+          careInstructions: newData.careInstructions || [],
           status: newData.status
-        };
-        
-        if (updatedProduct.status !== 'active') {
+        });
+        if (currentProduct.status !== 'active') {
           showToast("⚠️ This product is no longer available");
           setTimeout(() => window.location.href = 'index.html', 2000);
           return;
         }
-        
-        const priceChanged = currentProduct && currentProduct.price !== updatedProduct.price;
-        const nameChanged = currentProduct && currentProduct.name !== updatedProduct.name;
-        
-        if (priceChanged) showToast(`🔄 Price updated: ₹${updatedProduct.price.toLocaleString()}`);
-        if (nameChanged) showToast(`🔄 Product name updated: ${updatedProduct.name}`);
-        
-        currentProduct = ensureProductFields(updatedProduct);
-        
-        const index = allProducts.findIndex(p => p.id == currentProductId);
-        if (index !== -1) allProducts[index] = currentProduct;
-        else allProducts.push(currentProduct);
-        localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
-        
         renderPageContent();
-        console.log(`🔥 LIVE UPDATE: ${currentProduct.name} synced`);
       } else {
         showToast("❌ Product not found");
         setTimeout(() => window.location.href = 'index.html', 2000);
       }
-    }, (error) => {
-      console.error("Real-time listener error:", error);
-    });
+    }, (error) => { console.error("Real-time listener error:", error); });
   }
   
   function loadAllProductsForRelated() {
     db.collection('products').where('status', '==', 'active').onSnapshot((snapshot) => {
       const products = [];
-      snapshot.forEach(doc => {
-        products.push({ id: doc.id, ...doc.data() });
-      });
+      snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
       if (products.length > 0) {
         allProducts = products;
         localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
@@ -1317,14 +1764,11 @@
     const images = currentProduct.images || [];
     const totalSlides = images.length || 1;
     if (images.length <= 1) return;
-    
     const slider = document.getElementById('imageSlider');
     const prevBtn = document.getElementById('prevSlide');
     const nextBtn = document.getElementById('nextSlide');
     const thumbnails = document.querySelectorAll('.thumbnail');
-    
     if (!slider) return;
-    
     function updateSlider(index) {
       if (index < 0) index = totalSlides - 1;
       if (index >= totalSlides) index = 0;
@@ -1332,11 +1776,9 @@
       if (slider) slider.style.transform = `translateX(-${currentSlide * 100}%)`;
       thumbnails.forEach((t, i) => i === currentSlide ? t.classList.add('active') : t.classList.remove('active'));
     }
-    
     prevBtn?.addEventListener('click', () => updateSlider(currentSlide - 1));
     nextBtn?.addEventListener('click', () => updateSlider(currentSlide + 1));
     thumbnails.forEach((t, i) => t.addEventListener('click', () => updateSlider(i)));
-    
     if (slideInterval) clearInterval(slideInterval);
     slideInterval = setInterval(() => updateSlider(currentSlide + 1), 5000);
   }
@@ -1377,7 +1819,6 @@
         e.stopPropagation();
         const comboQty = parseInt(combo.getAttribute('data-combo-qty'));
         const comboPrice = parseInt(combo.getAttribute('data-combo-price'));
-        
         if (selectedCombo && selectedCombo.quantity === comboQty && selectedCombo.price === comboPrice) {
           selectedCombo = null;
           combo.classList.remove('selected');
@@ -1385,11 +1826,7 @@
           if (icon) icon.className = 'fas fa-plus-circle';
           showToast(`✨ Combo offer removed!`);
         } else {
-          comboItems.forEach(c => {
-            c.classList.remove('selected');
-            const icon = c.querySelector('.combo-select-icon i');
-            if (icon) icon.className = 'fas fa-plus-circle';
-          });
+          comboItems.forEach(c => { c.classList.remove('selected'); const icon = c.querySelector('.combo-select-icon i'); if (icon) icon.className = 'fas fa-plus-circle'; });
           combo.classList.add('selected');
           const icon = combo.querySelector('.combo-select-icon i');
           if (icon) icon.className = 'fas fa-check-circle';
@@ -1413,20 +1850,34 @@
       addToCart(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
       if (selectedCombo) selectedCombo = null;
     });
-    
-    // UPDATED: Buy Now button uses smart redirect with popup login
     document.getElementById('buyNowBtn')?.addEventListener('click', () => { 
       const currentQty = parseInt(document.getElementById('qtyInput')?.value || 1);
       buyNowWithSmartRedirect(currentProduct, currentQty, selectedSize, selectedColor, selectedCombo); 
     });
+    
+    // Specifications View More/Less functionality - FIXED
+    const specsViewMoreBtn = document.getElementById('specsViewMoreBtn');
+    if (specsViewMoreBtn) {
+      let specsExpanded = false;
+      const hiddenSpecs = document.querySelectorAll('.spec-point.hidden');
+      specsViewMoreBtn.addEventListener('click', () => {
+        specsExpanded = !specsExpanded;
+        if (specsExpanded) {
+          hiddenSpecs.forEach(spec => spec.classList.remove('hidden'));
+          specsViewMoreBtn.innerHTML = 'View Less Specifications <i class="fas fa-chevron-up"></i>';
+        } else {
+          hiddenSpecs.forEach(spec => spec.classList.add('hidden'));
+          specsViewMoreBtn.innerHTML = 'View More Specifications <i class="fas fa-chevron-down"></i>';
+        }
+      });
+    }
   }
   
   function renderImageSlider() {
     const images = currentProduct.images || [];
     const hasImages = images.length > 0;
-    let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
-    let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas ${currentProduct.icon || 'fa-gem'}"></i></div>`;
-    
+    let slidesHtml = hasImages ? images.map(img => `<div class="slide"><img src="${img}" loading="lazy"></div>`).join('') : `<div class="slide"><i class="fas fa-gem"></i></div>`;
+    let thumbnailsHtml = hasImages ? images.map((img, idx) => `<div class="thumbnail ${idx === currentSlide ? 'active' : ''}" data-index="${idx}"><img src="${img}"></div>`).join('') : `<div class="thumbnail active"><i class="fas fa-gem"></i></div>`;
     return `<div class="product-gallery">
       <div class="main-image-container">
         <div class="badge">${currentProduct.badge || 'New'}</div>
@@ -1434,52 +1885,6 @@
         ${hasImages && images.length > 1 ? `<button class="slider-btn slider-prev" id="prevSlide"><i class="fas fa-chevron-left"></i></button><button class="slider-btn slider-next" id="nextSlide"><i class="fas fa-chevron-right"></i></button>` : ''}
       </div>
       <div class="thumbnail-list" id="thumbnailList">${thumbnailsHtml}</div>
-    </div>`;
-  }
-  
-  function renderColors() {
-    const colors = currentProduct.colors || [];
-    if (colors.length === 0) return '';
-    
-    return `<div class="color-section">
-      <div class="color-title"><i class="fas fa-palette"></i> Select Color:</div>
-      <div class="color-options" id="colorOptions">
-        ${colors.map(color => {
-          const colorName = typeof color === 'object' ? color.name : color;
-          const colorCode = (typeof color === 'object' && color.code) ? color.code : getColorCode(colorName);
-          return `<div class="color-btn ${selectedColor === colorName ? 'active' : ''}" data-color="${colorName}">
-            <div class="color-circle" style="background: ${colorCode};"></div>
-            <span class="color-name">${colorName}</span>
-          </div>`;
-        }).join('')}
-      </div>
-    </div>`;
-  }
-  
-  function renderComboOffers() {
-    const combos = currentProduct.combos || [];
-    if (combos.length === 0) return '';
-    
-    return `<div class="combo-section">
-      <div class="combo-title"><i class="fas fa-gift"></i> 🔥 SPECIAL COMBO OFFERS</div>
-      <div class="combo-list" id="comboList">
-        ${combos.map((combo, idx) => {
-          const savePercent = Math.round(((combo.quantity * currentProduct.price) - combo.price) / (combo.quantity * currentProduct.price) * 100);
-          const isSelected = selectedCombo && selectedCombo.quantity === combo.quantity && selectedCombo.price === combo.price;
-          return `<div class="combo-item ${isSelected ? 'selected' : ''}" data-combo-index="${idx}" data-combo-qty="${combo.quantity}" data-combo-price="${combo.price}">
-            <div class="combo-item-info">
-              <div class="combo-quantity"><i class="fas fa-boxes"></i> Buy ${combo.quantity} Items</div>
-              <div class="combo-save">🔥 Save ${savePercent}%</div>
-            </div>
-            <div class="combo-price">
-              <div class="price-big">₹${combo.price}</div>
-              <div class="per-piece">₹${Math.round(combo.price / combo.quantity)}/piece</div>
-            </div>
-            <div class="combo-select-icon"><i class="fas ${isSelected ? 'fa-check-circle' : 'fa-plus-circle'}"></i></div>
-            <div class="combo-badge">BEST VALUE</div>
-          </div>`;
-        }).join('')}
-      </div>
     </div>`;
   }
   
@@ -1491,7 +1896,7 @@
     container.innerHTML = related.map(p => {
       const hasImage = p.images && p.images.length > 0;
       return `<div class="related-card" data-product-id="${p.id}">
-        <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}</div>
+        <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy">` : `<i class="fas fa-gem"></i>`}</div>
         <div class="related-name">${escapeHtml(p.name)}</div>
         <div class="related-price">₹${p.price.toLocaleString()}</div>
       </div>`;
@@ -1506,16 +1911,64 @@
     });
   }
   
+  function renderFooterBenefits() {
+    return `
+      <div class="footer-benefits">
+        <div class="footer-benefit-item"><i class="fas fa-truck-fast"></i><h4>Free Shipping</h4><p>On all orders</p></div>
+        <div class="footer-benefit-item"><i class="fas fa-money-bill-wave"></i><h4>Cash on Delivery</h4><p>Pay at doorstep</p></div>
+        <div class="footer-benefit-item"><i class="fas fa-undo-alt"></i><h4>15-Day Returns</h4><p>Easy return policy</p></div>
+        <div class="footer-benefit-item"><i class="fas fa-lock"></i><h4>Secure Payment</h4><p>100% secure</p></div>
+      </div>
+    `;
+  }
+  
+  function renderSocialLinks() {
+    return `
+      <div class="social-section">
+        <h3><i class="fas fa-share-alt"></i> Connect With Us</h3>
+        <div class="social-links">
+          <a href="https://instagram.com/Vedanta_777" target="_blank" class="social-link">
+            <div class="social-icon"><i class="fab fa-instagram"></i></div>
+            <span>@Vedanta_777</span>
+          </a>
+          <a href="https://facebook.com/Vedanta_777" target="_blank" class="social-link">
+            <div class="social-icon"><i class="fab fa-facebook-f"></i></div>
+            <span>Vedanta_777</span>
+          </a>
+          <a href="https://youtube.com/@Vedanta_777" target="_blank" class="social-link">
+            <div class="social-icon"><i class="fab fa-youtube"></i></div>
+            <span>@Vedanta_777</span>
+          </a>
+          <a href="https://twitter.com/Vedanta_777" target="_blank" class="social-link">
+            <div class="social-icon"><i class="fab fa-twitter"></i></div>
+            <span>@Vedanta_777</span>
+          </a>
+        </div>
+      </div>
+    `;
+  }
+  
   function renderPageContent() {
     if (!currentProduct) return;
     
-    const discountPercent = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
+    const discountPercent = currentProduct.originalPrice > currentProduct.price ? Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100) : 0;
     const galleryHtml = renderImageSlider();
-    const hasSizes = currentProduct.sizes && currentProduct.sizes.length > 0;
-    const sizeHtml = hasSizes ? `<div class="size-section"><div class="size-title"><i class="fas fa-tshirt"></i> Select Size:</div><div class="size-options" id="sizeOptions">${currentProduct.sizes.map(size => `<button class="size-btn ${selectedSize === size ? 'active' : ''}" data-size="${size}">${size}</button>`).join('')}</div></div>` : '';
-    const colorsHtml = renderColors();
-    const combosHtml = renderComboOffers();
-    const benefitsHtml = `<div class="features-list">${(currentProduct.benefits || []).map(b => `<div class="feature-item"><i class="fas fa-check-circle"></i><span>${escapeHtml(b)}</span></div>`).join('')}</div>`;
+    const sizesHtml = renderDynamicSizes(currentProduct.sizes);
+    const colorsHtml = renderDynamicColors(currentProduct.colors);
+    const combosHtml = renderDynamicCombos(currentProduct.combos);
+    const specificationsHtml = renderDynamicSpecifications(currentProduct.specifications);
+    const benefitsHtml = renderDynamicBenefits(currentProduct.benefits);
+    const careHtml = renderDynamicCareInstructions(currentProduct.careInstructions);
+    
+    const deliveryDate = new Date();
+    deliveryDate.setDate(deliveryDate.getDate() + 5);
+    const deliveryDateStr = deliveryDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    
+    // Description with 5-6 lines initially (approx 350 characters)
+    const fullDescHtml = currentProduct.fullDesc || "<p>Premium quality product from Vedanta. Crafted with precision and care.</p>";
+    const plainTextDesc = fullDescHtml.replace(/<[^>]*>/g, '');
+    const shortDescText = plainTextDesc.length > 350 ? plainTextDesc.substring(0, 350) + '...' : plainTextDesc;
+    const hasLongDesc = plainTextDesc.length > 350;
     
     const html = `<div class="header">
       <div class="logo"><h1>VEDANTA</h1></div>
@@ -1525,24 +1978,82 @@
     <div class="product-info">
       <div class="product-brand">VEDANTA EXCLUSIVE</div>
       <div class="product-name">${escapeHtml(currentProduct.name)}</div>
-      <div class="rating"><div class="stars">★★★★★</div><div class="review-count">${currentProduct.reviewCount} reviews</div></div>
-      <div class="price-section"><span class="current-price">₹${currentProduct.price.toLocaleString()}</span><span class="original-price">₹${currentProduct.originalPrice.toLocaleString()}</span><span class="discount">${discountPercent}% OFF</span></div>
-      ${sizeHtml}
+      <div class="rating">
+        <div class="stars">★★★★★</div>
+        <div class="review-count">${productReviews.length} reviews</div>
+        <div class="rating-badge">⭐ 4.9 Rating</div>
+      </div>
+      <div class="price-section">
+        <span class="current-price">₹${currentProduct.price.toLocaleString()}</span>
+        ${currentProduct.originalPrice ? `<span class="original-price">₹${currentProduct.originalPrice.toLocaleString()}</span>` : ''}
+        ${discountPercent > 0 ? `<span class="discount">${discountPercent}% OFF</span>` : ''}
+        <div class="tax-info">Inclusive of all taxes</div>
+      </div>
+      
+      <div class="trust-badges">
+        <div class="trust-item"><i class="fas fa-truck-fast"></i><div><h4>Free Shipping</h4><p>On all orders</p></div></div>
+        <div class="trust-item"><i class="fas fa-money-bill-wave"></i><div><h4>Cash on Delivery</h4><p>Pay at doorstep</p></div></div>
+        <div class="trust-item"><i class="fas fa-undo-alt"></i><div><h4>15-Day Returns</h4><p>Easy return policy</p></div></div>
+        <div class="trust-item"><i class="fas fa-lock"></i><div><h4>Secure Payment</h4><p>100% secure</p></div></div>
+      </div>
+      
+      <div class="delivery-info">
+        <div class="delivery-date">
+          <i class="fas fa-calendar-check"></i>
+          <div>
+            <div class="date-text">Get it by ${deliveryDateStr}</div>
+            <div class="pincode-text">Free Shipping • Free Returns</div>
+          </div>
+        </div>
+        <div class="stock-status"><i class="fas fa-check-circle"></i> In Stock</div>
+      </div>
+      
+      ${sizesHtml}
       ${colorsHtml}
       ${combosHtml}
-      <div class="product-detail-section"><div class="detail-title"><i class="fas fa-align-left"></i> Product Details</div><div class="full-description">${escapeHtml(currentProduct.fullDesc)}</div></div>
-      ${benefitsHtml}
-      <div class="offer-tag"><i class="fas fa-tags"></i> Free Shipping • COD Available • Easy Returns</div>
-      <div class="quantity-selector"><button class="qty-btn" id="qtyMinus">-</button><input type="text" class="qty-input" id="qtyInput" value="1" readonly><button class="qty-btn" id="qtyPlus">+</button></div>
-      <div class="action-buttons"><button class="add-cart-btn" id="addToCartBtn"><i class="fa-regular fa-bag-shopping"></i> ADD TO CART</button><button class="buy-btn" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button></div>
+      
+      ${specificationsHtml}
+      
+      ${currentProduct.sizeGuide && currentProduct.sizeGuide.length > 0 ? `<div style="text-align: right; margin-top: -10px; margin-bottom: 10px;"><button class="size-guide-btn" id="showSizeGuideBtn"><i class="fas fa-chart-simple"></i> Show Size Guide</button></div>` : ''}
+      
+      <div class="product-detail-section">
+        <div class="detail-title"><i class="fas fa-align-left"></i> Product Description</div>
+        <div id="descriptionWrapper">
+          <div id="descShort" class="full-description desc-short">${escapeHtml(shortDescText)}</div>
+          <div id="descFull" class="full-description desc-full">${fullDescHtml}</div>
+          ${hasLongDesc ? `<button id="toggleDescBtn" class="view-more-btn">View More <i class="fas fa-chevron-down"></i></button>` : ''}
+        </div>
+      </div>
+      
+      <div class="product-detail-section">
+        <div class="detail-title"><i class="fas fa-star"></i> Key Features</div>
+        ${benefitsHtml}
+      </div>
+      
+      ${careHtml}
+      
+      <div class="offer-tag" style="background: rgba(212,175,55,0.1); padding: 12px; border-radius: 16px; margin: 16px 0; text-align: center; font-size: 12px;"><i class="fas fa-tags"></i> Free Shipping • COD Available • Easy Returns • 24/7 Customer Support</div>
+      
+      <div class="quantity-selector">
+        <button class="qty-btn" id="qtyMinus">-</button>
+        <input type="text" class="qty-input" id="qtyInput" value="1" readonly>
+        <button class="qty-btn" id="qtyPlus">+</button>
+      </div>
+      
+      <div class="action-buttons">
+        <button class="add-cart-btn" id="addToCartBtn"><i class="fa-regular fa-bag-shopping"></i> ADD TO CART</button>
+        <button class="buy-btn" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
+      </div>
     </div>
+    
+    <div class="section-title"><span></span> Customer Reviews (${productReviews.length})</div>
+    <div class="reviews-section" id="reviewsContainer"></div>
+    
     <div class="section-title"><span></span> You May Also Like</div>
     <div class="related-products" id="relatedProducts"></div>
-    <div class="section-title"><span></span> Customer Reviews</div>
-    <div class="reviews-section">
-      <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Priya Sharma <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Absolutely stunning product! The quality is amazing."</div><div class="review-date">15 Mar 2025</div></div>
-      <div class="review-card"><div class="reviewer"><i class="fas fa-user-circle"></i> Amit Kumar <span style="color:#4CAF50;">✓ Verified</span></div><div class="review-stars-small">★★★★★</div><div class="review-text">"Worth every penny. Premium finish and fast delivery."</div><div class="review-date">10 Mar 2025</div></div>
-    </div>`;
+    
+    ${renderFooterBenefits()}
+    ${renderSocialLinks()}`;
     
     document.getElementById('app').innerHTML = html;
     
@@ -1550,12 +2061,74 @@
       initSliderAfterRender();
       attachEventsAfterRender();
       renderRelatedProducts();
+      renderReviews(false);
+      
+      // Description toggle - FIXED
+      const toggleDescBtn = document.getElementById('toggleDescBtn');
+      const descShortEl = document.getElementById('descShort');
+      const descFullEl = document.getElementById('descFull');
+      let expandedDesc = false;
+      if (toggleDescBtn) {
+        toggleDescBtn.addEventListener('click', () => {
+          expandedDesc = !expandedDesc;
+          if (expandedDesc) {
+            descShortEl.style.display = 'none';
+            descFullEl.classList.add('show');
+            descFullEl.style.display = 'block';
+            toggleDescBtn.innerHTML = 'View Less <i class="fas fa-chevron-up"></i>';
+          } else {
+            descShortEl.style.display = '-webkit-box';
+            descFullEl.classList.remove('show');
+            descFullEl.style.display = 'none';
+            toggleDescBtn.innerHTML = 'View More <i class="fas fa-chevron-down"></i>';
+          }
+        });
+      }
+      
+      // Size Guide Modal
+      const showSizeGuideBtn = document.getElementById('showSizeGuideBtn');
+      const sizeGuideModal = document.getElementById('sizeGuideModal');
+      const closeSizeModalBtn = document.getElementById('closeSizeModalBtn');
+      if (showSizeGuideBtn && sizeGuideModal) {
+        const sizeGuideTable = currentProduct.sizeGuide && currentProduct.sizeGuide.length > 0 ? currentProduct.sizeGuide : [
+          { size: "S", chest: "42\"", length: "27\"", shoulder: "20\"" },
+          { size: "M", chest: "44\"", length: "28\"", shoulder: "21\"" },
+          { size: "L", chest: "46\"", length: "29\"", shoulder: "22\"" },
+          { size: "XL", chest: "48\"", length: "30\"", shoulder: "23\"" },
+          { size: "XXL", chest: "50\"", length: "31\"", shoulder: "24\"" }
+        ];
+        const headers = Object.keys(sizeGuideTable[0]);
+        let sizeGuideHtml = `<table class="size-table"><thead><tr>`;
+        headers.forEach(h => { sizeGuideHtml += `<th>${h.toUpperCase()}</th>`; });
+        sizeGuideHtml += `</thead><tbody>`;
+        sizeGuideTable.forEach(row => {
+          sizeGuideHtml += `<tr>`;
+          headers.forEach(h => { sizeGuideHtml += `<td>${escapeHtml(row[h])}</td>`; });
+          sizeGuideHtml += `</tr>`;
+        });
+        sizeGuideHtml += `</tbody></table>`;
+        document.getElementById('sizeGuideTableContent').innerHTML = sizeGuideHtml;
+        
+        showSizeGuideBtn.addEventListener('click', () => {
+          sizeGuideModal.classList.add('show');
+        });
+        closeSizeModalBtn?.addEventListener('click', () => {
+          sizeGuideModal.classList.remove('show');
+        });
+        sizeGuideModal.addEventListener('click', (e) => {
+          if (e.target === sizeGuideModal) sizeGuideModal.classList.remove('show');
+        });
+      }
     }, 50);
   }
   
   async function initialize() {
     const urlParams = new URLSearchParams(window.location.search);
-    currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id') || "1";
+    currentProductId = urlParams.get('id') || localStorage.getItem('vedanta_selected_product_id');
+    if (!currentProductId) {
+      document.getElementById('app').innerHTML = `<div class="loading-state"><p>Product ID not found. <a href="index.html" style="color:#D4AF37;">Go back to shop</a></p></div>`;
+      return;
+    }
     
     const cached = localStorage.getItem('vedantaProducts');
     if (cached) {
@@ -1566,10 +2139,8 @@
         renderPageContent();
       }
     }
-    
     loadAllProductsForRelated();
     startRealTimeProductSync();
-    
     if (sessionStorage.getItem('scrollToTop') === 'true') {
       sessionStorage.removeItem('scrollToTop');
       window.scrollTo(0, 0);
@@ -1581,22 +2152,15 @@
     document.getElementById('closeCartBtn')?.addEventListener('click', closeCart);
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
     document.getElementById('checkoutBtn')?.addEventListener('click', () => { 
-      if (cart.length === 0) {
-        showToast('Cart is empty!');
-      } else {
-        // Check if user is logged in for cart checkout
+      if (cart.length === 0) showToast('Cart is empty!');
+      else {
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
         if (currentUser && currentUser.uid) {
-          // Already logged in, check saved address
           checkUserHasSavedAddress().then(hasSavedAddress => {
-            if (hasSavedAddress) {
-              window.location.href = 'secure-checkout2.html';
-            } else {
-              window.location.href = 'secure-checkout.html';
-            }
+            if (hasSavedAddress) window.location.href = 'secure-checkout2.html';
+            else window.location.href = 'secure-checkout.html';
           });
         } else {
-          // Not logged in, show login modal first
           pendingBuyProduct = null;
           openLoginModal();
         }
@@ -1604,18 +2168,15 @@
     });
   }
   
-  // Modal Event Listeners
   document.getElementById('modalSendOtpBtn')?.addEventListener('click', modalSendOTP);
   document.getElementById('modalVerifyBtn')?.addEventListener('click', modalVerifyOTP);
   document.getElementById('modalResendBtn')?.addEventListener('click', modalResendOTP);
   document.getElementById('modalBackBtn')?.addEventListener('click', modalBackToPhone);
   document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
+  document.getElementById('closeReviewsModalBtn')?.addEventListener('click', closeReviewsModal);
   
-  document.getElementById('loginModal')?.addEventListener('click', (e) => {
-    if (e.target === document.getElementById('loginModal')) {
-      closeLoginModal();
-    }
-  });
+  document.getElementById('loginModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('loginModal')) closeLoginModal(); });
+  document.getElementById('reviewsModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('reviewsModal')) closeReviewsModal(); });
   
   initialize();
   updateCartUI();
