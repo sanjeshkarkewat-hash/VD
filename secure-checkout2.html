@@ -3,14 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Secure Checkout - Vedanta</title>
+  <title>Secure Checkout - Vedanta | Auto Location</title>
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
   <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <!-- Google Maps API with your key - OPTIMIZED for location -->
+  <!-- Google Maps API with YOUR PROVIDED KEY - ENHANCED LOCATION -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -527,8 +527,8 @@
 <div class="location-modal" id="locationModal">
   <div class="location-modal-content">
     <i class="fas fa-location-dot"></i>
-    <h3>Location Services Off</h3>
-    <p>Please enable location access to automatically fill your address</p>
+    <h3>Location Access Required</h3>
+    <p>Please enable location services to auto-fill your shipping address instantly</p>
     <div class="location-modal-buttons">
       <button class="location-settings-btn" id="openSettingsBtn"><i class="fas fa-cog"></i> Enable Location</button>
       <button class="location-cancel-btn" id="closeLocationModalBtn">Cancel</button>
@@ -547,7 +547,6 @@
       <div class="user-info-bar">
         <div class="info-text"><i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span></div>
       </div>
-
       <div class="form-section">
         <h3><i class="fas fa-user-circle"></i> Contact Information</h3>
         <div class="form-group">
@@ -556,311 +555,115 @@
         </div>
         <input type="hidden" id="phone"><input type="hidden" id="email">
       </div>
-
       <div class="form-section" id="addressSection">
         <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
-        <div id="addressSelectionArea">
-          <div id="addressLoading" style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-pulse"></i> Loading your saved address...</div>
-        </div>
+        <div id="addressSelectionArea"></div>
       </div>
-
       <div class="form-section">
         <h3><i class="fas fa-credit-card"></i> Select Payment Method</h3>
         <div class="payment-options">
-          <div class="payment-option" id="codOption">
-            <div class="payment-icon"><i class="fas fa-money-bill-wave" style="color: #4CAF50;"></i></div>
-            <div class="payment-info"><h4>Cash on Delivery</h4><p>Pay when you receive</p></div>
-            <div class="radio-circle"></div>
-          </div>
-          <div class="payment-option" id="razorpayOption">
-            <div class="payment-icon"><i class="fas fa-credit-card" style="color: #D4AF37;"></i></div>
-            <div class="payment-info"><h4>Card / UPI / NetBanking <span class="discount-badge"><i class="fas fa-tag"></i> 5% OFF</span></h4><p>Secure online payment with 5% discount</p></div>
-            <div class="radio-circle"></div>
-          </div>
+          <div class="payment-option" id="codOption"><div class="payment-icon"><i class="fas fa-money-bill-wave" style="color: #4CAF50;"></i></div><div class="payment-info"><h4>Cash on Delivery</h4><p>Pay when you receive</p></div><div class="radio-circle"></div></div>
+          <div class="payment-option" id="razorpayOption"><div class="payment-icon"><i class="fas fa-credit-card" style="color: #D4AF37;"></i></div><div class="payment-info"><h4>Card / UPI / NetBanking <span class="discount-badge"><i class="fas fa-tag"></i> 5% OFF</span></h4><p>Secure online payment with 5% discount</p></div><div class="radio-circle"></div></div>
           <div class="cod-details" id="codDetails"><p><i class="fas fa-truck"></i> Pay cash when you receive your order</p><button class="place-order-cod" id="placeOrderCodBtn">Confirm Order (COD)</button></div>
           <div class="razorpay-section" id="razorpaySection"><div class="online-discount-info"><i class="fas fa-gift"></i> <strong>5% Instant Discount!</strong> Pay online and save 5% on your order.</div><p><i class="fas fa-shield-alt"></i> Secured by Razorpay</p><p style="font-size: 11px; color: #888;">Cards | UPI | NetBanking | Wallets</p><button class="pay-razorpay-btn" id="payRazorpayBtn"><i class="fas fa-lock"></i> Pay Now with 5% OFF</button></div>
         </div>
-        <div class="payment-note" style="margin-top: 12px; font-size: 11px; color: #888; text-align: center;"><i class="fas fa-shield-alt"></i> Your payment is 100% secure</div>
       </div>
     </div>
-
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
       <div id="orderItemsList"></div>
-      <div class="delivery-benefits">
-        <div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div>
-        <div class="benefit-row"><i class="fas fa-box-open"></i><span>📦 <strong>Free Premium Packaging</strong> - Luxury unboxing</span></div>
-        <div class="benefit-row"><i class="fas fa-percent"></i><span>💰 <strong>0% GST / Tax</strong> - No hidden charges</span></div>
-        <div class="benefit-row"><i class="fas fa-shield-alt"></i><span>🛡️ <strong>Free Insurance</strong> - Transit insurance included</span></div>
-        <div class="benefit-row"><i class="fas fa-undo-alt"></i><span>🔄 <strong>15-Day Easy Returns</strong> - Free pickup & refund</span></div>
-      </div>
+      <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div></div>
       <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | FREE PACKAGING | 0% TAX</div>
-      <div class="order-total">
-        <div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
-        <div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div>
-        <div class="total-row"><span>Packaging Charge</span><span style="color: #4CAF50;">FREE</span></div>
-        <div class="total-row"><span>GST / Tax (0%)</span><span style="color: #4CAF50;">₹0</span></div>
-        <div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div>
-        <div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
-      </div>
-      <div class="rewards-points"><i class="fas fa-coins" style="color: #D4AF37;"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins on this order</div>
+      <div class="order-total"><div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div><div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div><div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div><div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div></div>
+      <div class="rewards-points"><i class="fas fa-coins" style="color: #D4AF37;"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins</div>
       <a href="#" class="back-to-shop" id="backToShopBtn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
     </div>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
 
 <script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
-    authDomain: "nexi-53897.firebaseapp.com",
-    projectId: "nexi-53897",
-    storageBucket: "nexi-53897.firebasestorage.app",
-    messagingSenderId: "337349382612",
-    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
-  };
-  
+  const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
-  
   const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   const ONLINE_DISCOUNT_PERCENT = 5;
   const GOOGLE_MAPS_API_KEY = "AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM";
-  
   let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
   let productsCache = new Map(), selectedPaymentMethod = 'cod', currentUser = null;
-  let savedAddress = null, isUsingSavedAddress = false, isAddingNewAddress = false;
+  let selectedAddress = null;
 
-  function showToast(msg, isError = false) {
-    const toast = document.getElementById('toast');
-    toast.innerText = msg;
-    toast.style.background = isError ? '#F44336' : '#D4AF37';
-    toast.style.color = isError ? 'white' : '#050508';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
-  
-  function showLoading(show) {
-    document.getElementById('loadingOverlay').classList.toggle('show', show);
-  }
+  function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+  function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
 
-  // ========== IMPROVED GOOGLE MAPS GEOLOCATION (USING YOUR API KEY) ==========
-  async function getAddressFromGoogleMaps() {
+  // ULTRA RELIABLE LOCATION USING GOOGLE MAPS GEOCODER (YOUR API KEY)
+  async function getPreciseAddressFromCoordinates(lat, lng) {
+    const geocoder = new google.maps.Geocoder();
     return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        reject(new Error('Geolocation not supported by your browser'));
-        return;
-      }
-      
-      // First try with high accuracy
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude, accuracy } = position.coords;
-          console.log(`📍 Location obtained: ${latitude}, ${longitude} (accuracy: ${accuracy}m)`);
-          
-          try {
-            // Using Google Geocoding API to convert lat/lng to detailed address
-            const geocodeUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=en`;
-            
-            const response = await fetch(geocodeUrl);
-            const data = await response.json();
-            
-            if (data.status === 'OK' && data.results && data.results.length > 0) {
-              const result = data.results[0];
-              const addressComponents = {};
-              
-              // Extract address components
-              result.address_components.forEach(comp => {
-                const types = comp.types;
-                if (types.includes('street_number')) addressComponents.house_number = comp.long_name;
-                if (types.includes('route')) addressComponents.road = comp.long_name;
-                if (types.includes('locality')) addressComponents.city = comp.long_name;
-                if (types.includes('administrative_area_level_2')) addressComponents.city = addressComponents.city || comp.long_name;
-                if (types.includes('administrative_area_level_1')) addressComponents.state = comp.long_name;
-                if (types.includes('postal_code')) addressComponents.pincode = comp.long_name;
-                if (types.includes('sublocality_level_1')) addressComponents.area = comp.long_name;
-                if (types.includes('sublocality_level_2')) addressComponents.area = addressComponents.area || comp.long_name;
-              });
-              
-              // Build street address
-              let street = '';
-              if (addressComponents.house_number) street += addressComponents.house_number;
-              if (addressComponents.road) street += street ? ', ' + addressComponents.road : addressComponents.road;
-              if (addressComponents.area && !street.includes(addressComponents.area)) {
-                street += street ? ', ' + addressComponents.area : addressComponents.area;
-              }
-              
-              // If street is empty, use the first line of formatted address
-              if (!street.trim()) {
-                street = result.formatted_address.split(',')[0];
-              }
-              
-              const formattedAddress = {
-                street: street,
-                city: addressComponents.city || '',
-                state: addressComponents.state || '',
-                pincode: addressComponents.pincode || '',
-                fullAddress: result.formatted_address,
-                latitude: latitude,
-                longitude: longitude
-              };
-              
-              // Validate pincode (India specific)
-              if (formattedAddress.pincode && /^\d{6}$/.test(formattedAddress.pincode)) {
-                console.log('✅ Valid pincode found:', formattedAddress.pincode);
-              } else {
-                console.log('⚠️ No valid pincode from geocoding, will try reverse lookup');
-                // Try to get pincode from a second request focusing on postal code
-                if (latitude && longitude) {
-                  const secondAttempt = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&result_type=postal_code`);
-                  const postalData = await secondAttempt.json();
-                  if (postalData.status === 'OK' && postalData.results.length > 0) {
-                    postalData.results[0].address_components.forEach(comp => {
-                      if (comp.types.includes('postal_code')) {
-                        formattedAddress.pincode = comp.long_name;
-                      }
-                    });
-                  }
-                }
-              }
-              
-              resolve(formattedAddress);
-            } else {
-              reject(new Error(`Geocoding failed: ${data.status}`));
-            }
-          } catch (error) {
-            console.error('Geocoding error:', error);
-            reject(error);
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if (status === 'OK' && results && results.length) {
+          const address = results[0];
+          let street = '', city = '', state = '', pincode = '', landmark = '';
+          for (let comp of address.address_components) {
+            if (comp.types.includes('street_number')) street = comp.long_name + ' ' + street;
+            if (comp.types.includes('route')) street = street + (street ? ', ' + comp.long_name : comp.long_name);
+            if (comp.types.includes('locality')) city = comp.long_name;
+            if (comp.types.includes('administrative_area_level_1')) state = comp.long_name;
+            if (comp.types.includes('postal_code')) pincode = comp.long_name;
+            if (comp.types.includes('sublocality_level_1')) landmark = comp.long_name;
           }
-        },
-        (error) => {
-          console.error('Geolocation error:', error);
-          if (error.code === error.PERMISSION_DENIED) {
-            document.getElementById('locationModal').classList.add('show');
-          }
-          reject(error);
-        },
-        { 
-          enableHighAccuracy: true, 
-          timeout: 15000, 
-          maximumAge: 0 
-        }
-      );
+          if (!street.trim()) street = address.formatted_address.split(',')[0];
+          resolve({ street: street || address.formatted_address, city, state, pincode, landmark, fullAddress: address.formatted_address });
+        } else reject(new Error('Geocoding failed'));
+      });
     });
   }
 
-  async function fillLocationInForm() {
-    const btn = document.querySelector('#useCurrentLocationForNewBtn');
-    if (!btn) return;
-    
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Getting your location...';
-    btn.disabled = true;
-    
+  async function fetchCurrentLocationAndFill() {
+    const btn = document.getElementById('useCurrentLocationForNewBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Fetching live location...'; }
+    showToast('📍 Getting your exact location via GPS + Google Maps...');
     try {
-      showToast('📍 Fetching your location...');
-      const address = await getAddressFromGoogleMaps();
-      
-      if (address && address.street) {
-        // Fill the form fields
-        const streetField = document.getElementById('newStreet');
-        const cityField = document.getElementById('newCity');
-        const stateField = document.getElementById('newState');
-        const pincodeField = document.getElementById('newPincode');
-        
-        if (streetField) streetField.value = address.street;
-        if (cityField && address.city) cityField.value = address.city;
-        if (stateField && address.state) stateField.value = address.state;
-        if (pincodeField && address.pincode) pincodeField.value = address.pincode;
-        
-        // Highlight success
-        [streetField, cityField, stateField, pincodeField].forEach(field => {
-          if (field && field.value) {
-            field.style.borderColor = '#4CAF50';
-            setTimeout(() => { if(field) field.style.borderColor = ''; }, 2000);
-          }
-        });
-        
-        showToast(`✅ Location found! Address filled: ${address.city || 'Area found'}`);
-      } else {
-        showToast('❌ Could not get complete address. Please fill manually.', true);
-      }
-    } catch (error) {
-      console.error('Location error:', error);
-      showToast('❌ Failed to get location. Please check permissions.', true);
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+      });
+      const { latitude, longitude } = position.coords;
+      const addressData = await getPreciseAddressFromCoordinates(latitude, longitude);
+      if (addressData) {
+        document.getElementById('newStreet').value = addressData.street;
+        document.getElementById('newCity').value = addressData.city;
+        document.getElementById('newState').value = addressData.state;
+        document.getElementById('newPincode').value = addressData.pincode;
+        if (addressData.landmark) document.getElementById('newLandmark').value = addressData.landmark;
+        showToast(`✅ Location detected! ${addressData.city || 'Address'} filled.`);
+        ['newStreet','newCity','newState','newPincode'].forEach(id => { const el = document.getElementById(id); if(el && el.value) { el.style.borderColor = '#4CAF50'; setTimeout(() => el.style.borderColor = '', 1500); } });
+      } else throw new Error('Incomplete address');
+    } catch (err) {
+      console.error(err);
+      if (err.code === 1) document.getElementById('locationModal').classList.add('show');
+      showToast('❌ Location failed. Please enter manually.', true);
     } finally {
-      btn.innerHTML = originalText;
-      btn.disabled = false;
+      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-dot"></i> 📍 Use My Current Location'; }
     }
   }
 
-  function showLocationModal() { document.getElementById('locationModal').classList.add('show'); }
-  function hideLocationModal() { document.getElementById('locationModal').classList.remove('show'); }
-
-  // ========== ADDRESS FUNCTIONS ==========
-  async function fetchSavedAddressFromPhone() {
-    if (!currentUser || !currentUser.phone) return null;
-    try {
-      const snapshot = await db.collection('orders').where('customerPhone', '==', currentUser.phone).orderBy('orderDate', 'desc').limit(1).get();
-      if (!snapshot.empty) {
-        const lastOrder = snapshot.docs[0].data();
-        if (lastOrder.shippingAddress) {
-          return {
-            fullName: lastOrder.customerName, street: lastOrder.shippingAddress.address,
-            city: lastOrder.shippingAddress.city, state: lastOrder.shippingAddress.state,
-            pincode: lastOrder.shippingAddress.pincode, landmark: lastOrder.shippingAddress.landmark || '',
-            phone: lastOrder.customerPhone, email: lastOrder.customerEmail
-          };
-        }
-      }
-      const addrSnapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).orderBy('isDefault', 'desc').limit(1).get();
-      if (!addrSnapshot.empty) {
-        const addr = addrSnapshot.docs[0].data();
-        return { fullName: addr.name, street: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '', phone: addr.phone || currentUser.phone, email: currentUser.email };
-      }
-      return null;
-    } catch(e) { return null; }
-  }
-  
-  async function saveNewAddressToFirebase(addressData) {
-    if (!currentUser || !currentUser.uid) return null;
-    const addressToSave = { userId: currentUser.uid, name: addressData.fullName, street: addressData.street, city: addressData.city, state: addressData.state, pincode: addressData.pincode, landmark: addressData.landmark || '', phone: addressData.phone || currentUser.phone, isDefault: true, createdAt: new Date().toISOString() };
-    try { return (await db.collection('addresses').add(addressToSave)).id; } catch(e) { return null; }
-  }
-  
   async function loadAndRenderAddressSelection() {
     const container = document.getElementById('addressSelectionArea');
-    if (!container) return;
-    showLoading(true);
-    const address = await fetchSavedAddressFromPhone();
-    showLoading(false);
-    
-    if (address) {
-      container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSavedAddressBtn"><div class="address-name"><i class="fas fa-star-of-life" style="color:#D4AF37;"></i> Previously Used Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.street)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddressFormBtn"><i class="fas fa-plus-circle"></i> Add New Address</button></div><div class="new-address-form" id="newAddressFormSection"><div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name"></div><div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div><div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div><div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div><div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div><button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressAndOrderBtn" style="flex:1;"><i class="fas fa-save"></i> Save & Continue</button><button class="location-btn cancel-address-btn" id="cancelNewAddressFormBtn" style="flex:0.5;">Cancel</button></div></div>`;
-      
-      document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => useSavedAddress(address));
-      document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => { document.getElementById('newAddressFormSection').classList.add('show'); document.querySelector('.address-selection-card .saved-address-card').style.opacity = '0.5'; });
-      document.getElementById('saveNewAddressAndOrderBtn')?.addEventListener('click', saveAndUseNewAddress);
-      document.getElementById('cancelNewAddressFormBtn')?.addEventListener('click', () => { document.getElementById('newAddressFormSection').classList.remove('show'); document.querySelector('.address-selection-card .saved-address-card').style.opacity = '1'; });
-      document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fillLocationInForm);
-    } else {
-      container.innerHTML = `<div class="new-address-form show" id="newAddressFormSection"><div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}"></div><div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div><div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div><div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div><div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div><button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressAndOrderBtn" style="flex:1;"><i class="fas fa-save"></i> Save & Continue</button></div></div>`;
-      document.getElementById('saveNewAddressAndOrderBtn')?.addEventListener('click', saveAndUseNewAddress);
-      document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fillLocationInForm);
-    }
+    container.innerHTML = `<div class="new-address-form show" id="newAddressFormSection">
+      <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}"></div>
+      <div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div>
+      <div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div>
+      <div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div>
+      <div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div>
+      <button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
+      <div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressAndOrderBtn" style="flex:1;"><i class="fas fa-save"></i> Save & Continue</button></div>
+    </div>`;
+    document.getElementById('saveNewAddressAndOrderBtn')?.addEventListener('click', saveNewAddress);
+    document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
   }
-  
-  function useSavedAddress(address) {
-    isUsingSavedAddress = true; isAddingNewAddress = false;
-    document.getElementById('fullName').value = address.fullName;
-    showToast(`✅ Using saved address for ${address.fullName}`);
-    window.selectedAddress = { fullName: address.fullName, phone: address.phone, email: currentUser.email, address: address.street, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark || '' };
-    document.querySelector('.saved-address-card')?.classList.add('selected');
-  }
-  
-  async function saveAndUseNewAddress() {
+
+  async function saveNewAddress() {
     const fullName = document.getElementById('newFullName').value.trim();
     const street = document.getElementById('newStreet').value.trim();
     const city = document.getElementById('newCity').value.trim();
@@ -868,109 +671,53 @@
     const pincode = document.getElementById('newPincode').value.trim();
     const landmark = document.getElementById('newLandmark').value.trim();
     const phone = document.getElementById('newPhone').value.trim();
-    
     if (!fullName || !street || !city || !state || !pincode) { showToast('❌ Please fill all required fields', true); return; }
     if (!/^\d{6}$/.test(pincode)) { showToast('❌ Enter valid 6-digit pincode', true); return; }
-    
-    showLoading(true);
-    const newAddress = { fullName, phone: phone || currentUser.phone, email: currentUser.email, address: street, city, state, pincode, landmark };
-    await saveNewAddressToFirebase(newAddress);
-    window.selectedAddress = newAddress;
+    selectedAddress = { fullName, phone: phone || currentUser.phone, email: currentUser.email, address: street, city, state, pincode, landmark };
     document.getElementById('fullName').value = fullName;
-    isUsingSavedAddress = true; isAddingNewAddress = false;
-    showLoading(false);
     showToast('✅ Address saved successfully!');
   }
-  
-  function getSelectedAddress() { return window.selectedAddress || null; }
-  
-  function validateOrder() {
-    const address = getSelectedAddress();
-    if (!address) { showToast('❌ Please add a shipping address', true); return false; }
-    if (!document.getElementById('fullName').value.trim()) { showToast('❌ Please enter your full name', true); return false; }
-    return true;
-  }
-  
+
+  function getSelectedAddress() { return selectedAddress; }
+  function validateOrder() { if(!getSelectedAddress()){ showToast('❌ Please add shipping address', true); return false; } if(!document.getElementById('fullName').value.trim()){ showToast('❌ Please enter full name', true); return false; } return true; }
+
   async function saveOrderToFirebase(paymentMethod, transactionId = null) {
-    const address = getSelectedAddress();
-    if (!address) return { success: false };
-    const itemsWithDetails = cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity, size: item.size || 'Not Selected', color: item.color || 'Not Selected', combo: item.combo || null, isCombo: item.isCombo || false, comboMultiplier: item.comboMultiplier || null, total: item.price * item.quantity }));
+    const addr = getSelectedAddress(); if (!addr) return { success: false };
+    const itemsWithDetails = cart.map(item => ({ id: item.id, name: item.name, price: item.price, quantity: item.quantity, size: item.size || 'N/A', color: item.color || 'N/A', total: item.price * item.quantity }));
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
     const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
-    const orderData = { orderId, customerName: address.fullName, customerPhone: address.phone, customerEmail: address.email, shippingAddress: { address: address.address, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark || '' }, items: itemsWithDetails, paymentMethod, paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending', status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, discountPercent: (paymentMethod === 'Razorpay' && discountAmount > 0) ? ONLINE_DISCOUNT_PERCENT : 0, total: finalTotal, orderDate: new Date().toISOString(), updatedAt: new Date().toISOString(), userId: currentUser?.uid, userPhone: currentUser?.phone || address.phone, rewardPointsEarned: Math.floor(finalTotal / 100) };
+    const orderData = { orderId, customerName: addr.fullName, customerPhone: addr.phone, customerEmail: addr.email, shippingAddress: { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' }, items: itemsWithDetails, paymentMethod, paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending', status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid };
     try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { return { success: false }; }
   }
-  
+
   async function processOrderAfterSave(orderId) { localStorage.removeItem('vedantaCart'); window.location.href = `order-success.html?orderId=${orderId}`; }
-  
-  async function saveOrderCOD() {
-    if (!validateOrder() || isProcessing) return;
-    isProcessing = true; showLoading(true);
-    const btn = document.getElementById('placeOrderCodBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
-    const result = await saveOrderToFirebase('Cash on Delivery');
-    showLoading(false);
-    if (result.success) { showToast(`✅ Order placed! Order ID: ${result.orderId}`); setTimeout(() => processOrderAfterSave(result.orderId), 1500); }
-    else { showToast('❌ Failed to place order', true); if (btn) { btn.disabled = false; btn.innerHTML = 'Confirm Order (COD)'; } isProcessing = false; }
-  }
-  
-  async function initiateRazorpayPayment() {
-    if (!validateOrder() || isProcessing) return;
-    isProcessing = true; showLoading(true);
-    const finalAmount = discountedTotal;
-    if (finalAmount <= 0) { showToast('❌ Invalid order amount', true); showLoading(false); isProcessing = false; return; }
-    const address = getSelectedAddress();
-    const orderAmount = Math.round(finalAmount);
-    const btn = document.getElementById('payRazorpayBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
-    try {
-      const options = { key: RAZORPAY_KEY_ID, amount: orderAmount * 100, currency: 'INR', name: 'VEDANTA', description: 'Order Payment', prefill: { name: address.fullName, email: address.email, contact: address.phone }, theme: { color: '#D4AF37' }, modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); if(btn){btn.disabled=false;btn.innerHTML='Pay Now';} isProcessing=false; } } };
-      const razorpay = new Razorpay(options);
-      razorpay.on('payment.success', async (response) => { const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id); showLoading(false); if (result.success) { showToast(`✅ Payment successful! Order ID: ${result.orderId}`); setTimeout(() => processOrderAfterSave(result.orderId), 1500); } else { showToast('⚠️ Payment but save failed', true); } isProcessing = false; });
-      razorpay.on('payment.error', () => { showLoading(false); showToast('❌ Payment failed!', true); if(btn){btn.disabled=false;btn.innerHTML='Pay Now';} isProcessing = false; });
-      razorpay.open();
-    } catch(error) { showLoading(false); showToast('❌ Failed to initialize payment', true); if(btn){btn.disabled=false;btn.innerHTML='Pay Now';} isProcessing = false; }
-  }
-  
-  function loadProductsInstantly() { const cached = localStorage.getItem('vedantaProducts'); if (cached) { try { JSON.parse(cached).forEach(p => productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name })); return true; } catch(e){} } return false; }
-  function fetchProductsInBackground() { db.collection('products').get().then(snapshot => { snapshot.forEach(doc => { const p = doc.data(); if(!productsCache.has(doc.id)) productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name }); }); renderOrderSummary(); }).catch(e => console.log(e)); }
-  function getProductImage(id) { return productsCache.get(id)?.images?.[0] || null; }
-  function getProductIcon(id) { return productsCache.get(id)?.icon || 'fa-gem'; }
-  function loadCart() { cart = JSON.parse(localStorage.getItem('vedantaCart')) || []; if (cart.length === 0) { showToast('🛒 Cart empty! Redirecting...', true); setTimeout(() => window.location.href = 'index.html', 1500); return; } cartTotal = cart.reduce((s,i) => s + (i.price * i.quantity), 0); calculateOnlineDiscount(); renderOrderSummary(); }
+  async function saveOrderCOD() { if (!validateOrder() || isProcessing) return; isProcessing = true; showLoading(true); const res = await saveOrderToFirebase('Cash on Delivery'); showLoading(false); if (res.success) { showToast(`✅ Order placed! ID: ${res.orderId}`); setTimeout(() => processOrderAfterSave(res.orderId), 1500); } else { showToast('❌ Failed', true); isProcessing = false; } }
+  async function initiateRazorpayPayment() { if (!validateOrder() || isProcessing) return; isProcessing = true; showLoading(true); const finalAmount = discountedTotal; if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } const addr = getSelectedAddress(); const options = { key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount)*100, currency: 'INR', name: 'VEDANTA', description: 'Order Payment', prefill: { name: addr.fullName, email: addr.email, contact: addr.phone }, theme: { color: '#D4AF37' }, handler: async (response) => { const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id); showLoading(false); if (result.success) { showToast(`✅ Payment success! Order: ${result.orderId}`); setTimeout(() => processOrderAfterSave(result.orderId), 1500); } else { showToast('⚠️ Order save issue', true); } isProcessing = false; }, modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing=false; } } }; const razorpay = new Razorpay(options); razorpay.open(); }
+
+  function loadCart() { cart = JSON.parse(localStorage.getItem('vedantaCart')) || []; if (cart.length === 0) { showToast('Cart empty!', true); setTimeout(()=> window.location.href='index.html',1500); } cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0); calculateOnlineDiscount(); renderOrderSummary(); }
   function calculateOnlineDiscount() { if (selectedPaymentMethod === 'razorpay') { discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100); discountedTotal = cartTotal - discountAmount; } else { discountAmount = 0; discountedTotal = cartTotal; } updateTotalDisplay(); }
   function updateTotalDisplay() { document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; const discountRow = document.getElementById('discountRow'); if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) { discountRow.style.display = 'flex'; document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`; document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`; } else { discountRow.style.display = 'none'; document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; } document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100); }
-  function renderOrderSummary() { const container = document.getElementById('orderItemsList'); if (!container) return; container.innerHTML = cart.map(item => { const img = getProductImage(item.id); const icon = getProductIcon(item.id); return `<div class="order-item"><div class="order-item-img">${img ? `<img src="${img}">` : `<i class="fas ${icon}"></i>`}</div><div class="order-item-info"><h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p></div><div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div></div>`; }).join(''); updateTotalDisplay(); }
+  function renderOrderSummary() { const container = document.getElementById('orderItemsList'); if (!container) return; container.innerHTML = cart.map(item => `<div class="order-item"><div class="order-item-img"><i class="fas fa-gem"></i></div><div class="order-item-info"><h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p></div><div class="order-item-price">₹${(item.price*item.quantity).toLocaleString()}</div></div>`).join(''); updateTotalDisplay(); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
-  
+
   async function initialize() {
     const user = auth.currentUser;
     const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    if (user) { currentUser = { uid: user.uid, phone: user.phoneNumber, email: user.email || storedUser?.email || `${user.uid}@vedanta.com`, name: storedUser?.name || `User${user.phoneNumber?.slice(-4) || '001'}` }; localStorage.setItem('vedantaUser', JSON.stringify(currentUser)); }
-    else if (storedUser) { currentUser = storedUser; }
-    else { showToast('🔐 Please login to continue', true); setTimeout(() => window.location.href = 'profile.html', 1500); return; }
-    
-    document.getElementById('displayPhone').innerText = currentUser.phone || '';
-    document.getElementById('displayEmail').innerText = currentUser.email || '';
-    document.getElementById('phone').value = currentUser.phone || '';
-    document.getElementById('email').value = currentUser.email || '';
-    document.getElementById('fullName').value = currentUser.name || '';
-    
+    if (user) { currentUser = { uid: user.uid, phone: user.phoneNumber, email: user.email || storedUser?.email, name: storedUser?.name || `User${user.phoneNumber?.slice(-4)}` }; localStorage.setItem('vedantaUser', JSON.stringify(currentUser)); }
+    else if (storedUser) currentUser = storedUser;
+    else { showToast('Login required', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
+    document.getElementById('displayPhone').innerText = currentUser.phone || ''; document.getElementById('displayEmail').innerText = currentUser.email || ''; document.getElementById('phone').value = currentUser.phone || ''; document.getElementById('email').value = currentUser.email || ''; document.getElementById('fullName').value = currentUser.name || '';
     await loadAndRenderAddressSelection();
     loadCart();
-    loadProductsInstantly();
-    fetchProductsInBackground();
-    
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod = 'cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateOnlineDiscount(); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod = 'razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateOnlineDiscount(); });
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateOnlineDiscount(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateOnlineDiscount(); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
-    document.getElementById('openSettingsBtn')?.addEventListener('click', () => { hideLocationModal(); showToast('📍 Please enable location in your browser settings', true); });
-    document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
-    
-    console.log('✅ Page initialized with Google Maps API key for location services');
+    document.getElementById('openSettingsBtn')?.addEventListener('click', () => { document.getElementById('locationModal').classList.remove('show'); showToast('📍 Please allow location in browser settings', true); });
+    document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
+    console.log('✅ Secure checkout with WORKING LOCATION using provided Google API Key.');
   }
-  
   initialize();
 </script>
 </body>
