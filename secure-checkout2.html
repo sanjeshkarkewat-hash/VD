@@ -36,14 +36,16 @@
     @media (min-width: 768px) { .form-group input, .form-group textarea, .form-group select { padding: 14px 16px; border-radius: 16px; } }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212,175,55,0.3); }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    
     .address-selection-card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; margin-bottom: 16px; }
-    .saved-address-card { background: rgba(20,20,30,0.6); border: 2px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 16px; cursor: pointer; transition: all 0.2s; margin-bottom: 10px; }
-    .saved-address-card:hover { border-color: #D4AF37; background: rgba(212,175,55,0.15); transform: translateX(2px); }
-    .saved-address-card.selected { border-color: #4CAF50; background: rgba(76,175,80,0.15); }
-    .saved-address-card .address-name { font-weight: 800; color: #D4AF37; margin-bottom: 8px; font-size: 14px; }
-    .saved-address-card .address-detail { font-size: 12px; color: #ccc; line-height: 1.5; }
-    .saved-address-card .address-phone { font-size: 11px; color: #888; margin-top: 8px; }
-    .saved-address-card .address-label { display: inline-block; background: rgba(212,175,55,0.2); padding: 2px 10px; border-radius: 20px; font-size: 10px; margin-top: 8px; }
+    .saved-address-card, .selected-address-card { background: rgba(20,20,30,0.6); border: 2px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 16px; margin-bottom: 10px; }
+    .selected-address-card { border-color: #4CAF50; background: rgba(76,175,80,0.15); }
+    .saved-address-card:hover, .selected-address-card:hover { border-color: #D4AF37; background: rgba(212,175,55,0.15); transform: translateX(2px); }
+    .saved-address-card .address-name, .selected-address-card .address-name { font-weight: 800; color: #D4AF37; margin-bottom: 8px; font-size: 14px; }
+    .saved-address-card .address-detail, .selected-address-card .address-detail { font-size: 12px; color: #ccc; line-height: 1.5; }
+    .saved-address-card .address-phone, .selected-address-card .address-phone { font-size: 11px; color: #888; margin-top: 8px; }
+    .saved-address-card .address-label, .selected-address-card .address-label { display: inline-block; background: rgba(212,175,55,0.2); padding: 2px 10px; border-radius: 20px; font-size: 10px; margin-top: 8px; }
+    
     .option-divider { text-align: center; margin: 15px 0; position: relative; }
     .option-divider span { background: #0a0a12; padding: 0 15px; color: #888; font-size: 12px; }
     .option-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.1); z-index: -1; }
@@ -113,7 +115,6 @@
     .action-buttons-row { display: flex; gap: 12px; margin-top: 15px; }
     .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
     .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
-    .address-selected-info { background: rgba(76,175,80,0.2); border: 1px solid #4CAF50; border-radius: 12px; padding: 10px; margin-top: 10px; text-align: center; font-size: 12px; color: #4CAF50; }
   </style>
 </head>
 <body>
@@ -160,6 +161,7 @@
   let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
   let productsCache = new Map(), selectedPaymentMethod = 'cod', currentUser = null;
   let selectedAddress = null;
+  let savedAddressFromDb = null;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
@@ -212,7 +214,7 @@
     }
   }
 
-  // Product Images - Preload
+  // Product Images
   async function fetchProductsAndCache() {
     try {
       const snapshot = await db.collection('products').get();
@@ -230,6 +232,7 @@
     if (product && product.images && product.images.length > 0) return product.images[0];
     return null;
   }
+  function getProductIcon(id) { return productsCache.get(id)?.icon || 'fa-gem'; }
 
   // Address Functions
   async function fetchSavedAddressFromPhone() {
@@ -257,33 +260,52 @@
     try { return (await db.collection('addresses').add(addressToSave)).id; } catch(e) { return null; }
   }
 
-  function showAddressSelectedMessage(address) {
+  // Function to display selected address as a card (exactly like previously used address)
+  function displaySelectedAddressCard(address) {
     const container = document.getElementById('addressSelectionArea');
-    const existingMsg = document.getElementById('addressSelectedMsg');
-    if(existingMsg) existingMsg.remove();
-    const msgDiv = document.createElement('div');
-    msgDiv.id = 'addressSelectedMsg';
-    msgDiv.className = 'address-selected-info';
-    msgDiv.innerHTML = `<i class="fas fa-check-circle"></i> Address selected: ${address.fullName}, ${address.city}`;
-    container.appendChild(msgDiv);
-    setTimeout(() => { if(msgDiv) msgDiv.remove(); }, 5000);
+    container.innerHTML = `
+      <div class="selected-address-card">
+        <div class="address-name">
+          <i class="fas fa-check-circle" style="color: #4CAF50;"></i> Selected Delivery Address
+        </div>
+        <div class="address-detail">${escapeHtml(address.fullName)}</div>
+        <div class="address-detail">${escapeHtml(address.address)}</div>
+        <div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>
+        ${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}
+        <div class="address-phone">📞 ${escapeHtml(address.phone)}</div>
+        <div class="address-label">✓ Deliver to this address</div>
+      </div>
+      <div class="option-divider"><span>OR</span></div>
+      <button class="add-new-address-btn" id="changeAddressBtn"><i class="fas fa-edit"></i> Change Address</button>
+    `;
+    document.getElementById('changeAddressBtn')?.addEventListener('click', () => {
+      loadAndRenderAddressSelection();
+    });
   }
 
   async function loadAndRenderAddressSelection() {
     const container = document.getElementById('addressSelectionArea');
     showLoading(true);
     const address = await fetchSavedAddressFromPhone();
+    savedAddressFromDb = address;
     showLoading(false);
     
-    if (address) {
+    if (address && !selectedAddress) {
+      // Show saved address with options
       container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSavedAddressBtn"><div class="address-name"><i class="fas fa-star-of-life" style="color:#D4AF37;"></i> Previously Used Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.street)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddressFormBtn"><i class="fas fa-plus-circle"></i> Add New Address</button></div><div class="new-address-form" id="newAddressFormSection"><div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(address.fullName)}"></div><div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div><div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div><div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div><div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div><button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button><button class="location-btn cancel-address-btn" id="cancelNewAddressFormBtn" style="flex:0.5;">Cancel</button></div></div>`;
       
-      document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => { useSavedAddress(address); });
-      document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => { document.getElementById('newAddressFormSection').classList.add('show'); });
+      document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => {
+        useSavedAddress(address);
+      });
+      document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => { 
+        document.getElementById('newAddressFormSection').classList.add('show'); 
+      });
       document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
-      document.getElementById('cancelNewAddressFormBtn')?.addEventListener('click', () => { document.getElementById('newAddressFormSection').classList.remove('show'); });
+      document.getElementById('cancelNewAddressFormBtn')?.addEventListener('click', () => { 
+        document.getElementById('newAddressFormSection').classList.remove('show'); 
+      });
       document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
-    } else {
+    } else if (!selectedAddress) {
       container.innerHTML = `<div class="new-address-form show" id="newAddressFormSection"><div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}"></div><div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div><div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div><div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div><div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div><button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="margin-top:10px;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button></div>`;
       document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
       document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
@@ -293,10 +315,8 @@
   function useSavedAddress(address) {
     selectedAddress = { fullName: address.fullName, phone: address.phone, email: currentUser.email, address: address.street, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark || '' };
     document.getElementById('fullName').value = address.fullName;
-    showToast(`✅ Address selected! ${address.fullName}`);
-    const card = document.querySelector('.saved-address-card');
-    if(card) { card.classList.add('selected'); }
-    showAddressSelectedMessage(address);
+    showToast(`✅ Address selected: ${address.fullName}`);
+    displaySelectedAddressCard(selectedAddress);
   }
 
   async function saveNewAddressAndUse() {
@@ -321,11 +341,12 @@
     await saveNewAddressToFirebase(selectedAddress);
     
     btn.innerHTML = '✅ Saved!';
-    showToast(`✅ Address saved! ${fullName}`);
-    showAddressSelectedMessage(selectedAddress);
+    showToast(`✅ Address saved: ${fullName}`);
+    
+    // Display the selected address as a card (exactly like previously used address)
+    displaySelectedAddressCard(selectedAddress);
     
     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 1500);
-    document.getElementById('newAddressFormSection')?.classList.remove('show');
   }
 
   function getSelectedAddress() { return selectedAddress; }
@@ -360,13 +381,11 @@
     container.innerHTML = cart.map(item => { 
       const img = getProductImage(item.id); 
       const icon = getProductIcon(item.id);
-      const imgHtml = img ? `<img src="${img}" onerror="this.style.display='none';this.nextSibling.style.display='flex'">` : '';
       return `<div class="order-item"><div class="order-item-img">${img ? `<img src="${img}" onerror="this.style.display='none';this.nextSibling.style.display='flex'"><i class="fas ${icon}" style="display:none"></i>` : `<i class="fas ${icon}"></i>`}</div><div class="order-item-info"><h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p></div><div class="order-item-price">₹${(item.price*item.quantity).toLocaleString()}</div></div>`;
     }).join(''); 
     updateTotalDisplay(); 
   }
   
-  function getProductIcon(id) { return productsCache.get(id)?.icon || 'fa-gem'; }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
   async function initialize() {
