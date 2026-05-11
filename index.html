@@ -369,33 +369,10 @@
         }
         .overlay.show { display: block; }
         
-        .marquee-wrapper {
-            background: linear-gradient(90deg, #0A0A12, #1A1005, #0A0A12);
-            border-top: 1px solid rgba(212,175,55,0.4);
-            border-bottom: 1px solid rgba(212,175,55,0.4);
-            padding: 12px 0;
-            margin-top: 70px;
-        }
-        .marquee-line {
-            overflow: hidden;
-            white-space: nowrap;
-            padding: 6px 0;
-        }
-        .marquee-line marquee {
-            font-size: 13px;
-            font-weight: 600;
-            color: #FFD966;
-        }
-        .marquee-line i { margin: 0 12px; color: #D4AF37; }
-        
-        .hero-banner {
-            min-height: 35vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
+        /* ========== HEADER STYLES ========== */
+        .header-top {
             text-align: center;
-            margin: 20px 0 16px;
+            padding: 30px 20px 15px;
         }
         .animated-logo {
             animation: logoGlow 2s ease-in-out infinite, logoFloat 3s ease-in-out infinite;
@@ -422,56 +399,140 @@
             color: transparent;
             animation: gradientShift 3s linear infinite;
         }
-        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 100% 50%; } }
-        .banner-tag { font-size: 10px; letter-spacing: 3px; color: #D4AF37; margin-top: 8px; }
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            100% { background-position: 100% 50%; }
+        }
+        .banner-tag {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #D4AF37;
+            margin-top: 8px;
+        }
         @media (min-width: 768px) {
-            .hero-banner { min-height: 45vh; }
             .banner-logo { font-size: 100px; letter-spacing: -3px; }
             .banner-tag { font-size: 16px; letter-spacing: 6px; }
         }
         
+        /* Marquee */
+        .marquee-wrapper {
+            background: linear-gradient(90deg, #0A0A12, #1A1005, #0A0A12);
+            border-top: 1px solid rgba(212,175,55,0.4);
+            border-bottom: 1px solid rgba(212,175,55,0.4);
+            padding: 12px 0;
+        }
+        .marquee-line {
+            overflow: hidden;
+            white-space: nowrap;
+            padding: 6px 0;
+        }
+        .marquee-line marquee {
+            font-size: 13px;
+            font-weight: 600;
+            color: #FFD966;
+        }
+        .marquee-line i { margin: 0 12px; color: #D4AF37; }
+        
+        /* Image Slider */
+        .hero-slider {
+            width: 100%;
+            overflow: hidden;
+            position: relative;
+            margin: 20px 0;
+        }
+        .slider-container {
+            display: flex;
+            transition: transform 0.5s ease-in-out;
+        }
+        .slider-slide {
+            min-width: 100%;
+            position: relative;
+        }
+        .slider-slide img {
+            width: 100%;
+            height: 300px;
+            object-fit: cover;
+            border-radius: 24px;
+        }
+        @media (min-width: 768px) {
+            .slider-slide img { height: 400px; }
+        }
+        .slider-dots {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 12px;
+        }
+        .slider-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .slider-dot.active {
+            background: #D4AF37;
+            width: 25px;
+            border-radius: 10px;
+        }
+        
+        /* Search Box */
         .search-box {
             max-width: 90%;
-            margin: 16px auto;
+            margin: 20px auto;
             position: relative;
         }
         .search-box i {
             position: absolute;
-            left: 16px;
+            left: 18px;
             top: 50%;
             transform: translateY(-50%);
-            font-size: 16px;
+            font-size: 18px;
             color: #D4AF37;
         }
         #searchInput {
             width: 100%;
-            padding: 14px 16px 14px 44px;
-            font-size: 15px;
+            padding: 16px 20px 16px 50px;
+            font-size: 16px;
             background: rgba(20,20,30,0.9);
             backdrop-filter: blur(12px);
             border: 1.5px solid rgba(212,175,55,0.4);
-            border-radius: 50px;
+            border-radius: 60px;
             color: white;
+            transition: 0.2s;
+        }
+        #searchInput:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.3);
+            background: rgba(20,20,30,0.95);
         }
         
+        /* Filter Buttons */
         .filter-section {
             margin: 16px 0;
             overflow-x: auto;
             white-space: nowrap;
             padding: 8px 12px;
             -webkit-overflow-scrolling: touch;
+            scrollbar-width: thin;
         }
-        .filter-buttons { display: inline-flex; gap: 8px; }
+        .filter-buttons {
+            display: inline-flex;
+            gap: 10px;
+        }
         .filter-btn {
             background: rgba(20,20,30,0.8);
             border: 1px solid rgba(212,175,55,0.3);
-            padding: 8px 16px;
-            border-radius: 40px;
+            padding: 10px 20px;
+            border-radius: 50px;
             color: #DDD;
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;
             cursor: pointer;
             white-space: nowrap;
+            transition: 0.2s;
         }
         .filter-btn:hover, .filter-btn.active {
             background: #D4AF37;
@@ -994,6 +1055,15 @@
     </div>
 </div>
 
+<!-- ========== NEW LAYOUT: VEDANTA LOGO (TOP) ========== -->
+<div class="header-top">
+    <div class="animated-logo">
+        <div class="banner-logo">VEDANTA</div>
+    </div>
+    <div class="banner-tag">✦ WHERE SOUL MEETS LUXURY ✦</div>
+</div>
+
+<!-- ========== MARQUEE (SECOND) ========== -->
 <div class="marquee-wrapper">
     <div class="marquee-line">
         <marquee behavior="scroll" direction="left" scrollamount="4" onmouseover="this.stop();" onmouseout="this.start();">
@@ -1007,23 +1077,38 @@
     </div>
 </div>
 
-<div class="container">
-    <div class="hero-banner">
-        <div class="animated-logo"><div class="banner-logo">VEDANTA</div></div>
-        <div class="banner-tag">✦ WHERE SOUL MEETS LUXURY ✦</div>
+<!-- ========== IMAGE SLIDER (THIRD) ========== -->
+<div class="hero-slider">
+    <div class="slider-container" id="sliderContainer">
+        <div class="slider-slide"><img src="technology .jpeg" alt="Technology" onerror="this.src='https://placehold.co/1200x400/1e1e2a/D4AF37?text=Technology'"></div>
+        <div class="slider-slide"><img src="beauty.jpeg" alt="Beauty" onerror="this.src='https://placehold.co/1200x400/2a2a35/D4AF37?text=Beauty'"></div>
+        <div class="slider-slide"><img src="fashion.jpeg" alt="Fashion" onerror="this.src='https://placehold.co/1200x400/252530/D4AF37?text=Fashion'"></div>
+        <div class="slider-slide"><img src="GYM.jpeg" alt="GYM" onerror="this.src='https://placehold.co/1200x400/1e1e2a/D4AF37?text=GYM'"></div>
+        <div class="slider-slide"><img src="living.jpeg" alt="Living" onerror="this.src='https://placehold.co/1200x400/2a2a35/D4AF37?text=Living'"></div>
+        <div class="slider-slide"><img src="home.jpeg" alt="Home" onerror="this.src='https://placehold.co/1200x400/252530/D4AF37?text=Home'"></div>
     </div>
+    <div class="slider-dots" id="sliderDots"></div>
+</div>
 
+<div class="container">
     <div class="search-box">
         <i class="fas fa-search"></i>
-        <input type="text" id="searchInput" placeholder="Search products...">
+        <input type="text" id="searchInput" placeholder="Search products by name, category...">
     </div>
 
     <div class="filter-section">
         <div class="filter-buttons" id="filterButtons">
             <button class="filter-btn active" data-cat="all">🔥 ALL</button>
-            <button class="filter-btn" data-cat="Saree">🥻 SAREE</button>
-            <button class="filter-btn" data-cat="Kurta">🧥 KURTA</button>
-            <button class="filter-btn" data-cat="TShirt">👕 T-SHIRT</button>
+            <button class="filter-btn" data-cat="Fashion">👗 FASHION</button>
+            <button class="filter-btn" data-cat="Electronics">📱 ELECTRONICS</button>
+            <button class="filter-btn" data-cat="Beauty">💄 BEAUTY</button>
+            <button class="filter-btn" data-cat="Home">🏠 HOME & LIVING</button>
+            <button class="filter-btn" data-cat="Sports">⚽ SPORTS</button>
+            <button class="filter-btn" data-cat="Jewellery">💎 JEWELLERY</button>
+            <button class="filter-btn" data-cat="Watches">⌚ WATCHES</button>
+            <button class="filter-btn" data-cat="Footwear">👟 FOOTWEAR</button>
+            <button class="filter-btn" data-cat="Kids">🧸 KIDS</button>
+            <button class="filter-btn" data-cat="Bags">👜 BAGS</button>
             <button class="filter-btn" data-cat="Crystal">🔮 CRYSTAL</button>
             <button class="filter-btn" data-cat="Mala">📿 MALA</button>
         </div>
@@ -1119,6 +1204,11 @@
     let currentLanguage = "english";
     let unsubscribeProducts = null;
     
+    // Slider variables
+    let currentSlideIndex = 0;
+    let slideInterval = null;
+    const totalSlides = 6;
+    
     let modalRecaptchaVerifier = null;
     let modalConfirmationResult = null;
     let pendingBuyProduct = null;
@@ -1158,55 +1248,71 @@
         return num;
     }
     
+    // ========== SLIDER FUNCTIONS ==========
+    function initSlider() {
+        const sliderContainer = document.getElementById('sliderContainer');
+        const dotsContainer = document.getElementById('sliderDots');
+        
+        if (!sliderContainer || !dotsContainer) return;
+        
+        for (let i = 0; i < totalSlides; i++) {
+            const dot = document.createElement('div');
+            dot.className = 'slider-dot' + (i === 0 ? ' active' : '');
+            dot.addEventListener('click', () => goToSlide(i));
+            dotsContainer.appendChild(dot);
+        }
+        
+        startAutoSlide();
+        sliderContainer.addEventListener('mouseenter', pauseAutoSlide);
+        sliderContainer.addEventListener('mouseleave', startAutoSlide);
+    }
+    
+    function goToSlide(index) {
+        currentSlideIndex = index;
+        const sliderContainer = document.getElementById('sliderContainer');
+        sliderContainer.style.transform = `translateX(-${currentSlideIndex * 100}%)`;
+        
+        document.querySelectorAll('.slider-dot').forEach((dot, i) => {
+            dot.classList.toggle('active', i === currentSlideIndex);
+        });
+    }
+    
+    function nextSlide() {
+        currentSlideIndex = (currentSlideIndex + 1) % totalSlides;
+        goToSlide(currentSlideIndex);
+    }
+    
+    function startAutoSlide() {
+        if (slideInterval) clearInterval(slideInterval);
+        slideInterval = setInterval(nextSlide, 4000);
+    }
+    
+    function pauseAutoSlide() {
+        if (slideInterval) clearInterval(slideInterval);
+        slideInterval = null;
+    }
+    
     // ========== CHECK IF USER HAS SAVED ADDRESS ==========
     async function checkUserHasSavedAddress() {
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-        
-        if (!currentUser || !currentUser.uid) {
-            return false;
-        }
-        
+        if (!currentUser || !currentUser.uid) return false;
         try {
-            const addrSnapshot = await db.collection('addresses')
-                .where('userId', '==', currentUser.uid)
-                .limit(1)
-                .get();
-            
-            if (!addrSnapshot.empty) {
-                console.log("✅ User has saved address in addresses collection");
-                return true;
-            }
-            
-            const orderSnapshot = await db.collection('orders')
-                .where('customerPhone', '==', currentUser.phone)
-                .limit(1)
-                .get();
-            
-            if (!orderSnapshot.empty) {
-                console.log("✅ User has placed previous orders");
-                return true;
-            }
-            
-            console.log("❌ First time user - no saved address");
-            return false;
-        } catch(e) {
-            console.error("Error checking saved address:", e);
-            return false;
-        }
+            const addrSnapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).limit(1).get();
+            if (!addrSnapshot.empty) return true;
+            const orderSnapshot = await db.collection('orders').where('customerPhone', '==', currentUser.phone).limit(1).get();
+            return !orderSnapshot.empty;
+        } catch(e) { return false; }
     }
     
     // ========== SMART BUY NOW FUNCTION ==========
     async function buyNowWithSmartRedirect(product) {
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-        
         if (currentUser && currentUser.email) {
             const hasSavedAddress = await checkUserHasSavedAddress();
-            
             const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1 }];
             localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-            
             if (hasSavedAddress) {
-                showToastMessage(`💳 Redirecting to checkout (Saved address available)`);
+                showToastMessage(`💳 Redirecting to checkout`);
                 setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 300);
             } else {
                 showToastMessage(`💳 Proceeding to checkout with ${product.name}`);
@@ -1220,20 +1326,11 @@
     async function checkoutWithSmartRedirect() {
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
         const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-        
-        if (currentCart.length === 0) { 
-            showToastMessage('🛒 Cart is empty!', true); 
-            return; 
-        }
-        
+        if (currentCart.length === 0) { showToastMessage('🛒 Cart is empty!', true); return; }
         if (currentUser && currentUser.email) {
             const hasSavedAddress = await checkUserHasSavedAddress();
-            
-            if (hasSavedAddress) {
-                window.location.href = 'secure-checkout2.html';
-            } else {
-                window.location.href = 'secure-checkout.html';
-            }
+            if (hasSavedAddress) window.location.href = 'secure-checkout2.html';
+            else window.location.href = 'secure-checkout.html';
         } else { 
             showToastMessage('🔐 Please login to checkout');
             setTimeout(() => { window.location.href = 'profile.html'; }, 800);
@@ -1243,18 +1340,14 @@
     // ========== LOGIN MODAL FUNCTIONS ==========
     function setupModalRecaptcha() {
         return new Promise((resolve, reject) => {
-            if (modalRecaptchaVerifier) {
-                modalRecaptchaVerifier.clear();
-            }
+            if (modalRecaptchaVerifier) modalRecaptchaVerifier.clear();
             try {
                 modalRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-modal', {
                     size: 'invisible',
                     callback: () => resolve(true)
                 });
                 resolve(true);
-            } catch(e) {
-                reject(e);
-            }
+            } catch(e) { reject(e); }
         });
     }
     
@@ -1262,17 +1355,10 @@
         const phoneInput = document.getElementById('modalPhoneInput');
         const phone = phoneInput.value.trim();
         const sendBtn = document.getElementById('modalSendOtpBtn');
-        
-        if (!phone || phone.length < 10) {
-            showToastMessage('❌ Please enter valid phone number', true);
-            return;
-        }
-        
+        if (!phone || phone.length < 10) { showToastMessage('❌ Please enter valid phone number', true); return; }
         const formattedPhone = formatPhoneNumber(phone);
-        
         sendBtn.disabled = true;
         sendBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Sending...';
-        
         try {
             await setupModalRecaptcha();
             modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier);
@@ -1282,7 +1368,6 @@
             document.getElementById('modalOtpSection').classList.add('show');
             startModalTimer();
         } catch(error) {
-            console.error("Error sending OTP:", error);
             let errorMsg = 'Failed to send OTP';
             if (error.code === 'auth/invalid-phone-number') errorMsg = 'Invalid phone number';
             else if (error.code === 'auth/too-many-requests') errorMsg = 'Too many requests. Try later';
@@ -1297,17 +1382,12 @@
         let timeLeft = 60;
         const timerSpan = document.getElementById('modalTimer');
         const resendBtn = document.getElementById('modalResendBtn');
-        
         if (modalCountdownTimer) clearInterval(modalCountdownTimer);
-        
         modalCountdownTimer = setInterval(() => {
             if (timeLeft <= 0) {
                 clearInterval(modalCountdownTimer);
                 if (timerSpan) timerSpan.textContent = '';
-                if (resendBtn) {
-                    resendBtn.style.display = 'inline-block';
-                    resendBtn.disabled = false;
-                }
+                if (resendBtn) { resendBtn.style.display = 'inline-block'; resendBtn.disabled = false; }
             } else {
                 if (timerSpan) timerSpan.textContent = `Resend available in ${timeLeft}s`;
                 if (resendBtn) resendBtn.style.display = 'none';
@@ -1320,47 +1400,23 @@
         const otpInput = document.getElementById('modalOtpInput');
         const otp = otpInput.value.trim();
         const verifyBtn = document.getElementById('modalVerifyBtn');
-        
-        if (!otp || otp.length < 6) {
-            showToastMessage('❌ Please enter 6-digit OTP', true);
-            return;
-        }
-        
+        if (!otp || otp.length < 6) { showToastMessage('❌ Please enter 6-digit OTP', true); return; }
         verifyBtn.disabled = true;
         verifyBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Verifying...';
-        
         try {
             const result = await modalConfirmationResult.confirm(otp);
             const user = result.user;
-            
-            const userData = {
-                uid: user.uid,
-                phone: user.phoneNumber,
-                name: `User${user.phoneNumber.slice(-4)}`,
-                email: `${user.uid}@vedanta.com`,
-                joinDate: new Date().toISOString()
-            };
-            
+            const userData = { uid: user.uid, phone: user.phoneNumber, name: `User${user.phoneNumber.slice(-4)}`, email: `${user.uid}@vedanta.com`, joinDate: new Date().toISOString() };
             localStorage.setItem('vedantaUser', JSON.stringify(userData));
             await db.collection('users').doc(user.uid).set(userData, { merge: true });
-            
             showToastMessage(`✅ Welcome! Redirecting...`);
             closeLoginModal();
-            
             if (pendingBuyProduct) {
-                const tempCart = [{ 
-                    id: pendingBuyProduct.id, 
-                    name: pendingBuyProduct.name, 
-                    price: pendingBuyProduct.price, 
-                    quantity: 1 
-                }];
+                const tempCart = [{ id: pendingBuyProduct.id, name: pendingBuyProduct.name, price: pendingBuyProduct.price, quantity: 1 }];
                 localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-                setTimeout(() => {
-                    window.location.href = 'secure-checkout.html';
-                }, 500);
+                setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 500);
             }
         } catch(error) {
-            console.error("OTP verification error:", error);
             let errorMsg = 'Invalid OTP. Please try again.';
             if (error.code === 'auth/code-expired') errorMsg = 'OTP expired. Request new OTP.';
             else if (error.code === 'auth/invalid-verification-code') errorMsg = 'Invalid OTP code';
@@ -1375,18 +1431,14 @@
         const phoneInput = document.getElementById('modalPhoneInput');
         const phone = phoneInput.value.trim();
         const formattedPhone = formatPhoneNumber(phone);
-        
         const resendBtn = document.getElementById('modalResendBtn');
         resendBtn.disabled = true;
         resendBtn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i>';
-        
         try {
             modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier);
             showToastMessage('✅ OTP resent!');
             startModalTimer();
-        } catch(error) {
-            showToastMessage('Failed to resend OTP', true);
-        }
+        } catch(error) { showToastMessage('Failed to resend OTP', true); }
         resendBtn.disabled = false;
         resendBtn.innerHTML = 'Resend OTP';
     }
@@ -1496,8 +1548,8 @@
         }
     };
     
-    function t(key) { return translations[currentLanguage][key] || translations.english[key] || key; }
-    function getDetailedAnswer(optionKey) { return translations[currentLanguage].detailedAnswers[optionKey] || translations.english.detailedAnswers[optionKey]; }
+    function t(key) { return translations[currentLanguage]?.[key] || translations.english?.[key] || key; }
+    function getDetailedAnswer(optionKey) { return translations[currentLanguage]?.detailedAnswers?.[optionKey] || translations.english?.detailedAnswers?.[optionKey]; }
     
     function addMessage(text, isUser = false, isHtml = false) {
         const chatMessages = document.getElementById('chatMessages');
@@ -1703,7 +1755,6 @@
             });
         });
         
-        // SMART BUY NOW BUTTON
         document.querySelectorAll('.buynow-btn').forEach(btn => {
             btn.addEventListener('click', (e) => { 
                 e.stopPropagation(); 
@@ -1717,34 +1768,23 @@
     }
     
     function startLiveRealtimeSync() {
-        if (unsubscribeProducts) {
-            unsubscribeProducts();
-        }
-        
+        if (unsubscribeProducts) unsubscribeProducts();
         const query = db.collection('products').where('status', '==', 'active');
-        
         unsubscribeProducts = query.onSnapshot((snapshot) => {
             const newProducts = [];
             snapshot.forEach(doc => {
                 const data = doc.data();
                 newProducts.push({
-                    id: doc.id,
-                    name: data.name,
-                    category: data.category,
-                    price: data.price,
-                    icon: data.icon || 'fa-gem',
-                    badge: data.badge || 'New',
-                    images: data.images || []
+                    id: doc.id, name: data.name, category: data.category,
+                    price: data.price, icon: data.icon || 'fa-gem',
+                    badge: data.badge || 'New', images: data.images || []
                 });
             });
-            
             allProducts = newProducts;
             localStorage.setItem('vedantaProducts', JSON.stringify(allProducts));
             renderProducts();
             console.log(`🔥 LIVE SYNC: ${allProducts.length} products`);
-        }, (error) => {
-            console.error("Firestore listener error:", error);
-        });
+        }, (error) => console.error("Firestore listener error:", error));
     }
     
     function loadCachedProducts() {
@@ -1786,10 +1826,11 @@
     document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
     
     document.getElementById('loginModal')?.addEventListener('click', (e) => {
-        if (e.target === document.getElementById('loginModal')) {
-            closeLoginModal();
-        }
+        if (e.target === document.getElementById('loginModal')) closeLoginModal();
     });
+    
+    // Initialize slider
+    initSlider();
     
     loadCachedProducts();
     startLiveRealtimeSync();
