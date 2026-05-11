@@ -260,7 +260,63 @@
     try { return (await db.collection('addresses').add(addressToSave)).id; } catch(e) { return null; }
   }
 
-  // Function to display selected address as a card (exactly like previously used address)
+  // Show new address form for adding/changing address
+  function showNewAddressForm() {
+    const container = document.getElementById('addressSelectionArea');
+    container.innerHTML = `
+      <div class="new-address-form show" id="newAddressFormSection">
+        <div class="form-group">
+          <label>Full Name <span class="required">*</span></label>
+          <input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}">
+        </div>
+        <div class="form-group">
+          <label>Street Address <span class="required">*</span></label>
+          <input type="text" id="newStreet" placeholder="House number, building, street">
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div>
+          <div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div>
+        </div>
+        <div class="form-row">
+          <div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div>
+          <div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div>
+        </div>
+        <div class="form-group">
+          <label>Phone Number</label>
+          <input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}">
+        </div>
+        <button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
+        <div class="action-buttons-row">
+          <button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button>
+          <button class="location-btn cancel-address-btn" id="cancelNewAddressBtn" style="flex:0.5;">Cancel</button>
+        </div>
+      </div>
+    `;
+    document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
+    document.getElementById('cancelNewAddressBtn')?.addEventListener('click', () => {
+      if (savedAddressFromDb) {
+        showSavedAddressOptions();
+      } else {
+        showNewAddressForm();
+      }
+    });
+    document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
+  }
+
+  // Show saved address options (previously used address + add new option)
+  function showSavedAddressOptions() {
+    const address = savedAddressFromDb;
+    const container = document.getElementById('addressSelectionArea');
+    container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSavedAddressBtn"><div class="address-name"><i class="fas fa-star-of-life" style="color:#D4AF37;"></i> Previously Used Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.street)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddressFormBtn"><i class="fas fa-plus-circle"></i> Add New Address</button></div>`;
+    document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => {
+      useSavedAddress(address);
+    });
+    document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => {
+      showNewAddressForm();
+    });
+  }
+
+  // Display selected address card (after user selects/enters address)
   function displaySelectedAddressCard(address) {
     const container = document.getElementById('addressSelectionArea');
     container.innerHTML = `
@@ -279,36 +335,23 @@
       <button class="add-new-address-btn" id="changeAddressBtn"><i class="fas fa-edit"></i> Change Address</button>
     `;
     document.getElementById('changeAddressBtn')?.addEventListener('click', () => {
-      loadAndRenderAddressSelection();
+      // Show new address form for changing address
+      showNewAddressForm();
     });
   }
 
   async function loadAndRenderAddressSelection() {
-    const container = document.getElementById('addressSelectionArea');
     showLoading(true);
     const address = await fetchSavedAddressFromPhone();
     savedAddressFromDb = address;
     showLoading(false);
     
     if (address && !selectedAddress) {
-      // Show saved address with options
-      container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSavedAddressBtn"><div class="address-name"><i class="fas fa-star-of-life" style="color:#D4AF37;"></i> Previously Used Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.street)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddressFormBtn"><i class="fas fa-plus-circle"></i> Add New Address</button></div><div class="new-address-form" id="newAddressFormSection"><div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(address.fullName)}"></div><div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div><div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div><div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div><div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div><button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button><button class="location-btn cancel-address-btn" id="cancelNewAddressFormBtn" style="flex:0.5;">Cancel</button></div></div>`;
-      
-      document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => {
-        useSavedAddress(address);
-      });
-      document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => { 
-        document.getElementById('newAddressFormSection').classList.add('show'); 
-      });
-      document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
-      document.getElementById('cancelNewAddressFormBtn')?.addEventListener('click', () => { 
-        document.getElementById('newAddressFormSection').classList.remove('show'); 
-      });
-      document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
+      showSavedAddressOptions();
     } else if (!selectedAddress) {
-      container.innerHTML = `<div class="new-address-form show" id="newAddressFormSection"><div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}"></div><div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div><div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div><div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div><div class="form-group"><label>Phone Number</label><input type="tel" id="newPhone" value="${escapeHtml(currentUser?.phone || '')}"></div><button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="margin-top:10px;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button></div>`;
-      document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
-      document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
+      showNewAddressForm();
+    } else {
+      displaySelectedAddressCard(selectedAddress);
     }
   }
 
@@ -342,8 +385,6 @@
     
     btn.innerHTML = '✅ Saved!';
     showToast(`✅ Address saved: ${fullName}`);
-    
-    // Display the selected address as a card (exactly like previously used address)
     displaySelectedAddressCard(selectedAddress);
     
     setTimeout(() => { btn.innerHTML = originalText; btn.disabled = false; }, 1500);
