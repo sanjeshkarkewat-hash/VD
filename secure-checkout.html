@@ -619,15 +619,7 @@
         </div>
       </div>
 
-      <div class="form-section">
-        <h3><i class="fas fa-user-circle"></i> Contact Information</h3>
-        <div class="form-group">
-          <label>Full Name <span class="required">*</span></label>
-          <input type="text" id="fullName" placeholder="Enter your full name" required>
-        </div>
-        <input type="hidden" id="phone">
-        <input type="hidden" id="email">
-      </div>
+      <!-- ⭐ CONTACT INFORMATION SECTION REMOVED - No full name field here anymore ⭐ -->
 
       <div class="form-section" id="addressSection">
         <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
@@ -670,10 +662,7 @@
               <input type="text" id="manualLandmark" placeholder="Near...">
             </div>
           </div>
-          <div class="form-group">
-            <label>Phone Number</label>
-            <input type="tel" id="manualPhone" placeholder="Alternative phone number">
-          </div>
+          <!-- ⭐ PHONE NUMBER FIELD REMOVED - Using logged-in user's phone ⭐ -->
           <button class="location-btn" id="useCurrentLocationBtn">
             <i class="fas fa-location-dot"></i> 📍 Use My Current Location
           </button>
@@ -841,7 +830,6 @@
           console.log(`📍 Location obtained: ${latitude}, ${longitude}`);
           
           try {
-            // Using Google Maps Geocoding API with your key
             const response = await fetch(
               `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=en`
             );
@@ -852,7 +840,6 @@
               const result = data.results[0];
               const addressComponents = {};
               
-              // Parse address components
               result.address_components.forEach(comp => {
                 const types = comp.types;
                 if (types.includes('street_number')) addressComponents.house_number = comp.long_name;
@@ -864,7 +851,6 @@
                 if (types.includes('sublocality_level_1')) addressComponents.area = comp.long_name;
               });
               
-              // Build street address
               let streetAddress = '';
               if (addressComponents.house_number) streetAddress += addressComponents.house_number + ', ';
               if (addressComponents.road) streetAddress += addressComponents.road;
@@ -876,7 +862,6 @@
                 streetAddress = result.formatted_address.split(',')[0];
               }
               
-              // Validate pincode
               if (addressComponents.pincode && !/^\d{6}$/.test(addressComponents.pincode)) {
                 addressComponents.pincode = '';
               }
@@ -948,7 +933,6 @@
       document.getElementById('manualLandmark').value = locationData.landmark || '';
       showToast('✅ Address auto-filled from your location!');
       
-      // Highlight filled fields
       ['manualStreet', 'manualCity', 'manualState', 'manualPincode'].forEach(id => {
         const el = document.getElementById(id);
         if(el && el.value) {
@@ -1000,7 +984,6 @@
       
       if (userAddresses.length === 0 && !isAddingNewAddress) {
         document.getElementById('manualName').value = currentUser?.name || '';
-        document.getElementById('manualPhone').value = currentUser?.phone || '';
       }
     }
   }
@@ -1033,9 +1016,8 @@
     selectedAddressId = addressId;
     const address = userAddresses.find(a => a.id === addressId);
     if (address) {
-      document.getElementById('fullName').value = address.name;
-      renderSavedAddressesList();
       showToast(`✅ Using address: ${address.name}`);
+      renderSavedAddressesList();
     }
   }
   
@@ -1048,7 +1030,6 @@
     document.getElementById('manualState').value = '';
     document.getElementById('manualPincode').value = '';
     document.getElementById('manualLandmark').value = '';
-    document.getElementById('manualPhone').value = currentUser?.phone || '';
     document.getElementById('cancelManualAddressBtn').style.display = 'block';
     document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save New Address';
   }
@@ -1066,7 +1047,6 @@
       document.getElementById('manualState').value = '';
       document.getElementById('manualPincode').value = '';
       document.getElementById('manualLandmark').value = '';
-      document.getElementById('manualPhone').value = currentUser?.phone || '';
     }
   }
   
@@ -1077,7 +1057,8 @@
     const state = document.getElementById('manualState').value.trim();
     const pincode = document.getElementById('manualPincode').value.trim();
     const landmark = document.getElementById('manualLandmark').value.trim();
-    const phone = document.getElementById('manualPhone').value.trim();
+    // ⭐ Phone from logged in user only
+    const phone = currentUser.phone;
     
     if (!name || !street || !city || !state || !pincode) {
       showToast('❌ Please fill all required fields', true);
@@ -1099,7 +1080,7 @@
       state: state,
       pincode: pincode,
       landmark: landmark || '',
-      phone: phone || currentUser.phone,
+      phone: phone,
       isDefault: userAddresses.length === 0,
       createdAt: new Date().toISOString()
     };
@@ -1137,11 +1118,9 @@
       await loadUserAddresses();
       if (selectedAddressId === addressId) {
         selectedAddressId = null;
-        document.getElementById('fullName').value = currentUser?.name || '';
       }
       renderUI();
       if (userAddresses.length === 0) {
-        document.getElementById('fullName').value = currentUser?.name || '';
         document.getElementById('manualName').value = currentUser?.name || '';
       }
       showToast('✅ Address deleted');
@@ -1173,10 +1152,8 @@
     const state = document.getElementById('manualState').value.trim();
     const pincode = document.getElementById('manualPincode').value.trim();
     const landmark = document.getElementById('manualLandmark').value.trim();
-    const phone = document.getElementById('manualPhone').value.trim();
-    const fullName = name || document.getElementById('fullName').value.trim();
     
-    if (!fullName || !street || !city || !state || !pincode) {
+    if (!name || !street || !city || !state || !pincode) {
       return null;
     }
     
@@ -1186,8 +1163,8 @@
     }
     
     return {
-      fullName: fullName,
-      phone: phone || currentUser.phone,
+      fullName: name,
+      phone: currentUser.phone,
       email: currentUser.email,
       address: street,
       city: city,
@@ -1473,11 +1450,7 @@
     
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     document.getElementById('displayEmail').innerText = currentUser.email || '';
-    document.getElementById('phone').value = currentUser.phone || '';
-    document.getElementById('email').value = currentUser.email || '';
-    document.getElementById('fullName').value = currentUser.name || '';
     document.getElementById('manualName').value = currentUser.name || '';
-    document.getElementById('manualPhone').value = currentUser.phone || '';
     
     await loadUserAddresses();
     renderUI();
