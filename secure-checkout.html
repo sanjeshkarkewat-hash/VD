@@ -10,7 +10,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <!-- Google Maps API with YOUR KEY for location services -->
+  <!-- Google Maps API with YOUR KEY - Fully working location -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -168,6 +168,9 @@
       cursor: pointer;
       font-size: 12px;
     }
+    .delete-address-btn:hover {
+      background: rgba(244,67,54,0.4);
+    }
     .add-new-address-trigger {
       width: 100%;
       background: rgba(212,175,55,0.15);
@@ -183,6 +186,7 @@
       font-size: 13px;
       margin-top: 8px;
     }
+    .add-new-address-trigger:active { transform: scale(0.98); }
     
     /* Manual Address Form */
     .manual-address-form {
@@ -212,6 +216,10 @@
       font-size: 13px;
     }
     .location-btn:active { transform: scale(0.98); }
+    .location-btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
     
     .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
     .payment-option {
@@ -547,14 +555,14 @@
       margin-top: 12px;
     }
     .save-address-btn {
-      background: #4CAF50;
-      color: white;
-      border: none;
+      background: #4CAF50 !important;
+      color: white !important;
+      border: none !important;
     }
     .cancel-address-btn {
-      background: #F44336;
-      color: white;
-      border: none;
+      background: #F44336 !important;
+      color: white !important;
+      border: none !important;
     }
     
     .location-loading {
@@ -667,7 +675,7 @@
             <input type="tel" id="manualPhone" placeholder="Alternative phone number">
           </div>
           <button class="location-btn" id="useCurrentLocationBtn">
-            <i class="fas fa-location-dot"></i> Use My Current Location
+            <i class="fas fa-location-dot"></i> 📍 Use My Current Location
           </button>
           <div class="action-buttons-row">
             <button class="location-btn save-address-btn" id="saveManualAddressBtn" style="flex:1;">
@@ -868,6 +876,11 @@
                 streetAddress = result.formatted_address.split(',')[0];
               }
               
+              // Validate pincode
+              if (addressComponents.pincode && !/^\d{6}$/.test(addressComponents.pincode)) {
+                addressComponents.pincode = '';
+              }
+              
               resolve({
                 street: streetAddress.trim(),
                 city: addressComponents.city || '',
@@ -878,6 +891,9 @@
               });
             } else {
               console.log("Geocoding status:", data.status);
+              if (data.status === 'REQUEST_DENIED') {
+                showToast('❌ API key error. Please check Google Cloud Console settings.', true);
+              }
               resolve({
                 street: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
                 city: '',
@@ -889,14 +905,7 @@
             }
           } catch (error) {
             console.error("Google API Error:", error);
-            resolve({
-              street: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-              city: '',
-              state: '',
-              pincode: '',
-              landmark: '',
-              fullAddress: `Location: ${latitude}, ${longitude}`
-            });
+            resolve(null);
           }
         },
         (error) => {
@@ -938,6 +947,15 @@
       document.getElementById('manualPincode').value = locationData.pincode || '';
       document.getElementById('manualLandmark').value = locationData.landmark || '';
       showToast('✅ Address auto-filled from your location!');
+      
+      // Highlight filled fields
+      ['manualStreet', 'manualCity', 'manualState', 'manualPincode'].forEach(id => {
+        const el = document.getElementById(id);
+        if(el && el.value) {
+          el.style.borderColor = '#4CAF50';
+          setTimeout(() => { if(el) el.style.borderColor = ''; }, 1500);
+        }
+      });
     } else {
       showToast('❌ Could not get location, please fill manually', true);
     }
@@ -1003,7 +1021,8 @@
     `).join('');
     
     document.querySelectorAll('.saved-address-card').forEach(card => {
-      card.addEventListener('click', () => {
+      card.addEventListener('click', (e) => {
+        if (e.target.classList.contains('delete-address-btn')) return;
         const id = card.getAttribute('data-id');
         selectAddress(id);
       });
@@ -1495,7 +1514,8 @@
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => { hideLocationModal(); showToast('📍 Enable location in browser settings', true); });
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
     
-    console.log('✅ Page initialized with Google Maps API key for location');
+    console.log('✅ Page initialized with Google Maps API key for location services');
+    console.log('📍 API Key:', GOOGLE_MAPS_API_KEY);
   }
   
   initialize();
