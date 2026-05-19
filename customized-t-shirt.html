@@ -280,8 +280,9 @@
             border: none;
             color: white;
             font-size: 14px;
+            margin-top: 10px;
         }
-        .print-option {
+        .print-options {
             display: flex;
             gap: 10px;
             margin-top: 8px;
@@ -416,18 +417,19 @@
                 
                 <div class="tool-group">
                     <label>📝 ADD TEXT</label>
-                    <input type="text" id="textInput" placeholder="Enter text...">
+                    <input type="text" id="textInput" placeholder="Enter your text...">
                     <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🎨 TEXT COLOR</label>
+                    <label>🎨 TEXT COLOR (Click any color)</label>
                     <div class="color-grid" id="colorPalette"></div>
                     <div class="toggle-colors" id="toggleColors">+ Show More Colors (1000+)</div>
                     <div class="more-colors" id="moreColors"></div>
                     <div style="margin-top: 8px;">
                         <input type="color" id="customColorPicker" value="#D4AF37" style="width: 100%; height: 35px; border-radius: 10px;">
                     </div>
+                    <div class="hint">💡 Click any color to apply to selected text</div>
                 </div>
                 
                 <div class="tool-group">
@@ -436,17 +438,17 @@
                         <input type="range" id="glowSlider" min="0" max="20" step="1" value="0">
                         <span class="slider-value" id="glowValue">0px</span>
                     </div>
-                    <div class="hint">💡 Slide right to add golden glow to text</div>
+                    <div class="hint">💡 Slide right to add glow effect to text</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>⭕ CURVE TEXT (Make text circular/bend)</label>
+                    <label>⭕ CURVE TEXT (Bend like circle)</label>
                     <div class="slider-row">
                         <input type="range" id="curveSlider" min="-90" max="90" step="5" value="0">
                         <span class="slider-value" id="curveValue">0°</span>
                     </div>
                     <button class="btn-icon" id="applyCurveBtn">Apply Curve</button>
-                    <div class="hint">💡 Positive = Curve down | Negative = Curve up | Text bends like a circle!</div>
+                    <div class="hint">💡 Positive = Curve down | Negative = Curve up | Text bends like a circle</div>
                 </div>
                 
                 <div class="tool-group">
@@ -463,6 +465,7 @@
                         <option value="Lobster">Lobster</option>
                         <option value="Bebas Neue">Bebas Neue</option>
                     </select>
+                    <div class="hint">💡 Font applies to selected text instantly</div>
                 </div>
                 
                 <div class="tool-group">
@@ -471,6 +474,7 @@
                         <input type="range" id="fontSizeSlider" min="12" max="120" step="1" value="36">
                         <span class="slider-value" id="fontSizeValue">36px</span>
                     </div>
+                    <div class="hint">💡 Slide to change text size</div>
                 </div>
                 
                 <div class="tool-group">
@@ -482,21 +486,24 @@
                         <button class="btn-icon" id="flipHBtn"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
                         <button class="btn-icon" id="flipVBtn"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
                     </div>
+                    <div class="hint">💡 Click buttons to style selected text</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🖼️ UPLOAD DESIGN</label>
+                    <label>🖼️ UPLOAD YOUR DESIGN</label>
                     <div class="upload-area" id="uploadArea">
                         <i class="fas fa-cloud-upload-alt"></i>
                         <p style="font-size:11px;">Click to upload PNG/JPG</p>
                         <input type="file" id="imageUpload" accept="image/*" style="display:none">
                     </div>
+                    <div class="hint">💡 Upload your logo or design image</div>
                 </div>
                 
                 <div class="tool-group">
                     <label>🔧 MANAGE</label>
-                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
+                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button>
                     <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear All</button>
+                    <div class="hint">💡 Select an element first, then click Delete</div>
                 </div>
             </div>
             
@@ -515,36 +522,53 @@
                         <div class="tshirt-color" data-color="#6F4E37"><div class="preview" style="background:#6F4E37;"></div>Coffee</div>
                         <div class="tshirt-color" data-color="#708090"><div class="preview" style="background:#708090;"></div>Slate</div>
                     </div>
+                    <div class="hint">💡 Click any color - full t-shirt changes instantly!</div>
                 </div>
                 
                 <div class="tool-group">
                     <label>📏 SIZE</label>
                     <select id="sizeSelect">
-                        <option selected>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option>
+                        <option value="">-- Select Size --</option>
+                        <option value="S">S</option>
+                        <option value="M">M</option>
+                        <option value="L">L</option>
+                        <option value="XL">XL</option>
+                        <option value="XXL">XXL</option>
+                        <option value="3XL">3XL</option>
                     </select>
+                    <div class="hint">💡 Please select your size</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>⚖️ GSM</label>
+                    <label>⚖️ GSM (Fabric Thickness)</label>
                     <select id="gsmSelect">
-                        <option>180 GSM</option><option selected>220 GSM</option><option>260 GSM</option><option>300 GSM</option>
+                        <option value="">-- Select GSM --</option>
+                        <option value="180 GSM">180 GSM (Light)</option>
+                        <option value="220 GSM">220 GSM (Standard)</option>
+                        <option value="260 GSM">260 GSM (Heavy)</option>
+                        <option value="300 GSM">300 GSM (Premium)</option>
                     </select>
+                    <div class="hint">💡 Higher GSM = thicker fabric</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🧵 FABRIC</label>
+                    <label>🧵 FABRIC TYPE</label>
                     <select id="fabricSelect">
-                        <option>100% Cotton</option><option>Cotton Blend</option><option>Polyester</option>
+                        <option value="">-- Select Fabric --</option>
+                        <option value="100% Cotton">100% Cotton</option>
+                        <option value="Cotton Blend">Cotton Blend</option>
+                        <option value="Polyester">Polyester</option>
                     </select>
+                    <div class="hint">💡 Choose your preferred fabric</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🖨️ PRINT OPTION</label>
-                    <div class="print-option" id="printOption">
-                        <div class="print-opt active" data-print="standard">🖼️ With Background</div>
+                    <label>🖨️ HOW TO PRINT YOUR DESIGN?</label>
+                    <div class="print-options" id="printOptions">
+                        <div class="print-opt" data-print="standard">🖼️ With Background</div>
                         <div class="print-opt" data-print="transparent">✨ Transparent (No BG)</div>
                     </div>
-                    <div class="hint">💡 Choose how your design will be printed</div>
+                    <div class="hint">💡 Choose how your design will be printed on t-shirt</div>
                 </div>
             </div>
         </div>
@@ -554,17 +578,18 @@
                 <canvas id="tshirtCanvas" width="550" height="600"></canvas>
             </div>
             <p class="instruction-text"><i class="fas fa-mouse-pointer"></i> Click to select | Drag to move | Double-click text to edit</p>
+            <p class="instruction-text" style="color:#D4AF37;">💡 First select a t-shirt style from top, then add your design!</p>
         </div>
         
         <div class="order-panel">
             <h3 style="color:#D4AF37; margin-bottom:12px;"><i class="fas fa-shopping-bag"></i> ORDER SUMMARY</h3>
-            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Full Sleeve</span></div>
-            <div class="order-detail"><span>Size:</span><span id="summarySize">S</span></div>
-            <div class="order-detail"><span>GSM:</span><span id="summaryGSM">220 GSM</span></div>
-            <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">100% Cotton</span></div>
-            <div class="order-detail"><span>Print Type:</span><span id="summaryPrint">With Background</span></div>
+            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Not selected</span></div>
+            <div class="order-detail"><span>Size:</span><span id="summarySize">Not selected</span></div>
+            <div class="order-detail"><span>GSM:</span><span id="summaryGSM">Not selected</span></div>
+            <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">Not selected</span></div>
+            <div class="order-detail"><span>Print Type:</span><span id="summaryPrint">Not selected</span></div>
             <div class="order-detail"><span>Design:</span><span id="summaryElements">None</span></div>
-            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,699</span></div>
+            <div class="order-total"><span>Total:</span><span id="totalPrice">₹0</span></div>
             <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
         </div>
     </div>
@@ -604,11 +629,11 @@
         { id: 'acidwash', name: 'Acid Wash', img: 'acid wash T shirt.jpeg', price: 1799 }
     ];
     
-    let currentStyle = tshirtStyles[0];
-    let currentSize = 'S';
-    let currentGSM = '220 GSM';
-    let currentFabric = '100% Cotton';
-    let currentPrint = 'standard';
+    let currentStyle = null;
+    let currentSize = '';
+    let currentGSM = '';
+    let currentFabric = '';
+    let currentPrint = '';
     let fabricCanvas = null;
     let pendingOrder = null;
 
@@ -641,7 +666,7 @@
             }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
         };
         img.onerror = () => {
-            fabricCanvas.setBackgroundColor('#1a1a2e', () => {
+            fabricCanvas.setBackgroundColor('#2a2a3e', () => {
                 if (keepDesigns && existingObjects.length > 0) {
                     existingObjects.forEach(obj => fabricCanvas.add(obj));
                 }
@@ -659,7 +684,8 @@
         fabricCanvas.on('object:modified', () => updateSummaryElements());
         fabricCanvas.on('object:added', () => updateSummaryElements());
         fabricCanvas.on('object:removed', () => updateSummaryElements());
-        loadTshirtImage(currentStyle, false);
+        // No default style - user must select
+        fabricCanvas.setBackgroundColor('#2a2a3e', fabricCanvas.renderAll.bind(fabricCanvas));
     }
     
     function addText() {
@@ -675,7 +701,7 @@
         fabricCanvas.add(text);
         fabricCanvas.setActiveObject(text);
         fabricCanvas.renderAll();
-        showToast('✓ Text added!');
+        showToast('✓ Text added! Select it to apply styles');
         updateSummaryElements();
     }
     
@@ -702,7 +728,7 @@
         const angle = parseInt(document.getElementById('curveSlider').value);
         active.set('skewX', angle / 10);
         fabricCanvas.renderAll();
-        showToast(`✓ Text curved! Text bends like a circle`);
+        showToast(`✓ Text curved! (${angle}°)`);
     }
     
     function applyTextColor(color) {
@@ -710,9 +736,9 @@
         if (active && (active.type === 'i-text' || active.type === 'text')) {
             active.set('fill', color);
             fabricCanvas.renderAll();
-            showToast('✓ Color applied!');
+            showToast('✓ Color applied to selected text!');
         } else {
-            showToast('Select a text first', true);
+            showToast('⚠️ First select a text element', true);
         }
     }
     
@@ -723,14 +749,14 @@
     
     function flipHorizontal() {
         const active = fabricCanvas.getActiveObject();
-        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('✓ Flipped'); }
-        else showToast('Select element first', true);
+        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('✓ Flipped Horizontal'); }
+        else showToast('Select an element first', true);
     }
     
     function flipVertical() {
         const active = fabricCanvas.getActiveObject();
-        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('✓ Flipped'); }
-        else showToast('Select element first', true);
+        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('✓ Flipped Vertical'); }
+        else showToast('Select an element first', true);
     }
     
     function applyTextStyle(style) {
@@ -740,7 +766,7 @@
             if (style === 'italic') active.set('fontStyle', active.fontStyle === 'italic' ? 'normal' : 'italic');
             if (style === 'underline') active.set('underline', !active.underline);
             fabricCanvas.renderAll();
-        } else showToast('Select text first', true);
+        } else showToast('Select a text first', true);
     }
     
     function addImage(file) {
@@ -752,7 +778,7 @@
                 fabricCanvas.add(img);
                 fabricCanvas.setActiveObject(img);
                 fabricCanvas.renderAll();
-                showToast('✓ Image added!');
+                showToast('✓ Image added! Drag to position');
                 updateSummaryElements();
             });
         };
@@ -765,13 +791,22 @@
     }
     
     function updateSummary() {
-        document.getElementById('summaryStyle').innerText = currentStyle.name;
-        document.getElementById('summarySize').innerText = currentSize;
-        document.getElementById('summaryGSM').innerText = currentGSM;
-        document.getElementById('summaryFabric').innerText = currentFabric;
-        document.getElementById('summaryPrint').innerText = currentPrint === 'standard' ? 'With Background' : 'Transparent (No BG)';
-        document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`;
+        document.getElementById('summaryStyle').innerHTML = currentStyle ? currentStyle.name : 'Not selected';
+        document.getElementById('summarySize').innerHTML = currentSize || 'Not selected';
+        document.getElementById('summaryGSM').innerHTML = currentGSM || 'Not selected';
+        document.getElementById('summaryFabric').innerHTML = currentFabric || 'Not selected';
+        document.getElementById('summaryPrint').innerHTML = currentPrint === 'standard' ? 'With Background' : (currentPrint === 'transparent' ? 'Transparent (No BG)' : 'Not selected');
+        document.getElementById('totalPrice').innerHTML = currentStyle ? `₹${currentStyle.price}` : '₹0';
         updateSummaryElements();
+    }
+    
+    function validateSelections() {
+        if (!currentStyle) { showToast('❌ Please select a T-Shirt Style from top!', true); return false; }
+        if (!currentSize) { showToast('❌ Please select Size!', true); return false; }
+        if (!currentGSM) { showToast('❌ Please select GSM!', true); return false; }
+        if (!currentFabric) { showToast('❌ Please select Fabric Type!', true); return false; }
+        if (!currentPrint) { showToast('❌ Please select Print Type!', true); return false; }
+        return true;
     }
     
     async function saveOrder() {
@@ -789,13 +824,14 @@
     }
     
     async function buyNow() {
+        if (!validateSelections()) return;
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) { openLoginModal(); pendingOrder = 'buy'; return; }
         showToast('Processing order...');
         const id = await saveOrder();
         if (id) {
             showToast('✓ Order placed successfully!');
-        } else { showToast('Failed', true); }
+        } else { showToast('Failed to place order', true); }
     }
     
     function showToast(msg, isErr = false) {
@@ -809,7 +845,7 @@
     function renderStyles() {
         const grid = document.getElementById('styleGrid');
         grid.innerHTML = tshirtStyles.map(style => `
-            <div class="style-card ${style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
+            <div class="style-card ${currentStyle && style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
                 <img class="style-img" src="${style.img}" alt="${style.name}" onerror="this.src='https://placehold.co/150x150/1a1a2e/D4AF37?text=${style.name}'">
                 <div class="style-name">${style.name}</div>
                 <div class="style-price">₹${style.price}</div>
@@ -824,7 +860,7 @@
                     renderStyles();
                     loadTshirtImage(currentStyle, true);
                     updateSummary();
-                    showToast(`✓ ${currentStyle.name} selected!`);
+                    showToast(`✓ ${currentStyle.name} selected! Now customize your design`);
                 }
             });
         });
@@ -871,7 +907,7 @@
             opt.classList.add('active');
             currentPrint = opt.dataset.print;
             updateSummary();
-            showToast(`Print option: ${opt.dataset.print === 'standard' ? 'With Background' : 'Transparent (No BG)'}`);
+            showToast(`Print option: ${opt.dataset.print === 'standard' ? 'With Background' : 'Transparent (No BG)'} selected`);
         });
     });
     
@@ -885,13 +921,13 @@
     document.getElementById('deleteBtn')?.addEventListener('click', () => {
         const obj = fabricCanvas.getActiveObject();
         if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('✓ Deleted'); }
-        else showToast('Select element first', true);
+        else showToast('Select an element first', true);
     });
     document.getElementById('clearBtn')?.addEventListener('click', () => {
         fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
         fabricCanvas.renderAll();
         updateSummaryElements();
-        showToast('✓ All cleared');
+        showToast('✓ All designs cleared');
     });
     document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
     
@@ -939,7 +975,6 @@
     initCanvas();
     renderStyles();
     updateSummary();
-    document.querySelector('#tshirtColorPalette .tshirt-color')?.classList.add('active');
 </script>
 </body>
 </html>
