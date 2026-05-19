@@ -736,7 +736,7 @@
     let currentFabric = null;
     let currentPrintMethod = null;
     let fabricCanvas = null;
-    let pendingBuyAfterLogin = false; // Flag to trigger buy after login
+    let pendingBuyAfterLogin = false;
     let imageCache = {};
     let glowActive = false;
     let roundedActive = false;
@@ -1042,6 +1042,17 @@
         catch(e) { console.error(e); return null; }
     }
     
+    // Check if user has saved address in Firestore
+    async function checkUserHasAddress(userId) {
+        try {
+            const addressDoc = await db.collection('user_addresses').doc(userId).get();
+            return addressDoc.exists && addressDoc.data() && addressDoc.data().fullAddress;
+        } catch(e) {
+            console.error("Address check error:", e);
+            return false;
+        }
+    }
+    
     async function addToCart() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) { showToast('Login first', true); openLoginModal(); return; }
@@ -1072,10 +1083,20 @@
             return;
         }
         showToast('Processing order...');
-        const id = await saveOrder('buy');
-        if (id) {
-            localStorage.setItem('pendingCheckoutOrder', JSON.stringify({ orderId: id, style: currentStyle.name, price: currentStyle.price }));
-            window.location.href = 'secure-checkout.html';
+        const orderId = await saveOrder('buy');
+        if (orderId) {
+            localStorage.setItem('pendingCheckoutOrder', JSON.stringify({ orderId: orderId, style: currentStyle.name, price: currentStyle.price }));
+            
+            // Check if user has saved address
+            const hasAddress = await checkUserHasAddress(user.uid);
+            
+            if (hasAddress) {
+                // User has address - go to secure-checkout2.html
+                window.location.href = 'secure-checkout2.html';
+            } else {
+                // First time user - go to secure-checkout.html
+                window.location.href = 'secure-checkout.html';
+            }
         } else { 
             showToast('Failed to place order. Please try again.', true); 
         }
@@ -1197,12 +1218,12 @@
     document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
         const otp = document.getElementById('otpInput').value;
         if (otp === '123456') {
-            const userData = { uid: Date.now().toString(), phone: document.getElementById('loginPhone').value, name: 'Customer' };
+            const userId = Date.now().toString();
+            const userData = { uid: userId, phone: document.getElementById('loginPhone').value, name: 'Customer' };
             localStorage.setItem('vedantaUser', JSON.stringify(userData));
             closeLoginModal();
             showToast('✓ Login successful!');
             
-            // After successful login, if buy was pending, execute buy now
             if (pendingBuyAfterLogin) {
                 pendingBuyAfterLogin = false;
                 setTimeout(() => {
