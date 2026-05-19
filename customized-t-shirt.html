@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>VEDANTA | Professional T-Shirt Designer</title>
+    <title>VEDANTA | Custom T-Shirt Designer</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Pacifico&family=Oswald:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Lobster&family=Bebas+Neue&family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Pacifico&family=Oswald:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&family=Comfortaa&family=Orbitron&family=Press+Start+2P&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
@@ -90,6 +90,7 @@
             border-color: #D4AF37;
             background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
             box-shadow: 0 0 25px rgba(212,175,55,0.3);
+            transform: translateY(-3px);
         }
         .style-img {
             width: 100%;
@@ -98,36 +99,37 @@
             border-radius: 20px;
             margin-bottom: 12px;
             background: #1a1a2e;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
         .style-name { font-weight: 700; font-size: 15px; margin-bottom: 5px; }
         .style-price { color: #D4AF37; font-size: 14px; font-weight: 700; }
 
-        /* Two column layout for tools */
-        .tools-wrapper {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 25px;
-        }
-        
         .designer-grid {
             display: grid;
-            grid-template-columns: 380px 1fr 300px;
+            grid-template-columns: 360px 1fr 280px;
             gap: 25px;
         }
         @media (max-width: 1200px) {
             .designer-grid { grid-template-columns: 1fr; gap: 25px; }
-            .tools-wrapper { grid-template-columns: 1fr; }
         }
 
-        /* Tools Panels */
-        .tools-panel {
+        /* Two separate boxes for Design Tools and Material Tools */
+        .design-tools-box {
+            background: rgba(15,15,22,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 22px;
+            border: 1px solid rgba(212,175,55,0.25);
+            margin-bottom: 20px;
+        }
+        .material-tools-box {
             background: rgba(15,15,22,0.92);
             backdrop-filter: blur(20px);
             border-radius: 28px;
             padding: 22px;
             border: 1px solid rgba(212,175,55,0.25);
         }
-        .panel-title {
+        .box-title {
             color: #D4AF37;
             font-size: 18px;
             font-weight: 700;
@@ -176,21 +178,6 @@
             transition: 0.2s;
         }
         .color-swatch.active { border-color: white; transform: scale(1.1); }
-        
-        .gradient-row {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-        }
-        .gradient-preset {
-            padding: 6px 12px;
-            background: rgba(212,175,55,0.2);
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 11px;
-            transition: 0.2s;
-        }
-        .gradient-preset:hover { background: #D4AF37; color: #000; }
         
         .btn-icon {
             background: rgba(212,175,55,0.15);
@@ -306,20 +293,25 @@
             color: #888;
             margin-top: 12px;
         }
-
+        
+        .gradient-preset {
+            display: inline-block;
+            padding: 6px 12px;
+            background: rgba(212,175,55,0.2);
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 11px;
+            margin: 3px;
+        }
         .font-preview {
-            font-size: 14px;
-            margin-top: 5px;
-            padding: 5px;
+            font-size: 13px;
+            margin-top: 8px;
+            padding: 6px;
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
+            text-align: center;
         }
-        
-        .curve-slider {
-            width: 100%;
-            margin-top: 8px;
-        }
-        
+
         .modal {
             display: none;
             position: fixed;
@@ -368,26 +360,52 @@
             cursor: pointer;
             color: white;
         }
+        
+        .cors-warning {
+            background: rgba(255,100,0,0.2);
+            border: 1px solid #FF6600;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .two-col-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .slider-value {
+            display: inline-block;
+            margin-left: 10px;
+            font-size: 12px;
+            color: #D4AF37;
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo">VEDANTA</div>
-    <div class="tagline">✦ PROFESSIONAL CUSTOM T-SHIRT STUDIO ✦</div>
+    <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
 </div>
 
 <div class="designer-container">
+    <div class="cors-warning" id="corsWarning">
+        ⚠️ <strong>Note:</strong> Images not showing? Run with Live Server or use: <code>python -m http.server 8000</code>
+    </div>
+    
     <div class="style-section">
         <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
     <div class="designer-grid">
-        <div class="tools-wrapper">
-            <!-- DESIGN TOOLS Panel -->
-            <div class="tools-panel">
-                <div class="panel-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
+        <div>
+            <!-- DESIGN TOOLS BOX -->
+            <div class="design-tools-box">
+                <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
                 
                 <div class="tool-group">
                     <label>📝 Add Text</label>
@@ -408,17 +426,17 @@
                         <div class="color-swatch" style="background:#FFD700;" data-color="#FFD700"></div>
                         <div class="color-swatch" style="background:#9400D3;" data-color="#9400D3"></div>
                     </div>
-                    <div class="gradient-row">
+                    <div>
                         <span class="gradient-preset" data-gradient="linear-gradient(135deg, #FF0080, #FF8C00)">🌸 Pink-Orange</span>
                         <span class="gradient-preset" data-gradient="linear-gradient(135deg, #00B4DB, #0083B0)">💙 Blue</span>
                         <span class="gradient-preset" data-gradient="linear-gradient(135deg, #FFD194, #70E1F5)">✨ Gold-Sky</span>
                         <span class="gradient-preset" data-gradient="linear-gradient(135deg, #D4145A, #3A1C71)">💜 Purple-Pink</span>
                     </div>
-                    <button class="btn-icon" id="applyColorBtn">Apply to Selected</button>
+                    <button class="btn-icon" id="applyColorBtn">Apply Color/Gradient</button>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🔤 Font Family</label>
+                    <label>🔤 Font Family (15+ Fonts)</label>
                     <select id="fontSelect">
                         <option value="Arial">Arial</option>
                         <option value="Times New Roman">Times New Roman</option>
@@ -434,48 +452,72 @@
                         <option value="Lobster">Lobster</option>
                         <option value="Bebas Neue">Bebas Neue</option>
                         <option value="Great Vibes">Great Vibes</option>
+                        <option value="Caveat">Caveat</option>
+                        <option value="Orbitron">Orbitron</option>
                     </select>
-                    <div class="font-preview" id="fontPreview">Aa Bb Cc</div>
+                    <div class="font-preview" id="fontPreview">Aa Bb Cc 123</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>📏 Text Size & Opacity</label>
+                    <label>📏 Size & Opacity</label>
                     <input type="range" id="fontSizeSlider" min="12" max="120" step="1" value="36">
-                    <span id="fontSizeValue">36px</span>
+                    <span class="slider-value" id="fontSizeValue">36px</span>
                     <input type="range" id="opacitySlider" min="0" max="100" step="1" value="100" style="margin-top:8px;">
-                    <span id="opacityValue">100%</span>
-                    <button class="btn-icon" id="applyFontBtn">Apply Size/Font</button>
-                </div>
-                
-                <div class="tool-group">
-                    <label>🔄 Text Transform</label>
-                    <button class="btn-icon" id="flipHorizontalBtn"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
-                    <button class="btn-icon" id="flipVerticalBtn"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
-                    <button class="btn-icon" id="boldBtn"><i class="fas fa-bold"></i> Bold</button>
-                    <button class="btn-icon" id="italicBtn"><i class="fas fa-italic"></i> Italic</button>
-                    <button class="btn-icon" id="underlineBtn"><i class="fas fa-underline"></i> Underline</button>
+                    <span class="slider-value" id="opacityValue">100%</span>
+                    <button class="btn-icon" id="applyFontBtn">Apply Size/Opacity</button>
                 </div>
                 
                 <div class="tool-group">
                     <label>⭕ Curve Text (Round Effect)</label>
                     <input type="range" id="curveSlider" min="-180" max="180" step="5" value="0">
-                    <span id="curveValue">0°</span>
+                    <span class="slider-value" id="curveValue">0°</span>
                     <button class="btn-icon" id="applyCurveBtn">Apply Curve</button>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔄 Text Transform</label>
+                    <div class="two-col-btns">
+                        <button class="btn-icon" id="flipHorizontalBtn"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
+                        <button class="btn-icon" id="flipVerticalBtn"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                        <button class="btn-icon" id="boldBtn"><i class="fas fa-bold"></i> Bold</button>
+                        <button class="btn-icon" id="italicBtn"><i class="fas fa-italic"></i> Italic</button>
+                        <button class="btn-icon" id="underlineBtn"><i class="fas fa-underline"></i> Underline</button>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>✨ Glow/Shadow Effect</label>
+                    <input type="range" id="glowSlider" min="0" max="20" step="1" value="0">
+                    <span class="slider-value" id="glowValue">0px</span>
+                    <button class="btn-icon" id="applyGlowBtn">Apply Glow</button>
+                </div>
+                
+                <div class="tool-group">
+                    <label>📏 Letter Spacing</label>
+                    <input type="range" id="letterSpacingSlider" min="-5" max="20" step="1" value="0">
+                    <span class="slider-value" id="letterSpacingValue">0px</span>
+                    <button class="btn-icon" id="applyLetterSpacingBtn">Apply Spacing</button>
                 </div>
                 
                 <div class="tool-group">
                     <label>🖼️ Upload Your Design</label>
                     <div class="upload-area" id="uploadArea">
                         <i class="fas fa-cloud-upload-alt" style="font-size:24px;"></i>
-                        <p>Click to upload PNG/JPG/SVG</p>
+                        <p>Click to upload PNG/JPG</p>
                         <input type="file" id="imageUpload" accept="image/*" style="display:none">
                     </div>
                 </div>
+                
+                <div class="tool-group">
+                    <label>🔧 Manage</label>
+                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button>
+                    <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear All</button>
+                </div>
             </div>
             
-            <!-- MATERIAL TOOLS Panel -->
-            <div class="tools-panel">
-                <div class="panel-title"><i class="fas fa-boxes"></i> MATERIAL & SIZE</div>
+            <!-- MATERIAL TOOLS BOX -->
+            <div class="material-tools-box">
+                <div class="box-title"><i class="fas fa-boxes"></i> MATERIAL & SIZE</div>
                 
                 <div class="tool-group">
                     <label>📏 Size</label>
@@ -503,26 +545,6 @@
                         <option>Linen</option>
                         <option>Organic Cotton</option>
                     </select>
-                </div>
-                
-                <div class="tool-group">
-                    <label>🎨 T-Shirt Color (Optional)</label>
-                    <div class="color-row" id="tshirtColorOptions">
-                        <div class="color-swatch" style="background:#FFFFFF;" data-color="#FFFFFF"></div>
-                        <div class="color-swatch active" style="background:#000000;" data-color="#000000"></div>
-                        <div class="color-swatch" style="background:#D4AF37;" data-color="#D4AF37"></div>
-                        <div class="color-swatch" style="background:#FF4500;" data-color="#FF4500"></div>
-                        <div class="color-swatch" style="background:#1E90FF;" data-color="#1E90FF"></div>
-                        <div class="color-swatch" style="background:#32CD32;" data-color="#32CD32"></div>
-                    </div>
-                </div>
-                
-                <div class="tool-group">
-                    <label>🔧 Manage Designs</label>
-                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button>
-                    <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear All</button>
-                    <button class="btn-icon" id="bringForwardBtn"><i class="fas fa-layer-group"></i> Bring Forward</button>
-                    <button class="btn-icon" id="sendBackwardBtn"><i class="fas fa-layer-group"></i> Send Backward</button>
                 </div>
             </div>
         </div>
@@ -595,19 +617,56 @@
     let currentFabric = '100% Cotton';
     let fabricCanvas = null;
     let pendingOrder = null;
+    let imageCache = {};
 
-    function loadTshirtBackground(style) {
-        if (!fabricCanvas) return;
+    function loadImageAsDataURL(src, callback) {
+        if (imageCache[src]) { callback(imageCache[src]); return; }
         const img = new Image();
-        img.onload = () => {
-            const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
-            fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
-                scaleX: scale, scaleY: scale, originX: 'center', originY: 'center',
-                left: fabricCanvas.width / 2, top: fabricCanvas.height / 2
-            });
+        img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            imageCache[src] = dataURL;
+            callback(dataURL);
         };
-        img.onerror = () => { fabricCanvas.setBackgroundColor('#1a1a2e', fabricCanvas.renderAll.bind(fabricCanvas)); };
-        img.src = style.img;
+        img.onerror = function() { callback(null); };
+        img.src = src;
+    }
+
+    function loadTshirtImage(style, keepDesigns = true) {
+        if (!fabricCanvas) return;
+        let existingObjects = [];
+        if (keepDesigns) {
+            existingObjects = fabricCanvas.getObjects();
+            existingObjects.forEach(obj => fabricCanvas.remove(obj));
+        }
+        showToast(`Loading ${style.name}...`);
+        loadImageAsDataURL(style.img, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        if (keepDesigns && existingObjects.length > 0) {
+                            existingObjects.forEach(obj => fabricCanvas.add(obj));
+                        }
+                        fabricCanvas.renderAll();
+                        showToast(`✓ ${style.name} ready!`);
+                    }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
+                });
+            } else {
+                fabricCanvas.setBackgroundColor('#1a1a2e', function() {
+                    if (keepDesigns && existingObjects.length > 0) {
+                        existingObjects.forEach(obj => fabricCanvas.add(obj));
+                    }
+                    fabricCanvas.renderAll();
+                    showToast(`⚠️ Image not found: ${style.img}`, true);
+                });
+            }
+        });
     }
     
     function initCanvas() {
@@ -615,10 +674,10 @@
         fabricCanvas.setWidth(550);
         fabricCanvas.setHeight(600);
         fabricCanvas.selection = true;
-        loadTshirtBackground(currentStyle);
         fabricCanvas.on('object:modified', () => updateSummaryElements());
         fabricCanvas.on('object:added', () => updateSummaryElements());
         fabricCanvas.on('object:removed', () => updateSummaryElements());
+        loadTshirtImage(currentStyle, false);
     }
     
     function addText() {
@@ -642,11 +701,9 @@
         const active = fabricCanvas.getActiveObject();
         if (!active) { showToast('Select text first', true); return; }
         const activeSwatch = document.querySelector('#textColorOptions .color-swatch.active');
-        if (activeSwatch) {
-            active.set('fill', activeSwatch.dataset.color);
-            fabricCanvas.renderAll();
-            showToast('Color applied');
-        }
+        if (activeSwatch) { active.set('fill', activeSwatch.dataset.color); }
+        fabricCanvas.renderAll();
+        showToast('Color applied');
     }
     
     function applyGradient(gradientStr) {
@@ -669,33 +726,54 @@
     
     function flipHorizontal() {
         const active = fabricCanvas.getActiveObject();
-        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('Flipped'); }
+        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('Flipped H'); }
         else showToast('Select element first', true);
     }
     
     function flipVertical() {
         const active = fabricCanvas.getActiveObject();
-        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('Flipped'); }
+        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('Flipped V'); }
         else showToast('Select element first', true);
     }
     
-    function applyStyle(style) {
+    function applyTextStyle(style) {
         const active = fabricCanvas.getActiveObject();
         if (active && active.type === 'i-text') {
             if (style === 'bold') active.set('fontWeight', active.fontWeight === 'bold' ? 'normal' : 'bold');
             if (style === 'italic') active.set('fontStyle', active.fontStyle === 'italic' ? 'normal' : 'italic');
             if (style === 'underline') active.set('underline', !active.underline);
             fabricCanvas.renderAll();
-        }
+            showToast(style + ' toggled');
+        } else showToast('Select text first', true);
     }
     
     function applyCurve() {
         const active = fabricCanvas.getActiveObject();
         if (!active) { showToast('Select text first', true); return; }
-        const angle = parseInt(document.getElementById('curveSlider').value);
-        active.set('angle', angle);
+        active.set('angle', parseInt(document.getElementById('curveSlider').value));
         fabricCanvas.renderAll();
-        showToast(`Curve ${angle}° applied`);
+        showToast('Curve applied');
+    }
+    
+    function applyGlow() {
+        const active = fabricCanvas.getActiveObject();
+        if (!active) { showToast('Select text first', true); return; }
+        const glowSize = parseInt(document.getElementById('glowSlider').value);
+        if (glowSize > 0) {
+            active.set('shadow', `rgba(212,175,55,0.8) 0px 0px ${glowSize}px`);
+        } else {
+            active.set('shadow', null);
+        }
+        fabricCanvas.renderAll();
+        showToast(glowSize > 0 ? `Glow ${glowSize}px applied` : 'Glow removed');
+    }
+    
+    function applyLetterSpacing() {
+        const active = fabricCanvas.getActiveObject();
+        if (!active) { showToast('Select text first', true); return; }
+        active.set('charSpacing', parseInt(document.getElementById('letterSpacingSlider').value));
+        fabricCanvas.renderAll();
+        showToast('Letter spacing applied');
     }
     
     function addImage(file) {
@@ -738,10 +816,8 @@
             orderType: orderType, userId: user.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
-        try {
-            const doc = await db.collection('custom_orders').add(orderData);
-            return doc.id;
-        } catch(e) { return null; }
+        try { const doc = await db.collection('custom_orders').add(orderData); return doc.id; } 
+        catch(e) { return null; }
     }
     
     async function addToCart() {
@@ -793,7 +869,7 @@
                 if (selectedStyle) {
                     currentStyle = selectedStyle;
                     renderStyles();
-                    loadTshirtBackground(currentStyle);
+                    loadTshirtImage(currentStyle, true);
                     updateSummary();
                     showToast(`Selected: ${currentStyle.name}`);
                 }
@@ -801,23 +877,21 @@
         });
     }
     
-    // Font preview
     document.getElementById('fontSelect')?.addEventListener('change', (e) => {
         document.getElementById('fontPreview').style.fontFamily = e.target.value;
     });
     
-    // Slider displays
-    document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => {
-        document.getElementById('fontSizeValue').innerText = e.target.value + 'px';
-    });
-    document.getElementById('opacitySlider')?.addEventListener('input', (e) => {
-        document.getElementById('opacityValue').innerText = e.target.value + '%';
-    });
-    document.getElementById('curveSlider')?.addEventListener('input', (e) => {
-        document.getElementById('curveValue').innerText = e.target.value + '°';
+    document.querySelectorAll('.gradient-preset').forEach(g => {
+        g.addEventListener('click', () => applyGradient(g.dataset.gradient));
     });
     
-    // Color swatches
+    // Slider displays
+    document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => { document.getElementById('fontSizeValue').innerText = e.target.value + 'px'; });
+    document.getElementById('opacitySlider')?.addEventListener('input', (e) => { document.getElementById('opacityValue').innerText = e.target.value + '%'; });
+    document.getElementById('curveSlider')?.addEventListener('input', (e) => { document.getElementById('curveValue').innerText = e.target.value + '°'; });
+    document.getElementById('glowSlider')?.addEventListener('input', (e) => { document.getElementById('glowValue').innerText = e.target.value + 'px'; });
+    document.getElementById('letterSpacingSlider')?.addEventListener('input', (e) => { document.getElementById('letterSpacingValue').innerText = e.target.value + 'px'; });
+    
     document.querySelectorAll('#textColorOptions .color-swatch').forEach(sw => {
         sw.addEventListener('click', () => {
             document.querySelectorAll('#textColorOptions .color-swatch').forEach(s => s.classList.remove('active'));
@@ -825,29 +899,18 @@
         });
     });
     
-    document.querySelectorAll('.gradient-preset').forEach(g => {
-        g.addEventListener('click', () => applyGradient(g.dataset.gradient));
-    });
-    
-    // T-shirt color change
-    document.querySelectorAll('#tshirtColorOptions .color-swatch').forEach(sw => {
-        sw.addEventListener('click', () => {
-            document.querySelectorAll('#tshirtColorOptions .color-swatch').forEach(s => s.classList.remove('active'));
-            sw.classList.add('active');
-            fabricCanvas.setBackgroundColor(sw.dataset.color, fabricCanvas.renderAll.bind(fabricCanvas));
-        });
-    });
-    
-    // Event listeners
+    // Event Listeners
     document.getElementById('addTextBtn')?.addEventListener('click', addText);
     document.getElementById('applyColorBtn')?.addEventListener('click', applyColor);
     document.getElementById('applyFontBtn')?.addEventListener('click', applyFontAndSize);
     document.getElementById('flipHorizontalBtn')?.addEventListener('click', flipHorizontal);
     document.getElementById('flipVerticalBtn')?.addEventListener('click', flipVertical);
-    document.getElementById('boldBtn')?.addEventListener('click', () => applyStyle('bold'));
-    document.getElementById('italicBtn')?.addEventListener('click', () => applyStyle('italic'));
-    document.getElementById('underlineBtn')?.addEventListener('click', () => applyStyle('underline'));
+    document.getElementById('boldBtn')?.addEventListener('click', () => applyTextStyle('bold'));
+    document.getElementById('italicBtn')?.addEventListener('click', () => applyTextStyle('italic'));
+    document.getElementById('underlineBtn')?.addEventListener('click', () => applyTextStyle('underline'));
     document.getElementById('applyCurveBtn')?.addEventListener('click', applyCurve);
+    document.getElementById('applyGlowBtn')?.addEventListener('click', applyGlow);
+    document.getElementById('applyLetterSpacingBtn')?.addEventListener('click', applyLetterSpacing);
     document.getElementById('deleteBtn')?.addEventListener('click', () => {
         const obj = fabricCanvas.getActiveObject();
         if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('Deleted'); }
@@ -858,14 +921,6 @@
         fabricCanvas.renderAll();
         updateSummaryElements();
         showToast('Cleared');
-    });
-    document.getElementById('bringForwardBtn')?.addEventListener('click', () => {
-        const obj = fabricCanvas.getActiveObject();
-        if (obj) { fabricCanvas.bringForward(obj); fabricCanvas.renderAll(); }
-    });
-    document.getElementById('sendBackwardBtn')?.addEventListener('click', () => {
-        const obj = fabricCanvas.getActiveObject();
-        if (obj) { fabricCanvas.sendBackwards(obj); fabricCanvas.renderAll(); }
     });
     document.getElementById('addToCartBtn')?.addEventListener('click', addToCart);
     document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
@@ -878,7 +933,6 @@
     uploadArea?.addEventListener('click', () => fileInput.click());
     fileInput?.addEventListener('change', (e) => { if (e.target.files[0]) addImage(e.target.files[0]); });
     
-    // Login modal
     function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
     function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); document.getElementById('otpSection').style.display = 'none'; }
     document.getElementById('sendOtpBtn')?.addEventListener('click', () => {
@@ -897,6 +951,12 @@
         } else { showToast('Wrong OTP', true); }
     });
     document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
+    
+    if (window.location.protocol === 'file:') {
+        document.getElementById('corsWarning').style.display = 'block';
+    } else {
+        document.getElementById('corsWarning').style.display = 'none';
+    }
     
     initCanvas();
     renderStyles();
