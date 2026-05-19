@@ -352,6 +352,16 @@
             cursor: pointer;
             color: white;
         }
+        
+        .cors-warning {
+            background: rgba(255,100,0,0.2);
+            border: 1px solid #FF6600;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -362,6 +372,11 @@
 </div>
 
 <div class="designer-container">
+    <!-- CORS Warning -->
+    <div class="cors-warning" id="corsWarning">
+        ⚠️ <strong>Note:</strong> Images not showing? Run with Live Server or use: <code>python -m http.server 8000</code>
+    </div>
+    
     <div class="style-section">
         <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
         <div class="style-grid" id="styleGrid"></div>
@@ -480,12 +495,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
 
-    // ============================================================
-    // 🔥 IMPORTANT: Sabse pehle ye image paths apne hisaab se set karein
-    // Apni images ka FULL PATH yahan likhein
-    // Example: "C:/Users/Sanjeshkar/Vedanta/full sleeve oversized T shirt.jpeg"
-    // Ya agar same folder mein hai toh sirf naam likhein
-    // ============================================================
     const tshirtStyles = [
         { id: 'fullsleeve', name: 'Full Sleeve T-Shirt', img: 'full sleeve oversized T shirt.jpeg', price: 1699 },
         { id: 'oversized', name: 'Oversized T-Shirt', img: 'full sleeve oversized T shirt.jpeg', price: 1499 },
@@ -501,41 +510,94 @@
     let currentGSM = '220 GSM';
     let fabricCanvas = null;
     let pendingOrder = null;
+    
+    // Cache for converted images (dataURL)
+    let imageCache = {};
 
-    // Ye function select kiye gaye t-shirt ki image ko canvas mein load karega
-    function loadTshirtIntoCanvas(style) {
+    // Convert local image to dataURL to bypass CORS
+    function loadImageAsDataURL(src, callback) {
+        if (imageCache[src]) {
+            callback(imageCache[src]);
+            return;
+        }
+        
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            imageCache[src] = dataURL;
+            callback(dataURL);
+        };
+        img.onerror = function() {
+            console.error("Failed to load:", src);
+            callback(null);
+        };
+        img.src = src;
+    }
+
+    function loadTshirtImage(style, keepDesigns = true) {
         if (!fabricCanvas) return;
+        
+        let existingObjects = [];
+        if (keepDesigns) {
+            existingObjects = fabricCanvas.getObjects();
+            existingObjects.forEach(obj => fabricCanvas.remove(obj));
+        }
         
         showToast(`Loading ${style.name}...`);
         
-        // Image load karne ka tareeka - CORS error se bachne ke liye
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        
-        img.onload = () => {
-            const scaleX = fabricCanvas.width / img.width;
-            const scaleY = fabricCanvas.height / img.height;
-            const scale = Math.max(scaleX, scaleY);
-            
-            fabricCanvas.setBackgroundImage(img, fabricCanvas.renderAll.bind(fabricCanvas), {
-                scaleX: scale,
-                scaleY: scale,
-                originX: 'center',
-                originY: 'center',
-                left: fabricCanvas.width / 2,
-                top: fabricCanvas.height / 2
-            });
-            
-            showToast(`✓ ${style.name} loaded - Ab design karein!`);
-        };
-        
-        img.onerror = (err) => {
-            console.error("Image load error:", style.img, err);
-            fabricCanvas.setBackgroundColor('#1a1a2e', fabricCanvas.renderAll.bind(fabricCanvas));
-            showToast(`⚠️ Image not found: "${style.img}"`, true);
-        };
-        
-        img.src = style.img;
+        // Use dataURL to avoid CORS
+        loadImageAsDataURL(style.img, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const canvasWidth = fabricCanvas.width;
+                    const canvasHeight = fabricCanvas.height;
+                    let scaleX = canvasWidth / img.width;
+                    let scaleY = canvasHeight / img.height;
+                    let scale = Math.max(scaleX, scaleY);
+                    
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        if (keepDesigns && existingObjects.length > 0) {
+                            existingObjects.forEach(obj => fabricCanvas.add(obj));
+                        }
+                        fabricCanvas.renderAll();
+                        showToast(`✓ ${style.name} ready!`);
+                    }, {
+                        scaleX: scale,
+                        scaleY: scale,
+                        originX: 'center',
+                        originY: 'center',
+                        left: canvasWidth / 2,
+                        top: canvasHeight / 2
+                    });
+                });
+            } else {
+                // Fallback - show colored background
+                fabricCanvas.setBackgroundColor('#1a1a2e', function() {
+                    const fallbackText = new fabric.Text(`${style.name}\n(Image not found)`, {
+                        left: fabricCanvas.width / 2,
+                        top: fabricCanvas.height / 2,
+                        fill: '#D4AF37',
+                        fontSize: 20,
+                        originX: 'center',
+                        originY: 'center',
+                        selectable: false,
+                        evented: false
+                    });
+                    fabricCanvas.add(fallbackText);
+                    if (keepDesigns && existingObjects.length > 0) {
+                        existingObjects.forEach(obj => fabricCanvas.add(obj));
+                    }
+                    fabricCanvas.renderAll();
+                    showToast(`⚠️ Image not found: ${style.img}`, true);
+                });
+            }
+        });
     }
     
     function initCanvas() {
@@ -544,21 +606,26 @@
         fabricCanvas.setHeight(600);
         fabricCanvas.selection = true;
         fabricCanvas.renderAll();
-        loadTshirtIntoCanvas(currentStyle);
+        
+        fabricCanvas.on('object:modified', () => updateSummaryElements());
+        fabricCanvas.on('object:added', () => updateSummaryElements());
+        fabricCanvas.on('object:removed', () => updateSummaryElements());
+        
+        loadTshirtImage(currentStyle, false);
     }
     
     function addText() {
         const textValue = document.getElementById('textInput').value;
         if (!textValue.trim()) {
-            showToast('Pehle text likhein', true);
+            showToast('Please enter some text', true);
             return;
         }
         const text = new fabric.IText(textValue, {
             left: fabricCanvas.width / 2,
             top: fabricCanvas.height / 2,
-            fontFamily: 'Arial',
-            fill: '#D4AF37',
-            fontSize: 36,
+            fontFamily: document.getElementById('fontSelect').value,
+            fill: document.querySelector('#textColorOptions .color-swatch.active')?.dataset.color || '#D4AF37',
+            fontSize: parseInt(document.getElementById('fontSizeSlider').value),
             originX: 'center',
             originY: 'center',
             hasControls: true,
@@ -573,13 +640,14 @@
     
     function applyColor() {
         const active = fabricCanvas.getActiveObject();
-        const color = document.querySelector('#textColorOptions .color-swatch.active')?.dataset.color || '#D4AF37';
-        if (active) {
+        const activeSwatch = document.querySelector('#textColorOptions .color-swatch.active');
+        const color = activeSwatch ? activeSwatch.dataset.color : '#D4AF37';
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
             active.set('fill', color);
             fabricCanvas.renderAll();
             showToast('Color applied');
         } else {
-            showToast('Pehle text select karein', true);
+            showToast('Select a text element first', true);
         }
     }
     
@@ -587,13 +655,13 @@
         const active = fabricCanvas.getActiveObject();
         const font = document.getElementById('fontSelect').value;
         const size = parseInt(document.getElementById('fontSizeSlider').value);
-        if (active && active.type === 'i-text') {
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
             active.set('fontFamily', font);
             active.set('fontSize', size);
             fabricCanvas.renderAll();
-            showToast('Font & size applied');
+            showToast('Font & size updated');
         } else {
-            showToast('Pehle text select karein', true);
+            showToast('Select a text element first', true);
         }
     }
     
@@ -601,12 +669,20 @@
         const reader = new FileReader();
         reader.onload = (e) => {
             fabric.Image.fromURL(e.target.result, (img) => {
-                img.scaleToWidth(200);
-                img.set({ left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center' });
+                let maxWidth = 250;
+                if(img.width > maxWidth) {
+                    img.scale(maxWidth / img.width);
+                }
+                img.set({
+                    left: fabricCanvas.width / 2,
+                    top: fabricCanvas.height / 2,
+                    originX: 'center',
+                    originY: 'center'
+                });
                 fabricCanvas.add(img);
                 fabricCanvas.setActiveObject(img);
                 fabricCanvas.renderAll();
-                showToast('Design image added! Drag to position');
+                showToast('Design uploaded! Drag to position.');
                 updateSummaryElements();
             });
         };
@@ -615,7 +691,8 @@
     
     function updateSummaryElements() {
         const has = fabricCanvas && fabricCanvas.getObjects().length > 0;
-        document.getElementById('summaryElements').innerHTML = has ? '<i class="fas fa-check-circle"></i> Custom' : 'None';
+        const elementText = has ? '<i class="fas fa-check-circle"></i> Custom Design' : 'None';
+        document.getElementById('summaryElements').innerHTML = elementText;
     }
     
     function updateSummary() {
@@ -643,31 +720,34 @@
         try {
             const doc = await db.collection('custom_orders').add(orderData);
             return doc.id;
-        } catch(e) { return null; }
+        } catch(e) { 
+            console.warn(e);
+            return null; 
+        }
     }
     
     async function addToCart() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (!user) { showToast('Pehle login karein', true); openLoginModal(); return; }
-        showToast('Saving...');
+        if (!user) { showToast('Please login first', true); openLoginModal(); return; }
+        showToast('Saving your custom design...');
         const id = await saveOrder('cart');
         if (id) {
             let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
             cart.push({ id: id, name: `Custom ${currentStyle.name}`, price: currentStyle.price, quantity: 1 });
             localStorage.setItem('vedantaCart', JSON.stringify(cart));
-            showToast('Cart mein add ho gaya!');
-        } else { showToast('Failed', true); }
+            showToast('✓ Added to cart!');
+        } else { showToast('Failed to save', true); }
     }
     
     async function buyNow() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) { openLoginModal(); pendingOrder = 'buy'; return; }
-        showToast('Processing...');
+        showToast('Processing order...');
         const id = await saveOrder('buy');
         if (id) {
             localStorage.setItem('vedantaCart', JSON.stringify([{ id: id, name: `Custom ${currentStyle.name}`, price: currentStyle.price, quantity: 1 }]));
             window.location.href = 'secure-checkout.html';
-        } else { showToast('Failed', true); }
+        } else { showToast('Order failed', true); }
     }
     
     function showToast(msg, isErr = false) {
@@ -678,7 +758,6 @@
         setTimeout(() => t.classList.remove('show'), 3000);
     }
     
-    // Style Grid Render - Yahan click karne par image change hogi
     function renderStyles() {
         const grid = document.getElementById('styleGrid');
         grid.innerHTML = tshirtStyles.map(style => `
@@ -696,10 +775,10 @@
                 const selectedStyle = tshirtStyles.find(s => s.id === id);
                 if (selectedStyle) {
                     currentStyle = selectedStyle;
-                    renderStyles(); // Active highlight update
-                    loadTshirtIntoCanvas(currentStyle); // Selected image load in canvas
+                    renderStyles();
+                    loadTshirtImage(currentStyle, true);
                     updateSummary();
-                    showToast(`${currentStyle.name} selected - Ab design karein!`);
+                    showToast(`Selected: ${currentStyle.name}`);
                 }
             });
         });
@@ -710,7 +789,7 @@
     
     document.getElementById('sendOtpBtn')?.addEventListener('click', () => {
         const phone = document.getElementById('loginPhone').value;
-        if (phone.length < 10) { showToast('Sahi phone number daalein', true); return; }
+        if (phone.length < 10) { showToast('Enter valid phone number', true); return; }
         showToast('Demo OTP: 123456');
         document.getElementById('otpSection').style.display = 'block';
     });
@@ -721,7 +800,7 @@
             closeLoginModal();
             showToast('Login successful!');
             if (pendingOrder === 'buy') { pendingOrder = null; buyNow(); }
-        } else { showToast('Wrong OTP', true); }
+        } else { showToast('Invalid OTP', true); }
     });
     document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
     
@@ -731,13 +810,14 @@
     document.getElementById('deleteBtn')?.addEventListener('click', () => {
         const obj = fabricCanvas.getActiveObject();
         if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('Deleted'); }
-        else showToast('Kuch select karein', true);
+        else showToast('Select an element first', true);
     });
     document.getElementById('clearBtn')?.addEventListener('click', () => {
-        fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+        const userObjects = fabricCanvas.getObjects();
+        userObjects.forEach(obj => fabricCanvas.remove(obj));
         fabricCanvas.renderAll();
         updateSummaryElements();
-        showToast('Sab clear ho gaya');
+        showToast('All custom designs cleared');
     });
     document.getElementById('addToCartBtn')?.addEventListener('click', addToCart);
     document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
@@ -756,6 +836,13 @@
     const fileInput = document.getElementById('imageUpload');
     uploadArea?.addEventListener('click', () => fileInput.click());
     fileInput?.addEventListener('change', (e) => { if (e.target.files[0]) addImage(e.target.files[0]); });
+    
+    // Check if running from file:// and show warning
+    if (window.location.protocol === 'file:') {
+        document.getElementById('corsWarning').style.display = 'block';
+    } else {
+        document.getElementById('corsWarning').style.display = 'none';
+    }
     
     initCanvas();
     renderStyles();
