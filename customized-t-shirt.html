@@ -617,7 +617,7 @@
                 </div>
                 
                 <div class="tool-group">
-                    <label>📏 Size <span style="color:#ff8888;">(Not selected)</span></label>
+                    <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
                     <select id="sizeSelect">
                         <option value="" disabled selected>-- Select Size --</option>
                         <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option>
@@ -625,7 +625,7 @@
                 </div>
                 
                 <div class="tool-group">
-                    <label>⚖️ GSM <span style="color:#ff8888;">(Not selected)</span></label>
+                    <label>⚖️ GSM <span style="color:#ff8888;">(Required)</span></label>
                     <select id="gsmSelect">
                         <option value="" disabled selected>-- Select GSM --</option>
                         <option>180 GSM (Light)</option>
@@ -636,7 +636,7 @@
                 </div>
                 
                 <div class="tool-group">
-                    <label>🧵 Fabric Type <span style="color:#ff8888;">(Not selected)</span></label>
+                    <label>🧵 Fabric Type <span style="color:#ff8888;">(Required)</span></label>
                     <select id="fabricSelect">
                         <option value="" disabled selected>-- Select Fabric --</option>
                         <option>100% Cotton</option>
@@ -736,7 +736,7 @@
     let currentFabric = null;
     let currentPrintMethod = null;
     let fabricCanvas = null;
-    let pendingOrder = null;
+    let pendingBuyAfterLogin = false; // Flag to trigger buy after login
     let imageCache = {};
     let glowActive = false;
     let roundedActive = false;
@@ -1039,7 +1039,7 @@
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
         try { const doc = await db.collection('custom_orders').add(orderData); return doc.id; } 
-        catch(e) { return null; }
+        catch(e) { console.error(e); return null; }
     }
     
     async function addToCart() {
@@ -1056,22 +1056,29 @@
             cart.push({ id: id, name: `Custom ${currentStyle.name}`, price: currentStyle.price, quantity: 1 });
             localStorage.setItem('vedantaCart', JSON.stringify(cart));
             showToast('✓ Added to cart!');
-        } else { showToast('Failed', true); }
+        } else { showToast('Failed to save order', true); }
     }
     
     async function buyNow() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (!user) { openLoginModal(); pendingOrder = 'buy'; return; }
+        if (!user) { 
+            pendingBuyAfterLogin = true;
+            openLoginModal(); 
+            showToast('Please login to continue', false);
+            return; 
+        }
         if(!currentSize || !currentGSM || !currentFabric) {
             showToast('Please select Size, GSM and Fabric first', true);
             return;
         }
-        showToast('Processing...');
+        showToast('Processing order...');
         const id = await saveOrder('buy');
         if (id) {
-            localStorage.setItem('vedantaCart', JSON.stringify([{ id: id, name: `Custom ${currentStyle.name}`, price: currentStyle.price, quantity: 1 }]));
+            localStorage.setItem('pendingCheckoutOrder', JSON.stringify({ orderId: id, style: currentStyle.name, price: currentStyle.price }));
             window.location.href = 'secure-checkout.html';
-        } else { showToast('Failed', true); }
+        } else { 
+            showToast('Failed to place order. Please try again.', true); 
+        }
     }
     
     function showToast(msg, isErr = false) {
@@ -1170,23 +1177,43 @@
     uploadArea?.addEventListener('click', () => fileInput.click());
     fileInput?.addEventListener('change', (e) => { if (e.target.files[0]) addImage(e.target.files[0]); });
     
-    function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
-    function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); document.getElementById('otpSection').style.display = 'none'; }
+    function openLoginModal() { 
+        pendingBuyAfterLogin = false;
+        document.getElementById('loginModal').classList.add('show'); 
+    }
+    function closeLoginModal() { 
+        document.getElementById('loginModal').classList.remove('show'); 
+        document.getElementById('otpSection').style.display = 'none'; 
+        document.getElementById('otpInput').value = '';
+    }
+    
     document.getElementById('sendOtpBtn')?.addEventListener('click', () => {
         const phone = document.getElementById('loginPhone').value;
         if (phone.length < 10) { showToast('Valid phone required', true); return; }
         showToast('Demo OTP: 123456');
         document.getElementById('otpSection').style.display = 'block';
     });
-    document.getElementById('verifyOtpBtn')?.addEventListener('click', () => {
+    
+    document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
         const otp = document.getElementById('otpInput').value;
         if (otp === '123456') {
-            localStorage.setItem('vedantaUser', JSON.stringify({ uid: Date.now(), phone: document.getElementById('loginPhone').value }));
+            const userData = { uid: Date.now().toString(), phone: document.getElementById('loginPhone').value, name: 'Customer' };
+            localStorage.setItem('vedantaUser', JSON.stringify(userData));
             closeLoginModal();
             showToast('✓ Login successful!');
-            if (pendingOrder === 'buy') { pendingOrder = null; buyNow(); }
-        } else { showToast('Wrong OTP', true); }
+            
+            // After successful login, if buy was pending, execute buy now
+            if (pendingBuyAfterLogin) {
+                pendingBuyAfterLogin = false;
+                setTimeout(() => {
+                    buyNow();
+                }, 500);
+            }
+        } else { 
+            showToast('Wrong OTP', true); 
+        }
     });
+    
     document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
     
     if (window.location.protocol === 'file:') {
