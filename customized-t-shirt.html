@@ -162,9 +162,12 @@
         
         .color-grid {
             display: grid;
-            grid-template-columns: repeat(8, 1fr);
+            grid-template-columns: repeat(10, 1fr);
             gap: 8px;
             margin-top: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 5px;
         }
         .color-swatch {
             width: 100%;
@@ -174,7 +177,7 @@
             border: 2px solid transparent;
             transition: 0.2s;
         }
-        .color-swatch.active { border-color: white; transform: scale(1.05); }
+        .color-swatch.active { border-color: white; transform: scale(1.05); box-shadow: 0 0 6px white; }
         
         .tshirt-colors {
             display: grid;
@@ -201,15 +204,38 @@
             margin-bottom: 5px;
         }
         
-        .rgb-inputs {
-            display: flex;
-            gap: 8px;
-            margin-top: 10px;
+        .print-method-group {
+            margin-top: 15px;
         }
-        .rgb-inputs input {
-            flex: 1;
-            padding: 8px;
-            text-align: center;
+        .print-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            cursor: pointer;
+            border: 1px solid rgba(212,175,55,0.3);
+            transition: 0.2s;
+        }
+        .print-option.selected {
+            background: rgba(212,175,55,0.2);
+            border-color: #D4AF37;
+        }
+        .print-option input {
+            width: 18px;
+            height: 18px;
+            accent-color: #D4AF37;
+            margin: 0;
+            cursor: pointer;
+        }
+        .print-option label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
         }
         
         .btn-icon {
@@ -408,6 +434,18 @@
             font-size: 12px;
             text-align: center;
         }
+        
+        .color-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        .color-grid::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .color-grid::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -429,7 +467,6 @@
 
     <div class="designer-grid">
         <div>
-            <!-- DESIGN TOOLS BOX -->
             <div class="design-tools-box">
                 <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
                 
@@ -440,55 +477,8 @@
                 </div>
                 
                 <div class="tool-group">
-                    <label>🎨 Text Color (40+ Colors + RGB Picker)</label>
-                    <div class="color-grid" id="colorPalette">
-                        <div class="color-swatch" style="background:#FFFFFF;"></div>
-                        <div class="color-swatch" style="background:#000000;"></div>
-                        <div class="color-swatch" style="background:#D4AF37;"></div>
-                        <div class="color-swatch" style="background:#FF0000;"></div>
-                        <div class="color-swatch" style="background:#FF4500;"></div>
-                        <div class="color-swatch" style="background:#FF8C00;"></div>
-                        <div class="color-swatch" style="background:#FFD700;"></div>
-                        <div class="color-swatch" style="background:#FFFF00;"></div>
-                        <div class="color-swatch" style="background:#ADFF2F;"></div>
-                        <div class="color-swatch" style="background:#00FF00;"></div>
-                        <div class="color-swatch" style="background:#32CD32;"></div>
-                        <div class="color-swatch" style="background:#00CED1;"></div>
-                        <div class="color-swatch" style="background:#00BFFF;"></div>
-                        <div class="color-swatch" style="background:#0000FF;"></div>
-                        <div class="color-swatch" style="background:#8B00FF;"></div>
-                        <div class="color-swatch" style="background:#FF00FF;"></div>
-                        <div class="color-swatch" style="background:#FF1493;"></div>
-                        <div class="color-swatch" style="background:#DC143C;"></div>
-                        <div class="color-swatch" style="background:#8B4513;"></div>
-                        <div class="color-swatch" style="background:#808080;"></div>
-                        <div class="color-swatch" style="background:#696969;"></div>
-                        <div class="color-swatch" style="background:#A9A9A9;"></div>
-                        <div class="color-swatch" style="background:#C0C0C0;"></div>
-                        <div class="color-swatch" style="background:#F5F5DC;"></div>
-                        <div class="color-swatch" style="background:#FFE4B5;"></div>
-                        <div class="color-swatch" style="background:#FFDEAD;"></div>
-                        <div class="color-swatch" style="background:#F0E68C;"></div>
-                        <div class="color-swatch" style="background:#98FB98;"></div>
-                        <div class="color-swatch" style="background:#AFEEEE;"></div>
-                        <div class="color-swatch" style="background:#87CEEB;"></div>
-                        <div class="color-swatch" style="background:#B0E0E6;"></div>
-                        <div class="color-swatch" style="background:#DDA0DD;"></div>
-                        <div class="color-swatch" style="background:#EE82EE;"></div>
-                        <div class="color-swatch" style="background:#DA70D6;"></div>
-                        <div class="color-swatch" style="background:#FFB6C1;"></div>
-                        <div class="color-swatch" style="background:#FFC0CB;"></div>
-                        <div class="color-swatch" style="background:#DB7093;"></div>
-                        <div class="color-swatch" style="background:#CD5C5C;"></div>
-                        <div class="color-swatch" style="background:#F08080;"></div>
-                        <div class="color-swatch" style="background:#E9967A;"></div>
-                    </div>
-                    <div class="rgb-inputs">
-                        <input type="color" id="customColorPicker" value="#D4AF37" style="height: 38px;">
-                        <input type="number" id="rVal" placeholder="R" min="0" max="255" style="width: 70px;">
-                        <input type="number" id="gVal" placeholder="G" min="0" max="255" style="width: 70px;">
-                        <input type="number" id="bVal" placeholder="B" min="0" max="255" style="width: 70px;">
-                    </div>
+                    <label>🎨 Text Color (100+ Colors)</label>
+                    <div class="color-grid" id="colorPalette"></div>
                 </div>
                 
                 <div class="tool-group">
@@ -544,12 +534,11 @@
                 </div>
             </div>
             
-            <!-- MATERIAL TOOLS BOX -->
             <div class="material-tools-box">
                 <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT COLOR & SIZE</div>
                 
                 <div class="tool-group">
-                    <label>🎨 T-Shirt Color (Click any color - full shirt changes instantly!)</label>
+                    <label>🎨 T-Shirt Color</label>
                     <div class="tshirt-colors" id="tshirtColorPalette">
                         <div class="tshirt-color" data-color="#1a1a1a">
                             <div class="preview" style="background:#1a1a1a;"></div>
@@ -589,7 +578,7 @@
                 <div class="tool-group">
                     <label>📏 Size</label>
                     <select id="sizeSelect">
-                        <option>S</option><option>M</option><option>L</option><option selected>XL</option><option>XXL</option><option>3XL</option>
+                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option>
                     </select>
                 </div>
                 
@@ -597,7 +586,7 @@
                     <label>⚖️ GSM (Fabric Thickness)</label>
                     <select id="gsmSelect">
                         <option>180 GSM (Light)</option>
-                        <option selected>220 GSM (Standard)</option>
+                        <option>220 GSM (Standard)</option>
                         <option>260 GSM (Heavy)</option>
                         <option>300 GSM (Premium)</option>
                     </select>
@@ -612,6 +601,21 @@
                         <option>Linen</option>
                         <option>Organic Cotton</option>
                     </select>
+                </div>
+                
+                <div class="tool-group print-method-group">
+                    <label>🖨️ Design Print Method</label>
+                    <div id="printMethodContainer">
+                        <div class="print-option" data-method="transparent">
+                            <input type="radio" name="printMethod" id="printTransparent" value="transparent">
+                            <label for="printTransparent">✨ Transparent Print (No Background - Best for PNGs & Logos)</label>
+                        </div>
+                        <div class="print-option" data-method="fullbg">
+                            <input type="radio" name="printMethod" id="printFullBg" value="fullbg">
+                            <label for="printFullBg">🖼️ Print with Background (As uploaded - for full designs)</label>
+                        </div>
+                    </div>
+                    <div class="hint">Select how your uploaded design should be printed. By default no option is selected.</div>
                 </div>
             </div>
         </div>
@@ -634,6 +638,7 @@
             <div class="order-detail"><span>Size:</span><span id="summarySize">XL</span></div>
             <div class="order-detail"><span>GSM:</span><span id="summaryGSM">220 GSM</span></div>
             <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">100% Cotton</span></div>
+            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
             <div class="order-detail"><span>Design:</span><span id="summaryElements">None</span></div>
             <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,699</span></div>
             <div class="action-buttons">
@@ -685,10 +690,36 @@
     let currentSize = 'XL';
     let currentGSM = '220 GSM';
     let currentFabric = '100% Cotton';
+    let currentPrintMethod = null; // No auto-select
     let fabricCanvas = null;
     let pendingOrder = null;
     let imageCache = {};
 
+    function generateColorPalette() {
+        const colors = [];
+        const baseColors = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D', '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC', '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC', '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399', '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680', '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933', '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3', '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
+        const vibrant = ['#FFB6C1', '#C0F0E8', '#FFDAB9', '#E6E6FA', '#F0E68C', '#D8BFD8', '#FFA07A', '#20B2AA', '#87CEFA', '#778899', '#B0C4DE', '#FFF0F5', '#F5DEB3', '#BC8F8F', '#CD853F', '#DAA520', '#B8860B', '#9ACD32', '#6A5ACD', '#E9967A', '#48D1CC', '#FF69B4', '#C71585', '#00CED1', '#9400D3', '#FF4500', '#2E8B57', '#008B8B', '#B22222', '#5F9EA0'];
+        return [...baseColors, ...vibrant].slice(0, 115);
+    }
+    
+    function renderColorPalette() {
+        const palette = generateColorPalette();
+        const container = document.getElementById('colorPalette');
+        container.innerHTML = '';
+        palette.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.title = color;
+            swatch.addEventListener('click', () => {
+                applyTextColor(color);
+                document.querySelectorAll('#colorPalette .color-swatch').forEach(s => s.classList.remove('active'));
+                swatch.classList.add('active');
+            });
+            container.appendChild(swatch);
+        });
+    }
+    
     function loadImageAsDataURL(src, callback) {
         if (imageCache[src]) { callback(imageCache[src]); return; }
         const img = new Image();
@@ -832,6 +863,11 @@
         document.getElementById('summaryElements').innerHTML = has ? '<i class="fas fa-check-circle"></i> Custom' : 'None';
     }
     
+    function updatePrintSummary() {
+        const methodText = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected');
+        document.getElementById('summaryPrintMethod').innerHTML = methodText;
+    }
+    
     function updateSummary() {
         document.getElementById('summaryStyle').innerText = currentStyle.name;
         document.getElementById('summarySize').innerText = currentSize;
@@ -839,6 +875,7 @@
         document.getElementById('summaryFabric').innerText = currentFabric;
         document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`;
         updateSummaryElements();
+        updatePrintSummary();
     }
     
     async function saveOrder(orderType) {
@@ -847,7 +884,8 @@
         const designJSON = fabricCanvas ? JSON.stringify(fabricCanvas.toJSON()) : null;
         const orderData = {
             style: currentStyle.name, price: currentStyle.price, size: currentSize,
-            gsm: currentGSM, fabric: currentFabric, designJSON: designJSON,
+            gsm: currentGSM, fabric: currentFabric, printMethod: currentPrintMethod,
+            designJSON: designJSON,
             orderType: orderType, userId: user.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -912,25 +950,17 @@
         });
     }
     
-    // Color Swatch clicks
-    document.querySelectorAll('#colorPalette .color-swatch').forEach(sw => {
-        sw.addEventListener('click', () => {
-            const color = sw.style.backgroundColor;
-            const rgb = color.match(/\d+/g);
-            if (rgb) {
-                const hex = '#' + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
-                applyTextColor(hex);
-                document.getElementById('customColorPicker').value = hex;
+    // Print method selection (no auto-select)
+    document.querySelectorAll('.print-option input').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                currentPrintMethod = e.target.value;
+                updatePrintSummary();
+                showToast(`✓ Print method set to: ${currentPrintMethod === 'transparent' ? 'Transparent Print' : 'Full Background Print'}`);
             }
         });
     });
     
-    // Custom color picker
-    document.getElementById('customColorPicker')?.addEventListener('input', (e) => {
-        applyTextColor(e.target.value);
-    });
-    
-    // T-Shirt Color clicks
     document.querySelectorAll('#tshirtColorPalette .tshirt-color').forEach(c => {
         c.addEventListener('click', () => {
             document.querySelectorAll('#tshirtColorPalette .tshirt-color').forEach(p => p.classList.remove('active'));
@@ -939,7 +969,6 @@
         });
     });
     
-    // Event Listeners
     document.getElementById('addTextBtn')?.addEventListener('click', addText);
     document.getElementById('flipHorizontalBtn')?.addEventListener('click', flipHorizontal);
     document.getElementById('flipVerticalBtn')?.addEventListener('click', flipVertical);
@@ -1005,8 +1034,10 @@
     
     initCanvas();
     renderStyles();
+    renderColorPalette();
     updateSummary();
     document.querySelector('#tshirtColorPalette .tshirt-color')?.classList.add('active');
+    changeTShirtColor('#1a1a1a');
 </script>
 </body>
 </html>
