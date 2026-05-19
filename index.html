@@ -805,14 +805,24 @@
         
         .login-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
         .login-modal.show { display: flex; }
-        .login-modal-content { background: rgba(15,15,22,0.98); backdrop-filter: blur(20px); border-radius: 32px; padding: 28px; max-width: 420px; width: 100%; border: 1px solid rgba(212,175,55,0.3); text-align: center; }
+        .login-modal-content { background: rgba(15,15,22,0.98); backdrop-filter: blur(20px); border-radius: 32px; padding: 28px; max-width: 420px; width: 100%; border: 1px solid rgba(212,175,55,0.3); text-align: center; position: relative; }
         .login-modal-content h3 { color: #D4AF37; font-size: 24px; margin-bottom: 8px; }
         .login-modal-input { width: 100%; padding: 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 18px; color: white; font-size: 15px; text-align: center; margin-bottom: 16px; }
         .otp-section { display: none; }
         .otp-section.show { display: block; }
         .login-modal-btn { width: 100%; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; padding: 14px; border-radius: 18px; font-weight: 700; color: #050508; cursor: pointer; font-size: 14px; margin-bottom: 12px; }
-        .close-modal { background: none; border: none; color: white; font-size: 28px; cursor: pointer; position: absolute; top: 20px; right: 20px; }
-        #recaptcha-container-modal { position: fixed; visibility: hidden; pointer-events: none; opacity: 0; }
+        .close-modal { background: none; border: none; color: white; font-size: 28px; cursor: pointer; position: absolute; top: 12px; right: 16px; }
+        .back-btn-modal { background: rgba(212,175,55,0.2); border: 1px solid #D4AF37; padding: 10px; border-radius: 18px; font-weight: 600; color: #D4AF37; cursor: pointer; font-size: 13px; width: 100%; margin-top: 10px; }
+        .resend-otp { background: none; border: none; color: #D4AF37; cursor: pointer; font-size: 12px; margin-top: 8px; display: none; }
+        .timer-text { font-size: 11px; color: #888; margin-top: 8px; }
+        /* Fixed reCAPTCHA container - visible but positioned off-screen */
+        #recaptcha-container-modal { 
+            position: fixed; 
+            bottom: 0; 
+            right: 0; 
+            z-index: 10001;
+            transform: scale(0.9);
+        }
     </style>
 </head>
 <body>
@@ -831,12 +841,29 @@
     <div class="cart-items" id="cartItems"><div class="empty-cart">🛒 Your cart is empty</div></div>
     <div class="cart-footer"><div class="cart-total"><span>Total:</span><span id="cartTotal">₹0</span></div><button class="checkout-btn" id="checkoutBtn">💰 Proceed to Checkout</button></div>
 </div>
-<div class="login-modal" id="loginModal"><div class="login-modal-content"><button class="close-modal" id="closeModalBtn">&times;</button><h3><i class="fas fa-phone-alt"></i> Login to Continue</h3><div id="recaptcha-container-modal"></div><div id="modalPhoneSection"><input type="tel" id="modalPhoneInput" class="login-modal-input" placeholder="+91 9876543210"><button class="login-modal-btn" id="modalSendOtpBtn">Send OTP</button></div><div id="modalOtpSection" class="otp-section"><input type="text" id="modalOtpInput" class="login-modal-input" placeholder="Enter 6-digit OTP" maxlength="6"><button class="login-modal-btn" id="modalVerifyBtn">Verify & Continue</button><button class="resend-otp" id="modalResendBtn">Resend OTP</button><div class="timer-text" id="modalTimer">Resend available in 60s</div></div><button class="back-btn-modal" id="modalBackBtn">← Back to Phone</button></div></div>
+<div class="login-modal" id="loginModal">
+    <div class="login-modal-content">
+        <button class="close-modal" id="closeModalBtn">&times;</button>
+        <h3><i class="fas fa-phone-alt"></i> Login to Continue</h3>
+        <div id="recaptcha-container-modal"></div>
+        <div id="modalPhoneSection">
+            <input type="tel" id="modalPhoneInput" class="login-modal-input" placeholder="+91 9876543210" value="">
+            <button class="login-modal-btn" id="modalSendOtpBtn">Send OTP</button>
+        </div>
+        <div id="modalOtpSection" class="otp-section">
+            <input type="text" id="modalOtpInput" class="login-modal-input" placeholder="Enter 6-digit OTP" maxlength="6">
+            <button class="login-modal-btn" id="modalVerifyBtn">Verify & Continue</button>
+            <button class="resend-otp" id="modalResendBtn">Resend OTP</button>
+            <div class="timer-text" id="modalTimer"></div>
+        </div>
+        <button class="back-btn-modal" id="modalBackBtn">← Back to Phone</button>
+    </div>
+</div>
 
 <div class="header-top"><div class="animated-logo"><div class="banner-logo">VEDANTA</div></div><div class="banner-tag">✦ WHERE SOUL MEETS LUXURY ✦</div></div>
 <div class="marquee-wrapper"><div class="marquee-line"><marquee behavior="scroll" direction="left" scrollamount="4" onmouseover="this.stop();" onmouseout="this.start();"><i class="fas fa-truck"></i> 🚚 FREE SHIPPING WORLDWIDE 🚚 <i class="fas fa-tags"></i> 🏷️ 40% OFF SITEWIDE 🏷️ <i class="fas fa-rupee-sign"></i> 💰 CASH ON DELIVERY AVAILABLE 💰 <i class="fas fa-undo-alt"></i> 🔄 15-DAY EASY RETURNS 🔄</marquee></div></div>
 
-<div class="hero-slider"><div class="slider-container" id="sliderContainer"><div class="slider-slide"><img src="technology .jpeg" alt="Technology" onerror="this.src='https://placehold.co/1200x500/1e1e2a/D4AF37?text=Technology'"></div><div class="slider-slide"><img src="beauty.jpeg" alt="Beauty" onerror="this.src='https://placehold.co/1200x500/2a2a35/D4AF37?text=Beauty'"></div><div class="slider-slide"><img src="fashion.jpeg" alt="Fashion" onerror="this.src='https://placehold.co/1200x500/252530/D4AF37?text=Fashion'"></div><div class="slider-slide"><img src="GYM.jpeg" alt="GYM" onerror="this.src='https://placehold.co/1200x500/1e1e2a/D4AF37?text=GYM'"></div><div class="slider-slide"><img src="living.jpeg" alt="Living" onerror="this.src='https://placehold.co/1200x500/2a2a35/D4AF37?text=Living'"></div><div class="slider-slide"><img src="home.jpeg" alt="Home" onerror="this.src='https://placehold.co/1200x500/252530/D4AF37?text=Home'"></div></div><div class="slider-dots" id="sliderDots"></div></div>
+<div class="hero-slider"><div class="slider-container" id="sliderContainer"><div class="slider-slide"><img src="technology.jpeg" alt="Technology" onerror="this.src='https://placehold.co/1200x500/1e1e2a/D4AF37?text=Technology'"></div><div class="slider-slide"><img src="beauty.jpeg" alt="Beauty" onerror="this.src='https://placehold.co/1200x500/2a2a35/D4AF37?text=Beauty'"></div><div class="slider-slide"><img src="fashion.jpeg" alt="Fashion" onerror="this.src='https://placehold.co/1200x500/252530/D4AF37?text=Fashion'"></div><div class="slider-slide"><img src="GYM.jpeg" alt="GYM" onerror="this.src='https://placehold.co/1200x500/1e1e2a/D4AF37?text=GYM'"></div><div class="slider-slide"><img src="living.jpeg" alt="Living" onerror="this.src='https://placehold.co/1200x500/2a2a35/D4AF37?text=Living'"></div><div class="slider-slide"><img src="home.jpeg" alt="Home" onerror="this.src='https://placehold.co/1200x500/252530/D4AF37?text=Home'"></div></div><div class="slider-dots" id="sliderDots"></div></div>
 
 <div class="container">
     <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchInput" placeholder="Search products by name..."></div>
@@ -877,40 +904,83 @@
 <div class="toast" id="toastMsg"></div>
 
 <script>
-    // Firebase config (unchanged)
-    const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
+    // Firebase config
+    const firebaseConfig = { 
+        apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", 
+        authDomain: "nexi-53897.firebaseapp.com", 
+        projectId: "nexi-53897", 
+        storageBucket: "nexi-53897.firebasestorage.app", 
+        messagingSenderId: "337349382612", 
+        appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" 
+    };
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
+    
+    // Enable phone number sign-in
+    auth.settings.appVerificationDisabledForTesting = false;
     
     let allProducts = [], cart = JSON.parse(localStorage.getItem('vedantaCart')) || [], unsubscribeProducts = null;
     let currentSlideIndex = 0, slideInterval = null, totalSlides = 6;
     let promoCurrentIndex = 0, promoInterval = null, promoTotal = 2;
     let modalRecaptchaVerifier = null, modalConfirmationResult = null, pendingBuyProduct = null, modalCountdownTimer = null;
     
-    function showToastMessage(msg, isError = false) { let toast = document.getElementById('toastMsg'); if(toast){ toast.innerText = msg; toast.style.background = isError ? '#F44336' : '#D4AF37'; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); } }
-    function escapeHtml(str) { if(!str) return ''; return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m] || m)); }
-    function formatPhoneNumber(number) { let num = number.trim(); if(!num.startsWith('+')) { if(num.startsWith('0')) num='+91'+num.substring(1); else if(num.length===10) num='+91'+num; } return num; }
+    function showToastMessage(msg, isError = false) { 
+        let toast = document.getElementById('toastMsg'); 
+        if(toast){ 
+            toast.innerText = msg; 
+            toast.style.background = isError ? '#F44336' : '#D4AF37'; 
+            toast.classList.add('show'); 
+            setTimeout(() => toast.classList.remove('show'), 2500); 
+        } 
+    }
+    
+    function escapeHtml(str) { 
+        if(!str) return ''; 
+        return String(str).replace(/[&<>]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[m] || m)); 
+    }
+    
+    function formatPhoneNumber(number) { 
+        let num = number.trim(); 
+        if(!num.startsWith('+')) { 
+            if(num.startsWith('0')) num='+91'+num.substring(1); 
+            else if(num.length===10) num='+91'+num; 
+            else if(num.length===12 && num.startsWith('91')) num='+'+num;
+        } 
+        return num; 
+    }
     
     function initSlider(){
         const sliderContainer = document.getElementById('sliderContainer'), dotsContainer = document.getElementById('sliderDots');
         if(!sliderContainer) return;
-        for(let i=0;i<totalSlides;i++){ let dot = document.createElement('div'); dot.className='slider-dot'+(i===0?' active':''); dot.addEventListener('click',()=>goToSlide(i)); dotsContainer.appendChild(dot); }
+        for(let i=0;i<totalSlides;i++){ 
+            let dot = document.createElement('div'); 
+            dot.className='slider-dot'+(i===0?' active':''); 
+            dot.addEventListener('click',()=>goToSlide(i)); 
+            dotsContainer.appendChild(dot); 
+        }
         startAutoSlide();
-        sliderContainer.addEventListener('touchstart', handleTouchStart, {passive:true}); sliderContainer.addEventListener('touchend', handleTouchEnd, {passive:true});
+        sliderContainer.addEventListener('touchstart', handleTouchStart, {passive:true}); 
+        sliderContainer.addEventListener('touchend', handleTouchEnd, {passive:true});
     }
     let touchStartX=0, touchEndX=0;
     function handleTouchStart(e){ touchStartX = e.changedTouches[0].screenX; pauseAutoSlide(); }
     function handleTouchEnd(e){ touchEndX = e.changedTouches[0].screenX; if(Math.abs(touchEndX-touchStartX)>50) { if(touchEndX < touchStartX) nextSlide(); else prevSlide(); } startAutoSlide(); }
     function goToSlide(index){ if(index<0) index=totalSlides-1; if(index>=totalSlides) index=0; currentSlideIndex=index; document.getElementById('sliderContainer').style.transform = `translateX(-${currentSlideIndex*100}%)`; document.querySelectorAll('.slider-dot').forEach((dot,i)=> dot.classList.toggle('active', i===currentSlideIndex)); }
-    function nextSlide(){ goToSlide(currentSlideIndex+1); } function prevSlide(){ goToSlide(currentSlideIndex-1); }
+    function nextSlide(){ goToSlide(currentSlideIndex+1); } 
+    function prevSlide(){ goToSlide(currentSlideIndex-1); }
     function startAutoSlide(){ if(slideInterval) clearInterval(slideInterval); slideInterval = setInterval(nextSlide, 1800); }
     function pauseAutoSlide(){ if(slideInterval){ clearInterval(slideInterval); slideInterval = null; } }
     
     function initPromoSlider(){
         const promoContainer = document.getElementById('promoSliderContainer'), dotsContainer = document.getElementById('promoDots');
         if(!promoContainer) return;
-        for(let i=0;i<promoTotal;i++){ let dot = document.createElement('div'); dot.className='promo-dot'+(i===0?' active':''); dot.addEventListener('click',()=>goToPromoSlide(i)); dotsContainer.appendChild(dot); }
+        for(let i=0;i<promoTotal;i++){ 
+            let dot = document.createElement('div'); 
+            dot.className='promo-dot'+(i===0?' active':''); 
+            dot.addEventListener('click',()=>goToPromoSlide(i)); 
+            dotsContainer.appendChild(dot); 
+        }
         startPromoAutoSlide();
         promoContainer.addEventListener('touchstart', (e)=>{ promoStartX = e.changedTouches[0].screenX; pausePromoAutoSlide(); }, {passive:true});
         promoContainer.addEventListener('touchend', (e)=>{ let diff = e.changedTouches[0].screenX - promoStartX; if(Math.abs(diff)>50) { if(diff>0) goToPromoSlide(promoCurrentIndex-1); else goToPromoSlide(promoCurrentIndex+1); } startPromoAutoSlide(); }, {passive:true});
@@ -921,42 +991,448 @@
     function startPromoAutoSlide(){ if(promoInterval) clearInterval(promoInterval); promoInterval = setInterval(nextPromoSlide, 2000); }
     function pausePromoAutoSlide(){ if(promoInterval){ clearInterval(promoInterval); promoInterval = null; } }
     
-    async function checkUserHasSavedAddress(){ const currentUser = JSON.parse(localStorage.getItem('vedantaUser')); if(!currentUser || !currentUser.uid) return false; try { const addrSnapshot = await db.collection('addresses').where('userId','==',currentUser.uid).limit(1).get(); if(!addrSnapshot.empty) return true; const orderSnapshot = await db.collection('orders').where('customerPhone','==',currentUser.phone).limit(1).get(); return !orderSnapshot.empty; } catch(e){ return false; } }
-    async function buyNowWithSmartRedirect(product){ const currentUser = JSON.parse(localStorage.getItem('vedantaUser')); if(currentUser && currentUser.email){ const hasSavedAddress = await checkUserHasSavedAddress(); const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1 }]; localStorage.setItem('vedantaCart', JSON.stringify(tempCart)); if(hasSavedAddress){ showToastMessage(`💳 Redirecting to checkout`); setTimeout(()=>{ window.location.href = 'secure-checkout2.html'; },300); } else { showToastMessage(`💳 Proceeding to checkout`); setTimeout(()=>{ window.location.href = 'secure-checkout.html'; },300); } } else { openLoginModal(product); } }
-    async function checkoutWithSmartRedirect(){ const currentUser = JSON.parse(localStorage.getItem('vedantaUser')); const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || []; if(currentCart.length === 0){ showToastMessage('🛒 Cart is empty!', true); return; } if(currentUser && currentUser.email){ const hasSavedAddress = await checkUserHasSavedAddress(); if(hasSavedAddress) window.location.href = 'secure-checkout2.html'; else window.location.href = 'secure-checkout.html'; } else { showToastMessage('🔐 Please login to checkout'); setTimeout(()=>{ window.location.href = 'profile.html'; },800); } }
-    function setupModalRecaptcha(){ return new Promise((resolve,reject)=>{ if(modalRecaptchaVerifier) modalRecaptchaVerifier.clear(); try{ modalRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-modal',{ size:'invisible', callback:()=>resolve(true) }); resolve(true); } catch(e){ reject(e); } }); }
-    async function modalSendOTP(){ const phoneInput = document.getElementById('modalPhoneInput'); const phone = phoneInput.value.trim(); const sendBtn = document.getElementById('modalSendOtpBtn'); if(!phone || phone.length<10){ showToastMessage('❌ Please enter valid phone number', true); return; } const formattedPhone = formatPhoneNumber(phone); sendBtn.disabled=true; sendBtn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> Sending...'; try{ await setupModalRecaptcha(); modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier); showToastMessage('✅ OTP sent successfully!'); document.getElementById('modalPhoneSection').style.display='none'; document.getElementById('modalOtpSection').classList.add('show'); startModalTimer(); } catch(error){ showToastMessage('Failed to send OTP', true); } finally{ sendBtn.disabled=false; sendBtn.innerHTML='Send OTP'; } }
-    function startModalTimer(){ let timeLeft=60; const timerSpan=document.getElementById('modalTimer'); const resendBtn=document.getElementById('modalResendBtn'); if(modalCountdownTimer) clearInterval(modalCountdownTimer); modalCountdownTimer = setInterval(()=>{ if(timeLeft<=0){ clearInterval(modalCountdownTimer); if(timerSpan) timerSpan.textContent=''; if(resendBtn){ resendBtn.style.display='inline-block'; resendBtn.disabled=false; } } else { if(timerSpan) timerSpan.textContent=`Resend available in ${timeLeft}s`; if(resendBtn) resendBtn.style.display='none'; timeLeft--; } },1000); }
-    async function modalVerifyOTP(){ const otpInput = document.getElementById('modalOtpInput'); const otp = otpInput.value.trim(); const verifyBtn = document.getElementById('modalVerifyBtn'); if(!otp || otp.length<6){ showToastMessage('❌ Please enter 6-digit OTP', true); return; } verifyBtn.disabled=true; verifyBtn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> Verifying...'; try{ const result = await modalConfirmationResult.confirm(otp); const user = result.user; const userData = { uid: user.uid, phone: user.phoneNumber, name: `User${user.phoneNumber.slice(-4)}`, email: `${user.uid}@vedanta.com`, joinDate: new Date().toISOString() }; localStorage.setItem('vedantaUser', JSON.stringify(userData)); await db.collection('users').doc(user.uid).set(userData, { merge: true }); showToastMessage(`✅ Welcome! Redirecting...`); closeLoginModal(); if(pendingBuyProduct){ const tempCart = [{ id: pendingBuyProduct.id, name: pendingBuyProduct.name, price: pendingBuyProduct.price, quantity: 1 }]; localStorage.setItem('vedantaCart', JSON.stringify(tempCart)); setTimeout(()=>{ window.location.href = 'secure-checkout.html'; },500); } } catch(error){ showToastMessage('Invalid OTP', true); } finally{ verifyBtn.disabled=false; verifyBtn.innerHTML='Verify & Continue'; } }
-    async function modalResendOTP(){ const phoneInput = document.getElementById('modalPhoneInput'); const phone = phoneInput.value.trim(); const formattedPhone = formatPhoneNumber(phone); const resendBtn = document.getElementById('modalResendBtn'); resendBtn.disabled=true; resendBtn.innerHTML='<i class="fas fa-spinner fa-pulse"></i>'; try{ modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier); showToastMessage('✅ OTP resent!'); startModalTimer(); } catch(error){ showToastMessage('Failed to resend OTP', true); } resendBtn.disabled=false; resendBtn.innerHTML='Resend OTP'; }
-    function modalBackToPhone(){ document.getElementById('modalPhoneSection').style.display='block'; document.getElementById('modalOtpSection').classList.remove('show'); document.getElementById('modalOtpInput').value=''; if(modalCountdownTimer) clearInterval(modalCountdownTimer); }
-    function openLoginModal(product){ pendingBuyProduct = product; const modal = document.getElementById('loginModal'); document.getElementById('modalPhoneSection').style.display='block'; document.getElementById('modalOtpSection').classList.remove('show'); document.getElementById('modalPhoneInput').value=''; document.getElementById('modalOtpInput').value=''; if(modalCountdownTimer) clearInterval(modalCountdownTimer); modal.classList.add('show'); }
-    function closeLoginModal(){ const modal = document.getElementById('loginModal'); modal.classList.remove('show'); pendingBuyProduct = null; if(modalCountdownTimer) clearInterval(modalCountdownTimer); }
+    async function checkUserHasSavedAddress(){ 
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser')); 
+        if(!currentUser || !currentUser.uid) return false; 
+        try { 
+            const addrSnapshot = await db.collection('addresses').where('userId','==',currentUser.uid).limit(1).get(); 
+            if(!addrSnapshot.empty) return true; 
+            const orderSnapshot = await db.collection('orders').where('customerPhone','==',currentUser.phone).limit(1).get(); 
+            return !orderSnapshot.empty; 
+        } catch(e){ return false; } 
+    }
+    
+    async function buyNowWithSmartRedirect(product){ 
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser')); 
+        if(currentUser && currentUser.email){ 
+            const hasSavedAddress = await checkUserHasSavedAddress(); 
+            const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1 }]; 
+            localStorage.setItem('vedantaCart', JSON.stringify(tempCart)); 
+            if(hasSavedAddress){ 
+                showToastMessage(`💳 Redirecting to checkout`); 
+                setTimeout(()=>{ window.location.href = 'secure-checkout2.html'; },300); 
+            } else { 
+                showToastMessage(`💳 Proceeding to checkout`); 
+                setTimeout(()=>{ window.location.href = 'secure-checkout.html'; },300); 
+            } 
+        } else { 
+            openLoginModal(product); 
+        } 
+    }
+    
+    async function checkoutWithSmartRedirect(){ 
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser')); 
+        const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || []; 
+        if(currentCart.length === 0){ 
+            showToastMessage('🛒 Cart is empty!', true); 
+            return; 
+        } 
+        if(currentUser && currentUser.email){ 
+            const hasSavedAddress = await checkUserHasSavedAddress(); 
+            if(hasSavedAddress) window.location.href = 'secure-checkout2.html'; 
+            else window.location.href = 'secure-checkout.html'; 
+        } else { 
+            showToastMessage('🔐 Please login to checkout'); 
+            setTimeout(()=>{ window.location.href = 'profile.html'; },800); 
+        } 
+    }
+    
+    // FIXED: Setup reCAPTCHA with visible container
+    function setupModalRecaptcha(){ 
+        return new Promise((resolve,reject)=>{
+            try{
+                // Clear existing verifier if any
+                if(modalRecaptchaVerifier) {
+                    modalRecaptchaVerifier.clear();
+                    modalRecaptchaVerifier = null;
+                }
+                // Create new verifier with visible container (not invisible)
+                modalRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-modal', {
+                    size: 'normal',
+                    callback: () => {
+                        console.log('reCAPTCHA resolved');
+                        resolve(true);
+                    },
+                    'expired-callback': () => {
+                        console.log('reCAPTCHA expired');
+                        showToastMessage('reCAPTCHA expired. Please try again.', true);
+                        reject(new Error('reCAPTCHA expired'));
+                    }
+                });
+                // Render the reCAPTCHA
+                modalRecaptchaVerifier.render().then(() => {
+                    console.log('reCAPTCHA rendered');
+                    resolve(true);
+                }).catch(err => {
+                    console.error('reCAPTCHA render error:', err);
+                    reject(err);
+                });
+            } catch(e){ 
+                console.error('reCAPTCHA setup error:', e);
+                reject(e); 
+            }
+        });
+    }
+    
+    async function modalSendOTP(){ 
+        const phoneInput = document.getElementById('modalPhoneInput'); 
+        const phone = phoneInput.value.trim(); 
+        const sendBtn = document.getElementById('modalSendOtpBtn'); 
+        
+        if(!phone || phone.length<10){ 
+            showToastMessage('❌ Please enter valid phone number', true); 
+            return; 
+        } 
+        
+        const formattedPhone = formatPhoneNumber(phone); 
+        sendBtn.disabled=true; 
+        sendBtn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> Sending...'; 
+        
+        try{ 
+            await setupModalRecaptcha(); 
+            modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier); 
+            showToastMessage('✅ OTP sent successfully!'); 
+            document.getElementById('modalPhoneSection').style.display='none'; 
+            document.getElementById('modalOtpSection').classList.add('show'); 
+            startModalTimer(); 
+        } catch(error){ 
+            console.error('OTP send error:', error);
+            let errorMsg = 'Failed to send OTP';
+            if(error.code === 'auth/invalid-phone-number') errorMsg = '❌ Invalid phone number format';
+            else if(error.code === 'auth/too-many-requests') errorMsg = '❌ Too many requests. Try again later';
+            else if(error.message) errorMsg = error.message;
+            showToastMessage(errorMsg, true); 
+            // Reset reCAPTCHA on error
+            if(modalRecaptchaVerifier) {
+                modalRecaptchaVerifier.clear();
+                modalRecaptchaVerifier = null;
+            }
+        } finally{ 
+            sendBtn.disabled=false; 
+            sendBtn.innerHTML='Send OTP'; 
+        } 
+    }
+    
+    function startModalTimer(){ 
+        let timeLeft=60; 
+        const timerSpan=document.getElementById('modalTimer'); 
+        const resendBtn=document.getElementById('modalResendBtn'); 
+        if(modalCountdownTimer) clearInterval(modalCountdownTimer); 
+        modalCountdownTimer = setInterval(()=>{ 
+            if(timeLeft<=0){ 
+                clearInterval(modalCountdownTimer); 
+                if(timerSpan) timerSpan.textContent=''; 
+                if(resendBtn){ 
+                    resendBtn.style.display='inline-block'; 
+                    resendBtn.disabled=false; 
+                } 
+            } else { 
+                if(timerSpan) timerSpan.textContent=`Resend available in ${timeLeft}s`; 
+                if(resendBtn) resendBtn.style.display='none'; 
+                timeLeft--; 
+            } 
+        },1000); 
+    }
+    
+    async function modalVerifyOTP(){ 
+        const otpInput = document.getElementById('modalOtpInput'); 
+        const otp = otpInput.value.trim(); 
+        const verifyBtn = document.getElementById('modalVerifyBtn'); 
+        
+        if(!otp || otp.length<6){ 
+            showToastMessage('❌ Please enter 6-digit OTP', true); 
+            return; 
+        } 
+        
+        verifyBtn.disabled=true; 
+        verifyBtn.innerHTML='<i class="fas fa-spinner fa-pulse"></i> Verifying...'; 
+        
+        try{ 
+            const result = await modalConfirmationResult.confirm(otp); 
+            const user = result.user; 
+            const userData = { 
+                uid: user.uid, 
+                phone: user.phoneNumber, 
+                name: `User${user.phoneNumber.slice(-4)}`, 
+                email: `${user.uid}@vedanta.com`, 
+                joinDate: new Date().toISOString() 
+            }; 
+            localStorage.setItem('vedantaUser', JSON.stringify(userData)); 
+            await db.collection('users').doc(user.uid).set(userData, { merge: true }); 
+            showToastMessage(`✅ Welcome! Redirecting...`); 
+            closeLoginModal(); 
+            if(pendingBuyProduct){ 
+                const tempCart = [{ id: pendingBuyProduct.id, name: pendingBuyProduct.name, price: pendingBuyProduct.price, quantity: 1 }]; 
+                localStorage.setItem('vedantaCart', JSON.stringify(tempCart)); 
+                setTimeout(()=>{ window.location.href = 'secure-checkout.html'; },500); 
+            } 
+        } catch(error){ 
+            console.error('OTP verification error:', error);
+            let errorMsg = 'Invalid OTP';
+            if(error.code === 'auth/invalid-verification-code') errorMsg = '❌ Invalid OTP. Please try again';
+            else if(error.code === 'auth/session-expired') errorMsg = '❌ OTP expired. Request a new one';
+            else if(error.message) errorMsg = error.message;
+            showToastMessage(errorMsg, true); 
+        } finally{ 
+            verifyBtn.disabled=false; 
+            verifyBtn.innerHTML='Verify & Continue'; 
+        } 
+    }
+    
+    async function modalResendOTP(){ 
+        const phoneInput = document.getElementById('modalPhoneInput'); 
+        const phone = phoneInput.value.trim(); 
+        const formattedPhone = formatPhoneNumber(phone); 
+        const resendBtn = document.getElementById('modalResendBtn'); 
+        
+        resendBtn.disabled=true; 
+        resendBtn.innerHTML='<i class="fas fa-spinner fa-pulse"></i>'; 
+        
+        try{ 
+            // Reset reCAPTCHA for resend
+            if(modalRecaptchaVerifier) {
+                modalRecaptchaVerifier.clear();
+                modalRecaptchaVerifier = null;
+            }
+            await setupModalRecaptcha();
+            modalConfirmationResult = await auth.signInWithPhoneNumber(formattedPhone, modalRecaptchaVerifier); 
+            showToastMessage('✅ OTP resent!'); 
+            startModalTimer(); 
+        } catch(error){ 
+            console.error('Resend OTP error:', error);
+            showToastMessage('Failed to resend OTP', true); 
+        } finally {
+            resendBtn.disabled=false; 
+            resendBtn.innerHTML='Resend OTP';
+        }
+    }
+    
+    function modalBackToPhone(){ 
+        document.getElementById('modalPhoneSection').style.display='block'; 
+        document.getElementById('modalOtpSection').classList.remove('show'); 
+        document.getElementById('modalOtpInput').value=''; 
+        if(modalCountdownTimer) clearInterval(modalCountdownTimer); 
+        // Reset reCAPTCHA when going back
+        if(modalRecaptchaVerifier) {
+            modalRecaptchaVerifier.clear();
+            modalRecaptchaVerifier = null;
+        }
+    }
+    
+    function openLoginModal(product){ 
+        pendingBuyProduct = product; 
+        const modal = document.getElementById('loginModal'); 
+        document.getElementById('modalPhoneSection').style.display='block'; 
+        document.getElementById('modalOtpSection').classList.remove('show'); 
+        document.getElementById('modalPhoneInput').value=''; 
+        document.getElementById('modalOtpInput').value=''; 
+        if(modalCountdownTimer) clearInterval(modalCountdownTimer); 
+        modal.classList.add('show'); 
+    }
+    
+    function closeLoginModal(){ 
+        const modal = document.getElementById('loginModal'); 
+        modal.classList.remove('show'); 
+        pendingBuyProduct = null; 
+        if(modalCountdownTimer) clearInterval(modalCountdownTimer); 
+        if(modalRecaptchaVerifier) {
+            modalRecaptchaVerifier.clear();
+            modalRecaptchaVerifier = null;
+        }
+    }
     
     function saveCart(){ localStorage.setItem('vedantaCart', JSON.stringify(cart)); updateCartUI(); }
-    function addToCart(product){ const existing = cart.find(item=>item.id == product.id && !item.isCombo); if(existing){ existing.quantity++; } else { cart.push({ ...product, quantity: 1, isCombo: false }); } saveCart(); showToastMessage(`🛍️ ${product.name} added!`); }
-    function updateCartQuantity(index, newQuantity){ const item = cart[index]; if(item.isCombo && item.comboMultiplier){ const newMultiples = newQuantity / item.comboMultiplier; if(newMultiples < 1){ cart.splice(index,1); } else { item.quantity = newMultiples * item.comboMultiplier; } } else { if(newQuantity < 1){ cart.splice(index,1); } else { cart[index].quantity = newQuantity; } } saveCart(); }
+    
+    function addToCart(product){ 
+        const existing = cart.find(item=>item.id == product.id && !item.isCombo); 
+        if(existing){ 
+            existing.quantity++; 
+        } else { 
+            cart.push({ ...product, quantity: 1, isCombo: false }); 
+        } 
+        saveCart(); 
+        showToastMessage(`🛍️ ${product.name} added!`); 
+    }
+    
+    function updateCartQuantity(index, newQuantity){ 
+        const item = cart[index]; 
+        if(item.isCombo && item.comboMultiplier){ 
+            const newMultiples = newQuantity / item.comboMultiplier; 
+            if(newMultiples < 1){ 
+                cart.splice(index,1); 
+            } else { 
+                item.quantity = newMultiples * item.comboMultiplier; 
+            } 
+        } else { 
+            if(newQuantity < 1){ 
+                cart.splice(index,1); 
+            } else { 
+                cart[index].quantity = newQuantity; 
+            } 
+        } 
+        saveCart(); 
+    }
+    
     function removeFromCart(index){ cart.splice(index,1); saveCart(); }
-    function updateCartUI(){ const totalItems = cart.reduce((sum,item)=>sum+item.quantity,0); const cartCountEl = document.getElementById('cartCount'); if(cartCountEl) cartCountEl.innerText = totalItems; const cartItemsDiv = document.getElementById('cartItems'); const cartTotalSpan = document.getElementById('cartTotal'); if(cart.length===0){ if(cartItemsDiv) cartItemsDiv.innerHTML = '<div class="empty-cart">🛒 Your cart is empty</div>'; if(cartTotalSpan) cartTotalSpan.innerText = '₹0'; return; } let total = 0; cartItemsDiv.innerHTML = ''; cart.forEach((item,idx)=>{ const itemTotal = item.price * item.quantity; total += itemTotal; cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)}</h4>${item.combo?`<div class="combo-tag"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</div>`:''}<p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`; }); document.querySelectorAll('.cart-qty-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); const idx = parseInt(btn.dataset.index); const action = btn.dataset.action; if(action==='incr'){ if(cart[idx].isCombo && cart[idx].comboMultiplier) updateCartQuantity(idx, cart[idx].quantity + cart[idx].comboMultiplier); else updateCartQuantity(idx, cart[idx].quantity + 1); } else if(action==='decr'){ if(cart[idx].isCombo && cart[idx].comboMultiplier) updateCartQuantity(idx, cart[idx].quantity - cart[idx].comboMultiplier); else updateCartQuantity(idx, cart[idx].quantity - 1); } }); }); document.querySelectorAll('.cart-item-remove').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); removeFromCart(parseInt(btn.dataset.index)); }); }); if(cartTotalSpan) cartTotalSpan.innerText = `₹${total}`; }
+    
+    function updateCartUI(){ 
+        const totalItems = cart.reduce((sum,item)=>sum+item.quantity,0); 
+        const cartCountEl = document.getElementById('cartCount'); 
+        if(cartCountEl) cartCountEl.innerText = totalItems; 
+        const cartItemsDiv = document.getElementById('cartItems'); 
+        const cartTotalSpan = document.getElementById('cartTotal'); 
+        
+        if(cart.length===0){ 
+            if(cartItemsDiv) cartItemsDiv.innerHTML = '<div class="empty-cart">🛒 Your cart is empty</div>'; 
+            if(cartTotalSpan) cartTotalSpan.innerText = '₹0'; 
+            return; 
+        } 
+        
+        let total = 0; 
+        cartItemsDiv.innerHTML = ''; 
+        cart.forEach((item,idx)=>{ 
+            const itemTotal = item.price * item.quantity; 
+            total += itemTotal; 
+            cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)}</h4>${item.combo?`<div class="combo-tag"><i class="fas fa-gift"></i> ${escapeHtml(item.combo)}</div>`:''}<p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`; 
+        }); 
+        
+        document.querySelectorAll('.cart-qty-btn').forEach(btn=>{ 
+            btn.addEventListener('click',(e)=>{ 
+                e.stopPropagation(); 
+                const idx = parseInt(btn.dataset.index); 
+                const action = btn.dataset.action; 
+                if(action==='incr'){ 
+                    if(cart[idx].isCombo && cart[idx].comboMultiplier) updateCartQuantity(idx, cart[idx].quantity + cart[idx].comboMultiplier); 
+                    else updateCartQuantity(idx, cart[idx].quantity + 1); 
+                } else if(action==='decr'){ 
+                    if(cart[idx].isCombo && cart[idx].comboMultiplier) updateCartQuantity(idx, cart[idx].quantity - cart[idx].comboMultiplier); 
+                    else updateCartQuantity(idx, cart[idx].quantity - 1); 
+                } 
+            }); 
+        }); 
+        
+        document.querySelectorAll('.cart-item-remove').forEach(btn=>{ 
+            btn.addEventListener('click',(e)=>{ 
+                e.stopPropagation(); 
+                removeFromCart(parseInt(btn.dataset.index)); 
+            }); 
+        }); 
+        
+        if(cartTotalSpan) cartTotalSpan.innerText = `₹${total}`; 
+    }
+    
     function openCart(){ document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.add('show'); }
     function closeCart(){ document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('show'); }
-    function renderProducts(){ const container = document.getElementById('productsContainer'); const resultSpan = document.getElementById('resultCount'); if(!container) return; let filtered = [...allProducts]; const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || ''; if(searchTerm){ filtered = filtered.filter(p=>p.name && p.name.toLowerCase().includes(searchTerm)); }
-        if(filtered.length === 0){ container.innerHTML = `<div style="text-align:center; padding:40px;"><i class="fas fa-search"></i><br>No products found ✨</div>`; if(resultSpan) resultSpan.innerText = '0'; return; } container.innerHTML = ''; filtered.forEach(p=>{ const hasImage = p.images && p.images.length > 0; const firstImage = hasImage ? p.images[0] : null; container.innerHTML += `<div class="product-card" onclick="window.goToProductDetail('${p.id}')"><div class="product-img">${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}<div class="badge-offer">${p.badge || 'New'}</div></div><div class="product-info"><div class="product-title">${escapeHtml(p.name)}</div><div class="product-category">${p.category || 'General'}</div><div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div><div class="product-buttons"><button class="buynow-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fas fa-bolt"></i> BUY NOW</button><button class="cart-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fa-regular fa-bag-shopping"></i> ADD</button></div></div></div>`; }); if(resultSpan) resultSpan.innerText = filtered.length; document.querySelectorAll('.cart-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); addToCart({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) }); }); }); document.querySelectorAll('.buynow-btn').forEach(btn=>{ btn.addEventListener('click',(e)=>{ e.stopPropagation(); buyNowWithSmartRedirect({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) }); }); }); }
-    function startLiveRealtimeSync(){ if(unsubscribeProducts) unsubscribeProducts(); const query = db.collection('products').where('status','==','active'); unsubscribeProducts = query.onSnapshot((snapshot)=>{ const newProducts = []; snapshot.forEach(doc=>{ const data = doc.data(); newProducts.push({ id: doc.id, name: data.name, category: data.category, price: data.price, icon: data.icon || 'fa-gem', badge: data.badge || 'New', images: data.images || [] }); }); allProducts = newProducts; localStorage.setItem('vedantaProducts', JSON.stringify(allProducts)); renderProducts(); }); }
-    function loadCachedProducts(){ const cached = localStorage.getItem('vedantaProducts'); if(cached){ try{ const parsed = JSON.parse(cached); if(parsed && parsed.length > 0){ allProducts = parsed; renderProducts(); } } catch(e){} } }
     
+    function renderProducts(){ 
+        const container = document.getElementById('productsContainer'); 
+        const resultSpan = document.getElementById('resultCount'); 
+        if(!container) return; 
+        
+        let filtered = [...allProducts]; 
+        const searchTerm = document.getElementById('searchInput')?.value.toLowerCase() || ''; 
+        if(searchTerm){ 
+            filtered = filtered.filter(p=>p.name && p.name.toLowerCase().includes(searchTerm)); 
+        }
+        
+        if(filtered.length === 0){ 
+            container.innerHTML = `<div style="text-align:center; padding:40px;"><i class="fas fa-search"></i><br>No products found ✨</div>`; 
+            if(resultSpan) resultSpan.innerText = '0'; 
+            return; 
+        } 
+        
+        container.innerHTML = ''; 
+        filtered.forEach(p=>{ 
+            const hasImage = p.images && p.images.length > 0; 
+            const firstImage = hasImage ? p.images[0] : null; 
+            container.innerHTML += `<div class="product-card" onclick="window.goToProductDetail('${p.id}')"><div class="product-img">${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}<div class="badge-offer">${p.badge || 'New'}</div></div><div class="product-info"><div class="product-title">${escapeHtml(p.name)}</div><div class="product-category">${p.category || 'General'}</div><div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div><div class="product-buttons"><button class="buynow-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fas fa-bolt"></i> BUY NOW</button><button class="cart-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fa-regular fa-bag-shopping"></i> ADD</button></div></div></div>`; 
+        }); 
+        
+        if(resultSpan) resultSpan.innerText = filtered.length; 
+        
+        document.querySelectorAll('.cart-btn').forEach(btn=>{ 
+            btn.addEventListener('click',(e)=>{ 
+                e.stopPropagation(); 
+                addToCart({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) }); 
+            }); 
+        }); 
+        
+        document.querySelectorAll('.buynow-btn').forEach(btn=>{ 
+            btn.addEventListener('click',(e)=>{ 
+                e.stopPropagation(); 
+                buyNowWithSmartRedirect({ id: btn.dataset.id, name: btn.dataset.name, price: parseInt(btn.dataset.price) }); 
+            }); 
+        }); 
+    }
+    
+    function startLiveRealtimeSync(){ 
+        if(unsubscribeProducts) unsubscribeProducts(); 
+        const query = db.collection('products').where('status','==','active'); 
+        unsubscribeProducts = query.onSnapshot((snapshot)=>{ 
+            const newProducts = []; 
+            snapshot.forEach(doc=>{ 
+                const data = doc.data(); 
+                newProducts.push({ id: doc.id, name: data.name, category: data.category, price: data.price, icon: data.icon || 'fa-gem', badge: data.badge || 'New', images: data.images || [] }); 
+            }); 
+            allProducts = newProducts; 
+            localStorage.setItem('vedantaProducts', JSON.stringify(allProducts)); 
+            renderProducts(); 
+        }, (error) => {
+            console.error("Firestore error:", error);
+        }); 
+    }
+    
+    function loadCachedProducts(){ 
+        const cached = localStorage.getItem('vedantaProducts'); 
+        if(cached){ 
+            try{ 
+                const parsed = JSON.parse(cached); 
+                if(parsed && parsed.length > 0){ 
+                    allProducts = parsed; 
+                    renderProducts(); 
+                } 
+            } catch(e){} 
+        } 
+    }
+    
+    // Event Listeners
     document.getElementById('searchInput')?.addEventListener('input',()=>{ renderProducts(); });
-    document.getElementById('floatingCart')?.addEventListener('click', openCart); document.getElementById('closeCartBtn')?.addEventListener('click', closeCart); document.getElementById('cartOverlay')?.addEventListener('click', closeCart); document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWithSmartRedirect);
+    document.getElementById('floatingCart')?.addEventListener('click', openCart); 
+    document.getElementById('closeCartBtn')?.addEventListener('click', closeCart); 
+    document.getElementById('cartOverlay')?.addEventListener('click', closeCart); 
+    document.getElementById('checkoutBtn')?.addEventListener('click', checkoutWithSmartRedirect);
     document.getElementById('chatbotBtn')?.addEventListener('click',()=>document.getElementById('chatbotWindow').classList.toggle('open'));
     document.getElementById('closeChatBtn')?.addEventListener('click',()=>document.getElementById('chatbotWindow').classList.remove('open'));
-    document.getElementById('modalSendOtpBtn')?.addEventListener('click', modalSendOTP); document.getElementById('modalVerifyBtn')?.addEventListener('click', modalVerifyOTP); document.getElementById('modalResendBtn')?.addEventListener('click', modalResendOTP); document.getElementById('modalBackBtn')?.addEventListener('click', modalBackToPhone); document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
+    document.getElementById('modalSendOtpBtn')?.addEventListener('click', modalSendOTP); 
+    document.getElementById('modalVerifyBtn')?.addEventListener('click', modalVerifyOTP); 
+    document.getElementById('modalResendBtn')?.addEventListener('click', modalResendOTP); 
+    document.getElementById('modalBackBtn')?.addEventListener('click', modalBackToPhone); 
+    document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
     document.getElementById('loginModal')?.addEventListener('click',(e)=>{ if(e.target === document.getElementById('loginModal')) closeLoginModal(); });
     document.getElementById('designNowBtn')?.addEventListener('click',()=>window.location.href='customized-t-shirt.html');
     document.getElementById('customizeImageArea')?.addEventListener('click',()=>window.location.href='customized-t-shirt.html');
     
     window.goToProductDetail = (id)=>{ localStorage.setItem('vedanta_selected_product_id', id); window.location.href='product-detail.html'; };
-    initSlider(); initPromoSlider(); loadCachedProducts(); startLiveRealtimeSync(); updateCartUI();
-    window.addComboToCart = function(product, comboQty, comboPrice){ const finalPrice = comboPrice / comboQty; const comboInfo = `${comboQty} for ₹${comboPrice}`; const existing = cart.find(item=>item.id == product.id && item.combo === comboInfo); if(existing){ existing.quantity += comboQty; } else { cart.push({ id: product.id, name: product.name, price: finalPrice, quantity: comboQty, combo: comboInfo, isCombo: true, comboMultiplier: comboQty }); } saveCart(); showToastMessage(`🎉 Combo: ${comboQty} items for ₹${comboPrice} added!`); };
+    
+    // Initialize
+    initSlider(); 
+    initPromoSlider(); 
+    loadCachedProducts(); 
+    startLiveRealtimeSync(); 
+    updateCartUI();
+    
+    window.addComboToCart = function(product, comboQty, comboPrice){ 
+        const finalPrice = comboPrice / comboQty; 
+        const comboInfo = `${comboQty} for ₹${comboPrice}`; 
+        const existing = cart.find(item=>item.id == product.id && item.combo === comboInfo); 
+        if(existing){ 
+            existing.quantity += comboQty; 
+        } else { 
+            cart.push({ id: product.id, name: product.name, price: finalPrice, quantity: comboQty, combo: comboInfo, isCombo: true, comboMultiplier: comboQty }); 
+        } 
+        saveCart(); 
+        showToastMessage(`🎉 Combo: ${comboQty} items for ₹${comboPrice} added!`); 
+    };
 </script>
 </body>
 </html>
