@@ -3,25 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>VEDANTA | Professional Designer</title>
+    <title>VEDANTA | T-Shirt Designer</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&family=Orbitron&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <!-- Remove.bg API for background removal -->
-    <script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.4.0/dist/background-removal.umd.js"></script>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: 'Space Grotesk', sans-serif;
-            background: #0a0a0f;
+            background: #050508;
             color: #FFFFFF;
             overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
         }
 
         .header {
@@ -30,7 +39,7 @@
             border-bottom: 1px solid rgba(212,175,55,0.2);
         }
         .logo {
-            font-size: 40px;
+            font-size: 38px;
             font-weight: 800;
             background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
             -webkit-background-clip: text;
@@ -38,7 +47,7 @@
             color: transparent;
         }
         .tagline {
-            font-size: 11px;
+            font-size: 10px;
             letter-spacing: 3px;
             color: #D4AF37;
         }
@@ -53,18 +62,18 @@
         .section-title {
             font-size: 20px;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             color: #D4AF37;
         }
         .style-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
             gap: 15px;
         }
         .style-card {
             background: rgba(20,20,30,0.75);
             border-radius: 20px;
-            padding: 15px 10px;
+            padding: 12px 8px;
             text-align: center;
             cursor: pointer;
             border: 2px solid transparent;
@@ -73,6 +82,7 @@
         .style-card.active {
             border-color: #D4AF37;
             background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
+            box-shadow: 0 0 20px rgba(212,175,55,0.3);
         }
         .style-img {
             width: 100%;
@@ -81,31 +91,30 @@
             border-radius: 15px;
             background: #1a1a2e;
         }
-        .style-name { font-weight: 600; font-size: 13px; margin-top: 8px; }
-        .style-price { color: #D4AF37; font-size: 12px; }
+        .style-name { font-weight: 600; font-size: 12px; margin-top: 6px; }
+        .style-price { color: #D4AF37; font-size: 11px; }
 
         .designer-grid {
             display: grid;
-            grid-template-columns: 320px 1fr 280px;
+            grid-template-columns: 350px 1fr 260px;
             gap: 20px;
         }
         @media (max-width: 1200px) {
-            .designer-grid { grid-template-columns: 1fr; }
+            .designer-grid { grid-template-columns: 1fr; gap: 20px; }
         }
 
-        /* Tools Panel */
         .tools-panel {
             background: rgba(15,15,22,0.95);
             backdrop-filter: blur(20px);
             border-radius: 24px;
-            padding: 20px;
+            padding: 18px;
             border: 1px solid rgba(212,175,55,0.25);
             max-height: 85vh;
             overflow-y: auto;
         }
         .panel-title {
             color: #D4AF37;
-            font-size: 16px;
+            font-size: 15px;
             font-weight: 700;
             margin-bottom: 15px;
             padding-bottom: 8px;
@@ -133,12 +142,11 @@
             font-size: 12px;
         }
 
-        /* Color Palette - Most usable colors visible, hidden in expandable section */
         .color-palette {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
             gap: 6px;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .color-swatch {
             width: 100%;
@@ -158,10 +166,12 @@
             padding: 8px;
             background: rgba(0,0,0,0.3);
             border-radius: 12px;
+            max-height: 120px;
+            overflow-y: auto;
         }
         .more-colors.show { display: grid; }
         .toggle-colors {
-            font-size: 11px;
+            font-size: 10px;
             color: #D4AF37;
             cursor: pointer;
             text-align: center;
@@ -186,7 +196,7 @@
         .upload-area {
             border: 2px dashed rgba(212,175,55,0.4);
             border-radius: 14px;
-            padding: 15px;
+            padding: 12px;
             text-align: center;
             cursor: pointer;
         }
@@ -195,7 +205,7 @@
         .editor-panel {
             background: rgba(10,10,18,0.6);
             border-radius: 28px;
-            padding: 20px;
+            padding: 15px;
             text-align: center;
         }
         .canvas-container {
@@ -209,36 +219,36 @@
         .order-panel {
             background: rgba(15,15,22,0.95);
             border-radius: 24px;
-            padding: 20px;
+            padding: 18px;
             border: 1px solid rgba(212,175,55,0.25);
             position: sticky;
             top: 20px;
         }
         .order-detail {
-            padding: 10px 0;
+            padding: 8px 0;
             border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             justify-content: space-between;
-            font-size: 13px;
+            font-size: 12px;
         }
         .order-total {
-            padding: 15px 0;
+            padding: 12px 0;
             display: flex;
             justify-content: space-between;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 800;
             color: #D4AF37;
         }
         .btn-buy {
             width: 100%;
-            padding: 14px;
+            padding: 12px;
             border-radius: 50px;
             font-weight: 800;
             cursor: pointer;
             background: linear-gradient(135deg, #FF4500, #FF8C00);
             border: none;
             color: white;
-            font-size: 16px;
+            font-size: 14px;
         }
         .btn-buy:hover { transform: translateY(-2px); filter: brightness(1.05); }
 
@@ -266,17 +276,17 @@
         .instruction-text { font-size: 10px; color: #888; margin-top: 10px; }
         
         .layer-list {
-            margin-top: 10px;
-            max-height: 150px;
+            margin-top: 8px;
+            max-height: 120px;
             overflow-y: auto;
         }
         .layer-item {
-            padding: 5px 8px;
+            padding: 4px 8px;
             background: rgba(0,0,0,0.3);
-            margin-bottom: 4px;
-            border-radius: 8px;
+            margin-bottom: 3px;
+            border-radius: 6px;
             cursor: pointer;
-            font-size: 11px;
+            font-size: 10px;
             display: flex;
             justify-content: space-between;
         }
@@ -298,51 +308,51 @@
         .modal-content {
             background: rgba(15,15,22,0.98);
             border-radius: 28px;
-            padding: 30px;
-            max-width: 380px;
+            padding: 25px;
+            max-width: 350px;
             width: 90%;
             border: 1px solid rgba(212,175,55,0.3);
             text-align: center;
         }
         .modal-content input {
             width: 100%;
-            padding: 12px;
-            margin: 12px 0;
+            padding: 10px;
+            margin: 10px 0;
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 16px;
+            border-radius: 14px;
             color: white;
         }
         .modal-content button {
             width: 100%;
-            padding: 12px;
+            padding: 10px;
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             border: none;
-            border-radius: 16px;
+            border-radius: 14px;
             font-weight: bold;
             cursor: pointer;
         }
         .close-modal {
             position: absolute;
             top: 15px;
-            right: 25px;
-            font-size: 28px;
+            right: 20px;
+            font-size: 24px;
             cursor: pointer;
             color: white;
         }
         
-        .remove-bg-btn {
-            background: rgba(0,255,0,0.2);
-            border-color: #00ff00;
-        }
+        .remove-bg-btn { border-color: #00ff00; color: #00ff00; }
         .remove-bg-btn:hover { background: #00ff00; color: #000; }
+        
+        .slider-row { display: flex; gap: 8px; align-items: center; }
+        .slider-row input { flex: 1; }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo">VEDANTA</div>
-    <div class="tagline">✦ PROFESSIONAL DESIGN STUDIO ✦</div>
+    <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
 </div>
 
 <div class="designer-container">
@@ -353,7 +363,7 @@
 
     <div class="designer-grid">
         <div class="tools-panel">
-            <div class="panel-title"><i class="fas fa-wand-magic"></i> PHOTOSHOP TOOLS</div>
+            <div class="panel-title"><i class="fas fa-wand-magic"></i> DESIGN TOOLS</div>
             
             <div class="tool-group">
                 <label>📝 ADD TEXT</label>
@@ -362,7 +372,7 @@
             </div>
             
             <div class="tool-group">
-                <label>🎨 TEXT COLOR (Most Used)</label>
+                <label>🎨 TEXT COLOR</label>
                 <div class="color-palette" id="colorPalette">
                     <div class="color-swatch" style="background:#FFFFFF;"></div>
                     <div class="color-swatch" style="background:#000000;"></div>
@@ -383,11 +393,9 @@
                 </div>
                 <div class="toggle-colors" id="toggleColors">+ Show More Colors (100+)</div>
                 <div class="more-colors" id="moreColors"></div>
-                <div class="rgb-inputs" style="display: flex; gap: 5px; margin-top: 8px;">
-                    <input type="color" id="customColor" value="#D4AF37" style="flex: 1; height: 35px;">
-                    <input type="number" id="rVal" placeholder="R" min="0" max="255" style="width: 55px;">
-                    <input type="number" id="gVal" placeholder="G" min="0" max="255" style="width: 55px;">
-                    <input type="number" id="bVal" placeholder="B" min="0" max="255" style="width: 55px;">
+                <div style="display: flex; gap: 8px; margin-top: 8px;">
+                    <input type="color" id="customColor" value="#D4AF37" style="flex:1; height: 32px;">
+                    <button class="btn-icon" id="applyColorBtn" style="margin-top:0;">Apply</button>
                 </div>
             </div>
             
@@ -404,13 +412,12 @@
                     <option value="Oswald">Oswald</option>
                     <option value="Lobster">Lobster</option>
                     <option value="Bebas Neue">Bebas Neue</option>
-                    <option value="Great Vibes">Great Vibes</option>
                 </select>
-                <div class="slider-row" style="display: flex; gap: 10px; margin-top: 8px;">
-                    <input type="range" id="fontSizeSlider" min="12" max="120" value="36" style="flex:1;">
+                <div class="slider-row" style="margin-top: 8px;">
+                    <input type="range" id="fontSizeSlider" min="12" max="120" value="36">
                     <span id="fontSizeValue" style="color:#D4AF37;">36px</span>
                 </div>
-                <div style="margin-top: 8px;">
+                <div style="margin-top: 6px;">
                     <button class="btn-icon" id="boldBtn"><i class="fas fa-bold"></i> B</button>
                     <button class="btn-icon" id="italicBtn"><i class="fas fa-italic"></i> I</button>
                     <button class="btn-icon" id="underlineBtn"><i class="fas fa-underline"></i> U</button>
@@ -426,29 +433,29 @@
             </div>
             
             <div class="tool-group">
-                <label>⭕ CURVE TEXT (Circle Text)</label>
-                <div class="slider-row" style="display: flex; gap: 10px;">
-                    <input type="range" id="curveSlider" min="0" max="360" step="5" value="0" style="flex:1;">
+                <label>⭕ CURVE TEXT (Make text circular/curved)</label>
+                <div class="slider-row">
+                    <input type="range" id="curveSlider" min="-90" max="90" step="5" value="0">
                     <span id="curveValue" style="color:#D4AF37;">0°</span>
                 </div>
-                <button class="btn-icon" id="applyCurveBtn">Apply Circle Curve</button>
-                <div class="hint" style="font-size: 10px; color: #888; margin-top: 5px;">💡 Selected text will wrap in a circle!</div>
+                <button class="btn-icon" id="applyCurveBtn">Apply Curve</button>
+                <div class="instruction-text">💡 Positive = Curve down, Negative = Curve up</div>
             </div>
             
             <div class="tool-group">
                 <label>🖼️ UPLOAD DESIGN</label>
                 <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 20px;"></i>
-                    <p>Click to upload</p>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p style="font-size:11px;">Click to upload PNG/JPG</p>
                     <input type="file" id="imageUpload" accept="image/*" style="display:none">
                 </div>
-                <button class="btn-icon remove-bg-btn" id="removeBgBtn"><i class="fas fa-cut"></i> Remove Background (AI)</button>
+                <button class="btn-icon remove-bg-btn" id="removeBgBtn"><i class="fas fa-cut"></i> Remove Background</button>
             </div>
             
             <div class="tool-group">
                 <label>📋 LAYERS</label>
                 <div class="layer-list" id="layerList"></div>
-                <button class="btn-icon" id="deleteSelectedBtn"><i class="fas fa-trash"></i> Delete Selected</button>
+                <button class="btn-icon" id="deleteSelectedBtn"><i class="fas fa-trash"></i> Delete</button>
                 <button class="btn-icon" id="clearAllBtn"><i class="fas fa-eraser"></i> Clear All</button>
             </div>
         </div>
@@ -461,12 +468,33 @@
         </div>
         
         <div class="order-panel">
-            <h3 style="color:#D4AF37; margin-bottom: 15px;"><i class="fas fa-shopping-bag"></i> ORDER SUMMARY</h3>
+            <div class="panel-title" style="margin-bottom: 12px;"><i class="fas fa-shopping-bag"></i> ORDER SUMMARY</div>
             <div class="order-detail"><span>Style:</span><span id="summaryStyle">Full Sleeve</span></div>
             <div class="order-detail"><span>Size:</span><span id="summarySize">XL</span></div>
-            <div class="order-detail"><span>Fabric:</span><span id="summaryGSM">220 GSM</span></div>
+            <div class="order-detail"><span>GSM:</span><span id="summaryGSM">220 GSM</span></div>
+            <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">100% Cotton</span></div>
             <div class="order-detail"><span>Design:</span><span id="summaryElements">None</span></div>
             <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,699</span></div>
+            
+            <div class="tool-group" style="margin-top: 10px;">
+                <label>📏 SIZE</label>
+                <select id="sizeSelect">
+                    <option>S</option><option>M</option><option>L</option><option selected>XL</option><option>XXL</option>
+                </select>
+            </div>
+            <div class="tool-group">
+                <label>⚖️ GSM</label>
+                <select id="gsmSelect">
+                    <option>180 GSM</option><option selected>220 GSM</option><option>260 GSM</option><option>300 GSM</option>
+                </select>
+            </div>
+            <div class="tool-group">
+                <label>🧵 FABRIC</label>
+                <select id="fabricSelect">
+                    <option>100% Cotton</option><option>Cotton Blend</option><option>Polyester</option>
+                </select>
+            </div>
+            
             <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
         </div>
     </div>
@@ -479,11 +507,11 @@
         <h3 style="color:#D4AF37;">Login to Continue</h3>
         <input type="tel" id="loginPhone" placeholder="+91 9876543210">
         <button id="sendOtpBtn">Send OTP</button>
-        <div id="otpSection" style="display:none; margin-top:15px;">
+        <div id="otpSection" style="display:none; margin-top:12px;">
             <input type="text" id="otpInput" placeholder="Enter OTP">
             <button id="verifyOtpBtn">Verify</button>
         </div>
-        <p style="font-size:11px; color:#888;">Demo OTP: 123456</p>
+        <p style="font-size:10px; color:#888;">Demo OTP: 123456</p>
     </div>
 </div>
 
@@ -512,22 +540,9 @@
     let currentStyle = tshirtStyles[0];
     let currentSize = 'XL';
     let currentGSM = '220 GSM';
+    let currentFabric = '100% Cotton';
     let fabricCanvas = null;
     let pendingOrder = null;
-    let imageCache = {};
-
-    // Generate 100+ colors for more colors section
-    function generateMoreColors() {
-        const colors = [];
-        const hues = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180, 195, 210, 225, 240, 255, 270, 285, 300, 315, 330, 345];
-        hues.forEach(hue => {
-            colors.push(`hsl(${hue}, 100%, 50%)`);
-            colors.push(`hsl(${hue}, 70%, 60%)`);
-            colors.push(`hsl(${hue}, 80%, 40%)`);
-            colors.push(`hsl(${hue}, 90%, 30%)`);
-        });
-        return colors;
-    }
 
     function loadTshirtImage(style, keepDesigns = true) {
         if (!fabricCanvas) return;
@@ -537,6 +552,7 @@
             existingObjects.forEach(obj => fabricCanvas.remove(obj));
         }
         const img = new Image();
+        img.crossOrigin = "Anonymous";
         img.onload = () => {
             const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
             fabricCanvas.setBackgroundImage(img, () => {
@@ -555,6 +571,7 @@
                 fabricCanvas.renderAll();
                 updateLayerList();
             });
+            showToast(`⚠️ Image not found: ${style.img}`, true);
         };
         img.src = style.img;
     }
@@ -600,16 +617,17 @@
         }
     }
     
-    function applyCurveToText() {
+    function applyCurve() {
         const active = fabricCanvas.getActiveObject();
         if (!active || (active.type !== 'i-text' && active.type !== 'text')) {
             showToast('Select a text first', true);
             return;
         }
         const angle = parseInt(document.getElementById('curveSlider').value);
-        active.set('angle', angle);
+        active.set('skewX', angle / 10);
+        active.set('skewY', 0);
         fabricCanvas.renderAll();
-        showToast(`✓ Text rotated to ${angle}°! For circle text, use 180°+`);
+        showToast(`✓ Text curved! (${angle}°)`);
     }
     
     function flipHorizontal() {
@@ -652,7 +670,7 @@
         if (active) { fabricCanvas.sendBackwards(active); fabricCanvas.renderAll(); updateLayerList(); }
     }
     
-    function addImage(file, removeBg = false) {
+    function addImage(file) {
         const reader = new FileReader();
         reader.onload = (e) => {
             fabric.Image.fromURL(e.target.result, (img) => {
@@ -669,17 +687,54 @@
         reader.readAsDataURL(file);
     }
     
-    async function removeBackground() {
-        const fileInput = document.getElementById('imageUpload');
-        if (!fileInput.files[0]) {
-            showToast('Upload an image first', true);
+    function removeBackgroundFromImage() {
+        const active = fabricCanvas.getActiveObject();
+        if (!active || active.type !== 'image') {
+            showToast('Select an image first', true);
             return;
         }
-        showToast('Removing background... This may take a few seconds');
-        // Simulate BG removal - in production use remove.bg API
-        setTimeout(() => {
-            showToast('✓ Background removed! (Demo - upload image with clear subject for best results)');
-        }, 1500);
+        showToast('Removing background...');
+        // Simple canvas-based background removal - removes white/black background
+        active.clone((cloned) => {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = cloned.width * cloned.scaleX;
+            tempCanvas.height = cloned.height * cloned.scaleY;
+            const ctx = tempCanvas.getContext('2d');
+            cloned.render(ctx);
+            const imageData = ctx.getImageData(0, 0, tempCanvas.width, tempCanvas.height);
+            const data = imageData.data;
+            for (let i = 0; i < data.length; i += 4) {
+                const r = data[i];
+                const g = data[i+1];
+                const b = data[i+2];
+                // Remove white or near-white background
+                if (r > 240 && g > 240 && b > 240) {
+                    data[i+3] = 0; // make transparent
+                }
+                // Remove black background
+                else if (r < 20 && g < 20 && b < 20) {
+                    data[i+3] = 0;
+                }
+            }
+            ctx.putImageData(imageData, 0, 0);
+            const newImg = new Image();
+            newImg.onload = () => {
+                fabric.Image.fromURL(newImg.src, (finalImg) => {
+                    finalImg.set({
+                        left: active.left, top: active.top,
+                        scaleX: active.scaleX, scaleY: active.scaleY,
+                        originX: 'center', originY: 'center'
+                    });
+                    fabricCanvas.remove(active);
+                    fabricCanvas.add(finalImg);
+                    fabricCanvas.setActiveObject(finalImg);
+                    fabricCanvas.renderAll();
+                    showToast('✓ Background removed!');
+                    updateLayerList();
+                });
+            };
+            newImg.src = tempCanvas.toDataURL();
+        });
     }
     
     function updateLayerList() {
@@ -691,10 +746,9 @@
             return;
         }
         layerDiv.innerHTML = objects.map((obj, index) => {
-            let name = obj.text ? (obj.text.length > 15 ? obj.text.substring(0, 12) + '...' : obj.text) : (obj._element ? 'Image' : 'Element');
+            let name = obj.text ? (obj.text.length > 12 ? obj.text.substring(0, 10) + '...' : obj.text) : (obj._element ? 'Image' : 'Element');
             return `<div class="layer-item ${fabricCanvas.getActiveObject() === obj ? 'active' : ''}" data-index="${index}">
                 <span><i class="fas fa-${obj.text ? 'font' : 'image'}"></i> ${name}</span>
-                <span style="font-size:10px;">${Math.round(obj.left)}x${Math.round(obj.top)}</span>
             </div>`;
         }).join('');
         
@@ -710,7 +764,7 @@
     
     function updateSummaryElements() {
         const has = fabricCanvas && fabricCanvas.getObjects().length > 0;
-        document.getElementById('summaryElements').innerHTML = has ? '<i class="fas fa-check-circle"></i> Custom' : 'None';
+        document.getElementById('summaryElements').innerHTML = has ? '✓ Custom Design' : 'None';
         updateLayerList();
     }
     
@@ -718,19 +772,19 @@
         document.getElementById('summaryStyle').innerText = currentStyle.name;
         document.getElementById('summarySize').innerText = currentSize;
         document.getElementById('summaryGSM').innerText = currentGSM;
+        document.getElementById('summaryFabric').innerText = currentFabric;
         document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`;
         updateSummaryElements();
     }
     
-    async function saveOrder(orderType) {
+    async function saveOrder() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) return null;
         const designJSON = fabricCanvas ? JSON.stringify(fabricCanvas.toJSON()) : null;
         const orderData = {
             style: currentStyle.name, price: currentStyle.price, size: currentSize,
-            gsm: currentGSM, designJSON: designJSON,
-            orderType: orderType, userId: user.uid,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            gsm: currentGSM, fabric: currentFabric, designJSON: designJSON,
+            userId: user.uid, timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
         try { const doc = await db.collection('custom_orders').add(orderData); return doc.id; } 
         catch(e) { return null; }
@@ -740,11 +794,10 @@
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) { openLoginModal(); pendingOrder = 'buy'; return; }
         showToast('Processing order...');
-        const id = await saveOrder('buy');
+        const id = await saveOrder();
         if (id) {
-            showToast('✓ Order placed! Redirecting...');
-            setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 1000);
-        } else { showToast('Failed', true); }
+            showToast('✓ Order placed successfully!');
+        } else { showToast('Failed to place order', true); }
     }
     
     function showToast(msg, isErr = false) {
@@ -760,7 +813,7 @@
         grid.innerHTML = tshirtStyles.map(style => `
             <div class="style-card ${style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
                 <img class="style-img" src="${style.img}" alt="${style.name}" 
-                     onerror="this.src='https://placehold.co/200x200/1a1a2e/D4AF37?text=${style.name}'">
+                     onerror="this.src='https://placehold.co/150x150/1a1a2e/D4AF37?text=${style.name}'">
                 <div class="style-name">${style.name}</div>
                 <div class="style-price">₹${style.price}</div>
             </div>
@@ -780,10 +833,19 @@
         });
     }
     
-    // Generate more colors
+    // Generate 100+ colors
+    function generateMoreColors() {
+        const colors = [];
+        for (let h = 0; h < 360; h += 15) {
+            colors.push(`hsl(${h}, 100%, 50%)`);
+            colors.push(`hsl(${h}, 70%, 60%)`);
+            colors.push(`hsl(${h}, 80%, 40%)`);
+        }
+        return colors;
+    }
+    
     const moreColorsDiv = document.getElementById('moreColors');
-    const moreColorsList = generateMoreColors();
-    moreColorsList.forEach(color => {
+    generateMoreColors().forEach(color => {
         const swatch = document.createElement('div');
         swatch.className = 'color-swatch';
         swatch.style.background = color;
@@ -796,7 +858,6 @@
         document.getElementById('toggleColors').innerText = moreColorsDiv.classList.contains('show') ? '- Hide More Colors' : '+ Show More Colors (100+)';
     });
     
-    // Color picker events
     document.querySelectorAll('#colorPalette .color-swatch').forEach(sw => {
         sw.addEventListener('click', () => {
             const color = sw.style.backgroundColor;
@@ -804,14 +865,14 @@
             if (rgb) {
                 const hex = '#' + ((1 << 24) + (parseInt(rgb[0]) << 16) + (parseInt(rgb[1]) << 8) + parseInt(rgb[2])).toString(16).slice(1);
                 applyTextColor(hex);
-                document.getElementById('customColor').value = hex;
             }
         });
     });
     
-    document.getElementById('customColor')?.addEventListener('input', (e) => applyTextColor(e.target.value));
+    document.getElementById('applyColorBtn')?.addEventListener('click', () => {
+        applyTextColor(document.getElementById('customColor').value);
+    });
     
-    // Sliders
     document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => {
         document.getElementById('fontSizeValue').innerText = e.target.value + 'px';
         updateSelectedText();
@@ -821,9 +882,8 @@
     });
     document.getElementById('fontSelect')?.addEventListener('change', updateSelectedText);
     
-    // Buttons
     document.getElementById('addTextBtn')?.addEventListener('click', addText);
-    document.getElementById('applyCurveBtn')?.addEventListener('click', applyCurveToText);
+    document.getElementById('applyCurveBtn')?.addEventListener('click', applyCurve);
     document.getElementById('flipHBtn')?.addEventListener('click', flipHorizontal);
     document.getElementById('flipVBtn')?.addEventListener('click', flipVertical);
     document.getElementById('boldBtn')?.addEventListener('click', () => applyTextStyle('bold'));
@@ -840,19 +900,19 @@
         fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
         fabricCanvas.renderAll();
         showToast('✓ All cleared');
+        updateSummaryElements();
     });
-    document.getElementById('removeBgBtn')?.addEventListener('click', removeBackground);
+    document.getElementById('removeBgBtn')?.addEventListener('click', removeBackgroundFromImage);
     document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
     document.getElementById('sizeSelect')?.addEventListener('change', (e) => { currentSize = e.target.value; updateSummary(); });
     document.getElementById('gsmSelect')?.addEventListener('change', (e) => { currentGSM = e.target.value; updateSummary(); });
+    document.getElementById('fabricSelect')?.addEventListener('change', (e) => { currentFabric = e.target.value; updateSummary(); });
     
-    // Upload
     const uploadArea = document.getElementById('uploadArea');
     const fileInput = document.getElementById('imageUpload');
     uploadArea?.addEventListener('click', () => fileInput.click());
     fileInput?.addEventListener('change', (e) => { if (e.target.files[0]) addImage(e.target.files[0]); });
     
-    // Login Modal
     function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
     function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); document.getElementById('otpSection').style.display = 'none'; }
     document.getElementById('sendOtpBtn')?.addEventListener('click', () => {
