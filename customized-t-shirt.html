@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>VEDANTA | Custom T-Shirt Designer</title>
+    <title>VEDANTA | Pro T-Shirt Designer</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=Playfair+Display:wght@400;500;600;700&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@400;500;600;700&family=Pacifico&family=Oswald:wght@300;400;500;600;700&family=Raleway:wght@300;400;500;600;700&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&family=Comfortaa&family=Orbitron&family=Press+Start+2P&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&family=Orbitron&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
@@ -90,7 +90,6 @@
             border-color: #D4AF37;
             background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
             box-shadow: 0 0 25px rgba(212,175,55,0.3);
-            transform: translateY(-3px);
         }
         .style-img {
             width: 100%;
@@ -106,15 +105,14 @@
 
         .designer-grid {
             display: grid;
-            grid-template-columns: 360px 1fr 280px;
+            grid-template-columns: 380px 1fr 280px;
             gap: 25px;
         }
         @media (max-width: 1200px) {
             .designer-grid { grid-template-columns: 1fr; gap: 25px; }
         }
 
-        /* Two separate boxes for Design Tools and Material Tools */
-        .design-tools-box {
+        .design-tools-box, .material-tools-box {
             background: rgba(15,15,22,0.92);
             backdrop-filter: blur(20px);
             border-radius: 28px;
@@ -122,13 +120,7 @@
             border: 1px solid rgba(212,175,55,0.25);
             margin-bottom: 20px;
         }
-        .material-tools-box {
-            background: rgba(15,15,22,0.92);
-            backdrop-filter: blur(20px);
-            border-radius: 28px;
-            padding: 22px;
-            border: 1px solid rgba(212,175,55,0.25);
-        }
+        .material-tools-box { margin-bottom: 0; }
         .box-title {
             color: #D4AF37;
             font-size: 18px;
@@ -147,11 +139,16 @@
         }
         .tool-group label {
             display: block;
-            font-size: 11px;
+            font-size: 12px;
             color: #D4AF37;
             margin-bottom: 8px;
             font-weight: 600;
-            text-transform: uppercase;
+        }
+        .tool-group .hint {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+            font-style: italic;
         }
         .tool-group input, .tool-group select {
             width: 100%;
@@ -163,21 +160,22 @@
             font-size: 13px;
         }
         
-        .color-row {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 8px;
             margin-top: 8px;
         }
         .color-swatch {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 12px;
             cursor: pointer;
             border: 2px solid transparent;
             transition: 0.2s;
         }
-        .color-swatch.active { border-color: white; transform: scale(1.1); }
+        .color-swatch.active { border-color: white; transform: scale(1.05); }
+        .color-swatch:hover { transform: scale(1.08); }
         
         .btn-icon {
             background: rgba(212,175,55,0.15);
@@ -294,15 +292,22 @@
             margin-top: 12px;
         }
         
-        .gradient-preset {
-            display: inline-block;
+        .gradient-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .gradient-btn {
             padding: 6px 12px;
             background: rgba(212,175,55,0.2);
             border-radius: 20px;
             cursor: pointer;
             font-size: 11px;
-            margin: 3px;
+            transition: 0.2s;
         }
+        .gradient-btn:hover { background: #D4AF37; color: #000; }
+        
         .font-preview {
             font-size: 13px;
             margin-top: 8px;
@@ -310,6 +315,20 @@
             background: rgba(0,0,0,0.3);
             border-radius: 8px;
             text-align: center;
+        }
+        
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .slider-row input { flex: 1; }
+        .slider-value { font-size: 12px; color: #D4AF37; min-width: 45px; }
+
+        .two-col-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
         }
 
         .modal {
@@ -370,25 +389,13 @@
             font-size: 12px;
             text-align: center;
         }
-        
-        .two-col-btns {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .slider-value {
-            display: inline-block;
-            margin-left: 10px;
-            font-size: 12px;
-            color: #D4AF37;
-        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo">VEDANTA</div>
-    <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
+    <div class="tagline">✦ PRO CUSTOM T-SHIRT STUDIO ✦</div>
 </div>
 
 <div class="designer-container">
@@ -411,107 +418,127 @@
                     <label>📝 Add Text</label>
                     <input type="text" id="textInput" placeholder="Enter your text...">
                     <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
+                    <div class="hint">💡 Type text then click "Add Text" button</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🎨 Text Color / Gradient</label>
-                    <div class="color-row" id="textColorOptions">
+                    <label>🎨 Text Color (Click any color - instantly applies)</label>
+                    <div class="color-palette" id="textColorPalette">
                         <div class="color-swatch" style="background:#FFFFFF;" data-color="#FFFFFF"></div>
                         <div class="color-swatch" style="background:#000000;" data-color="#000000"></div>
-                        <div class="color-swatch active" style="background:#D4AF37;" data-color="#D4AF37"></div>
+                        <div class="color-swatch" style="background:#D4AF37;" data-color="#D4AF37"></div>
+                        <div class="color-swatch" style="background:#FF0000;" data-color="#FF0000"></div>
                         <div class="color-swatch" style="background:#FF4500;" data-color="#FF4500"></div>
                         <div class="color-swatch" style="background:#FF1493;" data-color="#FF1493"></div>
+                        <div class="color-swatch" style="background:#8B00FF;" data-color="#8B00FF"></div>
+                        <div class="color-swatch" style="background:#0000FF;" data-color="#0000FF"></div>
                         <div class="color-swatch" style="background:#00BFFF;" data-color="#00BFFF"></div>
-                        <div class="color-swatch" style="background:#7CFC00;" data-color="#7CFC00"></div>
+                        <div class="color-swatch" style="background:#00CED1;" data-color="#00CED1"></div>
+                        <div class="color-swatch" style="background:#00FF00;" data-color="#00FF00"></div>
+                        <div class="color-swatch" style="background:#32CD32;" data-color="#32CD32"></div>
                         <div class="color-swatch" style="background:#FFD700;" data-color="#FFD700"></div>
-                        <div class="color-swatch" style="background:#9400D3;" data-color="#9400D3"></div>
+                        <div class="color-swatch" style="background:#FF8C00;" data-color="#FF8C00"></div>
+                        <div class="color-swatch" style="background:#CD853F;" data-color="#CD853F"></div>
+                        <div class="color-swatch" style="background:#808080;" data-color="#808080"></div>
                     </div>
-                    <div>
-                        <span class="gradient-preset" data-gradient="linear-gradient(135deg, #FF0080, #FF8C00)">🌸 Pink-Orange</span>
-                        <span class="gradient-preset" data-gradient="linear-gradient(135deg, #00B4DB, #0083B0)">💙 Blue</span>
-                        <span class="gradient-preset" data-gradient="linear-gradient(135deg, #FFD194, #70E1F5)">✨ Gold-Sky</span>
-                        <span class="gradient-preset" data-gradient="linear-gradient(135deg, #D4145A, #3A1C71)">💜 Purple-Pink</span>
+                    <div class="gradient-btns">
+                        <span class="gradient-btn" data-gradient="linear-gradient(135deg, #FF0080, #FF8C00)">🌈 Pink-Orange</span>
+                        <span class="gradient-btn" data-gradient="linear-gradient(135deg, #00B4DB, #0083B0)">🌈 Blue Lagoon</span>
+                        <span class="gradient-btn" data-gradient="linear-gradient(135deg, #FFD194, #70E1F5)">🌈 Gold-Sky</span>
+                        <span class="gradient-btn" data-gradient="linear-gradient(135deg, #D4145A, #3A1C71)">🌈 Purple Passion</span>
+                        <span class="gradient-btn" data-gradient="linear-gradient(135deg, #FF4E50, #F9D423)">🌈 Sunset</span>
                     </div>
-                    <button class="btn-icon" id="applyColorBtn">Apply Color/Gradient</button>
+                    <div class="hint">💡 Click any color or gradient - text color changes instantly!</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🔤 Font Family (15+ Fonts)</label>
+                    <label>🔤 Font Family (Changes instantly when selected)</label>
                     <select id="fontSelect">
-                        <option value="Arial">Arial</option>
-                        <option value="Times New Roman">Times New Roman</option>
-                        <option value="Impact">Impact</option>
                         <option value="Space Grotesk">Space Grotesk</option>
+                        <option value="Arial">Arial</option>
                         <option value="Poppins">Poppins</option>
                         <option value="Montserrat">Montserrat</option>
                         <option value="Playfair Display">Playfair Display</option>
                         <option value="Dancing Script">Dancing Script</option>
                         <option value="Pacifico">Pacifico</option>
                         <option value="Oswald">Oswald</option>
-                        <option value="Raleway">Raleway</option>
                         <option value="Lobster">Lobster</option>
                         <option value="Bebas Neue">Bebas Neue</option>
                         <option value="Great Vibes">Great Vibes</option>
                         <option value="Caveat">Caveat</option>
                         <option value="Orbitron">Orbitron</option>
                     </select>
-                    <div class="font-preview" id="fontPreview">Aa Bb Cc 123</div>
+                    <div class="font-preview" id="fontPreview">Sample Text - This is how font looks</div>
+                    <div class="hint">💡 Select font from dropdown - applies to selected text instantly!</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>📏 Size & Opacity</label>
-                    <input type="range" id="fontSizeSlider" min="12" max="120" step="1" value="36">
-                    <span class="slider-value" id="fontSizeValue">36px</span>
-                    <input type="range" id="opacitySlider" min="0" max="100" step="1" value="100" style="margin-top:8px;">
-                    <span class="slider-value" id="opacityValue">100%</span>
-                    <button class="btn-icon" id="applyFontBtn">Apply Size/Opacity</button>
+                    <label>📏 Text Size (Slide to adjust - realtime)</label>
+                    <div class="slider-row">
+                        <input type="range" id="fontSizeSlider" min="12" max="120" step="1" value="36">
+                        <span class="slider-value" id="fontSizeValue">36px</span>
+                    </div>
+                    <div class="slider-row" style="margin-top: 10px;">
+                        <input type="range" id="opacitySlider" min="0" max="100" step="1" value="100">
+                        <span class="slider-value" id="opacityValue">100%</span>
+                    </div>
+                    <div class="hint">💡 Slide to change size/opacity - text updates in realtime!</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>⭕ Curve Text (Round Effect)</label>
-                    <input type="range" id="curveSlider" min="-180" max="180" step="5" value="0">
-                    <span class="slider-value" id="curveValue">0°</span>
-                    <button class="btn-icon" id="applyCurveBtn">Apply Curve</button>
+                    <label>⭕ Make Text Round/Curve (Slide to rotate text)</label>
+                    <div class="slider-row">
+                        <input type="range" id="curveSlider" min="-180" max="180" step="5" value="0">
+                        <span class="slider-value" id="curveValue">0°</span>
+                    </div>
+                    <div class="hint">💡 Slide left or right to make text curved/round! 0°=normal, 90°=vertical, 180°=upside down</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🔄 Text Transform</label>
+                    <label>🔄 Text Transform (Click to apply instantly)</label>
                     <div class="two-col-btns">
-                        <button class="btn-icon" id="flipHorizontalBtn"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
-                        <button class="btn-icon" id="flipVerticalBtn"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                        <button class="btn-icon" id="flipHorizontalBtn"><i class="fas fa-arrows-alt-h"></i> Flip Horizontal</button>
+                        <button class="btn-icon" id="flipVerticalBtn"><i class="fas fa-arrows-alt-v"></i> Flip Vertical</button>
                         <button class="btn-icon" id="boldBtn"><i class="fas fa-bold"></i> Bold</button>
                         <button class="btn-icon" id="italicBtn"><i class="fas fa-italic"></i> Italic</button>
                         <button class="btn-icon" id="underlineBtn"><i class="fas fa-underline"></i> Underline</button>
                     </div>
+                    <div class="hint">💡 Click any button - effect applies to selected text instantly!</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>✨ Glow/Shadow Effect</label>
-                    <input type="range" id="glowSlider" min="0" max="20" step="1" value="0">
-                    <span class="slider-value" id="glowValue">0px</span>
-                    <button class="btn-icon" id="applyGlowBtn">Apply Glow</button>
+                    <label>✨ Glow Effect (Slide to add glow to text)</label>
+                    <div class="slider-row">
+                        <input type="range" id="glowSlider" min="0" max="20" step="1" value="0">
+                        <span class="slider-value" id="glowValue">0px</span>
+                    </div>
+                    <div class="hint">💡 Slide right to add golden glow to text! 0=no glow, 20=max glow</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>📏 Letter Spacing</label>
-                    <input type="range" id="letterSpacingSlider" min="-5" max="20" step="1" value="0">
-                    <span class="slider-value" id="letterSpacingValue">0px</span>
-                    <button class="btn-icon" id="applyLetterSpacingBtn">Apply Spacing</button>
+                    <label>📏 Letter Spacing (Space between letters)</label>
+                    <div class="slider-row">
+                        <input type="range" id="letterSpacingSlider" min="-3" max="15" step="1" value="0">
+                        <span class="slider-value" id="letterSpacingValue">0px</span>
+                    </div>
+                    <div class="hint">💡 Slide right to increase space between letters, left to decrease</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🖼️ Upload Your Design</label>
+                    <label>🖼️ Upload Your Design (Click to upload image)</label>
                     <div class="upload-area" id="uploadArea">
                         <i class="fas fa-cloud-upload-alt" style="font-size:24px;"></i>
                         <p>Click to upload PNG/JPG</p>
                         <input type="file" id="imageUpload" accept="image/*" style="display:none">
                     </div>
+                    <div class="hint">💡 Click to upload your logo or design - drag to position on t-shirt!</div>
                 </div>
                 
                 <div class="tool-group">
-                    <label>🔧 Manage</label>
+                    <label>🔧 Manage Elements</label>
                     <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button>
                     <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear All</button>
+                    <div class="hint">💡 Select an element first, then click Delete. Clear All removes everything!</div>
                 </div>
             </div>
             
@@ -520,31 +547,34 @@
                 <div class="box-title"><i class="fas fa-boxes"></i> MATERIAL & SIZE</div>
                 
                 <div class="tool-group">
-                    <label>📏 Size</label>
+                    <label>📏 T-Shirt Size (Changes instantly)</label>
                     <select id="sizeSelect">
                         <option>S</option><option>M</option><option>L</option><option selected>XL</option><option>XXL</option><option>3XL</option>
                     </select>
+                    <div class="hint">💡 Select size - updates order summary instantly!</div>
                 </div>
                 
                 <div class="tool-group">
                     <label>⚖️ GSM (Fabric Thickness)</label>
                     <select id="gsmSelect">
-                        <option>180 GSM (Light)</option>
-                        <option selected>220 GSM (Standard)</option>
-                        <option>260 GSM (Heavy)</option>
-                        <option>300 GSM (Premium)</option>
+                        <option>180 GSM (Light - Summer)</option>
+                        <option selected>220 GSM (Standard - All Season)</option>
+                        <option>260 GSM (Heavy - Winter)</option>
+                        <option>300 GSM (Premium - Ultra Heavy)</option>
                     </select>
+                    <div class="hint">💡 Higher GSM = thicker, more durable fabric!</div>
                 </div>
                 
                 <div class="tool-group">
                     <label>🧵 Fabric Type</label>
                     <select id="fabricSelect">
-                        <option>100% Cotton</option>
-                        <option>Cotton Blend</option>
-                        <option>Polyester</option>
-                        <option>Linen</option>
-                        <option>Organic Cotton</option>
+                        <option>100% Cotton (Soft & Breathable)</option>
+                        <option>Cotton Blend (Durable & Comfortable)</option>
+                        <option>Polyester (Sporty & Quick Dry)</option>
+                        <option>Linen (Premium & Airy)</option>
+                        <option>Organic Cotton (Eco-Friendly)</option>
                     </select>
+                    <div class="hint">💡 Cotton is softest, Polyester is best for sports!</div>
                 </div>
             </div>
         </div>
@@ -555,6 +585,9 @@
             </div>
             <p class="instruction-text">
                 <i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit
+            </p>
+            <p class="instruction-text" style="color: #D4AF37; margin-top: 5px;">
+                <i class="fas fa-info-circle"></i> Select your t-shirt style from top gallery first!
             </p>
         </div>
         
@@ -644,7 +677,6 @@
             existingObjects = fabricCanvas.getObjects();
             existingObjects.forEach(obj => fabricCanvas.remove(obj));
         }
-        showToast(`Loading ${style.name}...`);
         loadImageAsDataURL(style.img, function(dataURL) {
             if (dataURL) {
                 fabric.Image.fromURL(dataURL, function(img) {
@@ -654,7 +686,6 @@
                             existingObjects.forEach(obj => fabricCanvas.add(obj));
                         }
                         fabricCanvas.renderAll();
-                        showToast(`✓ ${style.name} ready!`);
                     }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
             } else {
@@ -663,7 +694,6 @@
                         existingObjects.forEach(obj => fabricCanvas.add(obj));
                     }
                     fabricCanvas.renderAll();
-                    showToast(`⚠️ Image not found: ${style.img}`, true);
                 });
             }
         });
@@ -693,47 +723,65 @@
         fabricCanvas.add(text);
         fabricCanvas.setActiveObject(text);
         fabricCanvas.renderAll();
-        showToast('Text added!');
+        showToast('✓ Text added! Now select it and use tools above');
         updateSummaryElements();
     }
     
-    function applyColor() {
+    // Direct apply functions (no apply button needed)
+    function updateSelectedText() {
         const active = fabricCanvas.getActiveObject();
-        if (!active) { showToast('Select text first', true); return; }
-        const activeSwatch = document.querySelector('#textColorOptions .color-swatch.active');
-        if (activeSwatch) { active.set('fill', activeSwatch.dataset.color); }
+        if (!active || (active.type !== 'i-text' && active.type !== 'text')) return;
+        
+        // Apply font and size
+        active.set('fontFamily', document.getElementById('fontSelect').value);
+        active.set('fontSize', parseInt(document.getElementById('fontSizeSlider').value));
+        active.set('opacity', document.getElementById('opacitySlider').value / 100);
+        active.set('angle', parseInt(document.getElementById('curveSlider').value));
+        
+        const glowSize = parseInt(document.getElementById('glowSlider').value);
+        if (glowSize > 0) {
+            active.set('shadow', `rgba(212,175,55,0.8) 0px 0px ${glowSize}px`);
+        } else {
+            active.set('shadow', null);
+        }
+        
+        active.set('charSpacing', parseInt(document.getElementById('letterSpacingSlider').value));
+        
         fabricCanvas.renderAll();
-        showToast('Color applied');
+    }
+    
+    function applyTextColor(color) {
+        const active = fabricCanvas.getActiveObject();
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('fill', color);
+            fabricCanvas.renderAll();
+            showToast('✓ Color applied!');
+        } else {
+            showToast('⚠️ Select a text first', true);
+        }
     }
     
     function applyGradient(gradientStr) {
         const active = fabricCanvas.getActiveObject();
-        if (!active) { showToast('Select text first', true); return; }
-        active.set('fill', gradientStr);
-        fabricCanvas.renderAll();
-        showToast('Gradient applied');
-    }
-    
-    function applyFontAndSize() {
-        const active = fabricCanvas.getActiveObject();
-        if (!active) { showToast('Select text first', true); return; }
-        active.set('fontFamily', document.getElementById('fontSelect').value);
-        active.set('fontSize', parseInt(document.getElementById('fontSizeSlider').value));
-        active.set('opacity', document.getElementById('opacitySlider').value / 100);
-        fabricCanvas.renderAll();
-        showToast('Style applied');
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('fill', gradientStr);
+            fabricCanvas.renderAll();
+            showToast('✓ Gradient applied!');
+        } else {
+            showToast('⚠️ Select a text first', true);
+        }
     }
     
     function flipHorizontal() {
         const active = fabricCanvas.getActiveObject();
-        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('Flipped H'); }
-        else showToast('Select element first', true);
+        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('✓ Flipped Horizontal'); }
+        else showToast('⚠️ Select an element first', true);
     }
     
     function flipVertical() {
         const active = fabricCanvas.getActiveObject();
-        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('Flipped V'); }
-        else showToast('Select element first', true);
+        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('✓ Flipped Vertical'); }
+        else showToast('⚠️ Select an element first', true);
     }
     
     function applyTextStyle(style) {
@@ -743,37 +791,13 @@
             if (style === 'italic') active.set('fontStyle', active.fontStyle === 'italic' ? 'normal' : 'italic');
             if (style === 'underline') active.set('underline', !active.underline);
             fabricCanvas.renderAll();
-            showToast(style + ' toggled');
-        } else showToast('Select text first', true);
+            showToast(`✓ ${style} toggled`);
+        } else showToast('⚠️ Select a text first', true);
     }
     
-    function applyCurve() {
-        const active = fabricCanvas.getActiveObject();
-        if (!active) { showToast('Select text first', true); return; }
-        active.set('angle', parseInt(document.getElementById('curveSlider').value));
-        fabricCanvas.renderAll();
-        showToast('Curve applied');
-    }
-    
-    function applyGlow() {
-        const active = fabricCanvas.getActiveObject();
-        if (!active) { showToast('Select text first', true); return; }
-        const glowSize = parseInt(document.getElementById('glowSlider').value);
-        if (glowSize > 0) {
-            active.set('shadow', `rgba(212,175,55,0.8) 0px 0px ${glowSize}px`);
-        } else {
-            active.set('shadow', null);
-        }
-        fabricCanvas.renderAll();
-        showToast(glowSize > 0 ? `Glow ${glowSize}px applied` : 'Glow removed');
-    }
-    
-    function applyLetterSpacing() {
-        const active = fabricCanvas.getActiveObject();
-        if (!active) { showToast('Select text first', true); return; }
-        active.set('charSpacing', parseInt(document.getElementById('letterSpacingSlider').value));
-        fabricCanvas.renderAll();
-        showToast('Letter spacing applied');
+    function changeTShirtColor(color) {
+        fabricCanvas.setBackgroundColor(color, fabricCanvas.renderAll.bind(fabricCanvas));
+        showToast('✓ T-Shirt color changed!');
     }
     
     function addImage(file) {
@@ -785,7 +809,7 @@
                 fabricCanvas.add(img);
                 fabricCanvas.setActiveObject(img);
                 fabricCanvas.renderAll();
-                showToast('Image added!');
+                showToast('✓ Image added! Drag to position');
                 updateSummaryElements();
             });
         };
@@ -794,7 +818,7 @@
     
     function updateSummaryElements() {
         const has = fabricCanvas && fabricCanvas.getObjects().length > 0;
-        document.getElementById('summaryElements').innerHTML = has ? '<i class="fas fa-check-circle"></i> Custom' : 'None';
+        document.getElementById('summaryElements').innerHTML = has ? '<i class="fas fa-check-circle"></i> Custom Design' : 'None';
     }
     
     function updateSummary() {
@@ -829,7 +853,7 @@
             let cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
             cart.push({ id: id, name: `Custom ${currentStyle.name}`, price: currentStyle.price, quantity: 1 });
             localStorage.setItem('vedantaCart', JSON.stringify(cart));
-            showToast('Added to cart!');
+            showToast('✓ Added to cart!');
         } else { showToast('Failed', true); }
     }
     
@@ -871,56 +895,74 @@
                     renderStyles();
                     loadTshirtImage(currentStyle, true);
                     updateSummary();
-                    showToast(`Selected: ${currentStyle.name}`);
+                    showToast(`✓ ${currentStyle.name} selected!`);
                 }
             });
         });
     }
     
+    // Real-time update when sliders change
+    document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => {
+        document.getElementById('fontSizeValue').innerText = e.target.value + 'px';
+        updateSelectedText();
+    });
+    document.getElementById('opacitySlider')?.addEventListener('input', (e) => {
+        document.getElementById('opacityValue').innerText = e.target.value + '%';
+        updateSelectedText();
+    });
+    document.getElementById('curveSlider')?.addEventListener('input', (e) => {
+        document.getElementById('curveValue').innerText = e.target.value + '°';
+        updateSelectedText();
+    });
+    document.getElementById('glowSlider')?.addEventListener('input', (e) => {
+        document.getElementById('glowValue').innerText = e.target.value + 'px';
+        updateSelectedText();
+    });
+    document.getElementById('letterSpacingSlider')?.addEventListener('input', (e) => {
+        document.getElementById('letterSpacingValue').innerText = e.target.value + 'px';
+        updateSelectedText();
+    });
+    document.getElementById('fontSelect')?.addEventListener('change', () => updateSelectedText());
+    
     document.getElementById('fontSelect')?.addEventListener('change', (e) => {
         document.getElementById('fontPreview').style.fontFamily = e.target.value;
+        updateSelectedText();
     });
     
-    document.querySelectorAll('.gradient-preset').forEach(g => {
-        g.addEventListener('click', () => applyGradient(g.dataset.gradient));
-    });
-    
-    // Slider displays
-    document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => { document.getElementById('fontSizeValue').innerText = e.target.value + 'px'; });
-    document.getElementById('opacitySlider')?.addEventListener('input', (e) => { document.getElementById('opacityValue').innerText = e.target.value + '%'; });
-    document.getElementById('curveSlider')?.addEventListener('input', (e) => { document.getElementById('curveValue').innerText = e.target.value + '°'; });
-    document.getElementById('glowSlider')?.addEventListener('input', (e) => { document.getElementById('glowValue').innerText = e.target.value + 'px'; });
-    document.getElementById('letterSpacingSlider')?.addEventListener('input', (e) => { document.getElementById('letterSpacingValue').innerText = e.target.value + 'px'; });
-    
-    document.querySelectorAll('#textColorOptions .color-swatch').forEach(sw => {
+    // Color palette clicks for text
+    document.querySelectorAll('#textColorPalette .color-swatch').forEach(sw => {
         sw.addEventListener('click', () => {
-            document.querySelectorAll('#textColorOptions .color-swatch').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('#textColorPalette .color-swatch').forEach(s => s.classList.remove('active'));
             sw.classList.add('active');
+            applyTextColor(sw.dataset.color);
         });
     });
     
+    // Gradient buttons
+    document.querySelectorAll('.gradient-btn').forEach(g => {
+        g.addEventListener('click', () => applyGradient(g.dataset.gradient));
+    });
+    
+    // T-Shirt Color (you can add a palette for t-shirt color too)
+    const tshirtColors = ['#FFFFFF', '#000000', '#D4AF37', '#FF4500', '#1E90FF', '#32CD32', '#FF1493', '#8B00FF'];
+    
     // Event Listeners
     document.getElementById('addTextBtn')?.addEventListener('click', addText);
-    document.getElementById('applyColorBtn')?.addEventListener('click', applyColor);
-    document.getElementById('applyFontBtn')?.addEventListener('click', applyFontAndSize);
     document.getElementById('flipHorizontalBtn')?.addEventListener('click', flipHorizontal);
     document.getElementById('flipVerticalBtn')?.addEventListener('click', flipVertical);
     document.getElementById('boldBtn')?.addEventListener('click', () => applyTextStyle('bold'));
     document.getElementById('italicBtn')?.addEventListener('click', () => applyTextStyle('italic'));
     document.getElementById('underlineBtn')?.addEventListener('click', () => applyTextStyle('underline'));
-    document.getElementById('applyCurveBtn')?.addEventListener('click', applyCurve);
-    document.getElementById('applyGlowBtn')?.addEventListener('click', applyGlow);
-    document.getElementById('applyLetterSpacingBtn')?.addEventListener('click', applyLetterSpacing);
     document.getElementById('deleteBtn')?.addEventListener('click', () => {
         const obj = fabricCanvas.getActiveObject();
-        if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('Deleted'); }
-        else showToast('Select element first', true);
+        if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('✓ Deleted'); }
+        else showToast('⚠️ Select an element first', true);
     });
     document.getElementById('clearBtn')?.addEventListener('click', () => {
         fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
         fabricCanvas.renderAll();
         updateSummaryElements();
-        showToast('Cleared');
+        showToast('✓ All cleared');
     });
     document.getElementById('addToCartBtn')?.addEventListener('click', addToCart);
     document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
@@ -946,7 +988,7 @@
         if (otp === '123456') {
             localStorage.setItem('vedantaUser', JSON.stringify({ uid: Date.now(), phone: document.getElementById('loginPhone').value }));
             closeLoginModal();
-            showToast('Login successful!');
+            showToast('✓ Login successful!');
             if (pendingOrder === 'buy') { pendingOrder = null; buyNow(); }
         } else { showToast('Wrong OTP', true); }
     });
