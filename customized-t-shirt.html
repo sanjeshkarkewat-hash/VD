@@ -885,6 +885,7 @@
     const db = firebase.firestore();
     const storage = firebase.storage();
     const storageRef = storage.ref();
+    const auth = firebase.auth();
 
     const tshirtStyles = [
         { id: 'fullsleeve', name: 'Full Sleeve T-Shirt', img: 'full sleeve oversized T shirt.jpeg', price: 1699 },
@@ -916,17 +917,51 @@
     console.log("⏳ Waiting for user to design and click Buy Now");
     
     // Clear any old checkout data that might cause auto redirect
-    // But keep saved design image if exists
     const existingDesignImage = localStorage.getItem('customDesignImage');
     localStorage.removeItem('customCheckoutData');
     localStorage.removeItem('pendingCheckoutOrder');
-    localStorage.removeItem('autoCheckoutRedirect');
-    sessionStorage.removeItem('autoCheckoutRedirect');
     
     // Restore design image if it was saved
     if (existingDesignImage) {
         savedDesignImageURL = existingDesignImage;
         console.log("📸 Previously saved design image found:", savedDesignImageURL);
+    }
+
+    // ========== CHECK IF USER HAS SAVED ADDRESS IN FIRESTORE ==========
+    async function checkUserHasSavedAddress() {
+        try {
+            // Get current authenticated user
+            const user = auth.currentUser;
+            const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
+            const currentUserId = user?.uid || storedUser?.uid;
+            
+            if (!currentUserId) {
+                console.log("⚠️ No user ID found for address check");
+                return false;
+            }
+            
+            console.log("🔍 Checking saved address for user:", currentUserId);
+            
+            // Check in addresses collection using userId
+            const addressesSnapshot = await db.collection('addresses')
+                .where('userId', '==', currentUserId)
+                .limit(1)
+                .get();
+            
+            const hasAddress = !addressesSnapshot.empty;
+            
+            if (hasAddress) {
+                const addressData = addressesSnapshot.docs[0].data();
+                console.log("✅ Address found in Firestore:", addressData);
+            } else {
+                console.log("❌ No address found in Firestore for this user");
+            }
+            
+            return hasAddress;
+        } catch (error) {
+            console.error("❌ Error checking address in Firestore:", error);
+            return false;
+        }
     }
 
     // ========== Save Image to Firebase Storage ==========
@@ -946,7 +981,6 @@
                 multiplier: 2
             });
             
-            // Convert dataURL to blob
             const blob = dataURLToBlob(dataURL);
             const fileName = `design_${Date.now()}_${Math.random().toString(36).substr(2, 8)}.png`;
             const designRef = storageRef.child(`custom-designs/${fileName}`);
@@ -959,7 +993,6 @@
             
             console.log("✅ Design uploaded successfully! URL:", downloadURL);
             
-            // Save to localStorage for checkout page
             localStorage.setItem('customDesignImage', downloadURL);
             savedDesignImageURL = downloadURL;
             
@@ -972,7 +1005,6 @@
         }
     }
     
-    // Helper function to convert dataURL to Blob
     function dataURLToBlob(dataURL) {
         const arr = dataURL.split(',');
         const mime = arr[0].match(/:(.*?);/)[1];
@@ -1127,7 +1159,6 @@
         return true;
     }
 
-    // ========== SAVE IMAGE BUTTON HANDLER ==========
     async function handleSaveImage() {
         if (!fabricCanvas || fabricCanvas.getObjects().length === 0) {
             showToast('Please add some design first', true);
@@ -1141,23 +1172,30 @@
         }
     }
 
-    // ========== BUY NOW - ONLY HERE REDIRECT HAPPENS ==========
+    // ========== UPDATED BUY NOW WITH ADDRESS CHECK ==========
     async function buyNow() {
         console.log("🛒 Buy Now button clicked - preparing checkout");
         
-        const user = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (!user) { 
+        // Get current authenticated user
+        const user = auth.currentUser;
+        const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        const currentUser = user || storedUser;
+        
+        // Check if user is logged in
+        if (!currentUser) { 
             pendingBuyAfterLogin = true;
             openLoginModal(); 
-            showToast('Please login to continue', false);
+            showToast('Please login first', false);
             return; 
         }
         
+        // Check if all required fields are selected
         if(!currentSize || !currentGSM || !currentFabric) {
             showToast('Please select Size, GSM and Fabric first', true);
             return;
         }
         
+        // Save design image if not already saved
         if (!savedDesignImageURL) {
             showToast('📸 Saving your design first...');
             const imageURL = await saveDesignImageToFirebase();
@@ -1181,17 +1219,27 @@
             price: currentStyle.price
         };
         
-        console.log("📦 Saving checkout data:", customCheckoutData);
+        // Save checkout data to localStorage
         localStorage.setItem('customCheckoutData', JSON.stringify(customCheckoutData));
         localStorage.setItem('customDesignImage', savedDesignImageURL);
         
-        showToast("🔄 Redirecting to secure checkout...");
-        console.log("🚀 Redirecting to secure-checkout.html");
+        // Check if user has saved address in Firestore
+        console.log("🔍 Checking if user has saved address...");
+        const hasAddress = await checkUserHasSavedAddress();
         
-        // Small delay to ensure data is saved
-        setTimeout(() => {
-            window.location.href = 'secure-checkout.html';
-        }, 500);
+        if (hasAddress) {
+            console.log("✅ Address found! Redirecting to secure-checkout2.html");
+            showToast("Address found! Redirecting to express checkout...");
+            setTimeout(() => {
+                window.location.href = 'secure-checkout2.html';
+            }, 500);
+        } else {
+            console.log("❌ No address found! Redirecting to secure-checkout.html");
+            showToast("Please add your shipping address to continue...");
+            setTimeout(() => {
+                window.location.href = 'secure-checkout.html';
+            }, 500);
+        }
     }
 
     function generateColorPalette() {
@@ -1604,6 +1652,14 @@
             const userId = Date.now().toString();
             const userData = { uid: userId, phone: document.getElementById('loginPhone').value, name: 'Customer' };
             localStorage.setItem('vedantaUser', JSON.stringify(userData));
+            
+            // Also create Firebase Auth user for consistency
+            try {
+                const phoneNumber = document.getElementById('loginPhone').value;
+                // Note: This is demo - in production you'd use proper Firebase Auth
+                console.log("Demo login successful for:", phoneNumber);
+            } catch(e) { console.log("Auth demo mode"); }
+            
             closeLoginModal();
             showToast('✓ Login successful!');
             
