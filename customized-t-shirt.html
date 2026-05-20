@@ -1,602 +1,1643 @@
 <!DOCTYPE html>
-<html lang="hi">
+<html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-  <title>Secure Checkout - Vedanta</title>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; overflow-x: hidden; min-height: 100vh; }
-    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%); pointer-events: none; z-index: -1; }
-    .checkout-container { max-width: 1200px; margin: 0 auto; padding: 16px; }
-    .checkout-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(212,175,55,0.3); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
-    .logo h1 { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .logo p { font-size: 10px; color: #888; }
-    .secure-badge { background: rgba(212,175,55,0.15); padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 600; }
-    .secure-badge i { color: #4CAF50; margin-right: 6px; }
-    .checkout-main { display: grid; grid-template-columns: 1fr; gap: 20px; }
-    @media (min-width: 768px) { .checkout-main { grid-template-columns: 1fr 1fr; gap: 30px; } .checkout-container { padding: 20px; } .logo h1 { font-size: 32px; } }
-    .checkout-form { background: rgba(15,15,22,0.7); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; border: 1px solid rgba(212,175,55,0.2); }
-    @media (min-width: 768px) { .checkout-form { padding: 28px; border-radius: 32px; } }
-    .form-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .form-section:last-child { border-bottom: none; padding-bottom: 0; margin-bottom: 0; }
-    .form-section h3 { font-size: 18px; margin-bottom: 16px; color: #D4AF37; display: flex; align-items: center; gap: 8px; }
-    @media (min-width: 768px) { .form-section h3 { font-size: 20px; margin-bottom: 20px; } }
-    .form-group { margin-bottom: 14px; }
-    .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: #CCCCCC; }
-    .form-group label .required { color: #FF4500; margin-left: 4px; }
-    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; color: white; font-size: 14px; font-family: inherit; transition: 0.2s; }
-    @media (min-width: 768px) { .form-group input, .form-group textarea, .form-group select { padding: 14px 16px; border-radius: 16px; } }
-    .form-group input:focus, .form-group textarea:focus, .form-group select:focus { outline: none; border-color: #D4AF37; box-shadow: 0 0 10px rgba(212,175,55,0.3); }
-    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-    
-    .address-selection-card { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 12px; margin-bottom: 16px; }
-    .saved-address-card, .selected-address-card { background: rgba(20,20,30,0.6); border: 2px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
-    .selected-address-card { border-color: #4CAF50; background: rgba(76,175,80,0.15); cursor: default; }
-    .saved-address-card:hover { border-color: #D4AF37; background: rgba(212,175,55,0.15); transform: translateX(2px); }
-    .saved-address-card .address-name, .selected-address-card .address-name { font-weight: 800; color: #D4AF37; margin-bottom: 8px; font-size: 14px; }
-    .saved-address-card .address-detail, .selected-address-card .address-detail { font-size: 12px; color: #ccc; line-height: 1.5; }
-    .saved-address-card .address-phone, .selected-address-card .address-phone { font-size: 11px; color: #888; margin-top: 8px; }
-    .saved-address-card .address-label, .selected-address-card .address-label { display: inline-block; background: rgba(212,175,55,0.2); padding: 2px 10px; border-radius: 20px; font-size: 10px; margin-top: 8px; }
-    
-    .option-divider { text-align: center; margin: 15px 0; position: relative; }
-    .option-divider span { background: #0a0a12; padding: 0 15px; color: #888; font-size: 12px; }
-    .option-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.1); z-index: -1; }
-    .add-new-address-btn { width: 100%; background: rgba(212,175,55,0.15); border: 1px dashed rgba(212,175,55,0.5); padding: 14px; border-radius: 14px; color: #D4AF37; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 14px; font-weight: 600; }
-    .add-new-address-btn:active { transform: scale(0.98); }
-    .new-address-form { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 16px; }
-    .new-address-form.show { display: block; }
-    .location-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; padding: 14px; border-radius: 14px; width: 100%; color: #050508; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; transition: 0.2s; margin-top: 10px; font-size: 14px; }
-    .location-btn:active { transform: scale(0.98); }
-    .location-btn:disabled { opacity: 0.6; cursor: not-allowed; }
-    .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
-    .payment-option { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
-    @media (min-width: 768px) { .payment-option { padding: 16px 18px; gap: 15px; border-radius: 16px; } }
-    .payment-option:active { transform: scale(0.98); }
-    .payment-option.selected { border-color: #4CAF50; background: rgba(76,175,80,0.1); }
-    .payment-option .payment-icon i { font-size: 24px; }
-    @media (min-width: 768px) { .payment-option .payment-icon i { font-size: 28px; } }
-    .payment-option .payment-info h4 { font-size: 14px; margin-bottom: 2px; }
-    .payment-option .payment-info p { font-size: 10px; color: #888; }
-    .payment-option .radio-circle { width: 18px; height: 18px; border: 2px solid #888; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-    .payment-option.selected .radio-circle { border-color: #4CAF50; }
-    .payment-option.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; }
-    .cod-details, .razorpay-section { display: none; margin-top: 12px; padding: 12px; background: rgba(76,175,80,0.1); border-radius: 14px; text-align: center; }
-    .cod-details.show, .razorpay-section.show { display: block; }
-    .place-order-cod, .pay-razorpay-btn { width: 100%; background: linear-gradient(135deg, #4CAF50, #45a049); border: none; padding: 14px; border-radius: 50px; font-weight: 700; font-size: 14px; color: white; cursor: pointer; margin-top: 10px; }
-    .pay-razorpay-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; }
-    .order-summary { background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8)); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; border: 1px solid rgba(212,175,55,0.2); position: sticky; top: 10px; height: fit-content; }
-    @media (min-width: 768px) { .order-summary { padding: 28px; border-radius: 32px; top: 20px; } }
-    .order-summary h3 { font-size: 18px; margin-bottom: 16px; color: #D4AF37; display: flex; align-items: center; gap: 8px; }
-    .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .order-item-img { width: 80px; height: 80px; background: #0E0E14; border-radius: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
-    .order-item-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
-    .order-item-img i { font-size: 32px; color: #D4AF37; }
-    .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
-    .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
-    .design-preview-badge { background: rgba(212,175,55,0.15); border-radius: 8px; padding: 4px 8px; margin-top: 6px; font-size: 9px; color: #D4AF37; display: inline-block; }
-    .order-item-price { font-weight: 700; color: #D4AF37; text-align: right; font-size: 13px; min-width: 70px; }
-    .order-total { padding: 16px 0; border-top: 2px solid rgba(212,175,55,0.3); margin-top: 8px; }
-    .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; padding: 4px 0; }
-    .delivery-benefits { background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(76,175,80,0.05)); border-radius: 16px; padding: 12px; margin: 12px 0; }
-    .benefit-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 11px; color: #aaa; }
-    .benefit-row i { width: 20px; color: #4CAF50; font-size: 12px; }
-    .total-row.grand-total { font-size: 20px; font-weight: 800; color: #D4AF37; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(212,175,55,0.3); }
-    .free-shipping-badge { background: rgba(76,175,80,0.15); padding: 8px; border-radius: 12px; text-align: center; margin: 12px 0; color: #4CAF50; font-size: 11px; }
-    .rewards-points { background: rgba(212,175,55,0.1); border-radius: 12px; padding: 10px; margin-top: 12px; text-align: center; font-size: 11px; }
-    .back-to-shop { display: block; text-align: center; margin-top: 16px; color: #888; text-decoration: none; font-size: 12px; }
-    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 12px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; text-align: center; }
-    .toast.show { display: block; animation: fadeInOut 2s ease; }
-    @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 15% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
-    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
-    .loading-overlay.show { display: flex; }
-    .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(212,175,55,0.3); border-top-color: #D4AF37; border-radius: 50%; animation: spin 1s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: #D4AF37; font-size: 14px; }
-    .discount-badge { background: linear-gradient(135deg, #FF9800, #F44336); padding: 6px 12px; border-radius: 30px; font-size: 11px; font-weight: bold; display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; }
-    .online-discount-info { background: rgba(255,152,0,0.15); border: 1px solid rgba(255,152,0,0.3); border-radius: 12px; padding: 10px; margin-top: 8px; font-size: 11px; color: #FF9800; display: flex; align-items: center; gap: 8px; }
-    .location-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20000; align-items: center; justify-content: center; padding: 20px; }
-    .location-modal.show { display: flex; }
-    .location-modal-content { background: rgba(15,15,22,0.98); backdrop-filter: blur(20px); border-radius: 32px; padding: 28px; max-width: 350px; width: 100%; text-align: center; border: 1px solid rgba(212,175,55,0.3); }
-    .location-modal-content i { font-size: 60px; color: #FF9800; margin-bottom: 16px; }
-    .location-modal-content h3 { font-size: 22px; margin-bottom: 10px; }
-    .location-modal-content p { color: #888; font-size: 13px; margin-bottom: 20px; }
-    .location-modal-buttons { display: flex; gap: 12px; flex-direction: column; }
-    .location-settings-btn { background: linear-gradient(135deg, #2196F3, #0b5e7e); border: none; padding: 14px; border-radius: 30px; font-weight: 700; color: white; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .location-cancel-btn { background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 14px; border-radius: 30px; font-weight: 700; color: #ccc; cursor: pointer; }
-    .user-info-bar { background: rgba(212,175,55,0.1); border-radius: 14px; padding: 12px; margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
-    .user-info-bar .info-text { font-size: 12px; color: #D4AF37; }
-    .action-buttons-row { display: flex; gap: 12px; margin-top: 15px; }
-    .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
-    .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
-    
-    /* Custom Design Preview Section */
-    .custom-design-preview-section {
-      background: rgba(0,0,0,0.3);
-      border-radius: 16px;
-      padding: 15px;
-      margin-bottom: 20px;
-      text-align: center;
-      border: 1px solid rgba(212,175,55,0.2);
-    }
-    .custom-design-preview-section h4 {
-      color: #D4AF37;
-      font-size: 14px;
-      margin-bottom: 12px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .custom-design-preview-img {
-      max-width: 100%;
-      max-height: 200px;
-      border-radius: 12px;
-      object-fit: contain;
-      background: #1a1a2e;
-      margin: 0 auto;
-      display: block;
-    }
-    .custom-badge {
-      background: linear-gradient(135deg, #D4AF37, #FF8C00);
-      color: #050508;
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 10px;
-      font-weight: bold;
-      display: inline-block;
-      margin-bottom: 10px;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>VEDANTA | Custom T-Shirt Designer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #050508;
+            color: #FFFFFF;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .header {
+            text-align: center;
+            padding: 25px 20px;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+            position: relative;
+        }
+        .logo {
+            font-size: 44px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .tagline {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: #D4AF37;
+            margin-top: 5px;
+        }
+        .cart-icon-header {
+            position: absolute;
+            right: 30px;
+            top: 30px;
+            cursor: pointer;
+            background: rgba(212,175,55,0.15);
+            padding: 12px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(212,175,55,0.4);
+            transition: 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .cart-icon-header:hover {
+            background: rgba(212,175,55,0.3);
+            transform: scale(1.02);
+        }
+        .cart-count {
+            background: #D4AF37;
+            color: #050508;
+            border-radius: 30px;
+            padding: 2px 8px;
+            font-size: 13px;
+            font-weight: bold;
+        }
+
+        .designer-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .style-section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #D4AF37;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+            gap: 22px;
+        }
+        .style-card {
+            background: rgba(20,20,30,0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 18px 12px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .style-card.active {
+            border-color: #D4AF37;
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
+            box-shadow: 0 0 25px rgba(212,175,55,0.3);
+        }
+        .style-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            background: #1a1a2e;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .style-name { font-weight: 700; font-size: 15px; margin-bottom: 5px; }
+        .style-price { color: #D4AF37; font-size: 14px; font-weight: 700; }
+
+        .designer-grid {
+            display: grid;
+            grid-template-columns: 450px 1fr 320px;
+            gap: 25px;
+        }
+        @media (max-width: 1300px) {
+            .designer-grid { grid-template-columns: 1fr; gap: 25px; }
+        }
+
+        .design-tools-box, .material-tools-box {
+            background: rgba(15,15,22,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 22px;
+            border: 1px solid rgba(212,175,55,0.25);
+            margin-bottom: 20px;
+        }
+        .material-tools-box { margin-bottom: 0; }
+        .box-title {
+            color: #D4AF37;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tool-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .tool-group label {
+            display: block;
+            font-size: 12px;
+            color: #D4AF37;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .tool-group .hint {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .tool-group input, .tool-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 14px;
+            color: white;
+            font-size: 13px;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .color-swatch {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: 0.2s;
+        }
+        .color-swatch.active { border-color: white; transform: scale(1.05); box-shadow: 0 0 6px white; }
+        
+        .tshirt-colors {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-top: 8px;
+        }
+        .tshirt-color {
+            padding: 8px;
+            border-radius: 12px;
+            text-align: center;
+            cursor: pointer;
+            font-size: 11px;
+            font-weight: 600;
+            transition: 0.2s;
+            border: 2px solid transparent;
+            background: rgba(0,0,0,0.3);
+        }
+        .tshirt-color.active { border-color: #D4AF37; background: rgba(212,175,55,0.2); }
+        .tshirt-color .preview {
+            width: 100%;
+            height: 35px;
+            border-radius: 8px;
+            margin-bottom: 5px;
+        }
+        
+        .print-method-group {
+            margin-top: 15px;
+        }
+        .print-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            cursor: pointer;
+            border: 1px solid rgba(212,175,55,0.3);
+            transition: 0.2s;
+        }
+        .print-option.selected {
+            background: rgba(212,175,55,0.2);
+            border-color: #D4AF37;
+        }
+        .print-option input {
+            width: 18px;
+            height: 18px;
+            accent-color: #D4AF37;
+            margin: 0;
+            cursor: pointer;
+        }
+        .print-option label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .effect-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+        .effect-btn {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.4);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #D4AF37;
+            transition: 0.2s;
+        }
+        .effect-btn.active {
+            background: #D4AF37;
+            color: #050508;
+        }
+        
+        .btn-icon {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.4);
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #D4AF37;
+            margin-top: 8px;
+            display: inline-block;
+            margin-right: 6px;
+            transition: 0.2s;
+        }
+        .btn-icon:hover { background: #D4AF37; color: #050508; }
+        
+        .upload-area {
+            border: 2px dashed rgba(212,175,55,0.4);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .upload-area:hover { border-color: #D4AF37; background: rgba(212,175,55,0.05); }
+
+        .editor-panel {
+            background: rgba(10,10,18,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 32px;
+            padding: 20px;
+            text-align: center;
+        }
+        .canvas-container {
+            background: #1a1a24;
+            border-radius: 24px;
+            display: inline-block;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+        }
+        #tshirtCanvas { border-radius: 20px; cursor: crosshair; }
+
+        .order-panel {
+            background: rgba(15,15,22,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 22px;
+            border: 1px solid rgba(212,175,55,0.25);
+            position: sticky;
+            top: 20px;
+        }
+        .order-detail {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 14px;
+        }
+        .order-total {
+            padding: 18px 0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: 800;
+            color: #D4AF37;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-add, .btn-buy, .btn-save-image {
+            flex: 1;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-add {
+            background: rgba(212,175,55,0.15);
+            border: 1.5px solid #D4AF37;
+            color: #D4AF37;
+        }
+        .btn-buy {
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
+            border: none;
+            color: white;
+        }
+        .btn-save-image {
+            background: rgba(100,100,200,0.2);
+            border: 1px solid #8A8AFF;
+            color: #B8B8FF;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 480px;
+            height: 100vh;
+            background: rgba(8,8,15,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(212,175,55,0.4);
+            z-index: 15000;
+            transition: 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.8);
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .cart-item {
+            background: rgba(20,20,30,0.6);
+            margin-bottom: 15px;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        .cart-item-img {
+            width: 60px;
+            height: 60px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .cart-item-img i { font-size: 28px; color: #D4AF37; }
+        .cart-item-details {
+            flex: 1;
+        }
+        .cart-item-name { font-weight: bold; font-size: 14px; }
+        .cart-item-price { color: #D4AF37; font-size: 13px; }
+        .cart-item-variant { font-size: 11px; color: #888; margin-top: 3px; }
+        .cart-qty-control {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+        .cart-qty-control button {
+            background: rgba(212,175,55,0.2);
+            border: none;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            color: #D4AF37;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .cart-qty-control button:hover { background: rgba(212,175,55,0.4); }
+        .cart-item-remove {
+            background: rgba(200,50,50,0.3);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: #ff8888;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        .cart-total {
+            padding: 20px;
+            border-top: 1px solid rgba(212,175,55,0.3);
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #050508;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 12px 24px;
+            border-radius: 50px;
+            font-weight: bold;
+            z-index: 10000;
+            display: none;
+        }
+        .toast.show { display: block; animation: fade 2.5s ease; }
+        @keyframes fade {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
+        }
+
+        .instruction-text {
+            font-size: 11px;
+            color: #888;
+            margin-top: 12px;
+        }
+        
+        .font-preview {
+            font-size: 13px;
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .slider-row {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .slider-row input { flex: 1; }
+        .slider-value { font-size: 12px; color: #D4AF37; min-width: 45px; }
+
+        .two-col-btns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.96);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: rgba(15,15,22,0.98);
+            border-radius: 28px;
+            padding: 30px;
+            max-width: 380px;
+            width: 90%;
+            border: 1px solid rgba(212,175,55,0.3);
+            text-align: center;
+        }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 16px;
+            color: white;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .cors-warning {
+            background: rgba(255,100,0,0.2);
+            border: 1px solid #FF6600;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .color-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        .color-grid::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .color-grid::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 10px;
+        }
+        
+        .image-saved-badge {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: rgba(76,175,80,0.9);
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 12px;
+            z-index: 9999;
+            display: none;
+        }
+    </style>
 </head>
 <body>
 
-<div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Processing your order...</div></div>
-<div class="location-modal" id="locationModal"><div class="location-modal-content"><i class="fas fa-location-dot"></i><h3>Location Access Required</h3><p>Please enable location services to auto-fill your shipping address instantly</p><div class="location-modal-buttons"><button class="location-settings-btn" id="openSettingsBtn"><i class="fas fa-cog"></i> Enable Location</button><button class="location-cancel-btn" id="closeLocationModalBtn">Cancel</button></div></div></div>
-
-<div class="checkout-container">
-  <div class="checkout-header"><div class="logo"><h1>VEDANTA</h1><p>secure checkout</p></div><div class="secure-badge"><i class="fas fa-lock"></i> 100% Secure</div></div>
-  <div class="checkout-main">
-    <div class="checkout-form">
-      <div class="user-info-bar"><div class="info-text"><i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span></div></div>
-      
-      <div class="form-section" id="addressSection">
-        <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
-        <div id="addressSelectionArea"><div style="text-align:center; padding:20px;"><i class="fas fa-spinner fa-pulse"></i> Loading your saved address...</div></div>
-      </div>
-      
-      <div class="form-section"><h3><i class="fas fa-credit-card"></i> Select Payment Method</h3>
-        <div class="payment-options">
-          <div class="payment-option" id="codOption"><div class="payment-icon"><i class="fas fa-money-bill-wave" style="color: #4CAF50;"></i></div><div class="payment-info"><h4>Cash on Delivery</h4><p>Pay when you receive</p></div><div class="radio-circle"></div></div>
-          <div class="payment-option" id="razorpayOption"><div class="payment-icon"><i class="fas fa-credit-card" style="color: #D4AF37;"></i></div><div class="payment-info"><h4>Card / UPI / NetBanking <span class="discount-badge"><i class="fas fa-tag"></i> 5% OFF</span></h4><p>Secure online payment with 5% discount</p></div><div class="radio-circle"></div></div>
-          <div class="cod-details" id="codDetails"><p><i class="fas fa-truck"></i> Pay cash when you receive your order</p><button class="place-order-cod" id="placeOrderCodBtn">Confirm Order (COD)</button></div>
-          <div class="razorpay-section" id="razorpaySection"><div class="online-discount-info"><i class="fas fa-gift"></i> <strong>5% Instant Discount!</strong> Pay online and save 5% on your order.</div><p><i class="fas fa-shield-alt"></i> Secured by Razorpay</p><p style="font-size: 11px; color: #888;">Cards | UPI | NetBanking | Wallets</p><button class="pay-razorpay-btn" id="payRazorpayBtn"><i class="fas fa-lock"></i> Pay Now with 5% OFF</button></div>
-        </div>
-      </div>
+<div class="header">
+    <div class="logo">VEDANTA</div>
+    <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
+    <div class="cart-icon-header" id="cartIconBtn">
+        <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
     </div>
-    <div class="order-summary">
-      <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-      <!-- Custom Design Preview Section -->
-      <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
-        <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
-        <h4><i class="fas fa-star-of-life"></i> Final Edited Design</h4>
-        <img id="customCheckoutPreview" class="custom-design-preview-img" alt="Your Custom T-Shirt Design">
-        <p style="font-size: 10px; color: #888; margin-top: 8px;"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> This is exactly how your design will be printed</p>
-      </div>
-      <div id="orderItemsList"></div>
-      <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div></div>
-      <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | FREE PACKAGING | 0% TAX</div>
-      <div class="order-total"><div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div><div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div><div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div><div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div></div>
-      <div class="rewards-points"><i class="fas fa-coins" style="color: #D4AF37;"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins</div>
-      <a href="#" class="back-to-shop" id="backToShopBtn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
-    </div>
-  </div>
 </div>
-<div class="toast" id="toast"></div>
+
+<div class="designer-container">
+    <div class="cors-warning" id="corsWarning">
+        ⚠️ <strong>Note:</strong> Run with Live Server for best experience
+    </div>
+    
+    <div class="style-section">
+        <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
+        <div class="style-grid" id="styleGrid"></div>
+    </div>
+
+    <div class="designer-grid">
+        <div>
+            <div class="design-tools-box">
+                <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
+                
+                <div class="tool-group">
+                    <label>📝 Add Text</label>
+                    <input type="text" id="textInput" placeholder="Enter your text...">
+                    <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🎨 Text Color (100+ Colors)</label>
+                    <div class="color-grid" id="colorPalette"></div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>✨ Text Effects</label>
+                    <div class="effect-row">
+                        <button class="effect-btn" id="glowBtn"><i class="fas fa-magic"></i> Glow</button>
+                        <button class="effect-btn" id="roundedBtn"><i class="fas fa-circle"></i> Rounded/Circle</button>
+                        <button class="effect-btn" id="borderBtn"><i class="fas fa-border-all"></i> Toggle Border</button>
+                    </div>
+                    <div id="glowControls" style="display: none; margin-top: 12px;">
+                        <div class="slider-row">
+                            <span style="font-size:11px;">Glow Size:</span>
+                            <input type="range" id="glowSizeSlider" min="0" max="20" step="1" value="5">
+                            <span id="glowSizeValue" style="font-size:11px;">5px</span>
+                        </div>
+                        <div class="slider-row" style="margin-top: 8px;">
+                            <span style="font-size:11px;">Glow Color:</span>
+                            <input type="color" id="glowColorPicker" value="#D4AF37" style="height: 30px; width: 50px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔤 Font Family</label>
+                    <select id="fontSelect">
+                        <option value="Space Grotesk">Space Grotesk</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Dancing Script">Dancing Script</option>
+                        <option value="Pacifico">Pacifico</option>
+                        <option value="Oswald">Oswald</option>
+                        <option value="Lobster">Lobster</option>
+                        <option value="Bebas Neue">Bebas Neue</option>
+                        <option value="Great Vibes">Great Vibes</option>
+                    </select>
+                    <div class="font-preview" id="fontPreview">Sample Text</div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>📏 Text Size</label>
+                    <div class="slider-row">
+                        <input type="range" id="fontSizeSlider" min="12" max="120" step="1" value="36">
+                        <span class="slider-value" id="fontSizeValue">36px</span>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔄 Text Transform</label>
+                    <div class="two-col-btns">
+                        <button class="btn-icon" id="flipHorizontalBtn"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
+                        <button class="btn-icon" id="flipVerticalBtn"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                        <button class="btn-icon" id="boldBtn"><i class="fas fa-bold"></i> Bold</button>
+                        <button class="btn-icon" id="italicBtn"><i class="fas fa-italic"></i> Italic</button>
+                        <button class="btn-icon" id="underlineBtn"><i class="fas fa-underline"></i> Underline</button>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🖼️ Upload Your Design</label>
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:24px;"></i>
+                        <p>Click to upload PNG/JPG</p>
+                        <input type="file" id="imageUpload" accept="image/*" style="display:none">
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔧 Manage</label>
+                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button>
+                    <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear All</button>
+                </div>
+            </div>
+            
+            <div class="material-tools-box">
+                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT COLOR & SIZE</div>
+                
+                <div class="tool-group">
+                    <label>🎨 T-Shirt Color</label>
+                    <div class="tshirt-colors" id="tshirtColorPalette">
+                        <div class="tshirt-color" data-color="#1a1a1a">
+                            <div class="preview" style="background:#1a1a1a;"></div>
+                            <span>Black</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#f5f5f5">
+                            <div class="preview" style="background:#f5f5f5;"></div>
+                            <span>White</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#1e3a5f">
+                            <div class="preview" style="background:#1e3a5f;"></div>
+                            <span>Navy</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#800020">
+                            <div class="preview" style="background:#800020;"></div>
+                            <span>Maroon</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#4a5d23">
+                            <div class="preview" style="background:#4a5d23;"></div>
+                            <span>Olive</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#36454F">
+                            <div class="preview" style="background:#36454F;"></div>
+                            <span>Charcoal</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#6F4E37">
+                            <div class="preview" style="background:#6F4E37;"></div>
+                            <span>Coffee</span>
+                        </div>
+                        <div class="tshirt-color" data-color="#708090">
+                            <div class="preview" style="background:#708090;"></div>
+                            <span>Slate</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
+                    <select id="sizeSelect">
+                        <option value="" disabled selected>-- Select Size --</option>
+                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option>
+                    </select>
+                </div>
+                
+                <div class="tool-group">
+                    <label>⚖️ GSM <span style="color:#ff8888;">(Required)</span></label>
+                    <select id="gsmSelect">
+                        <option value="" disabled selected>-- Select GSM --</option>
+                        <option>180 GSM (Light)</option>
+                        <option>220 GSM (Standard)</option>
+                        <option>260 GSM (Heavy)</option>
+                        <option>300 GSM (Premium)</option>
+                    </select>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🧵 Fabric Type <span style="color:#ff8888;">(Required)</span></label>
+                    <select id="fabricSelect">
+                        <option value="" disabled selected>-- Select Fabric --</option>
+                        <option>100% Cotton</option>
+                        <option>Cotton Blend</option>
+                        <option>Polyester</option>
+                        <option>Linen</option>
+                        <option>Organic Cotton</option>
+                    </select>
+                </div>
+                
+                <div class="tool-group print-method-group">
+                    <label>🖨️ Design Print Method</label>
+                    <div id="printMethodContainer">
+                        <div class="print-option" data-method="transparent">
+                            <input type="radio" name="printMethod" id="printTransparent" value="transparent">
+                            <label for="printTransparent">✨ Transparent Print (No Background)</label>
+                        </div>
+                        <div class="print-option" data-method="fullbg">
+                            <input type="radio" name="printMethod" id="printFullBg" value="fullbg">
+                            <label for="printFullBg">🖼️ Print with Background</label>
+                        </div>
+                    </div>
+                    <div class="hint">Select how your uploaded design should be printed.</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="editor-panel">
+            <div class="canvas-container">
+                <canvas id="tshirtCanvas" width="550" height="600"></canvas>
+            </div>
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> 📸 Save Image</button>
+            </div>
+            <p class="instruction-text">
+                <i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit
+            </p>
+            <p class="instruction-text" style="color: #D4AF37;">
+                <i class="fas fa-info-circle"></i> Select text first, then apply effects!
+            </p>
+        </div>
+        
+        <div class="order-panel">
+            <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Full Sleeve T-Shirt</span></div>
+            <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
+            <div class="order-detail"><span>GSM:</span><span id="summaryGSM">--</span></div>
+            <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">--</span></div>
+            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
+            <div class="order-detail"><span>Design:</span><span id="summaryElements">None</span></div>
+            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,699</span></div>
+            <div class="action-buttons">
+                <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD TO CART</button>
+                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+        <i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:24px;"></i>
+    </div>
+    <div id="cartItemsList" class="cart-items">
+        <div style="text-align:center; padding:20px;">Your cart is empty</div>
+    </div>
+    <div class="cart-total">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span>Subtotal:</span>
+            <span id="cartSubtotal">₹0</span>
+        </div>
+        <button id="cartCheckoutBtn" class="checkout-btn">Proceed to Checkout</button>
+    </div>
+</div>
+
+<div class="toast" id="toastMsg"></div>
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModalBtn">&times;</span>
+        <h3 style="color:#D4AF37;">Login to Continue</h3>
+        <input type="tel" id="loginPhone" placeholder="+91 9876543210">
+        <button id="sendOtpBtn">Send OTP</button>
+        <div id="otpSection" style="display:none; margin-top:15px;">
+            <input type="text" id="otpInput" placeholder="Enter OTP">
+            <button id="verifyOtpBtn">Verify</button>
+        </div>
+        <p style="font-size:11px; color:#888; margin-top:12px;">Demo OTP: 123456</p>
+    </div>
+</div>
 
 <script>
-  const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-  const auth = firebase.auth();
-  const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
-  const ONLINE_DISCOUNT_PERCENT = 5;
-  let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
-  let selectedPaymentMethod = 'cod', currentUser = null;
-  let selectedAddress = null;
-  let savedAddressFromDb = null;
-  
-  // ========== CUSTOM CHECKOUT DATA FROM CUSTOMIZE PAGE ==========
-  let customCheckoutData = null;
-  let isCustomizedOrder = false;
-  let customDesignImageURL = null;
-
-  function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
-  function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
-
-  // ========== LOAD CUSTOM CHECKOUT DATA FROM STORAGE ==========
-  function loadCustomCheckoutData() {
-    try {
-      const savedData = localStorage.getItem('customCheckoutData');
-      if (savedData) {
-        customCheckoutData = JSON.parse(savedData);
-        console.log("✅ Custom checkout data loaded:", customCheckoutData);
-        
-        if (customCheckoutData && customCheckoutData.isCustomized === true) {
-          isCustomizedOrder = true;
-          customDesignImageURL = customCheckoutData.customDesignImage;
-          console.log("🎨 Customized order detected! Redirect will be skipped.");
-          console.log("📸 Custom design image URL:", customDesignImageURL);
-          
-          // Show custom preview
-          const previewContainer = document.getElementById('customDesignPreviewContainer');
-          const previewImg = document.getElementById('customCheckoutPreview');
-          if (previewContainer && previewImg && customDesignImageURL) {
-            previewImg.src = customDesignImageURL;
-            previewContainer.style.display = 'block';
-            console.log("✅ Custom design preview displayed");
-          }
-          
-          // Build cart from custom data
-          if (cart.length === 0) {
-            cart = [{
-              id: 'custom_' + Date.now(),
-              name: customCheckoutData.tshirtType || 'Custom T-Shirt',
-              price: customCheckoutData.price || 1699,
-              quantity: customCheckoutData.quantity || 1,
-              size: customCheckoutData.size || 'M',
-              customDesignImage: customDesignImageURL,
-              isCustomized: true
-            }];
-            cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0);
-            console.log("📦 Cart built from custom data:", cart);
-          }
-        }
-      }
-    } catch(e) {
-      console.error("Error loading custom checkout data:", e);
-    }
-  }
-
-  async function fetchCurrentLocationAndFill() {
-    const btn = document.getElementById('useCurrentLocationForNewBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Fetching location...'; }
-    showToast('📍 Getting your exact location...');
-    try {
-      const position = await new Promise((resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-      });
-      const geocoder = new google.maps.Geocoder();
-      geocoder.geocode({ location: { lat: position.coords.latitude, lng: position.coords.longitude } }, (results, status) => {
-        if (status === 'OK' && results && results.length > 0) {
-          const address = results[0];
-          let street = '', city = '', state = '', pincode = '', landmark = '';
-          for (let comp of address.address_components) {
-            if (comp.types.includes('street_number')) street = comp.long_name + ' ' + street;
-            if (comp.types.includes('route')) street = street + (street ? ', ' + comp.long_name : comp.long_name);
-            if (comp.types.includes('locality')) city = comp.long_name;
-            if (comp.types.includes('administrative_area_level_1')) state = comp.long_name;
-            if (comp.types.includes('postal_code')) pincode = comp.long_name;
-            if (comp.types.includes('sublocality_level_1')) landmark = comp.long_name;
-          }
-          if (!street.trim()) street = address.formatted_address.split(',')[0];
-          document.getElementById('newStreet').value = street;
-          document.getElementById('newCity').value = city;
-          document.getElementById('newState').value = state;
-          document.getElementById('newPincode').value = pincode;
-          if (landmark) document.getElementById('newLandmark').value = landmark;
-          showToast(`✅ Location detected! ${city || 'Address'} filled.`);
-        } else throw new Error('Geocoding failed');
-        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-dot"></i> 📍 Use My Current Location'; }
-      });
-    } catch (err) {
-      if (err.code === 1) document.getElementById('locationModal').classList.add('show');
-      showToast('❌ Location failed. Please enter manually.', true);
-      if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-dot"></i> 📍 Use My Current Location'; }
-    }
-  }
-
-  // Address Functions
-  async function fetchSavedAddressFromPhone() {
-    if (!currentUser || !currentUser.phone) return null;
-    try {
-      const snapshot = await db.collection('orders').where('customerPhone', '==', currentUser.phone).orderBy('orderDate', 'desc').limit(1).get();
-      if (!snapshot.empty) {
-        const lastOrder = snapshot.docs[0].data();
-        if (lastOrder.shippingAddress) {
-          return { fullName: lastOrder.customerName, street: lastOrder.shippingAddress.address, city: lastOrder.shippingAddress.city, state: lastOrder.shippingAddress.state, pincode: lastOrder.shippingAddress.pincode, landmark: lastOrder.shippingAddress.landmark || '', phone: lastOrder.customerPhone, email: lastOrder.customerEmail };
-        }
-      }
-      const addrSnapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).orderBy('isDefault', 'desc').limit(1).get();
-      if (!addrSnapshot.empty) {
-        const addr = addrSnapshot.docs[0].data();
-        return { fullName: addr.name, street: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '', phone: addr.phone || currentUser.phone, email: currentUser.email };
-      }
-      return null;
-    } catch(e) { return null; }
-  }
-
-  async function saveNewAddressToFirebase(addressData) {
-    if (!currentUser || !currentUser.uid) return null;
-    const addressToSave = { userId: currentUser.uid, name: addressData.fullName, street: addressData.street, city: addressData.city, state: addressData.state, pincode: addressData.pincode, landmark: addressData.landmark || '', phone: addressData.phone || currentUser.phone, isDefault: true, createdAt: new Date().toISOString() };
-    try { return (await db.collection('addresses').add(addressToSave)).id; } catch(e) { return null; }
-  }
-
-  function showNewAddressForm() {
-    const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `
-      <div class="new-address-form show" id="newAddressFormSection">
-        <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}"></div>
-        <div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div>
-        <div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div>
-        <div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode" maxlength="6"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div>
-        <button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
-        <div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button><button class="location-btn cancel-address-btn" id="cancelNewAddressBtn" style="flex:0.5;">Cancel</button></div>
-      </div>
-    `;
-    document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
-    document.getElementById('cancelNewAddressBtn')?.addEventListener('click', () => { if (savedAddressFromDb) showSavedAddressOptions(); else showNewAddressForm(); });
-    document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
-  }
-
-  function showSavedAddressOptions() {
-    const address = savedAddressFromDb;
-    const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSavedAddressBtn"><div class="address-name"><i class="fas fa-star-of-life" style="color:#D4AF37;"></i> Previously Used Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.street)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddressFormBtn"><i class="fas fa-plus-circle"></i> Add New Address</button></div>`;
-    document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => { useSavedAddress(address); });
-    document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => { showNewAddressForm(); });
-  }
-
-  function displaySelectedAddressCard(address) {
-    const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `<div class="selected-address-card"><div class="address-name"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> Selected Delivery Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.address)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="changeAddressBtn"><i class="fas fa-edit"></i> Change Address</button>`;
-    document.getElementById('changeAddressBtn')?.addEventListener('click', () => { showNewAddressForm(); });
-  }
-
-  function useSavedAddress(address) {
-    selectedAddress = { fullName: address.fullName, phone: address.phone, email: currentUser.email, address: address.street, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark || '' };
-    showToast(`✅ Address selected: ${address.fullName}`);
-    displaySelectedAddressCard(selectedAddress);
-  }
-
-  async function saveNewAddressAndUse() {
-    const fullName = document.getElementById('newFullName').value.trim();
-    const street = document.getElementById('newStreet').value.trim();
-    const city = document.getElementById('newCity').value.trim();
-    const state = document.getElementById('newState').value.trim();
-    const pincode = document.getElementById('newPincode').value.trim();
-    const landmark = document.getElementById('newLandmark').value.trim();
-    if (!fullName || !street || !city || !state || !pincode) { showToast('❌ Please fill all required fields', true); return; }
-    if (!/^\d{6}$/.test(pincode)) { showToast('❌ Enter valid 6-digit pincode', true); return; }
-    selectedAddress = { fullName, phone: currentUser.phone, email: currentUser.email, address: street, city, state, pincode, landmark };
-    await saveNewAddressToFirebase(selectedAddress);
-    showToast(`✅ Address saved: ${fullName}`);
-    displaySelectedAddressCard(selectedAddress);
-  }
-
-  async function loadAndRenderAddressSelection() {
-    showLoading(true);
-    const address = await fetchSavedAddressFromPhone();
-    savedAddressFromDb = address;
-    showLoading(false);
-    if (address && !selectedAddress) { showSavedAddressOptions(); }
-    else if (!selectedAddress) { showNewAddressForm(); }
-    else { displaySelectedAddressCard(selectedAddress); }
-  }
-
-  function getSelectedAddress() { return selectedAddress; }
-  function validateOrder() { if(!getSelectedAddress()){ showToast('❌ Please select or add a shipping address', true); return false; } return true; }
-
-  async function saveOrderToFirebase(paymentMethod, transactionId = null) {
-    const addr = getSelectedAddress(); if (!addr) return { success: false };
-    
-    const itemsWithDetails = cart.map(item => ({ 
-      id: item.id, name: item.name, price: item.price, quantity: item.quantity, 
-      size: item.size || 'N/A', total: item.price * item.quantity,
-      customDesignImage: customDesignImageURL || item.customDesignImage || null,
-      isCustomized: isCustomizedOrder || item.isCustomized || false
-    }));
-    
-    const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
-    const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
-    const orderData = { 
-      orderId, customerName: addr.fullName, customerPhone: addr.phone, customerEmail: addr.email, 
-      shippingAddress: { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' }, 
-      items: itemsWithDetails, paymentMethod, paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending', 
-      status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, 
-      subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, 
-      total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid,
-      isCustomized: isCustomizedOrder, customDesignImage: customDesignImageURL,
-      tshirtType: customCheckoutData?.tshirtType || null,
-      tshirtColor: customCheckoutData?.tshirtColor || null
+    const firebaseConfig = {
+        apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+        authDomain: "nexi-53897.firebaseapp.com",
+        projectId: "nexi-53897",
+        storageBucket: "nexi-53897.firebasestorage.app",
+        messagingSenderId: "337349382612",
+        appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
     };
-    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error("Order save error:", e); return { success: false }; }
-  }
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const storageRef = storage.ref();
 
-  async function processOrderAfterSave(orderId) { 
-    localStorage.removeItem('vedantaCart');
+    const tshirtStyles = [
+        { id: 'fullsleeve', name: 'Full Sleeve T-Shirt', img: 'full sleeve oversized T shirt.jpeg', price: 1699 },
+        { id: 'oversized', name: 'Oversized T-Shirt', img: 'full sleeve oversized T shirt.jpeg', price: 1499 },
+        { id: 'sweatshirt', name: 'Sweatshirt', img: 'sweatshirt T shirt.jpeg', price: 1999 },
+        { id: 'oversized_hoodie', name: 'Oversized Hoodie', img: 'oversized hoodie.jpeg', price: 2499 },
+        { id: 'polo', name: 'Polo T-Shirt', img: 'Polo T shirt.jpeg', price: 1599 },
+        { id: 'dropshoulder', name: 'Drop Shoulder', img: 'drop shoulder T shirt.jpeg', price: 1699 },
+        { id: 'acidwash', name: 'Acid Wash', img: 'acid wash T shirt.jpeg', price: 1799 }
+    ];
+    
+    let currentStyle = tshirtStyles[0];
+    let currentSize = null;
+    let currentGSM = null;
+    let currentFabric = null;
+    let currentPrintMethod = null;
+    let fabricCanvas = null;
+    let pendingBuyAfterLogin = false;
+    let imageCache = {};
+    let glowActive = false;
+    let roundedActive = false;
+    let borderActive = false;
+    let currentShirtColor = '#1a1a1a';
+    let cart = [];
+    let savedDesignImageURL = null;
+
+    // ========== CLEAR ANY OLD AUTO-REDIRECT DATA ON PAGE LOAD ==========
+    console.log("🎨 Customize page opened");
+    console.log("⏳ Waiting for user to design and click Buy Now");
+    
+    // Clear any old checkout data that might cause auto redirect
+    // But keep saved design image if exists
+    const existingDesignImage = localStorage.getItem('customDesignImage');
     localStorage.removeItem('customCheckoutData');
-    window.location.href = `order-success.html?orderId=${orderId}`; 
-  }
-  
-  async function saveOrderCOD() { if (!validateOrder() || isProcessing) return; isProcessing = true; showLoading(true); const res = await saveOrderToFirebase('Cash on Delivery'); showLoading(false); if (res.success) { showToast(`✅ Order placed! ID: ${res.orderId}`); setTimeout(() => processOrderAfterSave(res.orderId), 1500); } else { showToast('❌ Failed', true); isProcessing = false; } }
-  
-  async function initiateRazorpayPayment() { 
-    if (!validateOrder() || isProcessing) return; 
-    isProcessing = true; showLoading(true); 
-    const finalAmount = discountedTotal; 
-    if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } 
-    const addr = getSelectedAddress(); 
-    const options = { 
-      key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount)*100, currency: 'INR', 
-      name: 'VEDANTA', description: 'Order Payment', 
-      prefill: { name: addr.fullName, email: addr.email, contact: addr.phone }, 
-      theme: { color: '#D4AF37' }, 
-      handler: async (response) => { 
-        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id); 
-        showLoading(false); 
-        if (result.success) { 
-          showToast(`✅ Payment success! Order: ${result.orderId}`); 
-          setTimeout(() => processOrderAfterSave(result.orderId), 1500); 
-        } else { showToast('⚠️ Order save issue', true); } 
-        isProcessing = false; 
-      }, 
-      modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing=false; } } 
-    }; 
-    const razorpay = new Razorpay(options); 
-    razorpay.open(); 
-  }
+    localStorage.removeItem('pendingCheckoutOrder');
+    localStorage.removeItem('autoCheckoutRedirect');
+    sessionStorage.removeItem('autoCheckoutRedirect');
+    
+    // Restore design image if it was saved
+    if (existingDesignImage) {
+        savedDesignImageURL = existingDesignImage;
+        console.log("📸 Previously saved design image found:", savedDesignImageURL);
+    }
 
-  function loadCart() { 
-    // First, try to load custom checkout data
-    loadCustomCheckoutData();
-    
-    // If customized order exists, cart is already built from custom data
-    if (isCustomizedOrder && cart.length > 0) {
-      console.log("✅ Customized order active, cart loaded from custom data");
-      calculateOnlineDiscount();
-      renderOrderSummary();
-      updateTotalDisplay();
-      return;
-    }
-    
-    // Normal cart loading for regular products
-    const savedCart = localStorage.getItem('vedantaCart');
-    if (savedCart) {
-      try {
-        cart = JSON.parse(savedCart);
-      } catch(e) { cart = []; }
-    }
-    
-    // Also check pendingCheckoutOrder
-    if (cart.length === 0) { 
-      const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
-      if (pendingOrder) {
+    // ========== Save Image to Firebase Storage ==========
+    async function saveDesignImageToFirebase() {
+        if (!fabricCanvas) {
+            console.log("No canvas available");
+            return null;
+        }
+        
         try {
-          const order = JSON.parse(pendingOrder);
-          if (order.customDesignImage) {
-            isCustomizedOrder = true;
-            customDesignImageURL = order.customDesignImage;
-            cart = [{ 
-              id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, 
-              price: order.price || 1699, quantity: 1, size: order.size || 'M', 
-              customDesignImage: order.customDesignImage,
-              isCustomized: true
-            }];
-            console.log("✅ Loaded from pendingCheckoutOrder");
-          }
-        } catch(e) {}
-      }
+            showToast("📸 Exporting your design...");
+            console.log("Exporting canvas as PNG...");
+            
+            const dataURL = fabricCanvas.toDataURL({
+                format: 'png',
+                quality: 1,
+                multiplier: 2
+            });
+            
+            // Convert dataURL to blob
+            const blob = dataURLToBlob(dataURL);
+            const fileName = `design_${Date.now()}_${Math.random().toString(36).substr(2, 8)}.png`;
+            const designRef = storageRef.child(`custom-designs/${fileName}`);
+            
+            showToast("☁️ Uploading to cloud...");
+            console.log("Uploading to Firebase Storage...");
+            
+            await designRef.put(blob);
+            const downloadURL = await designRef.getDownloadURL();
+            
+            console.log("✅ Design uploaded successfully! URL:", downloadURL);
+            
+            // Save to localStorage for checkout page
+            localStorage.setItem('customDesignImage', downloadURL);
+            savedDesignImageURL = downloadURL;
+            
+            showToast("✅ Design saved successfully!");
+            return downloadURL;
+        } catch (error) {
+            console.error("Upload error:", error);
+            showToast("❌ Failed to save design. Please check Firebase Storage rules.", true);
+            return null;
+        }
     }
     
-    if (cart.length === 0 && !isCustomizedOrder) { 
-      console.log("❌ Cart empty and no custom order, redirecting to home");
-      showToast('Cart empty! Redirecting...', true); 
-      setTimeout(()=> window.location.href='index.html',1500); 
-      return; 
+    // Helper function to convert dataURL to Blob
+    function dataURLToBlob(dataURL) {
+        const arr = dataURL.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) {
+            u8arr[n] = bstr.charCodeAt(n);
+        }
+        return new Blob([u8arr], { type: mime });
     }
-    
-    cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0); 
-    calculateOnlineDiscount(); 
-    renderOrderSummary(); 
-    updateTotalDisplay();
-  }
 
-  async function renderOrderSummary() { 
-    const container = document.getElementById('orderItemsList'); 
-    if (!container) return; 
-    container.innerHTML = '';
-    
-    for (const item of cart) {
-      const itemDiv = document.createElement('div');
-      itemDiv.className = 'order-item';
-      const imgDiv = document.createElement('div');
-      imgDiv.className = 'order-item-img';
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'order-item-info';
-      
-      // Check for custom design image
-      const designImage = item.customDesignImage || customDesignImageURL;
-      if (designImage) {
-        const img = document.createElement('img');
-        img.src = designImage;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        imgDiv.appendChild(img);
-      } else {
-        imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
-      }
-      
-      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>${designImage ? '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>' : ''}`;
-      const priceDiv = document.createElement('div');
-      priceDiv.className = 'order-item-price';
-      priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
-      itemDiv.appendChild(imgDiv);
-      itemDiv.appendChild(infoDiv);
-      itemDiv.appendChild(priceDiv);
-      container.appendChild(itemDiv);
+    function loadCart() {
+        const saved = localStorage.getItem('vedanta_custom_cart');
+        if (saved) {
+            try {
+                cart = JSON.parse(saved);
+                updateCartUI();
+                updateCartCount();
+            } catch(e) { cart = []; }
+        }
     }
-    updateTotalDisplay(); 
-  }
-  
-  function calculateOnlineDiscount() { 
-    if (selectedPaymentMethod === 'razorpay') { 
-      discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100); 
-      discountedTotal = cartTotal - discountAmount; 
-    } else { 
-      discountAmount = 0; 
-      discountedTotal = cartTotal; 
-    } 
-    updateTotalDisplay(); 
-  }
-  
-  function updateTotalDisplay() { 
-    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; 
-    const discountRow = document.getElementById('discountRow'); 
-    if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) { 
-      discountRow.style.display = 'flex'; 
-      document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`; 
-      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`; 
-    } else { 
-      discountRow.style.display = 'none'; 
-      document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; 
-    } 
-    document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100); 
-  }
-  
-  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
-  async function initialize() {
-    const user = auth.currentUser;
-    const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    if (user) { currentUser = { uid: user.uid, phone: user.phoneNumber, email: user.email || storedUser?.email, name: storedUser?.name || `User${user.phoneNumber?.slice(-4)}` }; localStorage.setItem('vedantaUser', JSON.stringify(currentUser)); }
-    else if (storedUser) currentUser = storedUser;
-    else { showToast('Login required', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
+    function saveCart() {
+        localStorage.setItem('vedanta_custom_cart', JSON.stringify(cart));
+        updateCartCount();
+        updateCartUI();
+    }
+
+    function updateCartCount() {
+        const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+        document.getElementById('cartCount').innerText = totalItems;
+    }
+
+    function updateCartUI() {
+        const container = document.getElementById('cartItemsList');
+        if (!container) return;
+        
+        if (cart.length === 0) {
+            container.innerHTML = '<div style="text-align:center; padding:20px;">Your cart is empty</div>';
+            document.getElementById('cartSubtotal').innerText = '₹0';
+            return;
+        }
+        
+        let subtotal = 0;
+        container.innerHTML = '';
+        
+        cart.forEach((item, index) => {
+            const itemTotal = item.price * item.quantity;
+            subtotal += itemTotal;
+            
+            const cartItemDiv = document.createElement('div');
+            cartItemDiv.className = 'cart-item';
+            cartItemDiv.innerHTML = `
+                <div class="cart-item-img">
+                    ${item.customDesignImage ? `<img src="${item.customDesignImage}" alt="Design">` : '<i class="fas fa-tshirt"></i>'}
+                </div>
+                <div class="cart-item-details">
+                    <div class="cart-item-name">${item.styleName} ${item.isCustomized ? '✨ Custom' : ''}</div>
+                    <div class="cart-item-price">₹${item.price}</div>
+                    <div class="cart-item-variant">${item.size || 'M'} | ${item.gsm || '220 GSM'} | ${item.fabric || 'Cotton'}</div>
+                    <div class="cart-qty-control">
+                        <button class="cart-qty-dec" data-index="${index}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="cart-qty-inc" data-index="${index}">+</button>
+                        <button class="cart-item-remove" data-index="${index}"><i class="fas fa-trash"></i> Remove</button>
+                    </div>
+                </div>
+            `;
+            container.appendChild(cartItemDiv);
+        });
+        
+        document.getElementById('cartSubtotal').innerHTML = `₹${subtotal}`;
+        
+        document.querySelectorAll('.cart-qty-dec').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.index);
+                if (cart[idx].quantity > 1) {
+                    cart[idx].quantity--;
+                } else {
+                    cart.splice(idx, 1);
+                }
+                saveCart();
+                updateCartUI();
+                showToast('Cart updated');
+            });
+        });
+        
+        document.querySelectorAll('.cart-qty-inc').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.index);
+                cart[idx].quantity++;
+                saveCart();
+                updateCartUI();
+                showToast('Quantity increased');
+            });
+        });
+        
+        document.querySelectorAll('.cart-item-remove').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const idx = parseInt(btn.dataset.index);
+                cart.splice(idx, 1);
+                saveCart();
+                updateCartUI();
+                showToast('Item removed from cart');
+            });
+        });
+    }
+
+    async function addCurrentDesignToCart() {
+        if (!currentSize || !currentGSM || !currentFabric) {
+            showToast('Please select Size, GSM and Fabric first', true);
+            return false;
+        }
+        
+        if (!fabricCanvas || fabricCanvas.getObjects().length === 0) {
+            showToast('Please add some design (text or image) first', true);
+            return false;
+        }
+        
+        let designImageURL = savedDesignImageURL;
+        if (!designImageURL) {
+            showToast('Saving design first...');
+            designImageURL = await saveDesignImageToFirebase();
+        }
+        
+        if (!designImageURL) {
+            showToast('Failed to save design', true);
+            return false;
+        }
+        
+        const designString = JSON.stringify(fabricCanvas.toJSON());
+        
+        const cartItem = {
+            id: Date.now() + Math.random(),
+            styleId: currentStyle.id,
+            styleName: currentStyle.name,
+            price: currentStyle.price,
+            designString: designString,
+            customDesignImage: designImageURL,
+            isCustomized: true,
+            size: currentSize,
+            gsm: currentGSM,
+            fabric: currentFabric,
+            printMethod: currentPrintMethod || 'transparent',
+            shirtColor: currentShirtColor,
+            quantity: 1
+        };
+        cart.push(cartItem);
+        saveCart();
+        showToast('✓ Design added to cart!');
+        return true;
+    }
+
+    // ========== SAVE IMAGE BUTTON HANDLER ==========
+    async function handleSaveImage() {
+        if (!fabricCanvas || fabricCanvas.getObjects().length === 0) {
+            showToast('Please add some design first', true);
+            return;
+        }
+        
+        const imageURL = await saveDesignImageToFirebase();
+        if (imageURL) {
+            console.log("✅ Custom image saved to Firebase:", imageURL);
+            console.log("💾 Design saved. Click Buy Now to proceed to checkout.");
+        }
+    }
+
+    // ========== BUY NOW - ONLY HERE REDIRECT HAPPENS ==========
+    async function buyNow() {
+        console.log("🛒 Buy Now button clicked - preparing checkout");
+        
+        const user = JSON.parse(localStorage.getItem('vedantaUser'));
+        if (!user) { 
+            pendingBuyAfterLogin = true;
+            openLoginModal(); 
+            showToast('Please login to continue', false);
+            return; 
+        }
+        
+        if(!currentSize || !currentGSM || !currentFabric) {
+            showToast('Please select Size, GSM and Fabric first', true);
+            return;
+        }
+        
+        if (!savedDesignImageURL) {
+            showToast('📸 Saving your design first...');
+            const imageURL = await saveDesignImageToFirebase();
+            if (!imageURL) {
+                showToast('Failed to save design', true);
+                return;
+            }
+            savedDesignImageURL = imageURL;
+        }
+        
+        // Prepare checkout data
+        const customCheckoutData = {
+            isCustomized: true,
+            customDesignImage: savedDesignImageURL,
+            tshirtType: currentStyle.name,
+            tshirtColor: currentShirtColor,
+            size: currentSize,
+            gsm: currentGSM,
+            fabric: currentFabric,
+            quantity: 1,
+            price: currentStyle.price
+        };
+        
+        console.log("📦 Saving checkout data:", customCheckoutData);
+        localStorage.setItem('customCheckoutData', JSON.stringify(customCheckoutData));
+        localStorage.setItem('customDesignImage', savedDesignImageURL);
+        
+        showToast("🔄 Redirecting to secure checkout...");
+        console.log("🚀 Redirecting to secure-checkout.html");
+        
+        // Small delay to ensure data is saved
+        setTimeout(() => {
+            window.location.href = 'secure-checkout.html';
+        }, 500);
+    }
+
+    function generateColorPalette() {
+        const colors = [];
+        const baseColors = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D', '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC', '#66994D', '#B366CC', '#4D8000', '#B33300', '#CC80CC', '#66664D', '#991AFF', '#E666FF', '#4DB3FF', '#1AB399', '#E666B3', '#33991A', '#CC9999', '#B3B31A', '#00E680', '#4D8066', '#809980', '#E6FF80', '#1AFF33', '#999933', '#FF3380', '#CCCC00', '#66E64D', '#4D80CC', '#9900B3', '#E64D66', '#4DB380', '#FF4D4D', '#99E6E6', '#6666FF'];
+        return baseColors.slice(0, 70);
+    }
     
-    document.getElementById('displayPhone').innerText = currentUser.phone || ''; 
-    document.getElementById('displayEmail').innerText = currentUser.email || ''; 
+    function renderColorPalette() {
+        const palette = generateColorPalette();
+        const container = document.getElementById('colorPalette');
+        container.innerHTML = '';
+        palette.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.addEventListener('click', () => { applyTextColor(color); document.querySelectorAll('#colorPalette .color-swatch').forEach(s => s.classList.remove('active')); swatch.classList.add('active'); });
+            container.appendChild(swatch);
+        });
+    }
     
-    await loadAndRenderAddressSelection();
-    loadCart(); // This will also handle custom checkout data
+    function loadImageAsDataURL(src, callback) {
+        if (imageCache[src]) { callback(imageCache[src]); return; }
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            imageCache[src] = dataURL;
+            callback(dataURL);
+        };
+        img.onerror = function() { callback(null); };
+        img.src = src;
+    }
+
+    function loadTshirtImage(style, keepDesigns = true) {
+        if (!fabricCanvas) return;
+        let existingObjects = [];
+        if (keepDesigns) {
+            existingObjects = fabricCanvas.getObjects();
+            existingObjects.forEach(obj => fabricCanvas.remove(obj));
+        }
+        loadImageAsDataURL(style.img, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        if (keepDesigns && existingObjects.length > 0) {
+                            existingObjects.forEach(obj => fabricCanvas.add(obj));
+                        }
+                        fabricCanvas.renderAll();
+                    }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
+                });
+            } else {
+                fabricCanvas.setBackgroundColor(currentShirtColor, function() {
+                    if (keepDesigns && existingObjects.length > 0) {
+                        existingObjects.forEach(obj => fabricCanvas.add(obj));
+                    }
+                    fabricCanvas.renderAll();
+                });
+            }
+        });
+    }
     
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateOnlineDiscount(); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateOnlineDiscount(); });
-    document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
-    document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
-    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
-    document.getElementById('openSettingsBtn')?.addEventListener('click', () => { document.getElementById('locationModal').classList.remove('show'); showToast('📍 Please allow location in browser settings', true); });
-    document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
-  }
-  
-  initialize();
+    function initCanvas() {
+        fabricCanvas = new fabric.Canvas('tshirtCanvas');
+        fabricCanvas.setWidth(550); fabricCanvas.setHeight(600);
+        fabricCanvas.selection = true;
+        fabricCanvas.on('object:modified', () => updateSummaryElements());
+        fabricCanvas.on('object:added', () => updateSummaryElements());
+        fabricCanvas.on('object:removed', () => updateSummaryElements());
+        fabricCanvas.on('selection:created', (e) => { if(e.selected?.[0]) loadEffectState(e.selected[0]); });
+        fabricCanvas.on('selection:updated', (e) => { if(e.selected?.[0]) loadEffectState(e.selected[0]); });
+        loadTshirtImage(currentStyle, false);
+    }
+    
+    function loadEffectState(obj) {
+        if(obj.type !== 'i-text' && obj.type !== 'text') return;
+        glowActive = !!obj.shadow;
+        roundedActive = (obj.radius !== undefined && obj.radius > 0);
+        borderActive = (obj.stroke && obj.stroke !== 'transparent');
+        updateEffectButtonsUI();
+        if(glowActive && obj.shadow) {
+            document.getElementById('glowSizeSlider').value = obj.shadow.blur || 5;
+            document.getElementById('glowSizeValue').innerText = (obj.shadow.blur || 5) + 'px';
+            document.getElementById('glowColorPicker').value = obj.shadow.color || '#D4AF37';
+        }
+        document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none';
+    }
+    
+    function updateEffectButtonsUI() {
+        const glowBtn = document.getElementById('glowBtn');
+        const roundedBtn = document.getElementById('roundedBtn');
+        const borderBtn = document.getElementById('borderBtn');
+        if(glowActive) glowBtn.classList.add('active'); else glowBtn.classList.remove('active');
+        if(roundedActive) roundedBtn.classList.add('active'); else roundedBtn.classList.remove('active');
+        if(borderActive) borderBtn.classList.add('active'); else borderBtn.classList.remove('active');
+    }
+    
+    function applyGlow() {
+        const active = fabricCanvas.getActiveObject();
+        if(!active || (active.type !== 'i-text' && active.type !== 'text')) {
+            showToast('Select a text first', true);
+            return;
+        }
+        glowActive = !glowActive;
+        if(glowActive) {
+            const size = parseInt(document.getElementById('glowSizeSlider').value);
+            const color = document.getElementById('glowColorPicker').value;
+            active.set('shadow', `${color} 0px 0px ${size}px`);
+            document.getElementById('glowControls').style.display = 'block';
+        } else {
+            active.set('shadow', null);
+            document.getElementById('glowControls').style.display = 'none';
+        }
+        fabricCanvas.renderAll();
+        updateEffectButtonsUI();
+        showToast(glowActive ? '✓ Glow enabled' : '✓ Glow disabled');
+    }
+    
+    function applyRounded() {
+        const active = fabricCanvas.getActiveObject();
+        if(!active || (active.type !== 'i-text' && active.type !== 'text')) {
+            showToast('Select a text first', true);
+            return;
+        }
+        roundedActive = !roundedActive;
+        if(roundedActive) {
+            active.set('radius', 50);
+            active.set('rx', 50);
+            active.set('ry', 50);
+        } else {
+            active.set('radius', 0);
+            active.set('rx', 0);
+            active.set('ry', 0);
+        }
+        fabricCanvas.renderAll();
+        updateEffectButtonsUI();
+        showToast(roundedActive ? '✓ Rounded/Circle style applied' : '✓ Rounded style removed');
+    }
+    
+    function applyBorderToggle() {
+        const active = fabricCanvas.getActiveObject();
+        if(!active || (active.type !== 'i-text' && active.type !== 'text')) {
+            showToast('Select a text first', true);
+            return;
+        }
+        borderActive = !borderActive;
+        if(borderActive) {
+            active.set('stroke', '#D4AF37');
+            active.set('strokeWidth', 2);
+        } else {
+            active.set('stroke', null);
+            active.set('strokeWidth', 0);
+        }
+        fabricCanvas.renderAll();
+        updateEffectButtonsUI();
+        showToast(borderActive ? '✓ Border enabled' : '✓ Border disabled');
+    }
+    
+    function updateGlowFromSliders() {
+        const active = fabricCanvas.getActiveObject();
+        if(!glowActive || !active) return;
+        const size = document.getElementById('glowSizeSlider').value;
+        const color = document.getElementById('glowColorPicker').value;
+        document.getElementById('glowSizeValue').innerText = size + 'px';
+        if(active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('shadow', `${color} 0px 0px ${size}px`);
+            fabricCanvas.renderAll();
+        }
+    }
+    
+    function addText() {
+        const textValue = document.getElementById('textInput').value;
+        if (!textValue.trim()) { showToast('Enter text first', true); return; }
+        const text = new fabric.IText(textValue, {
+            left: fabricCanvas.width / 2, top: fabricCanvas.height / 2,
+            fontFamily: document.getElementById('fontSelect').value,
+            fill: '#D4AF37', fontSize: 36,
+            originX: 'center', originY: 'center',
+            hasControls: true, hasBorders: true
+        });
+        fabricCanvas.add(text);
+        fabricCanvas.setActiveObject(text);
+        fabricCanvas.renderAll();
+        showToast('✓ Text added!');
+        updateSummaryElements();
+    }
+    
+    function updateSelectedText() {
+        const active = fabricCanvas.getActiveObject();
+        if (!active || (active.type !== 'i-text' && active.type !== 'text')) return;
+        active.set('fontFamily', document.getElementById('fontSelect').value);
+        active.set('fontSize', parseInt(document.getElementById('fontSizeSlider').value));
+        fabricCanvas.renderAll();
+    }
+    
+    function applyTextColor(color) {
+        const active = fabricCanvas.getActiveObject();
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('fill', color);
+            fabricCanvas.renderAll();
+            showToast('✓ Color applied!');
+        } else {
+            showToast('⚠️ Select a text first', true);
+        }
+    }
+    
+    function changeTShirtColor(color) {
+        currentShirtColor = color;
+        fabricCanvas.setBackgroundColor(color, fabricCanvas.renderAll.bind(fabricCanvas));
+        showToast('✓ T-Shirt color changed!');
+    }
+    
+    function flipHorizontal() {
+        const active = fabricCanvas.getActiveObject();
+        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('✓ Flipped Horizontal'); }
+        else showToast('Select element first', true);
+    }
+    
+    function flipVertical() {
+        const active = fabricCanvas.getActiveObject();
+        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('✓ Flipped Vertical'); }
+        else showToast('Select element first', true);
+    }
+    
+    function applyTextStyle(style) {
+        const active = fabricCanvas.getActiveObject();
+        if (active && active.type === 'i-text') {
+            if (style === 'bold') active.set('fontWeight', active.fontWeight === 'bold' ? 'normal' : 'bold');
+            if (style === 'italic') active.set('fontStyle', active.fontStyle === 'italic' ? 'normal' : 'italic');
+            if (style === 'underline') active.set('underline', !active.underline);
+            fabricCanvas.renderAll();
+            showToast(`✓ ${style} toggled`);
+        } else showToast('Select text first', true);
+    }
+    
+    function addImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            fabric.Image.fromURL(e.target.result, (img) => {
+                img.scaleToWidth(200);
+                img.set({ left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center' });
+                fabricCanvas.add(img);
+                fabricCanvas.setActiveObject(img);
+                fabricCanvas.renderAll();
+                showToast('✓ Image added!');
+                updateSummaryElements();
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+    
+    function updateSummaryElements() {
+        const has = fabricCanvas && fabricCanvas.getObjects().length > 0;
+        document.getElementById('summaryElements').innerHTML = has ? '<i class="fas fa-check-circle"></i> Custom Design' : 'None';
+    }
+    
+    function updatePrintSummary() {
+        const methodText = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected');
+        document.getElementById('summaryPrintMethod').innerHTML = methodText;
+    }
+    
+    function updateSummary() {
+        document.getElementById('summaryStyle').innerText = currentStyle.name;
+        document.getElementById('summarySize').innerText = currentSize || '--';
+        document.getElementById('summaryGSM').innerText = currentGSM || '--';
+        document.getElementById('summaryFabric').innerText = currentFabric || '--';
+        document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`;
+        updateSummaryElements();
+        updatePrintSummary();
+    }
+    
+    function showToast(msg, isErr = false) {
+        const t = document.getElementById('toastMsg');
+        t.innerText = msg;
+        t.style.background = isErr ? '#F44336' : '#D4AF37';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+    
+    function renderStyles() {
+        const grid = document.getElementById('styleGrid');
+        grid.innerHTML = tshirtStyles.map(style => `
+            <div class="style-card ${style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
+                <img class="style-img" src="${style.img}" alt="${style.name}" 
+                     onerror="this.src='https://placehold.co/300x300/1a1a2e/D4AF37?text=${encodeURIComponent(style.name)}'">
+                <div class="style-name">${style.name}</div>
+                <div class="style-price">₹${style.price}</div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.style-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.dataset.id;
+                const selectedStyle = tshirtStyles.find(s => s.id === id);
+                if (selectedStyle) {
+                    currentStyle = selectedStyle;
+                    renderStyles();
+                    loadTshirtImage(currentStyle, true);
+                    updateSummary();
+                    showToast(`✓ ${currentStyle.name} selected!`);
+                }
+            });
+        });
+    }
+    
+    // Event Listeners
+    document.querySelectorAll('.print-option input').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            if (e.target.checked) {
+                currentPrintMethod = e.target.value;
+                updatePrintSummary();
+                showToast(`✓ Print method set to: ${currentPrintMethod === 'transparent' ? 'Transparent Print' : 'Full Background Print'}`);
+            }
+        });
+    });
+    
+    document.getElementById('sizeSelect')?.addEventListener('change', (e) => { currentSize = e.target.value; updateSummary(); });
+    document.getElementById('gsmSelect')?.addEventListener('change', (e) => { currentGSM = e.target.value; updateSummary(); });
+    document.getElementById('fabricSelect')?.addEventListener('change', (e) => { currentFabric = e.target.value; updateSummary(); });
+    
+    document.querySelectorAll('#tshirtColorPalette .tshirt-color').forEach(c => {
+        c.addEventListener('click', () => {
+            document.querySelectorAll('#tshirtColorPalette .tshirt-color').forEach(p => p.classList.remove('active'));
+            c.classList.add('active');
+            changeTShirtColor(c.dataset.color);
+        });
+    });
+    
+    document.getElementById('glowBtn')?.addEventListener('click', applyGlow);
+    document.getElementById('roundedBtn')?.addEventListener('click', applyRounded);
+    document.getElementById('borderBtn')?.addEventListener('click', applyBorderToggle);
+    document.getElementById('glowSizeSlider')?.addEventListener('input', updateGlowFromSliders);
+    document.getElementById('glowColorPicker')?.addEventListener('input', updateGlowFromSliders);
+    
+    document.getElementById('addTextBtn')?.addEventListener('click', addText);
+    document.getElementById('flipHorizontalBtn')?.addEventListener('click', flipHorizontal);
+    document.getElementById('flipVerticalBtn')?.addEventListener('click', flipVertical);
+    document.getElementById('boldBtn')?.addEventListener('click', () => applyTextStyle('bold'));
+    document.getElementById('italicBtn')?.addEventListener('click', () => applyTextStyle('italic'));
+    document.getElementById('underlineBtn')?.addEventListener('click', () => applyTextStyle('underline'));
+    document.getElementById('deleteBtn')?.addEventListener('click', () => {
+        const obj = fabricCanvas.getActiveObject();
+        if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('✓ Deleted'); }
+        else showToast('Select element first', true);
+    });
+    document.getElementById('clearBtn')?.addEventListener('click', () => {
+        fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+        fabricCanvas.renderAll();
+        updateSummaryElements();
+        showToast('✓ All cleared');
+    });
+    
+    document.getElementById('saveImageBtn')?.addEventListener('click', handleSaveImage);
+    
+    document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => {
+        document.getElementById('fontSizeValue').innerText = e.target.value + 'px';
+        updateSelectedText();
+    });
+    document.getElementById('fontSelect')?.addEventListener('change', () => {
+        updateSelectedText();
+        document.getElementById('fontPreview').style.fontFamily = document.getElementById('fontSelect').value;
+    });
+    
+    document.getElementById('addToCartBtn')?.addEventListener('click', addCurrentDesignToCart);
+    document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
+    
+    document.getElementById('cartIconBtn')?.addEventListener('click', () => {
+        document.getElementById('cartSidebar').classList.add('open');
+    });
+    document.getElementById('closeCartBtn')?.addEventListener('click', () => {
+        document.getElementById('cartSidebar').classList.remove('open');
+    });
+    document.getElementById('cartCheckoutBtn')?.addEventListener('click', () => {
+        if (cart.length === 0) {
+            showToast('Cart is empty', true);
+            return;
+        }
+        window.location.href = 'secure-checkout.html';
+    });
+    
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('imageUpload');
+    uploadArea?.addEventListener('click', () => fileInput.click());
+    fileInput?.addEventListener('change', (e) => { if (e.target.files[0]) addImage(e.target.files[0]); });
+    
+    function openLoginModal() { 
+        pendingBuyAfterLogin = false;
+        document.getElementById('loginModal').classList.add('show'); 
+    }
+    function closeLoginModal() { 
+        document.getElementById('loginModal').classList.remove('show'); 
+        document.getElementById('otpSection').style.display = 'none'; 
+        document.getElementById('otpInput').value = '';
+    }
+    
+    document.getElementById('sendOtpBtn')?.addEventListener('click', () => {
+        const phone = document.getElementById('loginPhone').value;
+        if (phone.length < 10) { showToast('Valid phone required', true); return; }
+        showToast('Demo OTP: 123456');
+        document.getElementById('otpSection').style.display = 'block';
+    });
+    
+    document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
+        const otp = document.getElementById('otpInput').value;
+        if (otp === '123456') {
+            const userId = Date.now().toString();
+            const userData = { uid: userId, phone: document.getElementById('loginPhone').value, name: 'Customer' };
+            localStorage.setItem('vedantaUser', JSON.stringify(userData));
+            closeLoginModal();
+            showToast('✓ Login successful!');
+            
+            if (pendingBuyAfterLogin) {
+                pendingBuyAfterLogin = false;
+                setTimeout(() => {
+                    buyNow();
+                }, 500);
+            }
+        } else { 
+            showToast('Wrong OTP', true); 
+        }
+    });
+    
+    document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
+    
+    if (window.location.protocol === 'file:') {
+        document.getElementById('corsWarning').style.display = 'block';
+    } else {
+        document.getElementById('corsWarning').style.display = 'none';
+    }
+    
+    // Initialize everything
+    initCanvas();
+    renderStyles();
+    renderColorPalette();
+    updateSummary();
+    loadCart();
+    document.querySelector('#tshirtColorPalette .tshirt-color')?.classList.add('active');
+    changeTShirtColor('#1a1a1a');
+    
+    console.log("✅ Customize page ready and waiting for user action");
+    console.log("🎨 User can now design their t-shirt");
+    console.log("💾 After design, click 'Save Image' then 'Buy Now'");
 </script>
 </body>
 </html>
