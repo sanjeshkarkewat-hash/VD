@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -424,7 +425,9 @@
             align-items: center;
             justify-content: center;
             font-size: 28px;
+            overflow: hidden;
         }
+        .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
         .cart-item-details {
             flex: 1;
         }
@@ -592,6 +595,17 @@
         .color-grid::-webkit-scrollbar-thumb {
             background: #D4AF37;
             border-radius: 10px;
+        }
+        
+        .uploading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -870,6 +884,8 @@
     };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
+    const storage = firebase.storage();
+    const storageRef = storage.ref();
 
     const tshirtStyles = [
         { id: 'fullsleeve', name: 'Full Sleeve T-Shirt', img: 'full sleeve oversized T shirt.jpeg', price: 1699 },
@@ -893,9 +909,38 @@
     let roundedActive = false;
     let borderActive = false;
     let currentShirtColor = '#1a1a1a';
-
-    // Cart array - each item stores full design JSON
     let cart = [];
+
+    // ========== NEW: Upload design to Firebase Storage ==========
+    async function uploadDesignToFirebase() {
+        if (!fabricCanvas) {
+            console.log("No canvas available for upload");
+            return null;
+        }
+        
+        try {
+            console.log("Exporting canvas as PNG...");
+            const dataURL = fabricCanvas.toDataURL({
+                format: 'png',
+                quality: 1,
+                multiplier: 2
+            });
+            
+            const fileName = `design_${Date.now()}_${Math.random().toString(36).substr(2, 8)}.png`;
+            const designRef = storageRef.child(`custom-designs/${fileName}`);
+            
+            console.log("Uploading design to Firebase Storage...");
+            await designRef.putString(dataURL.split(',')[1], 'base64');
+            
+            const downloadURL = await designRef.getDownloadURL();
+            console.log("Design uploaded successfully! URL:", downloadURL);
+            
+            return downloadURL;
+        } catch (error) {
+            console.error("Error uploading design:", error);
+            return null;
+        }
+    }
 
     function loadCart() {
         const saved = localStorage.getItem('vedanta_custom_cart');
@@ -940,10 +985,10 @@
             cartItemDiv.className = 'cart-item';
             cartItemDiv.innerHTML = `
                 <div class="cart-item-img">
-                    <i class="fas fa-tshirt"></i>
+                    ${item.customDesignImage ? `<img src="${item.customDesignImage}" alt="Design">` : '<i class="fas fa-tshirt"></i>'}
                 </div>
                 <div class="cart-item-details">
-                    <div class="cart-item-name">${item.styleName}</div>
+                    <div class="cart-item-name">${item.styleName} ${item.isCustomized ? '✨ Custom' : ''}</div>
                     <div class="cart-item-price">₹${item.price}</div>
                     <div class="cart-item-variant">${item.size || 'M'} | ${item.gsm || '220 GSM'} | ${item.fabric || 'Cotton'}</div>
                     <div class="cart-qty-control">
@@ -959,7 +1004,6 @@
         
         document.getElementById('cartSubtotal').innerHTML = `₹${subtotal}`;
         
-        // Attach event listeners
         document.querySelectorAll('.cart-qty-dec').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 const idx = parseInt(btn.dataset.index);
@@ -995,7 +1039,8 @@
         });
     }
 
-    function addCurrentDesignToCart() {
+    // ========== MODIFIED: Add to cart with design upload ==========
+    async function addCurrentDesignToCart() {
         if (!currentSize || !currentGSM || !currentFabric) {
             showToast('Please select Size, GSM and Fabric first', true);
             return false;
@@ -1006,10 +1051,19 @@
             return false;
         }
         
+        showToast('Uploading design image...');
+        
+        // Upload design to Firebase Storage
+        const designImageURL = await uploadDesignToFirebase();
+        
+        if (!designImageURL) {
+            showToast('Failed to upload design. Please try again.', true);
+            return false;
+        }
+        
         const designJSON = fabricCanvas.toJSON();
         const designString = JSON.stringify(designJSON);
         
-        // Check if same design already exists in cart
         const existingIndex = cart.findIndex(item => item.designString === designString && item.styleId === currentStyle.id);
         
         if (existingIndex !== -1) {
@@ -1022,6 +1076,8 @@
                 styleName: currentStyle.name,
                 price: currentStyle.price,
                 designString: designString,
+                customDesignImage: designImageURL,
+                isCustomized: true,
                 size: currentSize,
                 gsm: currentGSM,
                 fabric: currentFabric,
@@ -1030,7 +1086,7 @@
                 quantity: 1
             };
             cart.push(cartItem);
-            showToast('✓ Design added to cart!');
+            showToast('✓ Design added to cart with image preview!');
         }
         
         saveCart();
@@ -1356,11 +1412,16 @@
             showToast('Please select Size, GSM and Fabric', true);
             return null;
         }
+        
+        const designImageURL = await uploadDesignToFirebase();
+        
         const designJSON = fabricCanvas ? fabricCanvas.toJSON() : null;
         const orderData = {
             style: currentStyle.name, price: currentStyle.price, size: currentSize,
             gsm: currentGSM, fabric: currentFabric, printMethod: currentPrintMethod,
             designJSON: designJSON,
+            customDesignImage: designImageURL,
+            isCustomized: true,
             orderType: orderType, userId: user.uid,
             timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
@@ -1378,6 +1439,7 @@
         }
     }
     
+    // ========== MODIFIED: Add to cart handler with upload ==========
     async function addToCartHandler() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) { showToast('Login first', true); openLoginModal(); return; }
@@ -1385,9 +1447,10 @@
             showToast('Please select Size, GSM and Fabric first', true);
             return;
         }
-        addCurrentDesignToCart();
+        await addCurrentDesignToCart();
     }
     
+    // ========== MODIFIED: Buy now with design upload ==========
     async function buyNow() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
         if (!user) { 
@@ -1401,7 +1464,7 @@
             return;
         }
         
-        showToast('Processing order...');
+        showToast('Uploading design and processing order...');
         const orderId = await saveOrder('buy');
         if (orderId) {
             localStorage.setItem('pendingCheckoutOrder', JSON.stringify({ orderId: orderId, style: currentStyle.name, price: currentStyle.price }));
@@ -1449,7 +1512,6 @@
         });
     }
     
-    // Event Listeners
     document.querySelectorAll('.print-option input').forEach(radio => {
         radio.addEventListener('change', (e) => {
             if (e.target.checked) {
@@ -1511,7 +1573,6 @@
     document.getElementById('addToCartBtn')?.addEventListener('click', addToCartHandler);
     document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
     
-    // Cart sidebar events
     document.getElementById('cartIconBtn')?.addEventListener('click', () => {
         document.getElementById('cartSidebar').classList.add('open');
     });
@@ -1577,7 +1638,6 @@
         document.getElementById('corsWarning').style.display = 'none';
     }
     
-    // Initialize everything
     initCanvas();
     renderStyles();
     renderColorPalette();
