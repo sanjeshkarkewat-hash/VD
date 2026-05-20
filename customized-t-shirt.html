@@ -596,6 +596,17 @@
             background: #D4AF37;
             border-radius: 10px;
         }
+        
+        .uploading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -1107,32 +1118,68 @@
     function updatePrintSummary() { document.getElementById('summaryPrintMethod').innerHTML = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected'); }
     function updateSummary() { document.getElementById('summaryStyle').innerText = currentStyle.name; document.getElementById('summarySize').innerText = currentSize || '--'; document.getElementById('summaryGSM').innerText = currentGSM || '--'; document.getElementById('summaryFabric').innerText = currentFabric || '--'; document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`; updateSummaryElements(); updatePrintSummary(); }
     
-    // ========== SAVE ORDER FOR BUY NOW WITH IMAGE UPLOAD ==========
-    async function saveOrderForBuyNow() {
+    // ========== BUY NOW WITH INSTANT UPLOAD AND REDIRECT ==========
+    async function buyNow() {
         const user = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (!user) return null;
-        if(!currentSize || !currentGSM || !currentFabric) { showToast('Please select Size, GSM and Fabric', true); return null; }
+        if (!user) { pendingBuyAfterLogin = true; openLoginModal(); showToast('Please login to continue', false); return; }
+        if(!currentSize || !currentGSM || !currentFabric) { showToast('Please select Size, GSM and Fabric first', true); return; }
+        if (!fabricCanvas || fabricCanvas.getObjects().length === 0) { showToast('Please add some design first', true); return; }
         
-        showToast('Uploading your design...');
+        // Show loading toast
+        showToast('📤 Uploading your design to secure cloud...');
+        
+        // Upload design to Firebase Storage
         const designImageURL = await uploadDesignToFirebase();
-        if (!designImageURL) { showToast('Failed to upload design image', true); return null; }
+        if (!designImageURL) { showToast('❌ Failed to upload design. Please try again.', true); return; }
         
+        showToast('💾 Saving order details...');
+        
+        // Save order to Firestore with the design image URL
         const designJSON = fabricCanvas ? fabricCanvas.toJSON() : null;
         const orderData = {
             style: currentStyle.name, price: currentStyle.price, size: currentSize,
             gsm: currentGSM, fabric: currentFabric, printMethod: currentPrintMethod || 'transparent',
             designJSON: designJSON, customDesignImage: designImageURL, isCustomized: true,
-            orderType: 'buy', userId: user.uid, timestamp: firebase.firestore.FieldValue.serverTimestamp()
+            shirtColor: currentShirtColor,
+            orderType: 'buy', userId: user.uid, status: 'pending',
+            timestamp: firebase.firestore.FieldValue.serverTimestamp()
         };
-        try { const doc = await db.collection('custom_orders').add(orderData); return doc.id; } 
-        catch(e) { console.error(e); return null; }
-    }
-    
-    async function checkUserHasAddress(userId) {
+        
         try {
-            const addressDoc = await db.collection('user_addresses').doc(userId).get();
-            return addressDoc.exists && addressDoc.data() && addressDoc.data().fullAddress;
-        } catch(e) { return false; }
+            const docRef = await db.collection('custom_orders').add(orderData);
+            const orderId = docRef.id;
+            console.log("Order saved with ID:", orderId);
+            
+            // Store in localStorage for checkout page
+            localStorage.setItem('pendingCheckoutOrder', JSON.stringify({ 
+                orderId: orderId, 
+                style: currentStyle.name, 
+                price: currentStyle.price,
+                designImage: designImageURL,
+                isCustomized: true
+            }));
+            
+            // Check if user has saved address
+            try {
+                const addressDoc = await db.collection('user_addresses').doc(user.uid).get();
+                const hasAddress = addressDoc.exists && addressDoc.data() && addressDoc.data().fullAddress;
+                
+                showToast('✓ Design saved! Redirecting to checkout...');
+                
+                // Immediate redirect based on address existence
+                if (hasAddress) { 
+                    window.location.href = 'secure-checkout2.html'; 
+                } else { 
+                    window.location.href = 'secure-checkout.html'; 
+                }
+            } catch (addrError) {
+                console.log("Address check error, redirecting to new address page:", addrError);
+                window.location.href = 'secure-checkout.html';
+            }
+        } catch (error) {
+            console.error("Order save error:", error);
+            showToast('❌ Failed to place order. Please try again.', true);
+        }
     }
     
     async function addToCartHandler() {
@@ -1142,22 +1189,7 @@
         await addCurrentDesignToCart();
     }
     
-    // ========== BUY NOW WITH CONDITIONAL REDIRECT ==========
-    async function buyNow() {
-        const user = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (!user) { pendingBuyAfterLogin = true; openLoginModal(); showToast('Please login to continue', false); return; }
-        if(!currentSize || !currentGSM || !currentFabric) { showToast('Please select Size, GSM and Fabric first', true); return; }
-        
-        const orderId = await saveOrderForBuyNow();
-        if (orderId) {
-            localStorage.setItem('pendingCheckoutOrder', JSON.stringify({ orderId: orderId, style: currentStyle.name, price: currentStyle.price }));
-            const hasAddress = await checkUserHasAddress(user.uid);
-            if (hasAddress) { window.location.href = 'secure-checkout2.html'; } 
-            else { window.location.href = 'secure-checkout.html'; }
-        } else { showToast('Failed to place order. Please try again.', true); }
-    }
-    
-    function showToast(msg, isErr = false) { const t = document.getElementById('toastMsg'); t.innerText = msg; t.style.background = isErr ? '#F44336' : '#D4AF37'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 2500); }
+    function showToast(msg, isErr = false) { const t = document.getElementById('toastMsg'); t.innerText = msg; t.style.background = isErr ? '#F44336' : '#D4AF37'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
     
     function renderStyles() {
         const grid = document.getElementById('styleGrid');
