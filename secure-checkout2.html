@@ -11,8 +11,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
-  <!-- Fabric.js for rendering custom design thumbnails -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; overflow-x: hidden; min-height: 100vh; }
@@ -78,9 +76,8 @@
     @media (min-width: 768px) { .order-summary { padding: 28px; border-radius: 32px; top: 20px; } }
     .order-summary h3 { font-size: 18px; margin-bottom: 16px; color: #D4AF37; display: flex; align-items: center; gap: 8px; }
     .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
-    .order-item-img { width: 80px; height: 80px; background: #0E0E14; border-radius: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; position: relative; }
-    .order-item-img canvas { width: 100%; height: 100%; object-fit: contain; background: #1a1a2e; border-radius: 12px; }
-    .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .order-item-img { width: 80px; height: 80px; background: #0E0E14; border-radius: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+    .order-item-img img { width: 100%; height: 100%; object-fit: cover; border-radius: 12px; }
     .order-item-img i { font-size: 32px; color: #D4AF37; }
     .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
     .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
@@ -120,7 +117,7 @@
     .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
     .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
     
-    /* NEW: Custom Design Preview Section */
+    /* Custom Design Preview Section */
     .custom-design-preview-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
@@ -186,7 +183,7 @@
     </div>
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-      <!-- NEW: Custom Design Preview Section -->
+      <!-- Custom Design Preview Section -->
       <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
         <h4><i class="fas fa-star-of-life"></i> Final Edited Design</h4>
@@ -215,95 +212,56 @@
   let selectedPaymentMethod = 'cod', currentUser = null;
   let selectedAddress = null;
   let savedAddressFromDb = null;
+  
+  // ========== CUSTOM CHECKOUT DATA FROM CUSTOMIZE PAGE ==========
+  let customCheckoutData = null;
+  let isCustomizedOrder = false;
+  let customDesignImageURL = null;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
 
-  // Render custom design thumbnail from saved design JSON using Fabric.js
-  async function renderCustomDesignThumbnail(designJSON, containerElement) {
-    if (!designJSON || !containerElement) return;
+  // ========== LOAD CUSTOM CHECKOUT DATA FROM STORAGE ==========
+  function loadCustomCheckoutData() {
     try {
-      containerElement.innerHTML = '';
-      const canvas = document.createElement('canvas');
-      canvas.width = 150;
-      canvas.height = 150;
-      canvas.style.width = '100%';
-      canvas.style.height = '100%';
-      canvas.style.borderRadius = '12px';
-      containerElement.appendChild(canvas);
-      const tempCanvas = new fabric.Canvas(canvas);
-      tempCanvas.loadFromJSON(designJSON, () => {
-        tempCanvas.renderAll();
-        setTimeout(() => {
-          tempCanvas.dispose();
-        }, 100);
-      });
-    } catch(e) {
-      console.error("Design render error:", e);
-      containerElement.innerHTML = '<i class="fas fa-palette"></i>';
-    }
-  }
-
-  // ========== NEW: Load Custom Design Image from localStorage/pendingOrder ==========
-  function loadCustomDesignPreview() {
-    let customImageURL = null;
-    let isCustomized = false;
-    
-    // Check multiple sources for custom design image
-    // 1. Check localStorage directly
-    customImageURL = localStorage.getItem('customDesignImage');
-    if (customImageURL) {
-      isCustomized = true;
-      console.log("Custom design image found in localStorage:", customImageURL);
-    }
-    
-    // 2. Check pendingCheckoutOrder
-    if (!customImageURL) {
-      const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
-      if (pendingOrder) {
-        try {
-          const order = JSON.parse(pendingOrder);
-          if (order.customDesignImage) {
-            customImageURL = order.customDesignImage;
-            isCustomized = true;
-            console.log("Custom design image found in pendingCheckoutOrder:", customImageURL);
+      const savedData = localStorage.getItem('customCheckoutData');
+      if (savedData) {
+        customCheckoutData = JSON.parse(savedData);
+        console.log("✅ Custom checkout data loaded:", customCheckoutData);
+        
+        if (customCheckoutData && customCheckoutData.isCustomized === true) {
+          isCustomizedOrder = true;
+          customDesignImageURL = customCheckoutData.customDesignImage;
+          console.log("🎨 Customized order detected! Redirect will be skipped.");
+          console.log("📸 Custom design image URL:", customDesignImageURL);
+          
+          // Show custom preview
+          const previewContainer = document.getElementById('customDesignPreviewContainer');
+          const previewImg = document.getElementById('customCheckoutPreview');
+          if (previewContainer && previewImg && customDesignImageURL) {
+            previewImg.src = customDesignImageURL;
+            previewContainer.style.display = 'block';
+            console.log("✅ Custom design preview displayed");
           }
-        } catch(e) { console.error("Error parsing pendingOrder:", e); }
-      }
-    }
-    
-    // 3. Check cart items for custom design
-    if (!customImageURL && cart.length > 0) {
-      for (const item of cart) {
-        if (item.customDesignImage) {
-          customImageURL = item.customDesignImage;
-          isCustomized = true;
-          console.log("Custom design image found in cart item:", customImageURL);
-          break;
+          
+          // Build cart from custom data
+          if (cart.length === 0) {
+            cart = [{
+              id: 'custom_' + Date.now(),
+              name: customCheckoutData.tshirtType || 'Custom T-Shirt',
+              price: customCheckoutData.price || 1699,
+              quantity: customCheckoutData.quantity || 1,
+              size: customCheckoutData.size || 'M',
+              customDesignImage: customDesignImageURL,
+              isCustomized: true
+            }];
+            cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0);
+            console.log("📦 Cart built from custom data:", cart);
+          }
         }
       }
-    }
-    
-    // 4. Check sessionStorage
-    if (!customImageURL) {
-      customImageURL = sessionStorage.getItem('pendingDesignImage');
-      if (customImageURL) {
-        isCustomized = true;
-        console.log("Custom design image found in sessionStorage:", customImageURL);
-      }
-    }
-    
-    // Show the preview if custom image exists
-    const previewContainer = document.getElementById('customDesignPreviewContainer');
-    const previewImg = document.getElementById('customCheckoutPreview');
-    
-    if (customImageURL && isCustomized) {
-      previewImg.src = customImageURL;
-      previewContainer.style.display = 'block';
-      console.log("✅ Custom design preview loaded successfully!");
-    } else {
-      previewContainer.style.display = 'none';
-      console.log("No custom design image found, showing regular checkout");
+    } catch(e) {
+      console.error("Error loading custom checkout data:", e);
     }
   }
 
@@ -439,24 +397,13 @@
   async function saveOrderToFirebase(paymentMethod, transactionId = null) {
     const addr = getSelectedAddress(); if (!addr) return { success: false };
     
-    // Get custom design image
-    let customDesignImage = localStorage.getItem('customDesignImage');
-    if (!customDesignImage) {
-      const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
-      if (pendingOrder) {
-        try {
-          const order = JSON.parse(pendingOrder);
-          customDesignImage = order.customDesignImage;
-        } catch(e) {}
-      }
-    }
-    
     const itemsWithDetails = cart.map(item => ({ 
       id: item.id, name: item.name, price: item.price, quantity: item.quantity, 
       size: item.size || 'N/A', total: item.price * item.quantity,
-      designJSON: item.designJSON || null,
-      customDesignImage: customDesignImage || item.customDesignImage || null
+      customDesignImage: customDesignImageURL || item.customDesignImage || null,
+      isCustomized: isCustomizedOrder || item.isCustomized || false
     }));
+    
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
     const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
     const orderData = { 
@@ -466,50 +413,129 @@
       status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, 
       subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, 
       total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid,
-      isCustomized: !!customDesignImage, customDesignImage: customDesignImage || null
+      isCustomized: isCustomizedOrder, customDesignImage: customDesignImageURL,
+      tshirtType: customCheckoutData?.tshirtType || null,
+      tshirtColor: customCheckoutData?.tshirtColor || null
     };
-    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { return { success: false }; }
+    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error("Order save error:", e); return { success: false }; }
   }
 
-  async function processOrderAfterSave(orderId) { localStorage.removeItem('vedantaCart'); window.location.href = `order-success.html?orderId=${orderId}`; }
+  async function processOrderAfterSave(orderId) { 
+    localStorage.removeItem('vedantaCart');
+    localStorage.removeItem('customCheckoutData');
+    window.location.href = `order-success.html?orderId=${orderId}`; 
+  }
+  
   async function saveOrderCOD() { if (!validateOrder() || isProcessing) return; isProcessing = true; showLoading(true); const res = await saveOrderToFirebase('Cash on Delivery'); showLoading(false); if (res.success) { showToast(`✅ Order placed! ID: ${res.orderId}`); setTimeout(() => processOrderAfterSave(res.orderId), 1500); } else { showToast('❌ Failed', true); isProcessing = false; } }
-  async function initiateRazorpayPayment() { if (!validateOrder() || isProcessing) return; isProcessing = true; showLoading(true); const finalAmount = discountedTotal; if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } const addr = getSelectedAddress(); const options = { key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount)*100, currency: 'INR', name: 'VEDANTA', description: 'Order Payment', prefill: { name: addr.fullName, email: addr.email, contact: addr.phone }, theme: { color: '#D4AF37' }, handler: async (response) => { const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id); showLoading(false); if (result.success) { showToast(`✅ Payment success! Order: ${result.orderId}`); setTimeout(() => processOrderAfterSave(result.orderId), 1500); } else { showToast('⚠️ Order save issue', true); } isProcessing = false; }, modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing=false; } } }; const razorpay = new Razorpay(options); razorpay.open(); }
+  
+  async function initiateRazorpayPayment() { 
+    if (!validateOrder() || isProcessing) return; 
+    isProcessing = true; showLoading(true); 
+    const finalAmount = discountedTotal; 
+    if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } 
+    const addr = getSelectedAddress(); 
+    const options = { 
+      key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount)*100, currency: 'INR', 
+      name: 'VEDANTA', description: 'Order Payment', 
+      prefill: { name: addr.fullName, email: addr.email, contact: addr.phone }, 
+      theme: { color: '#D4AF37' }, 
+      handler: async (response) => { 
+        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id); 
+        showLoading(false); 
+        if (result.success) { 
+          showToast(`✅ Payment success! Order: ${result.orderId}`); 
+          setTimeout(() => processOrderAfterSave(result.orderId), 1500); 
+        } else { showToast('⚠️ Order save issue', true); } 
+        isProcessing = false; 
+      }, 
+      modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing=false; } } 
+    }; 
+    const razorpay = new Razorpay(options); 
+    razorpay.open(); 
+  }
 
   function loadCart() { 
-    cart = JSON.parse(localStorage.getItem('vedantaCart')) || []; 
+    // First, try to load custom checkout data
+    loadCustomCheckoutData();
+    
+    // If customized order exists, cart is already built from custom data
+    if (isCustomizedOrder && cart.length > 0) {
+      console.log("✅ Customized order active, cart loaded from custom data");
+      calculateOnlineDiscount();
+      renderOrderSummary();
+      updateTotalDisplay();
+      return;
+    }
+    
+    // Normal cart loading for regular products
+    const savedCart = localStorage.getItem('vedantaCart');
+    if (savedCart) {
+      try {
+        cart = JSON.parse(savedCart);
+      } catch(e) { cart = []; }
+    }
+    
+    // Also check pendingCheckoutOrder
     if (cart.length === 0) { 
       const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
       if (pendingOrder) {
         try {
           const order = JSON.parse(pendingOrder);
-          cart = [{ 
-            id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, 
-            price: order.price || 1699, quantity: 1, size: order.size || 'M', 
-            designJSON: order.designJSON || null,
-            customDesignImage: order.customDesignImage || null
-          }];
+          if (order.customDesignImage) {
+            isCustomizedOrder = true;
+            customDesignImageURL = order.customDesignImage;
+            cart = [{ 
+              id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, 
+              price: order.price || 1699, quantity: 1, size: order.size || 'M', 
+              customDesignImage: order.customDesignImage,
+              isCustomized: true
+            }];
+            console.log("✅ Loaded from pendingCheckoutOrder");
+          }
         } catch(e) {}
       }
     }
-    if (cart.length === 0) { showToast('Cart empty!', true); setTimeout(()=> window.location.href='index.html',1500); return; }
+    
+    if (cart.length === 0 && !isCustomizedOrder) { 
+      console.log("❌ Cart empty and no custom order, redirecting to home");
+      showToast('Cart empty! Redirecting...', true); 
+      setTimeout(()=> window.location.href='index.html',1500); 
+      return; 
+    }
+    
     cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0); 
     calculateOnlineDiscount(); 
     renderOrderSummary(); 
+    updateTotalDisplay();
   }
 
   async function renderOrderSummary() { 
     const container = document.getElementById('orderItemsList'); 
     if (!container) return; 
     container.innerHTML = '';
+    
     for (const item of cart) {
       const itemDiv = document.createElement('div');
       itemDiv.className = 'order-item';
       const imgDiv = document.createElement('div');
       imgDiv.className = 'order-item-img';
-      imgDiv.id = `design-thumb-${item.id || Date.now()}`;
       const infoDiv = document.createElement('div');
       infoDiv.className = 'order-item-info';
-      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>${item.designJSON || item.customDesignImage ? '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>' : ''}`;
+      
+      // Check for custom design image
+      const designImage = item.customDesignImage || customDesignImageURL;
+      if (designImage) {
+        const img = document.createElement('img');
+        img.src = designImage;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        imgDiv.appendChild(img);
+      } else {
+        imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
+      }
+      
+      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>${designImage ? '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>' : ''}`;
       const priceDiv = document.createElement('div');
       priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
@@ -517,25 +543,34 @@
       itemDiv.appendChild(infoDiv);
       itemDiv.appendChild(priceDiv);
       container.appendChild(itemDiv);
-      
-      if (item.customDesignImage) {
-        const img = document.createElement('img');
-        img.src = item.customDesignImage;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
-        imgDiv.appendChild(img);
-      } else if (item.designJSON) {
-        await renderCustomDesignThumbnail(item.designJSON, imgDiv);
-      } else {
-        imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
-      }
     }
     updateTotalDisplay(); 
   }
   
-  function calculateOnlineDiscount() { if (selectedPaymentMethod === 'razorpay') { discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100); discountedTotal = cartTotal - discountAmount; } else { discountAmount = 0; discountedTotal = cartTotal; } updateTotalDisplay(); }
-  function updateTotalDisplay() { document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; const discountRow = document.getElementById('discountRow'); if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) { discountRow.style.display = 'flex'; document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`; document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`; } else { discountRow.style.display = 'none'; document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; } document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100); }
+  function calculateOnlineDiscount() { 
+    if (selectedPaymentMethod === 'razorpay') { 
+      discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100); 
+      discountedTotal = cartTotal - discountAmount; 
+    } else { 
+      discountAmount = 0; 
+      discountedTotal = cartTotal; 
+    } 
+    updateTotalDisplay(); 
+  }
+  
+  function updateTotalDisplay() { 
+    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; 
+    const discountRow = document.getElementById('discountRow'); 
+    if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) { 
+      discountRow.style.display = 'flex'; 
+      document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`; 
+      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`; 
+    } else { 
+      discountRow.style.display = 'none'; 
+      document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; 
+    } 
+    document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100); 
+  }
   
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
@@ -545,14 +580,12 @@
     if (user) { currentUser = { uid: user.uid, phone: user.phoneNumber, email: user.email || storedUser?.email, name: storedUser?.name || `User${user.phoneNumber?.slice(-4)}` }; localStorage.setItem('vedantaUser', JSON.stringify(currentUser)); }
     else if (storedUser) currentUser = storedUser;
     else { showToast('Login required', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
+    
     document.getElementById('displayPhone').innerText = currentUser.phone || ''; 
     document.getElementById('displayEmail').innerText = currentUser.email || ''; 
     
     await loadAndRenderAddressSelection();
-    loadCart();
-    
-    // Load custom design preview after cart is loaded
-    loadCustomDesignPreview();
+    loadCart(); // This will also handle custom checkout data
     
     document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateOnlineDiscount(); });
     document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateOnlineDiscount(); });
@@ -562,6 +595,7 @@
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => { document.getElementById('locationModal').classList.remove('show'); showToast('📍 Please allow location in browser settings', true); });
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
   }
+  
   initialize();
 </script>
 </body>
