@@ -968,19 +968,24 @@
     const storageRef = storage.ref();
     const auth = firebase.auth();
 
-    // Product styles with their exact names as per file naming
+    // ========== IMAGE PATH SETTINGS ==========
+    // Agar images "com" folder mein hain to: const IMAGE_PATH = "com/";
+    // Agar images current directory mein hain to: const IMAGE_PATH = "";
+    const IMAGE_PATH = "com/";  // Change this to your actual folder path
+    
+    // Product styles with their exact names and extensions
     const tshirtStyles = [
-        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, 
+        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, ext: 'jpeg',
           colors: ['white', 'warm grey', 'cream', 'black'] },
-        { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, 
+        { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, ext: 'jpeg',
           colors: ['white', 'grey', 'cream', 'blue', 'black'] },
-        { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, 
+        { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, ext: 'jpeg',
           colors: ['white', 'grey', 'blue', 'black'] },
-        { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, 
+        { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, ext: 'jpeg',
           colors: ['white', 'warm grey', 'cream', 'black'] },
-        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, 
+        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, ext: 'jpg',
           colors: ['green', 'black'] },
-        { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, 
+        { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, ext: 'jpeg',
           colors: ['olive green', 'dark brown', 'blue', 'black'] }
     ];
     
@@ -1007,49 +1012,78 @@
     let selectedColorDisplay = 'White';
 
     console.log("🎨 Customize page opened");
-    console.log("📸 Using exact file names as provided with .jpeg extension");
+    console.log("📸 Image folder path:", IMAGE_PATH || "(current directory)");
 
-    // ========== EXACT FILE NAME GENERATION AS PER YOUR LIST ==========
+    // ========== EXACT FILE NAME GENERATION WITH CORRECT EXTENSIONS ==========
     function getDynamicImagePath(productName, colorName, side) {
         const productLower = productName.toLowerCase().trim();
         const colorLower = colorName.toLowerCase().trim();
+        const ext = currentStyle.ext; // Get extension from current style
         
         let imageName;
         
         if (side === 'front') {
-            imageName = `${productLower} ${colorLower} color frunt t shirt.jpeg`;
+            imageName = `${productLower} ${colorLower} color frunt t shirt.${ext}`;
         } else {
-            // Special case: "tt" typo in some back images
-            if (productLower === 'sweatshirt' && colorLower === 'white') {
-                imageName = `${productLower} ${colorLower} color back tt shirt.jpeg`;
+            // Special case for back images
+            if (productLower === 'sweatshirt' && colorLower === 'white' && ext === 'jpeg') {
+                imageName = `${productLower} ${colorLower} color back tt shirt.${ext}`;
             } else {
-                imageName = `${productLower} ${colorLower} color back t shirt.jpeg`;
+                imageName = `${productLower} ${colorLower} color back t shirt.${ext}`;
             }
         }
         
-        // Handle special case for "regular fit bllue" typo
+        // Handle special case for "regular fit bllue" typo (front only)
         if (productLower === 'regular fit' && colorLower === 'blue' && side === 'front') {
-            imageName = `regular fit bllue color frunt t shirt.jpeg`;
+            imageName = `regular fit bllue color frunt t shirt.${ext}`;
         }
         
         // Handle special case for "regular fit cream" back only
         if (productLower === 'regular fit' && colorLower === 'cream' && side === 'back') {
-            imageName = `regular fit cream color back t shirt.jpeg`;
+            imageName = `regular fit cream color back t shirt.${ext}`;
         }
         
         // Handle oversized black - remove extra space
         if (productLower === 'oversized' && colorLower === 'black') {
             if (side === 'front') {
-                imageName = `oversized black color frunt t shirt.jpeg`;
+                imageName = `oversized black color frunt t shirt.${ext}`;
             } else {
-                imageName = `oversized black color back t shirt.jpeg`;
+                imageName = `oversized black color back t shirt.${ext}`;
+            }
+        }
+        
+        // Handle acid wash - proper formatting
+        if (productLower === 'acid wash') {
+            if (colorLower === 'green') {
+                if (side === 'front') {
+                    imageName = `acid wash green color frunt t shirt.${ext}`;
+                } else {
+                    imageName = `acid wash green color back t shirt.${ext}`;
+                }
+            } else if (colorLower === 'black') {
+                if (side === 'front') {
+                    imageName = `acid wash black color frunt t shirt.${ext}`;
+                } else {
+                    imageName = `acid wash black color back t shirt.${ext}`;
+                }
+            }
+        }
+        
+        // Handle hoodie
+        if (productLower === 'hoodie') {
+            if (colorLower === 'olive green') {
+                imageName = `hoodie olive green color ${side} t shirt.${ext}`;
+            } else if (colorLower === 'dark brown') {
+                imageName = `hoodie dark brown color ${side} t shirt.${ext}`;
+            } else {
+                imageName = `hoodie ${colorLower} color ${side} t shirt.${ext}`;
             }
         }
         
         imageName = imageName.replace(/\s+/g, ' ').trim();
         
         console.log(`📸 Generated: ${imageName}`);
-        return imageName;
+        return IMAGE_PATH + imageName;
     }
     
     function loadTshirtImageDynamic(productName, colorName, side, preserveDesign = true) {
@@ -1692,7 +1726,8 @@
     
     console.log("✅ Customize page ready");
     console.log("📸 Image naming format: {product} {color} color frunt/back t shirt.jpeg");
-    console.log("💡 Images should be in the same folder as this HTML file");
+    console.log("📸 Acid Wash uses .jpg extension, others use .jpeg");
+    console.log("💡 Images should be in folder: " + IMAGE_PATH);
 </script>
 </body>
 </html>
