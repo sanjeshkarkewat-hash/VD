@@ -10,7 +10,6 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <!-- Google Maps API with YOUR KEY - Fully working location -->
   <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -84,7 +83,6 @@
       align-items: center;
       gap: 8px;
     }
-    @media (min-width: 768px) { .form-section h3 { font-size: 20px; margin-bottom: 20px; } }
     .form-group { margin-bottom: 14px; }
     .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: #CCCCCC; }
     .form-group label .required { color: #FF4500; margin-left: 4px; }
@@ -99,7 +97,6 @@
       font-family: inherit;
       transition: 0.2s;
     }
-    @media (min-width: 768px) { .form-group input, .form-group textarea, .form-group select { padding: 14px 16px; border-radius: 16px; } }
     .form-group input:focus, .form-group textarea:focus, .form-group select:focus {
       outline: none;
       border-color: #D4AF37;
@@ -107,7 +104,6 @@
     }
     .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
     
-    /* Address Selection Styles */
     .address-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
@@ -131,30 +127,10 @@
       transition: all 0.2s;
       position: relative;
     }
-    .saved-address-card:hover {
-      border-color: #D4AF37;
-      background: rgba(212,175,55,0.1);
-    }
-    .saved-address-card.selected {
-      border-color: #4CAF50;
-      background: rgba(76,175,80,0.1);
-    }
-    .saved-address-card .address-name {
-      font-weight: 700;
-      color: #D4AF37;
-      margin-bottom: 6px;
-      font-size: 13px;
-    }
-    .saved-address-card .address-detail {
-      font-size: 11px;
-      color: #aaa;
-      line-height: 1.4;
-    }
-    .saved-address-card .address-phone {
-      font-size: 10px;
-      color: #888;
-      margin-top: 6px;
-    }
+    .saved-address-card:hover { border-color: #D4AF37; background: rgba(212,175,55,0.1); }
+    .saved-address-card.selected { border-color: #4CAF50; background: rgba(76,175,80,0.1); }
+    .saved-address-card .address-name { font-weight: 700; color: #D4AF37; margin-bottom: 6px; font-size: 13px; }
+    .saved-address-card .address-detail { font-size: 11px; color: #aaa; line-height: 1.4; }
     .delete-address-btn {
       position: absolute;
       top: 8px;
@@ -167,9 +143,6 @@
       border-radius: 50%;
       cursor: pointer;
       font-size: 12px;
-    }
-    .delete-address-btn:hover {
-      background: rgba(244,67,54,0.4);
     }
     .add-new-address-trigger {
       width: 100%;
@@ -186,17 +159,8 @@
       font-size: 13px;
       margin-top: 8px;
     }
-    .add-new-address-trigger:active { transform: scale(0.98); }
-    
-    /* Manual Address Form */
-    .manual-address-form {
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 1px solid rgba(255,255,255,0.1);
-    }
-    .manual-address-form.hide {
-      display: none;
-    }
+    .manual-address-form { margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.1); }
+    .manual-address-form.hide { display: none; }
     
     .location-btn {
       background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.2));
@@ -215,12 +179,6 @@
       margin-top: 8px;
       font-size: 13px;
     }
-    .location-btn:active { transform: scale(0.98); }
-    .location-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-    }
-    
     .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
     .payment-option {
       background: rgba(0,0,0,0.4);
@@ -233,14 +191,7 @@
       cursor: pointer;
       transition: 0.2s;
     }
-    @media (min-width: 768px) { .payment-option { padding: 16px 18px; gap: 15px; border-radius: 16px; } }
-    .payment-option:active { transform: scale(0.98); }
     .payment-option.selected { border-color: #4CAF50; background: rgba(76,175,80,0.1); }
-    .payment-option .payment-icon i { font-size: 24px; }
-    @media (min-width: 768px) { .payment-option .payment-icon i { font-size: 28px; } }
-    .payment-option .payment-info h4 { font-size: 14px; margin-bottom: 2px; }
-    .payment-option .payment-info p { font-size: 10px; color: #888; }
-    @media (min-width: 768px) { .payment-option .payment-info h4 { font-size: 16px; } .payment-option .payment-info p { font-size: 11px; } }
     .payment-option .radio-circle {
       width: 18px;
       height: 18px;
@@ -272,13 +223,8 @@
       color: white;
       cursor: pointer;
       margin-top: 10px;
-      transition: transform 0.1s;
     }
-    .pay-razorpay-btn {
-      background: linear-gradient(135deg, #D4AF37, #FF8C00);
-      color: #050508;
-    }
-    .place-order-cod:active, .pay-razorpay-btn:active { transform: scale(0.98); }
+    .pay-razorpay-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; }
     
     .order-summary {
       background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8));
@@ -291,15 +237,7 @@
       height: fit-content;
     }
     @media (min-width: 768px) { .order-summary { padding: 28px; border-radius: 32px; top: 20px; } }
-    .order-summary h3 {
-      font-size: 18px;
-      margin-bottom: 16px;
-      color: #D4AF37;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    @media (min-width: 768px) { .order-summary h3 { font-size: 22px; margin-bottom: 20px; } }
+    .order-summary h3 { font-size: 18px; margin-bottom: 16px; color: #D4AF37; display: flex; align-items: center; gap: 8px; }
     .order-item {
       display: flex;
       gap: 12px;
@@ -307,8 +245,8 @@
       border-bottom: 1px solid rgba(255,255,255,0.08);
     }
     .order-item-img {
-      width: 60px;
-      height: 60px;
+      width: 80px;
+      height: 80px;
       background: #0E0E14;
       border-radius: 14px;
       display: flex;
@@ -316,58 +254,33 @@
       justify-content: center;
       overflow: hidden;
       flex-shrink: 0;
+      position: relative;
     }
-    @media (min-width: 768px) { .order-item-img { width: 70px; height: 70px; border-radius: 16px; } }
+    .order-item-img canvas { width: 100%; height: 100%; object-fit: contain; background: #1a1a2e; border-radius: 12px; }
     .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
-    .order-item-img i { font-size: 28px; color: #D4AF37; }
+    .order-item-img i { font-size: 32px; color: #D4AF37; }
     .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
     .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
-    .order-item-price {
-      font-weight: 700;
+    .design-preview-badge {
+      background: rgba(212,175,55,0.15);
+      border-radius: 8px;
+      padding: 4px 8px;
+      margin-top: 6px;
+      font-size: 9px;
       color: #D4AF37;
-      text-align: right;
-      font-size: 13px;
-      min-width: 70px;
+      display: inline-block;
     }
-    .order-total {
-      padding: 16px 0;
-      border-top: 2px solid rgba(212,175,55,0.3);
-      margin-top: 8px;
-    }
-    .total-row {
-      display: flex;
-      justify-content: space-between;
-      margin-bottom: 10px;
-      font-size: 13px;
-      padding: 4px 0;
-    }
+    .order-item-price { font-weight: 700; color: #D4AF37; text-align: right; font-size: 13px; min-width: 70px; }
+    .order-total { padding: 16px 0; border-top: 2px solid rgba(212,175,55,0.3); margin-top: 8px; }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; padding: 4px 0; }
+    .total-row.grand-total { font-size: 20px; font-weight: 800; color: #D4AF37; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(212,175,55,0.3); }
     .delivery-benefits {
       background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(76,175,80,0.05));
       border-radius: 16px;
       padding: 12px;
       margin: 12px 0;
     }
-    .benefit-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 6px 0;
-      font-size: 11px;
-      color: #aaa;
-    }
-    .benefit-row i {
-      width: 20px;
-      color: #4CAF50;
-      font-size: 12px;
-    }
-    .total-row.grand-total {
-      font-size: 20px;
-      font-weight: 800;
-      color: #D4AF37;
-      margin-top: 12px;
-      padding-top: 12px;
-      border-top: 2px solid rgba(212,175,55,0.3);
-    }
+    .benefit-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 11px; color: #aaa; }
     .free-shipping-badge {
       background: rgba(76,175,80,0.15);
       padding: 8px;
@@ -385,14 +298,7 @@
       text-align: center;
       font-size: 11px;
     }
-    .back-to-shop {
-      display: block;
-      text-align: center;
-      margin-top: 16px;
-      color: #888;
-      text-decoration: none;
-      font-size: 12px;
-    }
+    .back-to-shop { display: block; text-align: center; margin-top: 16px; color: #888; text-decoration: none; font-size: 12px; }
     .toast {
       position: fixed;
       bottom: 30px;
@@ -406,10 +312,8 @@
       z-index: 10000;
       font-size: 12px;
       display: none;
-      white-space: nowrap;
-      max-width: 90%;
-      white-space: normal;
       text-align: center;
+      max-width: 90%;
     }
     .toast.show { display: block; animation: fadeInOut 2s ease; }
     @keyframes fadeInOut {
@@ -432,17 +336,8 @@
       gap: 16px;
     }
     .loading-overlay.show { display: flex; }
-    .loading-spinner {
-      width: 50px;
-      height: 50px;
-      border: 3px solid rgba(212,175,55,0.3);
-      border-top-color: #D4AF37;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
+    .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(212,175,55,0.3); border-top-color: #D4AF37; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .loading-text { color: #D4AF37; font-size: 14px; }
-    
     .discount-badge {
       background: linear-gradient(135deg, #FF9800, #F44336);
       padding: 6px 12px;
@@ -454,85 +349,10 @@
       gap: 6px;
       margin-left: 10px;
     }
-    .online-discount-info {
-      background: rgba(255,152,0,0.15);
-      border: 1px solid rgba(255,152,0,0.3);
-      border-radius: 12px;
-      padding: 10px;
-      margin-top: 8px;
-      font-size: 11px;
-      color: #FF9800;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    
-    .location-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0,0,0,0.95);
-      z-index: 20000;
-      align-items: center;
-      justify-content: center;
-      padding: 20px;
-    }
-    .location-modal.show { display: flex; }
-    .location-modal-content {
-      background: rgba(15,15,22,0.98);
-      backdrop-filter: blur(20px);
-      border-radius: 32px;
-      padding: 28px;
-      max-width: 350px;
-      width: 100%;
-      text-align: center;
-      border: 1px solid rgba(212,175,55,0.3);
-    }
-    .location-modal-content i {
-      font-size: 60px;
-      color: #FF9800;
-      margin-bottom: 16px;
-    }
-    .location-modal-content h3 {
-      font-size: 22px;
-      margin-bottom: 10px;
-    }
-    .location-modal-content p {
-      color: #888;
-      font-size: 13px;
-      margin-bottom: 20px;
-    }
-    .location-modal-buttons {
-      display: flex;
-      gap: 12px;
-      flex-direction: column;
-    }
-    .location-settings-btn {
-      background: linear-gradient(135deg, #2196F3, #0b5e7e);
-      border: none;
-      padding: 14px;
-      border-radius: 30px;
-      font-weight: 700;
-      color: white;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-    }
-    .location-cancel-btn {
-      background: rgba(255,255,255,0.1);
-      border: 1px solid rgba(212,175,55,0.3);
-      padding: 14px;
-      border-radius: 30px;
-      font-weight: 700;
-      color: #ccc;
-      cursor: pointer;
-    }
-    
+    .action-buttons-row { display: flex; gap: 10px; margin-top: 12px; }
+    .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
+    .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
+    .location-loading { display: inline-block; width: 16px; height: 16px; border: 2px solid rgba(212,175,55,0.3); border-top-color: #D4AF37; border-radius: 50%; animation: spin 0.8s linear infinite; margin-right: 8px; }
     .user-info-bar {
       background: rgba(212,175,55,0.1);
       border-radius: 14px;
@@ -544,36 +364,12 @@
       flex-wrap: wrap;
       gap: 10px;
     }
-    .user-info-bar .info-text {
-      font-size: 12px;
-      color: #D4AF37;
-    }
-    
-    .action-buttons-row {
-      display: flex;
-      gap: 10px;
-      margin-top: 12px;
-    }
-    .save-address-btn {
-      background: #4CAF50 !important;
-      color: white !important;
-      border: none !important;
-    }
-    .cancel-address-btn {
-      background: #F44336 !important;
-      color: white !important;
-      border: none !important;
-    }
-    
-    .location-loading {
-      display: inline-block;
-      width: 16px;
-      height: 16px;
-      border: 2px solid rgba(212,175,55,0.3);
-      border-top-color: #D4AF37;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin-right: 8px;
+    .design-thumb-container {
+      width: 80px;
+      height: 80px;
+      border-radius: 12px;
+      overflow: hidden;
+      background: #1a1a2e;
     }
   </style>
 </head>
@@ -584,144 +380,52 @@
   <div class="loading-text">Processing your order...</div>
 </div>
 
-<div class="location-modal" id="locationModal">
-  <div class="location-modal-content">
-    <i class="fas fa-location-dot"></i>
-    <h3>Location Services Off</h3>
-    <p>Please turn on your location to use this feature.</p>
-    <div class="location-modal-buttons">
-      <button class="location-settings-btn" id="openSettingsBtn">
-        <i class="fas fa-cog"></i> Open Settings
-      </button>
-      <button class="location-cancel-btn" id="closeLocationModalBtn">
-        Cancel
-      </button>
-    </div>
-  </div>
-</div>
-
 <div class="checkout-container">
   <div class="checkout-header">
-    <div class="logo">
-      <h1>VEDANTA</h1>
-      <p>secure checkout</p>
-    </div>
-    <div class="secure-badge">
-      <i class="fas fa-lock"></i> 100% Secure
-    </div>
+    <div class="logo"><h1>VEDANTA</h1><p>secure checkout</p></div>
+    <div class="secure-badge"><i class="fas fa-lock"></i> 100% Secure</div>
   </div>
 
   <div class="checkout-main">
     <div class="checkout-form">
       <div class="user-info-bar">
-        <div class="info-text">
-          <i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span>
-        </div>
+        <div class="info-text"><i class="fas fa-user-check"></i> <span id="displayPhone">Loading...</span> | <span id="displayEmail">Loading...</span></div>
       </div>
-
-      <!-- ⭐ CONTACT INFORMATION SECTION REMOVED - No full name field here anymore ⭐ -->
 
       <div class="form-section" id="addressSection">
         <h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3>
-        
         <div id="savedAddressesSection" style="display: none;">
           <div class="address-section">
             <div class="saved-addresses-list" id="savedAddressesList"></div>
-            <button class="add-new-address-trigger" id="addNewAddressTrigger">
-              <i class="fas fa-plus-circle"></i> Add New Address
-            </button>
+            <button class="add-new-address-trigger" id="addNewAddressTrigger"><i class="fas fa-plus-circle"></i> Add New Address</button>
           </div>
         </div>
-
         <div id="manualAddressForm" class="manual-address-form">
-          <div class="form-group">
-            <label>Full Name <span class="required">*</span></label>
-            <input type="text" id="manualName" placeholder="Recipient full name">
-          </div>
-          <div class="form-group">
-            <label>Street Address <span class="required">*</span></label>
-            <input type="text" id="manualStreet" placeholder="House number, building, street">
+          <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="manualName" placeholder="Recipient full name"></div>
+          <div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="manualStreet" placeholder="House number, building, street"></div>
+          <div class="form-row">
+            <div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="manualCity" placeholder="City"></div>
+            <div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="manualState" placeholder="State"></div>
           </div>
           <div class="form-row">
-            <div class="form-group">
-              <label>City <span class="required">*</span></label>
-              <input type="text" id="manualCity" placeholder="City">
-            </div>
-            <div class="form-group">
-              <label>State <span class="required">*</span></label>
-              <input type="text" id="manualState" placeholder="State">
-            </div>
+            <div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="manualPincode" placeholder="6-digit pincode" maxlength="6"></div>
+            <div class="form-group"><label>Landmark (Optional)</label><input type="text" id="manualLandmark" placeholder="Near..."></div>
           </div>
-          <div class="form-row">
-            <div class="form-group">
-              <label>Pincode <span class="required">*</span></label>
-              <input type="text" id="manualPincode" placeholder="6-digit pincode" maxlength="6">
-            </div>
-            <div class="form-group">
-              <label>Landmark (Optional)</label>
-              <input type="text" id="manualLandmark" placeholder="Near...">
-            </div>
-          </div>
-          <!-- ⭐ PHONE NUMBER FIELD REMOVED - Using logged-in user's phone ⭐ -->
-          <button class="location-btn" id="useCurrentLocationBtn">
-            <i class="fas fa-location-dot"></i> 📍 Use My Current Location
-          </button>
+          <button class="location-btn" id="useCurrentLocationBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
           <div class="action-buttons-row">
-            <button class="location-btn save-address-btn" id="saveManualAddressBtn" style="flex:1;">
-              <i class="fas fa-save"></i> Save & Continue
-            </button>
-            <button class="location-btn cancel-address-btn" id="cancelManualAddressBtn" style="flex:0.5; display: none;">
-              Cancel
-            </button>
+            <button class="location-btn save-address-btn" id="saveManualAddressBtn" style="flex:1;"><i class="fas fa-save"></i> Save & Continue</button>
+            <button class="location-btn cancel-address-btn" id="cancelManualAddressBtn" style="flex:0.5; display: none;">Cancel</button>
           </div>
         </div>
       </div>
 
       <div class="form-section">
         <h3><i class="fas fa-credit-card"></i> Select Payment Method</h3>
-        
         <div class="payment-options">
-          <div class="payment-option" id="codOption">
-            <div class="payment-icon">
-              <i class="fas fa-money-bill-wave" style="color: #4CAF50;"></i>
-            </div>
-            <div class="payment-info">
-              <h4>Cash on Delivery</h4>
-              <p>Pay when you receive</p>
-            </div>
-            <div class="radio-circle"></div>
-          </div>
-
-          <div class="payment-option" id="razorpayOption">
-            <div class="payment-icon">
-              <i class="fas fa-credit-card" style="color: #D4AF37;"></i>
-            </div>
-            <div class="payment-info">
-              <h4>Card / UPI / NetBanking <span class="discount-badge"><i class="fas fa-tag"></i> 5% OFF</span></h4>
-              <p>Secure online payment with 5% discount</p>
-            </div>
-            <div class="radio-circle"></div>
-          </div>
-
-          <div class="cod-details" id="codDetails">
-            <p><i class="fas fa-truck"></i> Pay cash when you receive your order</p>
-            <button class="place-order-cod" id="placeOrderCodBtn">Confirm Order (COD)</button>
-          </div>
-
-          <div class="razorpay-section" id="razorpaySection">
-            <div class="online-discount-info">
-              <i class="fas fa-gift"></i> <strong>5% Instant Discount!</strong> Pay online and save 5% on your order.
-            </div>
-            <p><i class="fas fa-shield-alt"></i> Secured by Razorpay</p>
-            <p style="font-size: 11px; color: #888; margin: 6px 0;">Cards | UPI | NetBanking | Wallets</p>
-            <button class="pay-razorpay-btn" id="payRazorpayBtn">
-              <i class="fas fa-lock"></i> Pay Now with 5% OFF
-            </button>
-          </div>
-        </div>
-        
-        <div class="payment-note" style="margin-top: 12px; font-size: 11px; color: #888; text-align: center;">
-          <i class="fas fa-shield-alt"></i> Your payment is 100% secure
+          <div class="payment-option" id="codOption"><div class="payment-icon"><i class="fas fa-money-bill-wave" style="color: #4CAF50;"></i></div><div class="payment-info"><h4>Cash on Delivery</h4><p>Pay when you receive</p></div><div class="radio-circle"></div></div>
+          <div class="payment-option" id="razorpayOption"><div class="payment-icon"><i class="fas fa-credit-card" style="color: #D4AF37;"></i></div><div class="payment-info"><h4>Card / UPI / NetBanking <span class="discount-badge"><i class="fas fa-tag"></i> 5% OFF</span></h4><p>Secure online payment with 5% discount</p></div><div class="radio-circle"></div></div>
+          <div class="cod-details" id="codDetails"><p><i class="fas fa-truck"></i> Pay cash when you receive your order</p><button class="place-order-cod" id="placeOrderCodBtn">Confirm Order (COD)</button></div>
+          <div class="razorpay-section" id="razorpaySection"><div class="online-discount-info"><i class="fas fa-gift"></i> <strong>5% Instant Discount!</strong> Pay online and save 5% on your order.</div><p><i class="fas fa-shield-alt"></i> Secured by Razorpay</p><button class="pay-razorpay-btn" id="payRazorpayBtn"><i class="fas fa-lock"></i> Pay Now with 5% OFF</button></div>
         </div>
       </div>
     </div>
@@ -729,19 +433,13 @@
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
       <div id="orderItemsList"></div>
-      
       <div class="delivery-benefits">
         <div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div>
         <div class="benefit-row"><i class="fas fa-box-open"></i><span>📦 <strong>Free Premium Packaging</strong> - Luxury unboxing</span></div>
         <div class="benefit-row"><i class="fas fa-percent"></i><span>💰 <strong>0% GST / Tax</strong> - No hidden charges</span></div>
-        <div class="benefit-row"><i class="fas fa-shield-alt"></i><span>🛡️ <strong>Free Insurance</strong> - Transit insurance included</span></div>
         <div class="benefit-row"><i class="fas fa-undo-alt"></i><span>🔄 <strong>15-Day Easy Returns</strong> - Free pickup & refund</span></div>
       </div>
-      
-      <div class="free-shipping-badge">
-        <i class="fas fa-truck"></i> FREE SHIPPING | FREE PACKAGING | 0% TAX
-      </div>
-      
+      <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | FREE PACKAGING | 0% TAX</div>
       <div class="order-total">
         <div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
         <div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div>
@@ -750,15 +448,8 @@
         <div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div>
         <div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
       </div>
-
-      <div class="rewards-points">
-        <i class="fas fa-coins" style="color: #D4AF37;"></i> 
-        You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins on this order
-      </div>
-      
-      <a href="#" class="back-to-shop" id="backToShopBtn">
-        <i class="fas fa-arrow-left"></i> Back to Shopping
-      </a>
+      <div class="rewards-points"><i class="fas fa-coins" style="color: #D4AF37;"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins on this order</div>
+      <a href="#" class="back-to-shop" id="backToShopBtn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
     </div>
   </div>
 </div>
@@ -766,17 +457,14 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ========== FIREBASE CONFIG ==========
   const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
     authDomain: "nexi-53897.firebaseapp.com",
     projectId: "nexi-53897",
     storageBucket: "nexi-53897.firebasestorage.app",
     messagingSenderId: "337349382612",
-    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
-    measurementId: "G-W6N519LBPH"
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
   };
-  
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
@@ -784,20 +472,16 @@
   const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   const ONLINE_DISCOUNT_PERCENT = 5;
   
-  // ========== YOUR GOOGLE MAPS API KEY ==========
-  const GOOGLE_MAPS_API_KEY = "AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM";
-  
   let cart = [];
   let cartTotal = 0;
   let discountedTotal = 0;
   let discountAmount = 0;
   let isProcessing = false;
-  let productsCache = new Map();
-  let selectedPaymentMethod = 'cod';
   let currentUser = null;
   let userAddresses = [];
   let selectedAddressId = null;
   let isAddingNewAddress = false;
+  let selectedPaymentMethod = 'cod';
   
   function showToast(msg, isError = false) {
     const toast = document.getElementById('toast');
@@ -808,172 +492,44 @@
     setTimeout(() => toast.classList.remove('show'), 3000);
   }
   
-  function showLoading(show) {
-    const overlay = document.getElementById('loadingOverlay');
-    if (show) overlay.classList.add('show');
-    else overlay.classList.remove('show');
-  }
+  function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
   
-  // ========== GOOGLE MAPS GEOLOCATION FUNCTION (USING YOUR API KEY) ==========
-  async function getDetailedCurrentLocation() {
-    showToast('📍 Getting your location...');
-    
-    if (!navigator.geolocation) {
-      showToast('❌ Geolocation not supported', true);
-      return null;
-    }
-    
-    return new Promise((resolve) => {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords;
-          console.log(`📍 Location obtained: ${latitude}, ${longitude}`);
-          
-          try {
-            const response = await fetch(
-              `https://maps.googleapis.com/maps/api/geocode/json?latlng=${latitude},${longitude}&key=${GOOGLE_MAPS_API_KEY}&language=en`
-            );
-            
-            const data = await response.json();
-            
-            if (data.status === 'OK' && data.results && data.results.length > 0) {
-              const result = data.results[0];
-              const addressComponents = {};
-              
-              result.address_components.forEach(comp => {
-                const types = comp.types;
-                if (types.includes('street_number')) addressComponents.house_number = comp.long_name;
-                if (types.includes('route')) addressComponents.road = comp.long_name;
-                if (types.includes('locality')) addressComponents.city = comp.long_name;
-                if (types.includes('administrative_area_level_2')) addressComponents.city = addressComponents.city || comp.long_name;
-                if (types.includes('administrative_area_level_1')) addressComponents.state = comp.long_name;
-                if (types.includes('postal_code')) addressComponents.pincode = comp.long_name;
-                if (types.includes('sublocality_level_1')) addressComponents.area = comp.long_name;
-              });
-              
-              let streetAddress = '';
-              if (addressComponents.house_number) streetAddress += addressComponents.house_number + ', ';
-              if (addressComponents.road) streetAddress += addressComponents.road;
-              if (addressComponents.area && !streetAddress.includes(addressComponents.area)) {
-                streetAddress += streetAddress ? ', ' + addressComponents.area : addressComponents.area;
-              }
-              
-              if (!streetAddress.trim()) {
-                streetAddress = result.formatted_address.split(',')[0];
-              }
-              
-              if (addressComponents.pincode && !/^\d{6}$/.test(addressComponents.pincode)) {
-                addressComponents.pincode = '';
-              }
-              
-              resolve({
-                street: streetAddress.trim(),
-                city: addressComponents.city || '',
-                state: addressComponents.state || '',
-                pincode: addressComponents.pincode || '',
-                landmark: addressComponents.area || '',
-                fullAddress: result.formatted_address
-              });
-            } else {
-              console.log("Geocoding status:", data.status);
-              if (data.status === 'REQUEST_DENIED') {
-                showToast('❌ API key error. Please check Google Cloud Console settings.', true);
-              }
-              resolve({
-                street: `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`,
-                city: '',
-                state: '',
-                pincode: '',
-                landmark: '',
-                fullAddress: `Lat: ${latitude}, Lng: ${longitude}`
-              });
-            }
-          } catch (error) {
-            console.error("Google API Error:", error);
-            resolve(null);
-          }
-        },
-        (error) => {
-          console.log("Geolocation error:", error);
-          if (error.code === error.PERMISSION_DENIED) {
-            showToast('❌ Location permission denied', true);
-            document.getElementById('locationModal').classList.add('show');
-          } else if (error.code === error.TIMEOUT) {
-            showToast('⏱️ Location timeout - try manual entry', true);
-          } else {
-            showToast('❌ Failed to get location', true);
-          }
-          resolve(null);
-        },
-        { 
-          enableHighAccuracy: true, 
-          timeout: 10000,
-          maximumAge: 0
-        }
-      );
-    });
-  }
-  
-  async function fillManualFormWithLocation() {
-    const btn = document.getElementById('useCurrentLocationBtn');
-    const originalText = btn.innerHTML;
-    btn.innerHTML = '<span class="location-loading"></span> Getting location...';
-    btn.disabled = true;
-    
-    const locationData = await getDetailedCurrentLocation();
-    
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-    
-    if (locationData) {
-      document.getElementById('manualStreet').value = locationData.street || '';
-      document.getElementById('manualCity').value = locationData.city || '';
-      document.getElementById('manualState').value = locationData.state || '';
-      document.getElementById('manualPincode').value = locationData.pincode || '';
-      document.getElementById('manualLandmark').value = locationData.landmark || '';
-      showToast('✅ Address auto-filled from your location!');
-      
-      ['manualStreet', 'manualCity', 'manualState', 'manualPincode'].forEach(id => {
-        const el = document.getElementById(id);
-        if(el && el.value) {
-          el.style.borderColor = '#4CAF50';
-          setTimeout(() => { if(el) el.style.borderColor = ''; }, 1500);
-        }
-      });
-    } else {
-      showToast('❌ Could not get location, please fill manually', true);
-    }
-  }
-  
-  function showLocationModal() { document.getElementById('locationModal').classList.add('show'); }
-  function hideLocationModal() { document.getElementById('locationModal').classList.remove('show'); }
-  
-  // ========== ADDRESS MANAGEMENT ==========
-  async function loadUserAddresses() {
-    if (!currentUser || !currentUser.uid) return [];
-    
+  // Render design thumbnail from saved design JSON
+  async function renderDesignThumbnail(designJSON, containerElement) {
+    if (!designJSON || !containerElement) return;
     try {
-      const snapshot = await db.collection('addresses')
-        .where('userId', '==', currentUser.uid)
-        .orderBy('isDefault', 'desc')
-        .get();
-      
-      userAddresses = [];
-      snapshot.forEach(doc => {
-        userAddresses.push({ id: doc.id, ...doc.data() });
+      const canvas = document.createElement('canvas');
+      canvas.width = 150;
+      canvas.height = 150;
+      const tempCanvas = new fabric.Canvas(canvas);
+      tempCanvas.loadFromJSON(designJSON, () => {
+        tempCanvas.renderAll();
+        const imgData = tempCanvas.toDataURL('image/png');
+        const img = document.createElement('img');
+        img.src = imgData;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'contain';
+        containerElement.innerHTML = '';
+        containerElement.appendChild(img);
+        tempCanvas.dispose();
       });
-      
-      return userAddresses;
     } catch(e) {
-      console.error("Error loading addresses:", e);
-      return [];
+      console.error("Design render error:", e);
+      containerElement.innerHTML = '<i class="fas fa-palette"></i>';
     }
+  }
+  
+  async function loadUserAddresses() {
+    if (!currentUser?.uid) return [];
+    const snapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).get();
+    userAddresses = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    return userAddresses;
   }
   
   function renderUI() {
     const savedSection = document.getElementById('savedAddressesSection');
     const manualForm = document.getElementById('manualAddressForm');
-    
     if (userAddresses.length > 0 && !isAddingNewAddress) {
       savedSection.style.display = 'block';
       manualForm.classList.add('hide');
@@ -981,74 +537,29 @@
     } else {
       savedSection.style.display = 'none';
       manualForm.classList.remove('hide');
-      
-      if (userAddresses.length === 0 && !isAddingNewAddress) {
-        document.getElementById('manualName').value = currentUser?.name || '';
-      }
+      if (userAddresses.length === 0 && !isAddingNewAddress) document.getElementById('manualName').value = currentUser?.name || '';
     }
   }
   
   function renderSavedAddressesList() {
     const container = document.getElementById('savedAddressesList');
-    if (!container) return;
-    
     container.innerHTML = userAddresses.map(addr => `
       <div class="saved-address-card ${selectedAddressId === addr.id ? 'selected' : ''}" data-id="${addr.id}">
         <div class="address-name">${escapeHtml(addr.name)} ${addr.isDefault ? '⭐ Default' : ''}</div>
         <div class="address-detail">${escapeHtml(addr.street)}</div>
         <div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div>
         ${addr.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(addr.landmark)}</div>` : ''}
-        <div class="address-phone">📞 ${escapeHtml(addr.phone || currentUser?.phone || '')}</div>
         <button class="delete-address-btn" data-id="${addr.id}" onclick="event.stopPropagation(); deleteAddress('${addr.id}')">✕</button>
       </div>
     `).join('');
-    
     document.querySelectorAll('.saved-address-card').forEach(card => {
-      card.addEventListener('click', (e) => {
-        if (e.target.classList.contains('delete-address-btn')) return;
-        const id = card.getAttribute('data-id');
-        selectAddress(id);
-      });
+      card.addEventListener('click', (e) => { if (!e.target.classList.contains('delete-address-btn')) selectAddress(card.dataset.id); });
     });
   }
   
-  function selectAddress(addressId) {
-    selectedAddressId = addressId;
-    const address = userAddresses.find(a => a.id === addressId);
-    if (address) {
-      showToast(`✅ Using address: ${address.name}`);
-      renderSavedAddressesList();
-    }
-  }
-  
-  function showAddNewAddress() {
-    isAddingNewAddress = true;
-    renderUI();
-    document.getElementById('manualName').value = currentUser?.name || '';
-    document.getElementById('manualStreet').value = '';
-    document.getElementById('manualCity').value = '';
-    document.getElementById('manualState').value = '';
-    document.getElementById('manualPincode').value = '';
-    document.getElementById('manualLandmark').value = '';
-    document.getElementById('cancelManualAddressBtn').style.display = 'block';
-    document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save New Address';
-  }
-  
-  function cancelAddNewAddress() {
-    if (userAddresses.length > 0) {
-      isAddingNewAddress = false;
-      renderUI();
-      document.getElementById('cancelManualAddressBtn').style.display = 'none';
-      document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save & Continue';
-    } else {
-      document.getElementById('manualName').value = currentUser?.name || '';
-      document.getElementById('manualStreet').value = '';
-      document.getElementById('manualCity').value = '';
-      document.getElementById('manualState').value = '';
-      document.getElementById('manualPincode').value = '';
-      document.getElementById('manualLandmark').value = '';
-    }
-  }
+  function selectAddress(addressId) { selectedAddressId = addressId; renderSavedAddressesList(); showToast('✅ Address selected'); }
+  function showAddNewAddress() { isAddingNewAddress = true; renderUI(); document.getElementById('cancelManualAddressBtn').style.display = 'block'; document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save New Address'; }
+  function cancelAddNewAddress() { isAddingNewAddress = false; renderUI(); document.getElementById('cancelManualAddressBtn').style.display = 'none'; document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save & Continue'; }
   
   async function saveNewAddress() {
     const name = document.getElementById('manualName').value.trim();
@@ -1056,349 +567,37 @@
     const city = document.getElementById('manualCity').value.trim();
     const state = document.getElementById('manualState').value.trim();
     const pincode = document.getElementById('manualPincode').value.trim();
-    const landmark = document.getElementById('manualLandmark').value.trim();
-    // ⭐ Phone from logged in user only
-    const phone = currentUser.phone;
-    
-    if (!name || !street || !city || !state || !pincode) {
-      showToast('❌ Please fill all required fields', true);
-      return;
-    }
-    
-    if (pincode.length !== 6 || !/^\d+$/.test(pincode)) {
-      showToast('❌ Enter valid 6-digit pincode', true);
-      return;
-    }
-    
+    if (!name || !street || !city || !state || !pincode || pincode.length !== 6) { showToast('❌ Fill all fields correctly', true); return; }
     showLoading(true);
-    
-    const addressData = {
-      userId: currentUser.uid,
-      name: name,
-      street: street,
-      city: city,
-      state: state,
-      pincode: pincode,
-      landmark: landmark || '',
-      phone: phone,
-      isDefault: userAddresses.length === 0,
-      createdAt: new Date().toISOString()
-    };
-    
-    try {
-      const docRef = await db.collection('addresses').add(addressData);
-      addressData.id = docRef.id;
-      
-      await loadUserAddresses();
-      
-      if (userAddresses.length > 0) {
-        isAddingNewAddress = false;
-        renderUI();
-        selectAddress(docRef.id);
-        document.getElementById('cancelManualAddressBtn').style.display = 'none';
-        document.getElementById('saveManualAddressBtn').innerHTML = '<i class="fas fa-save"></i> Save & Continue';
-      } else {
-        renderUI();
-        selectAddress(docRef.id);
-      }
-      
-      showToast('✅ Address saved successfully!');
-    } catch(e) {
-      showToast('❌ Failed to save address', true);
-    }
-    
+    const addressData = { userId: currentUser.uid, name, street, city, state, pincode, landmark: document.getElementById('manualLandmark').value.trim(), phone: currentUser.phone, isDefault: userAddresses.length === 0, createdAt: new Date().toISOString() };
+    const docRef = await db.collection('addresses').add(addressData);
+    await loadUserAddresses();
+    isAddingNewAddress = false;
+    renderUI();
+    selectAddress(docRef.id);
     showLoading(false);
+    showToast('✅ Address saved');
   }
   
-  async function deleteAddress(addressId) {
-    if (!confirm('Delete this address?')) return;
-    
-    try {
-      await db.collection('addresses').doc(addressId).delete();
-      await loadUserAddresses();
-      if (selectedAddressId === addressId) {
-        selectedAddressId = null;
-      }
-      renderUI();
-      if (userAddresses.length === 0) {
-        document.getElementById('manualName').value = currentUser?.name || '';
-      }
-      showToast('✅ Address deleted');
-    } catch(e) {
-      showToast('❌ Failed to delete address', true);
-    }
-  }
+  async function deleteAddress(addressId) { if (!confirm('Delete address?')) return; await db.collection('addresses').doc(addressId).delete(); await loadUserAddresses(); if (selectedAddressId === addressId) selectedAddressId = null; renderUI(); showToast('✅ Deleted'); }
   
   function getOrderAddress() {
     if (selectedAddressId) {
       const addr = userAddresses.find(a => a.id === selectedAddressId);
-      if (addr) {
-        return {
-          fullName: addr.name,
-          phone: addr.phone || currentUser.phone,
-          email: currentUser.email,
-          address: addr.street,
-          city: addr.city,
-          state: addr.state,
-          pincode: addr.pincode,
-          landmark: addr.landmark || ''
-        };
-      }
+      if (addr) return { fullName: addr.name, phone: currentUser.phone, email: currentUser.email, address: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' };
     }
-    
     const name = document.getElementById('manualName').value.trim();
     const street = document.getElementById('manualStreet').value.trim();
     const city = document.getElementById('manualCity').value.trim();
     const state = document.getElementById('manualState').value.trim();
     const pincode = document.getElementById('manualPincode').value.trim();
-    const landmark = document.getElementById('manualLandmark').value.trim();
-    
-    if (!name || !street || !city || !state || !pincode) {
-      return null;
-    }
-    
-    if (pincode.length !== 6 || !/^\d+$/.test(pincode)) {
-      showToast('❌ Enter valid 6-digit pincode', true);
-      return null;
-    }
-    
-    return {
-      fullName: name,
-      phone: currentUser.phone,
-      email: currentUser.email,
-      address: street,
-      city: city,
-      state: state,
-      pincode: pincode,
-      landmark: landmark || ''
-    };
-  }
-  
-  async function saveAddressFromManualOrder() {
-    const address = getOrderAddress();
-    if (!address) return null;
-    
-    const exists = userAddresses.some(a => 
-      a.street === address.address && 
-      a.city === address.city && 
-      a.pincode === address.pincode
-    );
-    
-    if (exists) return null;
-    
-    const addressData = {
-      userId: currentUser.uid,
-      name: address.fullName,
-      street: address.address,
-      city: address.city,
-      state: address.state,
-      pincode: address.pincode,
-      landmark: address.landmark,
-      phone: address.phone,
-      isDefault: userAddresses.length === 0,
-      createdAt: new Date().toISOString()
-    };
-    
-    try {
-      const docRef = await db.collection('addresses').add(addressData);
-      addressData.id = docRef.id;
-      userAddresses.push(addressData);
-      return docRef.id;
-    } catch(e) {
-      return null;
-    }
-  }
-  
-  function validateOrder() {
-    const address = getOrderAddress();
-    if (!address) {
-      showToast('❌ Please fill all address details', true);
-      return false;
-    }
-    return true;
-  }
-  
-  async function saveOrderToFirebase(paymentMethod, transactionId = null, address = null) {
-    const orderAddress = address || getOrderAddress();
-    if (!orderAddress) return { success: false };
-    
-    const itemsWithDetails = cart.map(item => ({
-      id: item.id, name: item.name, price: item.price, quantity: item.quantity,
-      size: item.size || 'Not Selected', color: item.color || 'Not Selected',
-      combo: item.combo || null, isCombo: item.isCombo || false,
-      comboMultiplier: item.comboMultiplier || null, total: item.price * item.quantity
-    }));
-    
-    const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
-    const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
-    
-    const orderData = {
-      orderId: orderId,
-      customerName: orderAddress.fullName,
-      customerPhone: orderAddress.phone,
-      customerEmail: orderAddress.email,
-      shippingAddress: {
-        address: orderAddress.address, city: orderAddress.city,
-        state: orderAddress.state, pincode: orderAddress.pincode, landmark: orderAddress.landmark
-      },
-      items: itemsWithDetails,
-      paymentMethod: paymentMethod,
-      paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending',
-      status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending',
-      transactionId: transactionId,
-      subtotal: cartTotal,
-      discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0,
-      discountPercent: (paymentMethod === 'Razorpay' && discountAmount > 0) ? ONLINE_DISCOUNT_PERCENT : 0,
-      total: finalTotal,
-      orderDate: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      userId: currentUser ? currentUser.uid : null,
-      userPhone: currentUser ? currentUser.phone : orderAddress.phone,
-      rewardPointsEarned: Math.floor(finalTotal / 100)
-    };
-    
-    try {
-      await db.collection('orders').doc(orderId).set(orderData);
-      return { success: true, orderId: orderId };
-    } catch (error) {
-      console.error("Save order error:", error);
-      return { success: false, error: error.message };
-    }
-  }
-  
-  async function processOrderAfterSave(orderId) {
-    localStorage.removeItem('vedantaCart');
-    window.location.href = `order-success.html?orderId=${orderId}`;
-  }
-  
-  async function saveOrderCOD() {
-    if (!validateOrder()) return;
-    if (isProcessing) return;
-    isProcessing = true;
-    
-    showLoading(true);
-    const btn = document.getElementById('placeOrderCodBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
-    
-    const address = getOrderAddress();
-    
-    if (!selectedAddressId && address) {
-      await saveAddressFromManualOrder();
-      await loadUserAddresses();
-      renderUI();
-    }
-    
-    const result = await saveOrderToFirebase('Cash on Delivery', null, address);
-    showLoading(false);
-    
-    if (result.success) {
-      showToast(`✅ Order placed! Order ID: ${result.orderId}`);
-      setTimeout(() => processOrderAfterSave(result.orderId), 1500);
-    } else {
-      showToast('❌ Failed to place order', true);
-      if (btn) { btn.disabled = false; btn.innerHTML = 'Confirm Order (COD)'; }
-      isProcessing = false;
-    }
-  }
-  
-  async function initiateRazorpayPayment() {
-    if (!validateOrder()) return;
-    if (isProcessing) return;
-    isProcessing = true;
-    
-    showLoading(true);
-    const finalAmount = discountedTotal;
-    if (finalAmount <= 0) {
-      showToast('❌ Invalid order amount', true);
-      showLoading(false);
-      isProcessing = false;
-      return;
-    }
-    
-    const address = getOrderAddress();
-    const orderAmount = Math.round(finalAmount);
-    const btn = document.getElementById('payRazorpayBtn');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Processing...'; }
-    
-    try {
-      const options = {
-        key: RAZORPAY_KEY_ID, amount: orderAmount * 100, currency: 'INR',
-        name: 'VEDANTA', description: `Order Payment`,
-        prefill: { name: address.fullName, email: address.email, contact: address.phone },
-        theme: { color: '#D4AF37' },
-        modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); if(btn){btn.disabled=false;btn.innerHTML='Pay Now';} isProcessing=false; } }
-      };
-      
-      const razorpay = new Razorpay(options);
-      
-      razorpay.on('payment.success', async (response) => {
-        if (!selectedAddressId && address) {
-          await saveAddressFromManualOrder();
-          await loadUserAddresses();
-          renderUI();
-        }
-        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id, address);
-        showLoading(false);
-        if (result.success) {
-          showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
-          setTimeout(() => processOrderAfterSave(result.orderId), 1500);
-        } else {
-          showToast('⚠️ Payment successful but order save failed', true);
-        }
-        isProcessing = false;
-      });
-      
-      razorpay.on('payment.error', (response) => {
-        showLoading(false);
-        showToast('❌ Payment failed!', true);
-        if(btn){btn.disabled=false;btn.innerHTML='Pay Now';}
-        isProcessing = false;
-      });
-      
-      razorpay.open();
-    } catch(error) {
-      showLoading(false);
-      showToast('❌ Failed to initialize payment', true);
-      if(btn){btn.disabled=false;btn.innerHTML='Pay Now';}
-      isProcessing = false;
-    }
-  }
-  
-  function loadProductsInstantly() {
-    const cached = localStorage.getItem('vedantaProducts');
-    if (cached) {
-      try { JSON.parse(cached).forEach(p => productsCache.set(p.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name })); return true; } catch(e){}
-    }
-    return false;
-  }
-  
-  function fetchProductsInBackground() {
-    db.collection('products').get().then(snapshot => {
-      snapshot.forEach(doc => { const p = doc.data(); if(!productsCache.has(doc.id)) productsCache.set(doc.id, { images: p.images || [], icon: p.icon || 'fa-gem', name: p.name }); });
-      renderOrderSummary();
-    }).catch(e => console.log("Background fetch error:", e));
-  }
-  
-  function getProductImage(id) { return productsCache.get(id)?.images?.[0] || null; }
-  function getProductIcon(id) { return productsCache.get(id)?.icon || 'fa-gem'; }
-  
-  function loadCart() {
-    cart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-    if (cart.length === 0) {
-      showToast('🛒 Cart empty! Redirecting...', true);
-      setTimeout(() => window.location.href = 'index.html', 1500);
-      return;
-    }
-    cartTotal = cart.reduce((s,i) => s + (i.price * i.quantity), 0);
-    calculateOnlineDiscount();
-    renderOrderSummary();
+    if (!name || !street || !city || !state || !pincode || pincode.length !== 6) return null;
+    return { fullName: name, phone: currentUser.phone, email: currentUser.email, address: street, city, state, pincode, landmark: document.getElementById('manualLandmark').value.trim() };
   }
   
   function calculateOnlineDiscount() {
-    if (selectedPaymentMethod === 'razorpay') {
-      discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100);
-      discountedTotal = cartTotal - discountAmount;
-    } else { discountAmount = 0; discountedTotal = cartTotal; }
+    if (selectedPaymentMethod === 'razorpay') { discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100); discountedTotal = cartTotal - discountAmount; }
+    else { discountAmount = 0; discountedTotal = cartTotal; }
     updateTotalDisplay();
   }
   
@@ -1409,44 +608,160 @@
       discountRow.style.display = 'flex';
       document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`;
       document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`;
-    } else {
-      discountRow.style.display = 'none';
-      document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
-    }
+    } else { discountRow.style.display = 'none'; document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; }
     const finalTotal = selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal;
     document.getElementById('rewardPoints').innerHTML = Math.floor(finalTotal / 100);
   }
   
-  function renderOrderSummary() {
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
+  
+  async function renderOrderSummary() {
     const container = document.getElementById('orderItemsList');
-    if (!container) return;
-    container.innerHTML = cart.map(item => {
-      const img = getProductImage(item.id);
-      const icon = getProductIcon(item.id);
-      return `<div class="order-item"><div class="order-item-img">${img ? `<img src="${img}">` : `<i class="fas ${icon}"></i>`}</div><div class="order-item-info"><h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p></div><div class="order-item-price">₹${(item.price * item.quantity).toLocaleString()}</div></div>`;
-    }).join('');
+    container.innerHTML = '';
+    for (const item of cart) {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'order-item';
+      
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'order-item-img';
+      imgDiv.id = `design-thumb-${item.id}`;
+      
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'order-item-info';
+      infoDiv.innerHTML = `
+        <h4>${escapeHtml(item.name)}</h4>
+        <p>Size: ${item.size || 'Not Selected'} | Quantity: ${item.quantity}</p>
+        <p>Price: ₹${item.price.toLocaleString()}</p>
+        ${item.designJSON ? `<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>` : ''}
+      `;
+      
+      const priceDiv = document.createElement('div');
+      priceDiv.className = 'order-item-price';
+      priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
+      
+      itemDiv.appendChild(imgDiv);
+      itemDiv.appendChild(infoDiv);
+      itemDiv.appendChild(priceDiv);
+      container.appendChild(itemDiv);
+      
+      // Render design thumbnail if designJSON exists
+      if (item.designJSON) {
+        await renderDesignThumbnail(item.designJSON, imgDiv);
+      } else {
+        imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
+      }
+    }
     updateTotalDisplay();
   }
   
-  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
+  async function saveOrderToFirebase(paymentMethod, transactionId = null) {
+    const address = getOrderAddress();
+    if (!address) return { success: false };
+    
+    const itemsWithDetails = cart.map(item => ({
+      id: item.id, name: item.name, price: item.price, quantity: item.quantity,
+      size: item.size || 'Not Selected',
+      designJSON: item.designJSON || null,
+      designImage: item.designImage || null,
+      total: item.price * item.quantity
+    }));
+    
+    const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
+    const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
+    
+    const orderData = {
+      orderId, customerName: address.fullName, customerPhone: address.phone, customerEmail: address.email,
+      shippingAddress: { address: address.address, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark },
+      items: itemsWithDetails, paymentMethod, paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending',
+      status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId,
+      subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0,
+      discountPercent: (paymentMethod === 'Razorpay' && discountAmount > 0) ? ONLINE_DISCOUNT_PERCENT : 0,
+      total: finalTotal, orderDate: new Date().toISOString(), updatedAt: new Date().toISOString(),
+      userId: currentUser?.uid, userPhone: currentUser?.phone, rewardPointsEarned: Math.floor(finalTotal / 100)
+    };
+    
+    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; }
+    catch (error) { return { success: false, error: error.message }; }
+  }
+  
+  async function saveOrderCOD() {
+    if (!getOrderAddress()) { showToast('❌ Please fill all address details', true); return; }
+    if (isProcessing) return;
+    isProcessing = true;
+    showLoading(true);
+    const result = await saveOrderToFirebase('Cash on Delivery');
+    showLoading(false);
+    if (result.success) {
+      localStorage.removeItem('vedantaCart');
+      showToast(`✅ Order placed! Order ID: ${result.orderId}`);
+      setTimeout(() => window.location.href = `order-success.html?orderId=${result.orderId}`, 1500);
+    } else { showToast('❌ Failed to place order', true); isProcessing = false; }
+  }
+  
+  async function initiateRazorpayPayment() {
+    if (!getOrderAddress()) { showToast('❌ Please fill all address details', true); return; }
+    if (isProcessing) return;
+    isProcessing = true;
+    showLoading(true);
+    const finalAmount = discountedTotal;
+    if (finalAmount <= 0) { showToast('❌ Invalid order amount', true); showLoading(false); isProcessing = false; return; }
+    
+    const address = getOrderAddress();
+    const options = {
+      key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount) * 100, currency: 'INR',
+      name: 'VEDANTA', description: 'Custom T-Shirt Order',
+      prefill: { name: address.fullName, email: address.email, contact: address.phone },
+      theme: { color: '#D4AF37' },
+      modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing = false; } }
+    };
+    
+    const razorpay = new Razorpay(options);
+    razorpay.on('payment.success', async (response) => {
+      const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id);
+      showLoading(false);
+      if (result.success) {
+        localStorage.removeItem('vedantaCart');
+        showToast(`✅ Payment successful! Order ID: ${result.orderId}`);
+        setTimeout(() => window.location.href = `order-success.html?orderId=${result.orderId}`, 1500);
+      } else { showToast('⚠️ Payment successful but order save failed', true); }
+      isProcessing = false;
+    });
+    razorpay.on('payment.error', () => { showLoading(false); showToast('❌ Payment failed!', true); isProcessing = false; });
+    razorpay.open();
+  }
+  
+  function loadCart() {
+    const savedCart = localStorage.getItem('vedantaCart');
+    if (savedCart) {
+      cart = JSON.parse(savedCart);
+    } else {
+      const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
+      if (pendingOrder) {
+        const order = JSON.parse(pendingOrder);
+        cart = [{
+          id: order.orderId,
+          name: `Custom ${order.style || 'T-Shirt'}`,
+          price: order.price || 1699,
+          quantity: 1,
+          size: 'M',
+          designJSON: order.designJSON || null,
+          designImage: order.designImage || null
+        }];
+      } else {
+        cart = [];
+      }
+    }
+    
+    if (cart.length === 0) { showToast('🛒 Cart empty! Redirecting...', true); setTimeout(() => window.location.href = 'index.html', 1500); return; }
+    cartTotal = cart.reduce((s,i) => s + (i.price * i.quantity), 0);
+    calculateOnlineDiscount();
+    renderOrderSummary();
+  }
   
   async function initialize() {
-    const user = auth.currentUser;
     const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    
-    if (user) {
-      currentUser = {
-        uid: user.uid, phone: user.phoneNumber,
-        email: user.email || storedUser?.email || `${user.uid}@vedanta.com`,
-        name: storedUser?.name || `User${user.phoneNumber?.slice(-4) || '001'}`
-      };
-      localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
-    } else if (storedUser) { currentUser = storedUser; }
-    else {
-      showToast('🔐 Please login to continue', true);
-      setTimeout(() => window.location.href = 'profile.html', 1500);
-      return;
-    }
+    if (storedUser) currentUser = storedUser;
+    else { showToast('🔐 Please login to continue', true); setTimeout(() => window.location.href = 'profile.html', 1500); return; }
     
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     document.getElementById('displayEmail').innerText = currentUser.email || '';
@@ -1454,10 +769,7 @@
     
     await loadUserAddresses();
     renderUI();
-    
     loadCart();
-    loadProductsInstantly();
-    fetchProductsInBackground();
     
     document.getElementById('codOption')?.addEventListener('click', () => {
       document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
@@ -1480,15 +792,37 @@
     document.getElementById('addNewAddressTrigger')?.addEventListener('click', showAddNewAddress);
     document.getElementById('saveManualAddressBtn')?.addEventListener('click', saveNewAddress);
     document.getElementById('cancelManualAddressBtn')?.addEventListener('click', cancelAddNewAddress);
-    document.getElementById('useCurrentLocationBtn')?.addEventListener('click', fillManualFormWithLocation);
+    document.getElementById('useCurrentLocationBtn')?.addEventListener('click', async () => {
+      showToast('📍 Getting location...');
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(async (pos) => {
+          try {
+            const response = await fetch(`https://maps.googleapis.com/maps/api/geocode/json?latlng=${pos.coords.latitude},${pos.coords.longitude}&key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM`);
+            const data = await response.json();
+            if (data.status === 'OK' && data.results[0]) {
+              const components = data.results[0].address_components;
+              let city = '', state = '', pincode = '', street = '';
+              components.forEach(c => {
+                if (c.types.includes('locality')) city = c.long_name;
+                if (c.types.includes('administrative_area_level_1')) state = c.long_name;
+                if (c.types.includes('postal_code')) pincode = c.long_name;
+                if (c.types.includes('route')) street = c.long_name;
+              });
+              document.getElementById('manualCity').value = city;
+              document.getElementById('manualState').value = state;
+              document.getElementById('manualPincode').value = pincode;
+              if (street) document.getElementById('manualStreet').value = street;
+              showToast('✅ Address auto-filled!');
+            }
+          } catch(e) { showToast('❌ Could not get address', true); }
+        }, () => showToast('❌ Location denied', true));
+      }
+    });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
-    document.getElementById('openSettingsBtn')?.addEventListener('click', () => { hideLocationModal(); showToast('📍 Enable location in browser settings', true); });
-    document.getElementById('closeLocationModalBtn')?.addEventListener('click', hideLocationModal);
     
-    console.log('✅ Page initialized with Google Maps API key for location services');
-    console.log('📍 API Key:', GOOGLE_MAPS_API_KEY);
+    document.getElementById('codOption').click();
   }
   
   initialize();
