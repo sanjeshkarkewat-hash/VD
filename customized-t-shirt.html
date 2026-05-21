@@ -205,31 +205,6 @@
         }
         .color-swatch.active { border-color: white; transform: scale(1.05); box-shadow: 0 0 6px white; }
         
-        .tshirt-colors {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 10px;
-            margin-top: 8px;
-        }
-        .tshirt-color {
-            padding: 8px;
-            border-radius: 12px;
-            text-align: center;
-            cursor: pointer;
-            font-size: 11px;
-            font-weight: 600;
-            transition: 0.2s;
-            border: 2px solid transparent;
-            background: rgba(0,0,0,0.3);
-        }
-        .tshirt-color.active { border-color: #D4AF37; background: rgba(212,175,55,0.2); }
-        .tshirt-color .preview {
-            width: 100%;
-            height: 35px;
-            border-radius: 8px;
-            margin-bottom: 5px;
-        }
-        
         .print-method-group {
             margin-top: 15px;
         }
@@ -318,7 +293,7 @@
             text-align: center;
         }
         
-        /* Front/Back Switcher - Placed right above canvas */
+        /* Front/Back Switcher */
         .side-switcher {
             display: flex;
             justify-content: center;
@@ -346,7 +321,6 @@
             display: flex;
             align-items: center;
             gap: 10px;
-            letter-spacing: 0.5px;
         }
         .side-btn i {
             font-size: 16px;
@@ -366,7 +340,71 @@
             transform: translateY(-2px);
         }
         
-        /* T-shirt flip animation */
+        /* Color Selector - Placed below canvas */
+        .color-selector-section {
+            margin-top: 20px;
+            padding: 15px 20px;
+            background: rgba(15,15,22,0.6);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .color-selector-title {
+            font-size: 13px;
+            color: #D4AF37;
+            margin-bottom: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .color-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .color-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 40px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .color-option:hover {
+            transform: translateY(-3px);
+            border-color: #D4AF37;
+        }
+        .color-option.active {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.15);
+            box-shadow: 0 0 15px rgba(212,175,55,0.3);
+        }
+        .color-swatch-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.2s ease;
+        }
+        .color-option.active .color-swatch-circle {
+            border-color: #D4AF37;
+            transform: scale(1.05);
+        }
+        .color-option-name {
+            font-size: 11px;
+            font-weight: 600;
+            color: #ccc;
+        }
+        .color-option.active .color-option-name {
+            color: #D4AF37;
+        }
+        
         .canvas-container {
             background: #1a1a24;
             border-radius: 24px;
@@ -374,22 +412,9 @@
             box-shadow: 0 20px 40px rgba(0,0,0,0.4);
             transition: transform 0.3s ease, opacity 0.2s ease;
         }
-        .canvas-flip-out {
-            transform: rotateY(90deg);
-            opacity: 0;
-        }
-        .canvas-flip-in {
-            animation: flipIn 0.3s ease forwards;
-        }
-        @keyframes flipIn {
-            0% { transform: rotateY(-90deg); opacity: 0; }
-            100% { transform: rotateY(0deg); opacity: 1; }
-        }
-        
         #tshirtCanvas { 
             border-radius: 20px; 
             cursor: crosshair;
-            transition: all 0.2s ease;
         }
 
         .order-panel {
@@ -663,7 +688,6 @@
             border-radius: 10px;
         }
         
-        /* Mobile Responsive */
         @media (max-width: 768px) {
             .side-switcher {
                 gap: 10px;
@@ -674,8 +698,15 @@
                 padding: 8px 20px;
                 font-size: 12px;
             }
-            .side-btn i {
-                font-size: 14px;
+            .color-swatch-circle {
+                width: 35px;
+                height: 35px;
+            }
+            .color-option {
+                padding: 5px 8px;
+            }
+            .color-option-name {
+                font-size: 9px;
             }
         }
     </style>
@@ -790,45 +821,7 @@
             </div>
             
             <div class="material-tools-box">
-                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT COLOR & SIZE</div>
-                
-                <div class="tool-group">
-                    <label>🎨 T-Shirt Color</label>
-                    <div class="tshirt-colors" id="tshirtColorPalette">
-                        <div class="tshirt-color" data-color="#1a1a1a">
-                            <div class="preview" style="background:#1a1a1a;"></div>
-                            <span>Black</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#f5f5f5">
-                            <div class="preview" style="background:#f5f5f5;"></div>
-                            <span>White</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#1e3a5f">
-                            <div class="preview" style="background:#1e3a5f;"></div>
-                            <span>Navy</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#800020">
-                            <div class="preview" style="background:#800020;"></div>
-                            <span>Maroon</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#4a5d23">
-                            <div class="preview" style="background:#4a5d23;"></div>
-                            <span>Olive</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#36454F">
-                            <div class="preview" style="background:#36454F;"></div>
-                            <span>Charcoal</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#6F4E37">
-                            <div class="preview" style="background:#6F4E37;"></div>
-                            <span>Coffee</span>
-                        </div>
-                        <div class="tshirt-color" data-color="#708090">
-                            <div class="preview" style="background:#708090;"></div>
-                            <span>Slate</span>
-                        </div>
-                    </div>
-                </div>
+                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE & FABRIC</div>
                 
                 <div class="tool-group">
                     <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
@@ -879,7 +872,7 @@
         </div>
         
         <div class="editor-panel">
-            <!-- Front/Back Switcher - Placed directly above canvas -->
+            <!-- Front/Back Switcher -->
             <div class="side-switcher">
                 <button class="side-btn active" id="frontSideBtn">
                     <i class="fas fa-tshirt"></i> Front
@@ -891,6 +884,16 @@
             
             <div class="canvas-container">
                 <canvas id="tshirtCanvas" width="550" height="600"></canvas>
+            </div>
+            
+            <!-- Color Selector Section - Right below canvas -->
+            <div class="color-selector-section">
+                <div class="color-selector-title">
+                    <i class="fas fa-palette"></i> Choose T-Shirt Color
+                </div>
+                <div class="color-options" id="colorOptionsContainer">
+                    <!-- Color options will be populated dynamically -->
+                </div>
             </div>
             
             <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
@@ -981,6 +984,18 @@
         { id: 'acidwash', name: 'Acid Wash', img: 'acid wash T shirt.jpeg', price: 1799 }
     ];
     
+    // Color variants configuration
+    const colorVariants = {
+        black: { name: 'Black', code: '#1a1a1a', frontImg: 'black_front.png', backImg: 'black_back.png' },
+        white: { name: 'White', code: '#f5f5f5', frontImg: 'white_front.png', backImg: 'white_back.png' },
+        navy: { name: 'Navy', code: '#1e3a5f', frontImg: 'navy_front.png', backImg: 'navy_back.png' },
+        maroon: { name: 'Maroon', code: '#800020', frontImg: 'maroon_front.png', backImg: 'maroon_back.png' },
+        olive: { name: 'Olive', code: '#4a5d23', frontImg: 'olive_front.png', backImg: 'olive_back.png' },
+        beige: { name: 'Beige', code: '#f5f0e1', frontImg: 'beige_front.png', backImg: 'beige_back.png' },
+        charcoal: { name: 'Charcoal', code: '#36454F', frontImg: 'charcoal_front.png', backImg: 'charcoal_back.png' },
+        coffee: { name: 'Coffee', code: '#6F4E37', frontImg: 'coffee_front.png', backImg: 'coffee_back.png' }
+    };
+    
     let currentStyle = tshirtStyles[0];
     let currentSize = null;
     let currentGSM = null;
@@ -992,7 +1007,6 @@
     let glowActive = false;
     let roundedActive = false;
     let borderActive = false;
-    let currentShirtColor = '#1a1a1a';
     let cart = [];
     
     // Front/Back Design Storage
@@ -1002,13 +1016,114 @@
     let frontDesignImageURL = null;
     let backDesignImageURL = null;
     
-    // Store original fabric canvas methods for state preservation
-    let canvasStateSnapshot = null;
+    // Selected Color
+    let selectedColorKey = 'black';
+    let selectedColorName = 'Black';
+    let selectedColorCode = '#1a1a1a';
 
     console.log("🎨 Customize page opened");
-    console.log("📍 Front/Back switcher placed next to canvas");
+    console.log("🎨 Color selector added below canvas");
 
-    // ========== FRONT/BACK SWITCHING WITH ANIMATION ==========
+    // ========== COLOR SELECTOR UI ==========
+    function renderColorSelector() {
+        const container = document.getElementById('colorOptionsContainer');
+        const colors = [
+            { key: 'black', name: 'Black', icon: '⚫' },
+            { key: 'white', name: 'White', icon: '⚪' },
+            { key: 'navy', name: 'Navy', icon: '🔵' },
+            { key: 'maroon', name: 'Maroon', icon: '🔴' },
+            { key: 'olive', name: 'Olive', icon: '🟢' },
+            { key: 'beige', name: 'Beige', icon: '🟤' },
+            { key: 'charcoal', name: 'Charcoal', icon: '⚫' },
+            { key: 'coffee', name: 'Coffee', icon: '🟤' }
+        ];
+        
+        container.innerHTML = colors.map(color => `
+            <div class="color-option ${selectedColorKey === color.key ? 'active' : ''}" data-color="${color.key}">
+                <div class="color-swatch-circle" style="background: ${colorVariants[color.key].code};"></div>
+                <span class="color-option-name">${color.name}</span>
+            </div>
+        `).join('');
+        
+        // Add click event listeners
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const colorKey = option.dataset.color;
+                changeTShirtColor(colorKey);
+            });
+        });
+    }
+    
+    // ========== CHANGE T-SHIRT COLOR (Preserves Design) ==========
+    async function changeTShirtColor(colorKey) {
+        console.log("Selected color:", colorKey);
+        
+        const colorInfo = colorVariants[colorKey];
+        if (!colorInfo) return;
+        
+        // Update selected color
+        selectedColorKey = colorKey;
+        selectedColorName = colorInfo.name;
+        selectedColorCode = colorInfo.code;
+        
+        // Update UI
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.classList.remove('active');
+            if (opt.dataset.color === colorKey) {
+                opt.classList.add('active');
+            }
+        });
+        
+        document.getElementById('summaryColor').innerText = selectedColorName;
+        
+        console.log(`Loading ${selectedColorName} t-shirt`);
+        console.log("Preserving existing design");
+        
+        // Save current design before changing color
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
+        }
+        
+        // Get current design objects to restore later
+        const currentObjects = fabricCanvas.getObjects();
+        
+        // Clear canvas
+        fabricCanvas.clear();
+        
+        // Load new color background image
+        const colorImageUrl = currentSide === 'front' ? colorInfo.frontImg : colorInfo.backImg;
+        
+        loadImageAsDataURL(colorImageUrl, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        // Restore all design objects
+                        if (currentObjects.length > 0) {
+                            currentObjects.forEach(obj => fabricCanvas.add(obj));
+                        }
+                        fabricCanvas.renderAll();
+                        console.log(`${selectedColorName} t-shirt loaded, design preserved`);
+                    }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
+                });
+            } else {
+                // Fallback to solid color
+                fabricCanvas.setBackgroundColor(selectedColorCode, function() {
+                    if (currentObjects.length > 0) {
+                        currentObjects.forEach(obj => fabricCanvas.add(obj));
+                    }
+                    fabricCanvas.renderAll();
+                    console.log(`${selectedColorName} solid color applied, design preserved`);
+                });
+            }
+        });
+        
+        showToast(`✓ Color changed to ${selectedColorName}`);
+    }
+
+    // ========== FRONT/BACK SWITCHING ==========
     async function switchToFront() {
         if (currentSide === 'front') return;
         
@@ -1019,35 +1134,52 @@
             backDesignJSON = fabricCanvas.toJSON();
         }
         
-        // Apply flip out animation
-        const canvasContainer = document.querySelector('.canvas-container');
-        canvasContainer.style.transition = 'transform 0.25s ease, opacity 0.2s ease';
-        canvasContainer.style.transform = 'rotateY(90deg)';
-        canvasContainer.style.opacity = '0';
+        // Get current design objects to restore
+        const currentObjects = fabricCanvas.getObjects();
         
-        setTimeout(() => {
-            // Load front design
-            currentSide = 'front';
-            document.getElementById('frontSideBtn').classList.add('active');
-            document.getElementById('backSideBtn').classList.remove('active');
-            
-            if (frontDesignJSON) {
-                fabricCanvas.loadFromJSON(frontDesignJSON, () => {
-                    fabricCanvas.renderAll();
-                    console.log("Front design loaded");
-                    canvasContainer.style.transform = 'rotateY(0deg)';
-                    canvasContainer.style.opacity = '1';
+        // Load front design
+        currentSide = 'front';
+        document.getElementById('frontSideBtn').classList.add('active');
+        document.getElementById('backSideBtn').classList.remove('active');
+        
+        fabricCanvas.clear();
+        
+        const colorInfo = colorVariants[selectedColorKey];
+        const colorImageUrl = colorInfo.frontImg;
+        
+        loadImageAsDataURL(colorImageUrl, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        if (frontDesignJSON) {
+                            fabricCanvas.loadFromJSON(frontDesignJSON, () => {
+                                fabricCanvas.renderAll();
+                                console.log("Front design loaded");
+                            });
+                        } else if (currentObjects.length > 0) {
+                            currentObjects.forEach(obj => fabricCanvas.add(obj));
+                            fabricCanvas.renderAll();
+                        } else {
+                            fabricCanvas.renderAll();
+                        }
+                    }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
             } else {
-                fabricCanvas.clear();
-                fabricCanvas.setBackgroundColor(currentShirtColor, () => {
-                    fabricCanvas.renderAll();
-                    canvasContainer.style.transform = 'rotateY(0deg)';
-                    canvasContainer.style.opacity = '1';
+                fabricCanvas.setBackgroundColor(selectedColorCode, function() {
+                    if (frontDesignJSON) {
+                        fabricCanvas.loadFromJSON(frontDesignJSON, () => {
+                            fabricCanvas.renderAll();
+                        });
+                    } else if (currentObjects.length > 0) {
+                        currentObjects.forEach(obj => fabricCanvas.add(obj));
+                        fabricCanvas.renderAll();
+                    } else {
+                        fabricCanvas.renderAll();
+                    }
                 });
-                console.log("Front design empty, cleared canvas");
             }
-        }, 150);
+        });
         
         updateSummaryElements();
     }
@@ -1062,41 +1194,58 @@
             frontDesignJSON = fabricCanvas.toJSON();
         }
         
-        // Apply flip out animation
-        const canvasContainer = document.querySelector('.canvas-container');
-        canvasContainer.style.transition = 'transform 0.25s ease, opacity 0.2s ease';
-        canvasContainer.style.transform = 'rotateY(-90deg)';
-        canvasContainer.style.opacity = '0';
+        // Get current design objects to restore
+        const currentObjects = fabricCanvas.getObjects();
         
-        setTimeout(() => {
-            // Load back design
-            currentSide = 'back';
-            document.getElementById('frontSideBtn').classList.remove('active');
-            document.getElementById('backSideBtn').classList.add('active');
-            
-            if (backDesignJSON) {
-                fabricCanvas.loadFromJSON(backDesignJSON, () => {
-                    fabricCanvas.renderAll();
-                    canvasContainer.style.transform = 'rotateY(0deg)';
-                    canvasContainer.style.opacity = '1';
-                    console.log("Back design loaded");
+        // Load back design
+        currentSide = 'back';
+        document.getElementById('frontSideBtn').classList.remove('active');
+        document.getElementById('backSideBtn').classList.add('active');
+        
+        fabricCanvas.clear();
+        
+        const colorInfo = colorVariants[selectedColorKey];
+        const colorImageUrl = colorInfo.backImg;
+        
+        loadImageAsDataURL(colorImageUrl, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        if (backDesignJSON) {
+                            fabricCanvas.loadFromJSON(backDesignJSON, () => {
+                                fabricCanvas.renderAll();
+                                console.log("Back design loaded");
+                            });
+                        } else if (currentObjects.length > 0) {
+                            currentObjects.forEach(obj => fabricCanvas.add(obj));
+                            fabricCanvas.renderAll();
+                        } else {
+                            fabricCanvas.renderAll();
+                        }
+                    }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
             } else {
-                fabricCanvas.clear();
-                fabricCanvas.setBackgroundColor(currentShirtColor, () => {
-                    fabricCanvas.renderAll();
-                    canvasContainer.style.transform = 'rotateY(0deg)';
-                    canvasContainer.style.opacity = '1';
+                fabricCanvas.setBackgroundColor(selectedColorCode, function() {
+                    if (backDesignJSON) {
+                        fabricCanvas.loadFromJSON(backDesignJSON, () => {
+                            fabricCanvas.renderAll();
+                        });
+                    } else if (currentObjects.length > 0) {
+                        currentObjects.forEach(obj => fabricCanvas.add(obj));
+                        fabricCanvas.renderAll();
+                    } else {
+                        fabricCanvas.renderAll();
+                    }
                 });
-                console.log("Back design empty, cleared canvas");
             }
-        }, 150);
+        });
         
         updateSummaryElements();
     }
 
     // ========== Save Both Front and Back Images to Firebase ==========
-    async function saveDesignImageToFirebase(side, designJSON) {
+    async function saveDesignImageToFirebase(side, designJSON, colorKey) {
         if (!designJSON) return null;
         
         try {
@@ -1107,12 +1256,29 @@
             tempCanvas.height = 600;
             const tempFabric = new fabric.Canvas(tempCanvas);
             
+            const colorInfo = colorVariants[colorKey];
+            const colorImageUrl = side === 'front' ? colorInfo.frontImg : colorInfo.backImg;
+            
             await new Promise((resolve) => {
-                tempFabric.loadFromJSON(designJSON, () => {
-                    tempFabric.setBackgroundColor(currentShirtColor, () => {
-                        tempFabric.renderAll();
-                        resolve();
-                    });
+                loadImageAsDataURL(colorImageUrl, function(dataURL) {
+                    if (dataURL) {
+                        fabric.Image.fromURL(dataURL, function(img) {
+                            const scale = Math.max(tempCanvas.width / img.width, tempCanvas.height / img.height);
+                            tempFabric.setBackgroundImage(img, () => {
+                                tempFabric.loadFromJSON(designJSON, () => {
+                                    tempFabric.renderAll();
+                                    resolve();
+                                });
+                            }, { scaleX: scale, scaleY: scale });
+                        });
+                    } else {
+                        tempFabric.setBackgroundColor(colorInfo.code, () => {
+                            tempFabric.loadFromJSON(designJSON, () => {
+                                tempFabric.renderAll();
+                                resolve();
+                            });
+                        });
+                    }
                 });
             });
             
@@ -1123,7 +1289,7 @@
             });
             
             const blob = dataURLToBlob(dataURL);
-            const fileName = `${side}_design_${Date.now()}_${Math.random().toString(36).substr(2, 8)}.png`;
+            const fileName = `${side}_${colorKey}_design_${Date.now()}_${Math.random().toString(36).substr(2, 8)}.png`;
             const designRef = storageRef.child(`custom-designs/${side}/${fileName}`);
             
             await designRef.put(blob);
@@ -1148,7 +1314,7 @@
         }
         
         showToast("📸 Saving front design...");
-        const frontURL = await saveDesignImageToFirebase('front', frontDesignJSON);
+        const frontURL = await saveDesignImageToFirebase('front', frontDesignJSON, selectedColorKey);
         if (frontURL) {
             frontDesignImageURL = frontURL;
             console.log("Front design saved:", frontURL);
@@ -1156,7 +1322,7 @@
         }
         
         showToast("📸 Saving back design...");
-        const backURL = await saveDesignImageToFirebase('back', backDesignJSON);
+        const backURL = await saveDesignImageToFirebase('back', backDesignJSON, selectedColorKey);
         if (backURL) {
             backDesignImageURL = backURL;
             console.log("Back design saved:", backURL);
@@ -1182,7 +1348,7 @@
         return new Blob([u8arr], { type: mime });
     }
 
-    // ========== Existing Functions (Preserved) ==========
+    // ========== Existing Functions ==========
     function loadCart() {
         const saved = localStorage.getItem('vedanta_custom_cart');
         if (saved) {
@@ -1231,7 +1397,7 @@
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.styleName} ✨ Custom (Front+Back)</div>
                     <div class="cart-item-price">₹${item.price}</div>
-                    <div class="cart-item-variant">${item.size || 'M'} | ${item.color || 'Black'} | ${item.gsm || '220 GSM'}</div>
+                    <div class="cart-item-variant">${item.size || 'M'} | ${item.selectedColor || 'Black'} | ${item.gsm || '220 GSM'}</div>
                     <div class="cart-qty-control">
                         <button class="cart-qty-dec" data-index="${index}">-</button>
                         <span>${item.quantity}</span>
@@ -1315,8 +1481,8 @@
             gsm: currentGSM,
             fabric: currentFabric,
             printMethod: currentPrintMethod || 'transparent',
-            color: 'Black',
-            colorCode: currentShirtColor,
+            selectedColor: selectedColorName,
+            selectedColorKey: selectedColorKey,
             quantity: 1
         };
         cart.push(cartItem);
@@ -1398,8 +1564,8 @@
             frontDesignImage: frontURL,
             backDesignImage: backURL,
             tshirtType: currentStyle.name,
-            tshirtColor: 'Black',
-            colorCode: currentShirtColor,
+            selectedColor: selectedColorName,
+            selectedColorKey: selectedColorKey,
             size: currentSize,
             gsm: currentGSM,
             fabric: currentFabric,
@@ -1410,6 +1576,8 @@
         localStorage.setItem('customCheckoutData', JSON.stringify(customCheckoutData));
         localStorage.setItem('frontDesignImage', frontURL);
         localStorage.setItem('backDesignImage', backURL);
+        localStorage.setItem('selectedColor', selectedColorName);
+        localStorage.setItem('selectedColorKey', selectedColorKey);
         
         const hasAddress = await checkUserHasSavedAddress();
         
@@ -1423,7 +1591,7 @@
     }
 
     function generateColorPalette() {
-        const baseColors = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D', '#80B300', '#809900', '#E6B3B3', '#6680B3', '#66991A', '#FF99E6', '#CCFF1A', '#FF1A66', '#E6331A', '#33FFCC'];
+        const baseColors = ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D'];
         return baseColors;
     }
     
@@ -1468,7 +1636,10 @@
         }
         if (keepDesigns) existingObjects.forEach(obj => fabricCanvas.remove(obj));
         
-        loadImageAsDataURL(style.img, function(dataURL) {
+        const colorInfo = colorVariants[selectedColorKey];
+        const colorImageUrl = currentSide === 'front' ? colorInfo.frontImg : colorInfo.backImg;
+        
+        loadImageAsDataURL(colorImageUrl, function(dataURL) {
             if (dataURL) {
                 fabric.Image.fromURL(dataURL, function(img) {
                     const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
@@ -1480,7 +1651,7 @@
                     }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
             } else {
-                fabricCanvas.setBackgroundColor(currentShirtColor, function() {
+                fabricCanvas.setBackgroundColor(selectedColorCode, function() {
                     if (keepDesigns && existingObjects.length > 0) {
                         existingObjects.forEach(obj => fabricCanvas.add(obj));
                     }
@@ -1635,14 +1806,6 @@
         }
     }
     
-    function changeTShirtColor(color) {
-        currentShirtColor = color;
-        if (fabricCanvas) {
-            fabricCanvas.setBackgroundColor(color, fabricCanvas.renderAll.bind(fabricCanvas));
-        }
-        showToast('✓ T-Shirt color changed!');
-    }
-    
     function flipHorizontal() {
         const active = fabricCanvas.getActiveObject();
         if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('✓ Flipped Horizontal'); }
@@ -1696,7 +1859,7 @@
     
     function updateSummary() {
         document.getElementById('summaryStyle').innerText = currentStyle.name;
-        document.getElementById('summaryColor').innerText = 'Black';
+        document.getElementById('summaryColor').innerText = selectedColorName;
         document.getElementById('summarySize').innerText = currentSize || '--';
         document.getElementById('summaryGSM').innerText = currentGSM || '--';
         document.getElementById('summaryFabric').innerText = currentFabric || '--';
@@ -1752,14 +1915,6 @@
     document.getElementById('sizeSelect')?.addEventListener('change', (e) => { currentSize = e.target.value; updateSummary(); });
     document.getElementById('gsmSelect')?.addEventListener('change', (e) => { currentGSM = e.target.value; updateSummary(); });
     document.getElementById('fabricSelect')?.addEventListener('change', (e) => { currentFabric = e.target.value; updateSummary(); });
-    
-    document.querySelectorAll('#tshirtColorPalette .tshirt-color').forEach(c => {
-        c.addEventListener('click', () => {
-            document.querySelectorAll('#tshirtColorPalette .tshirt-color').forEach(p => p.classList.remove('active'));
-            c.classList.add('active');
-            changeTShirtColor(c.dataset.color);
-        });
-    });
     
     document.getElementById('glowBtn')?.addEventListener('click', applyGlow);
     document.getElementById('roundedBtn')?.addEventListener('click', applyRounded);
@@ -1876,18 +2031,17 @@
     initCanvas();
     renderStyles();
     renderColorPalette();
+    renderColorSelector();
     updateSummary();
     loadCart();
-    document.querySelector('#tshirtColorPalette .tshirt-color')?.classList.add('active');
-    changeTShirtColor('#1a1a1a');
     
     // Initialize empty front and back design storage
     frontDesignJSON = fabricCanvas.toJSON();
     backDesignJSON = null;
     
     console.log("✅ Customize page ready");
-    console.log("🎨 Front/Back switcher placed next to canvas");
-    console.log("✨ Flip animation enabled for side switching");
+    console.log("🎨 Color selector placed below canvas");
+    console.log("🎨 Selected color:", selectedColorName);
 </script>
 </body>
 </html>
