@@ -99,14 +99,14 @@
         }
         .style-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 22px;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 20px;
         }
         .style-card {
             background: rgba(20,20,30,0.75);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 18px 12px;
+            padding: 20px 15px;
             text-align: center;
             cursor: pointer;
             border: 2px solid transparent;
@@ -117,17 +117,30 @@
             background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
             box-shadow: 0 0 25px rgba(212,175,55,0.3);
         }
-        .style-img {
-            width: 100%;
-            aspect-ratio: 1/1;
-            object-fit: cover;
-            border-radius: 20px;
-            margin-bottom: 12px;
-            background: #1a1a2e;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        .style-card:hover {
+            transform: translateY(-5px);
+            background: rgba(212,175,55,0.1);
         }
-        .style-name { font-weight: 700; font-size: 15px; margin-bottom: 5px; }
-        .style-price { color: #D4AF37; font-size: 14px; font-weight: 700; }
+        .style-icon {
+            font-size: 48px;
+            color: #D4AF37;
+            margin-bottom: 15px;
+        }
+        .style-name { 
+            font-weight: 700; 
+            font-size: 18px; 
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        .style-price { 
+            color: #D4AF37; 
+            font-size: 16px; 
+            font-weight: 700;
+        }
+        .style-price i {
+            font-size: 12px;
+            margin-right: 2px;
+        }
 
         .designer-grid {
             display: grid;
@@ -706,6 +719,15 @@
             .color-option-name {
                 font-size: 9px;
             }
+            .style-name {
+                font-size: 14px;
+            }
+            .style-price {
+                font-size: 13px;
+            }
+            .style-icon {
+                font-size: 36px;
+            }
         }
     </style>
 </head>
@@ -971,7 +993,7 @@
     // ========== IMAGE PATH SETTINGS ==========
     const IMAGE_PATH = "";  // Change this to your folder path if images are in subfolder
     
-    // Product styles with exact colors as per file names
+    // Product styles with exact names and prices
     const tshirtStyles = [
         { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999,
           colors: ['white', 'warm grey', 'cream', 'black'] },
@@ -1010,7 +1032,6 @@
     let selectedColorDisplay = 'White';
 
     console.log("🎨 Customize page opened");
-    console.log("📸 Using exact file names as provided");
 
     // ========== EXACT FILE NAME GENERATION AS PER YOUR LIST ==========
     function getDynamicImagePath(productName, colorName, side) {
@@ -1089,7 +1110,7 @@
         else if (productLower === 'hoodie') {
             if (side === 'front') {
                 if (colorLower === 'dark brown') {
-                    imageName = `hoodie dark brown color frunt t shirt`;
+                    imageName = `hoodie dark brown color frunt t shirt.jpg`;
                 } else {
                     imageName = `hoodie ${colorLower} color frunt t shirt.jpg`;
                 }
@@ -1121,7 +1142,6 @@
         
         const imagePath = getDynamicImagePath(productName, colorName, side);
         console.log(`🖼️ Loading: ${imagePath}`);
-        console.log(`📋 Product: ${productName}, Color: ${colorName}, Side: ${side}`);
         
         let currentObjects = [];
         if (preserveDesign) {
@@ -1136,10 +1156,8 @@
                         if (preserveDesign && currentObjects.length > 0) {
                             currentObjects.forEach(obj => fabricCanvas.add(obj));
                             fabricCanvas.renderAll();
-                            console.log(`✅ ${side} ${colorName} loaded, ${currentObjects.length} elements restored`);
                         } else {
                             fabricCanvas.renderAll();
-                            console.log(`✅ ${side} ${colorName} loaded`);
                         }
                     }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
@@ -1187,8 +1205,6 @@
     }
     
     function changeTShirtColor(color) {
-        console.log(`🎨 Changing color from ${selectedColor} to ${color}`);
-        
         selectedColor = color;
         const colorDisplayMap = {
             'white': 'White', 'warm grey': 'Warm Grey', 'cream': 'Cream', 'black': 'Black',
@@ -1213,7 +1229,6 @@
 
     function switchToFront() {
         if (currentSide === 'front') return;
-        console.log("🔄 Switched to Front view");
         
         if (currentSide === 'back') backDesignJSON = fabricCanvas.toJSON();
         currentSide = 'front';
@@ -1232,7 +1247,6 @@
     
     function switchToBack() {
         if (currentSide === 'back') return;
-        console.log("🔄 Switched to Back view");
         
         if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
         currentSide = 'back';
@@ -1252,7 +1266,6 @@
     async function saveDesignImageToFirebase(side, designJSON, productName, colorName) {
         if (!designJSON) return null;
         try {
-            console.log(`📸 Exporting ${side} design...`);
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 550; tempCanvas.height = 600;
             const tempFabric = new fabric.Canvas(tempCanvas);
@@ -1287,7 +1300,6 @@
             const designRef = storageRef.child(`custom-designs/${side}/${fileName}`);
             await designRef.put(blob);
             const downloadURL = await designRef.getDownloadURL();
-            console.log(`✅ ${side} design uploaded`);
             tempFabric.dispose();
             return downloadURL;
         } catch (error) {
@@ -1651,11 +1663,11 @@
         const grid = document.getElementById('styleGrid');
         grid.innerHTML = tshirtStyles.map(style => `
             <div class="style-card ${style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
-                <div class="style-img" style="background: linear-gradient(135deg, #1a1a2e, #2a2a3e); display: flex; align-items: center; justify-content: center;">
-                    <i class="fas fa-tshirt" style="font-size: 48px; color: #D4AF37;"></i>
+                <div class="style-icon">
+                    <i class="fas fa-tshirt"></i>
                 </div>
                 <div class="style-name">${style.displayName}</div>
-                <div class="style-price">₹${style.price}</div>
+                <div class="style-price"><i class="fas fa-rupee-sign"></i> ${style.price}</div>
             </div>
         `).join('');
         document.querySelectorAll('.style-card').forEach(card => {
@@ -1755,8 +1767,6 @@
     backDesignJSON = null;
     
     console.log("✅ Customize page ready");
-    console.log("📸 Using exact file names as provided in your list");
-    console.log("💡 Images should be in same folder as HTML file");
 </script>
 </body>
 </html>
