@@ -3,11 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>Vedanta Admin | Orders + Custom Designs</title>
+    <title>VEDANTA | Custom T-Shirt Designer</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.0/fabric.min.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -15,7 +19,6 @@
             background: #050508;
             color: #FFFFFF;
             overflow-x: hidden;
-            min-height: 100vh;
         }
         body::before {
             content: '';
@@ -24,404 +27,598 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.1), transparent 70%);
+            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
             pointer-events: none;
             z-index: -1;
         }
+
         .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 16px 20px;
-            background: rgba(10,10,18,0.95);
-            backdrop-filter: blur(10px);
+            text-align: center;
+            padding: 25px 20px;
             border-bottom: 1px solid rgba(212,175,55,0.2);
-            flex-wrap: wrap;
-            gap: 15px;
+            position: relative;
         }
-        .logo h1 {
-            font-size: 22px;
+        .logo {
+            font-size: 44px;
             font-weight: 800;
-            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00);
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
         }
-        .header-buttons {
-            display: flex;
-            gap: 12px;
-            align-items: center;
+        .tagline {
+            font-size: 12px;
+            letter-spacing: 4px;
+            color: #D4AF37;
+            margin-top: 5px;
         }
-        .return-manage-btn {
-            background: rgba(255,152,0,0.15);
-            border: 1px solid rgba(255,152,0,0.3);
-            padding: 8px 20px;
-            border-radius: 40px;
-            color: #FF9800;
+        .cart-icon-header {
+            position: absolute;
+            right: 30px;
+            top: 30px;
             cursor: pointer;
-            font-size: 13px;
-            font-weight: 600;
+            background: rgba(212,175,55,0.15);
+            padding: 12px 18px;
+            border-radius: 40px;
+            border: 1px solid rgba(212,175,55,0.4);
+            transition: 0.3s;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: 0.2s;
         }
-        .return-manage-btn:hover { background: rgba(255,152,0,0.25); transform: scale(0.98); }
-        .logout-btn {
-            background: rgba(244,67,54,0.15);
-            border: 1px solid rgba(244,67,54,0.3);
-            padding: 8px 20px;
-            border-radius: 40px;
-            color: #F44336;
-            cursor: pointer;
+        .cart-icon-header:hover {
+            background: rgba(212,175,55,0.3);
+            transform: scale(1.02);
+        }
+        .cart-count {
+            background: #D4AF37;
+            color: #050508;
+            border-radius: 30px;
+            padding: 2px 8px;
             font-size: 13px;
-            font-weight: 600;
+            font-weight: bold;
         }
-        .stats-grid {
+
+        .designer-container {
+            max-width: 1800px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+
+        .style-section {
+            margin-bottom: 40px;
+        }
+        .section-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 25px;
+            color: #D4AF37;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .style-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-            gap: 16px;
-            padding: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 20px;
         }
-        .stat-card {
-            background: rgba(15,15,22,0.6);
+        .style-card {
+            background: rgba(20,20,30,0.75);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 20px;
+            padding: 18px 12px;
             text-align: center;
-            border: 1px solid rgba(212,175,55,0.15);
-            transition: 0.2s;
-        }
-        .stat-card:hover { transform: translateY(-3px); border-color: rgba(212,175,55,0.4); }
-        .stat-card i { font-size: 36px; color: #D4AF37; margin-bottom: 12px; }
-        .stat-number { font-size: 32px; font-weight: 800; color: #FFD966; }
-        .stat-label { font-size: 12px; color: #888; margin-top: 5px; }
-        .tabs {
-            display: flex;
-            gap: 8px;
-            padding: 0 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        .tab-btn {
-            background: rgba(20,20,30,0.8);
-            border: 1px solid rgba(212,175,55,0.2);
-            padding: 12px 24px;
-            border-radius: 40px;
-            color: #DDD;
-            font-weight: 600;
             cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+        }
+        .style-card.active {
+            border-color: #D4AF37;
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
+            box-shadow: 0 0 25px rgba(212,175,55,0.3);
+        }
+        .style-card:hover {
+            transform: translateY(-5px);
+        }
+        .style-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            background: #1a1a2e;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+        .style-name { 
+            font-weight: 700; 
+            font-size: 16px; 
+            margin-bottom: 8px;
+        }
+        .style-price { 
+            color: #D4AF37; 
+            font-size: 15px; 
+            font-weight: 700;
+        }
+        .style-price i {
+            font-size: 12px;
+            margin-right: 2px;
+        }
+
+        .designer-grid {
+            display: grid;
+            grid-template-columns: 450px 1fr 320px;
+            gap: 25px;
+        }
+        @media (max-width: 1300px) {
+            .designer-grid { grid-template-columns: 1fr; gap: 25px; }
+        }
+
+        .design-tools-box, .material-tools-box {
+            background: rgba(15,15,22,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 22px;
+            border: 1px solid rgba(212,175,55,0.25);
+            margin-bottom: 20px;
+        }
+        .material-tools-box { margin-bottom: 0; }
+        .box-title {
+            color: #D4AF37;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .tool-group {
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .tool-group label {
+            display: block;
+            font-size: 12px;
+            color: #D4AF37;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        .tool-group .hint {
+            font-size: 10px;
+            color: #888;
+            margin-top: 5px;
+            font-style: italic;
+        }
+        .tool-group input, .tool-group select {
+            width: 100%;
+            padding: 10px 12px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 14px;
+            color: white;
+            font-size: 13px;
+        }
+        
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+            max-height: 280px;
+            overflow-y: auto;
+            padding: 5px;
+        }
+        .color-swatch {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 2px solid transparent;
             transition: 0.2s;
         }
-        .tab-btn.active { background: #D4AF37; color: #050508; }
-        .tab-content { display: none; padding: 0 20px 20px; }
-        .tab-content.active { display: block; }
+        .color-swatch.active { border-color: white; transform: scale(1.05); box-shadow: 0 0 6px white; }
         
-        .order-filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 20px;
-            align-items: center;
-            justify-content: space-between;
-            background: rgba(0,0,0,0.3);
-            padding: 15px;
-            border-radius: 20px;
+        .print-method-group {
+            margin-top: 15px;
         }
-        .filter-group {
+        .print-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-top: 10px;
+            padding: 12px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 16px;
+            cursor: pointer;
+            border: 1px solid rgba(212,175,55,0.3);
+            transition: 0.2s;
+        }
+        .print-option.selected {
+            background: rgba(212,175,55,0.2);
+            border-color: #D4AF37;
+        }
+        .print-option input {
+            width: 18px;
+            height: 18px;
+            accent-color: #D4AF37;
+            margin: 0;
+            cursor: pointer;
+        }
+        .print-option label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+        }
+        
+        .effect-row {
             display: flex;
             gap: 10px;
             flex-wrap: wrap;
-            align-items: center;
+            margin-top: 10px;
         }
-        .filter-btn {
-            background: rgba(20,20,30,0.8);
-            border: 1px solid rgba(212,175,55,0.2);
-            padding: 8px 16px;
-            border-radius: 40px;
-            color: #DDD;
-            font-size: 12px;
+        .effect-btn {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.4);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 11px;
             cursor: pointer;
+            color: #D4AF37;
             transition: 0.2s;
         }
-        .filter-btn:hover, .filter-btn.active {
+        .effect-btn.active {
             background: #D4AF37;
             color: #050508;
         }
-        .date-range-box {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
-            border-radius: 40px;
-            padding: 6px 16px;
-            display: inline-flex;
-            align-items: center;
-            gap: 12px;
+        
+        .btn-icon {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.4);
+            padding: 8px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+            color: #D4AF37;
+            margin-top: 8px;
+            display: inline-block;
+            margin-right: 6px;
+            transition: 0.2s;
+        }
+        .btn-icon:hover { background: #D4AF37; color: #050508; }
+        
+        .upload-area {
+            border: 2px dashed rgba(212,175,55,0.4);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
             cursor: pointer;
             transition: 0.2s;
         }
-        .date-range-box:hover {
-            border-color: #D4AF37;
-            background: rgba(212,175,55,0.1);
-        }
-        .date-range-box i { color: #D4AF37; font-size: 14px; }
-        .date-range-text { font-size: 12px; color: #DDD; }
-        .datepicker-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
-        .datepicker-modal.show { display: flex; }
-        .datepicker-content {
-            background: rgba(15,15,22,0.95);
-            backdrop-filter: blur(20px);
+        .upload-area:hover { border-color: #D4AF37; background: rgba(212,175,55,0.05); }
+
+        .editor-panel {
+            background: rgba(10,10,18,0.6);
+            backdrop-filter: blur(10px);
             border-radius: 32px;
-            padding: 24px;
-            max-width: 400px;
-            width: 90%;
+            padding: 20px;
             text-align: center;
-            border: 1px solid #D4AF37;
         }
-        .products-list {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
+        
+        .side-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding: 8px;
+            background: rgba(15,15,22,0.5);
+            border-radius: 60px;
+            width: fit-content;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .side-btn {
+            background: rgba(20,20,30,0.8);
+            border: none;
+            padding: 12px 28px;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            color: #aaa;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .side-btn i {
+            font-size: 16px;
+            transition: transform 0.3s ease;
+        }
+        .side-btn.active {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            color: #050508;
+            box-shadow: 0 0 20px rgba(212,175,55,0.4);
+        }
+        .side-btn.active i {
+            transform: scale(1.1);
+        }
+        .side-btn:hover:not(.active) {
+            background: rgba(212,175,55,0.2);
+            color: #D4AF37;
+            transform: translateY(-2px);
+        }
+        
+        .color-selector-section {
             margin-top: 20px;
-        }
-        .product-item {
+            padding: 15px 20px;
             background: rgba(15,15,22,0.6);
             backdrop-filter: blur(10px);
-            border-radius: 24px;
-            padding: 16px;
-            border: 1px solid rgba(212,175,55,0.15);
-            transition: 0.2s;
+            border-radius: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
         }
-        .product-item:hover { transform: translateY(-3px); border-color: rgba(212,175,55,0.4); }
-        .product-img-preview {
-            width: 100%;
-            height: 150px;
-            background: #0E0E14;
-            border-radius: 16px;
+        .color-selector-title {
+            font-size: 13px;
+            color: #D4AF37;
             margin-bottom: 12px;
-            overflow: hidden;
+            font-weight: 600;
             display: flex;
             align-items: center;
+            gap: 8px;
+        }
+        .color-options {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
             justify-content: center;
         }
-        .product-img-preview img { width: 100%; height: 100%; object-fit: cover; }
-        .product-img-preview i { font-size: 55px; color: #D4AF37; }
-        .product-item h4 { font-size: 16px; margin-bottom: 8px; }
-        .product-price { color: #D4AF37; font-weight: 700; font-size: 18px; margin: 8px 0; }
-        .product-actions { display: flex; gap: 10px; margin-top: 12px; }
-        .edit-btn, .delete-btn {
-            padding: 6px 12px;
-            border-radius: 20px;
+        .color-option {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            padding: 8px 12px;
+            border-radius: 40px;
+            background: rgba(0,0,0,0.3);
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .color-option:hover {
+            transform: translateY(-3px);
+            border-color: #D4AF37;
+        }
+        .color-option.active {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.15);
+            box-shadow: 0 0 15px rgba(212,175,55,0.3);
+        }
+        .color-swatch-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+            transition: all 0.2s ease;
+        }
+        .color-option.active .color-swatch-circle {
+            border-color: #D4AF37;
+            transform: scale(1.05);
+        }
+        .color-option-name {
             font-size: 11px;
             font-weight: 600;
-            cursor: pointer;
-            border: none;
+            color: #ccc;
         }
-        .edit-btn { background: rgba(33,150,243,0.2); color: #2196F3; }
-        .delete-btn { background: rgba(244,67,54,0.2); color: #F44336; }
+        .color-option.active .color-option-name {
+            color: #D4AF37;
+        }
         
-        .orders-table { overflow-x: auto; margin-top: 12px; }
-        table { width: 100%; border-collapse: collapse; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid rgba(255,255,255,0.08); }
-        th { color: #D4AF37; font-size: 13px; }
-        td { font-size: 12px; }
-        .status-badge {
+        .canvas-container {
+            background: #1a1a24;
+            border-radius: 24px;
             display: inline-block;
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+            transition: transform 0.3s ease, opacity 0.2s ease;
+            position: relative;
         }
-        .status-confirmed { background: rgba(33,150,243,0.2); color: #2196F3; }
-        .status-processing { background: rgba(255,152,0,0.2); color: #FF9800; }
-        .status-shipped { background: rgba(156,39,176,0.2); color: #9C27B0; }
-        .status-delivered { background: rgba(76,175,80,0.2); color: #4CAF50; }
-        .status-cancelled { background: rgba(244,67,54,0.2); color: #F44336; }
-        .status-select {
-            background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
-            padding: 6px 10px;
-            border-radius: 20px;
-            color: white;
-            font-size: 11px;
-            cursor: pointer;
+        #tshirtCanvas { 
+            border-radius: 20px; 
+            cursor: crosshair;
         }
-        .view-details, .delete-order-btn {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            border: none;
-            margin: 0 3px;
-        }
-        .view-details { background: rgba(212,175,55,0.15); color: #D4AF37; }
-        .delete-order-btn { background: rgba(244,67,54,0.2); color: #F44336; }
-        .custom-badge {
-            background: #FF8C00;
-            color: #050508;
-            font-size: 10px;
-            font-weight: bold;
-            padding: 3px 10px;
-            border-radius: 30px;
-            display: inline-block;
-            margin-left: 8px;
-        }
-        .order-modal {
-            display: none;
+
+        .save-loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
-            z-index: 1000;
+            background: rgba(0,0,0,0.85);
+            z-index: 100000;
+            display: none;
             align-items: center;
             justify-content: center;
+            flex-direction: column;
+            gap: 20px;
         }
-        .order-modal.show { display: flex; }
-        .order-modal-content {
-            background: rgba(15,15,22,0.95);
-            backdrop-filter: blur(15px);
-            border-radius: 32px;
-            padding: 24px;
-            max-width: 1100px;
-            width: 90%;
-            max-height: 85vh;
-            overflow-y: auto;
-            border: 1px solid rgba(212,175,55,0.3);
+        .save-loading-overlay.show {
+            display: flex;
         }
-        .order-modal-header {
+        .save-loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(212,175,55,0.3);
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        .save-loading-text {
+            color: #D4AF37;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .save-loading-subtext {
+            color: #888;
+            font-size: 12px;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .order-panel {
+            background: rgba(15,15,22,0.92);
+            backdrop-filter: blur(20px);
+            border-radius: 28px;
+            padding: 22px;
+            border: 1px solid rgba(212,175,55,0.25);
+            position: sticky;
+            top: 20px;
+        }
+        .order-detail {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
             display: flex;
             justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
+            font-size: 14px;
         }
-        .close-order-modal {
-            background: none;
+        .order-total {
+            padding: 18px 0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 24px;
+            font-weight: 800;
+            color: #D4AF37;
+        }
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .btn-add, .btn-buy, .btn-save-image {
+            flex: 1;
+            padding: 14px;
+            border-radius: 50px;
+            font-weight: 800;
+            cursor: pointer;
+            text-align: center;
+        }
+        .btn-add {
+            background: rgba(212,175,55,0.15);
+            border: 1.5px solid #D4AF37;
+            color: #D4AF37;
+        }
+        .btn-buy {
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
             border: none;
             color: white;
-            font-size: 28px;
-            cursor: pointer;
         }
-        .order-detail-row {
+        .btn-save-image {
+            background: rgba(100,100,200,0.2);
+            border: 1px solid #8A8AFF;
+            color: #B8B8FF;
+        }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -480px;
+            width: 480px;
+            height: 100vh;
+            background: rgba(8,8,15,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(212,175,55,0.4);
+            z-index: 15000;
+            transition: 0.4s ease;
+            display: flex;
+            flex-direction: column;
+            box-shadow: -5px 0 30px rgba(0,0,0,0.8);
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .custom-design-preview {
-            background: rgba(212,175,55,0.1);
-            border-radius: 24px;
-            padding: 16px;
-            margin: 16px 0;
-            border: 1px solid rgba(212,175,55,0.3);
-        }
-        .custom-design-image {
-            max-width: 100%;
-            max-height: 280px;
-            border-radius: 16px;
-            border: 1px solid #D4AF37;
-            margin: 12px 0;
-            background: #1a1a24;
-            object-fit: contain;
-        }
-        .design-attr {
-            display: inline-block;
-            background: rgba(0,0,0,0.5);
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 11px;
-            margin-right: 10px;
-            margin-top: 6px;
-        }
-        .print-method-badge {
-            display: inline-flex;
             align-items: center;
-            gap: 5px;
-            background: rgba(212,175,55,0.15);
-            padding: 4px 10px;
+        }
+        .cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .cart-item {
+            background: rgba(20,20,30,0.6);
+            margin-bottom: 15px;
             border-radius: 20px;
-            font-size: 11px;
-            margin-right: 8px;
-            margin-top: 6px;
+            padding: 15px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
         }
-        .custom-image-section {
-            margin-top: 20px;
-            padding: 16px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 24px;
-            border-left: 3px solid #D4AF37;
+        .cart-item-img {
+            width: 60px;
+            height: 60px;
+            background: #1a1a2e;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
         }
-        .custom-image-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #D4AF37;
-            margin-bottom: 12px;
+        .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .cart-item-img i { font-size: 28px; color: #D4AF37; }
+        .cart-item-details {
+            flex: 1;
+        }
+        .cart-item-name { font-weight: bold; font-size: 14px; }
+        .cart-item-price { color: #D4AF37; font-size: 13px; }
+        .cart-item-variant { font-size: 11px; color: #888; margin-top: 3px; }
+        .cart-qty-control {
             display: flex;
             align-items: center;
             gap: 12px;
-            flex-wrap: wrap;
+            margin-top: 8px;
         }
-        .custom-image-grid {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 24px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        .custom-image-card {
-            flex: 1;
-            min-width: 280px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 20px;
-            padding: 16px;
-            text-align: center;
-            border: 1px solid rgba(212,175,55,0.3);
-        }
-        .custom-image-card h4 {
-            margin-bottom: 12px;
-            font-size: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-        .preview-img {
-            width: 100%;
-            max-height: 320px;
-            object-fit: contain;
-            border-radius: 16px;
-            background: #0a0a10;
-            margin: 12px 0;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .download-btn {
-            background: linear-gradient(135deg, #D4AF37, #B87E00);
+        .cart-qty-control button {
+            background: rgba(212,175,55,0.2);
             border: none;
-            color: #050508;
-            font-weight: 700;
-            padding: 8px 16px;
-            border-radius: 40px;
-            margin-top: 10px;
+            width: 28px;
+            height: 28px;
+            border-radius: 8px;
+            color: #D4AF37;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .cart-qty-control button:hover { background: rgba(212,175,55,0.4); }
+        .cart-item-remove {
+            background: rgba(200,50,50,0.3);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 8px;
+            color: #ff8888;
             cursor: pointer;
             font-size: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: 0.2s;
         }
-        .download-btn:hover { transform: scale(1.02); filter: brightness(1.05); }
+        .cart-total {
+            padding: 20px;
+            border-top: 1px solid rgba(212,175,55,0.3);
+        }
+        .checkout-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            color: #050508;
+        }
+
         .toast {
             position: fixed;
             bottom: 30px;
@@ -429,458 +626,1291 @@
             transform: translateX(-50%);
             background: #D4AF37;
             color: #050508;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 50px;
             font-weight: bold;
             z-index: 10000;
-            font-size: 12px;
             display: none;
         }
-        .toast.show { display: block; animation: fadeInOut 2s ease; }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+        .toast.show { display: block; animation: fade 2.5s ease; }
+        @keyframes fade {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; }
+            85% { opacity: 1; }
+            100% { opacity: 0; transform: translateX(-50%) translateY(-20px); }
         }
-        .login-container {
-            max-width: 450px;
-            width: 90%;
-            margin: 0 auto;
-            padding-top: 100px;
+
+        .instruction-text {
+            font-size: 11px;
+            color: #888;
+            margin-top: 12px;
         }
-        .login-card {
-            background: rgba(15,15,22,0.7);
-            backdrop-filter: blur(15px);
-            border-radius: 32px;
-            padding: 35px 28px;
-            border: 1px solid rgba(212,175,55,0.2);
+        
+        .font-preview {
+            font-size: 13px;
+            margin-top: 8px;
+            padding: 6px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
         }
-        .login-card h2 { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 8px; }
-        .login-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 16px;
-            border-radius: 30px;
-            font-weight: 800;
-            font-size: 16px;
-            color: #050508;
-            cursor: pointer;
-            margin-top: 10px;
-        }
-        .add-product-link {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            padding: 10px 20px;
-            border-radius: 40px;
-            font-weight: 700;
-            color: #050508;
-            cursor: pointer;
-            display: inline-flex;
+        
+        .slider-row {
+            display: flex;
             align-items: center;
+            gap: 12px;
+        }
+        .slider-row input { flex: 1; }
+        .slider-value { font-size: 12px; color: #D4AF37; min-width: 45px; }
+
+        .two-col-btns {
+            display: flex;
             gap: 8px;
-            font-size: 14px;
+            flex-wrap: wrap;
         }
-        .section-title {
-            margin: 25px 0 15px 0;
-            font-size: 20px;
-            font-weight: 600;
-            border-left: 4px solid #D4AF37;
-            padding-left: 15px;
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.96);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
         }
-        @media (max-width: 700px) {
-            .stats-grid { grid-template-columns: repeat(2, 1fr); }
-            .order-filters { flex-direction: column; align-items: stretch; }
-            .custom-image-grid { flex-direction: column; }
-            .preview-img { max-height: 240px; }
+        .modal.show { display: flex; }
+        .modal-content {
+            background: rgba(15,15,22,0.98);
+            border-radius: 28px;
+            padding: 30px;
+            max-width: 380px;
+            width: 90%;
+            border: 1px solid rgba(212,175,55,0.3);
+            text-align: center;
         }
-        .input-group { margin-bottom: 15px; }
-        .input-group label { display: block; margin-bottom: 6px; font-size: 12px; color: #D4AF37; }
-        .input-group input { width: 100%; padding: 12px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 16px; color: white; }
-        .datepicker-input-group { margin: 15px 0; text-align: left; }
-        .clickable-date-input { background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 12px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; margin-top: 5px; }
-        .datepicker-buttons { display: flex; gap: 12px; margin-top: 20px; }
-        .datepicker-cancel, .datepicker-apply { flex: 1; padding: 12px; border-radius: 30px; font-weight: 600; cursor: pointer; border: none; }
-        .datepicker-cancel { background: rgba(255,255,255,0.1); color: #ccc; }
-        .datepicker-apply { background: #D4AF37; color: #050508; }
-        .placeholder-text { color: #888; }
-        .selected-date { color: #D4AF37; font-weight: 500; }
+        .modal-content input {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 16px;
+            color: white;
+        }
+        .modal-content button {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 16px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close-modal {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 28px;
+            cursor: pointer;
+            color: white;
+        }
+        
+        .cors-warning {
+            background: rgba(255,100,0,0.2);
+            border: 1px solid #FF6600;
+            border-radius: 12px;
+            padding: 10px;
+            margin-bottom: 15px;
+            font-size: 12px;
+            text-align: center;
+        }
+        
+        .color-grid::-webkit-scrollbar {
+            width: 5px;
+        }
+        .color-grid::-webkit-scrollbar-track {
+            background: rgba(255,255,255,0.1);
+            border-radius: 10px;
+        }
+        .color-grid::-webkit-scrollbar-thumb {
+            background: #D4AF37;
+            border-radius: 10px;
+        }
+        
+        @media (max-width: 768px) {
+            .side-switcher {
+                gap: 10px;
+                padding: 6px;
+                margin-bottom: 15px;
+            }
+            .side-btn {
+                padding: 8px 20px;
+                font-size: 12px;
+            }
+            .color-swatch-circle {
+                width: 35px;
+                height: 35px;
+            }
+            .color-option {
+                padding: 5px 8px;
+            }
+            .color-option-name {
+                font-size: 9px;
+            }
+            .style-name {
+                font-size: 14px;
+            }
+            .style-price {
+                font-size: 13px;
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="app"></div>
-    <div class="toast" id="toast"></div>
-    <script>
-        const firebaseConfig = {
-            apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
-            authDomain: "nexi-53897.firebaseapp.com",
-            projectId: "nexi-53897",
-            storageBucket: "nexi-53897.firebasestorage.app",
-            messagingSenderId: "337349382612",
-            appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
-        const ADMIN_USERNAME = "vedanta";
-        const ADMIN_PASSWORD = "king@63061";
-        
-        let isLoggedIn = localStorage.getItem('adminLoggedIn') === 'true';
-        let products = [];
-        let allOrders = [];
-        let regularOrders = [];
-        let customOrders = [];
-        
-        let currentDateFilter = 'all';
-        let currentStatusFilter = 'all';
-        let customStartDate = '', customEndDate = '', tempStartDate = '', tempEndDate = '';
-        
-        function showToast(msg, isError = false) {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
-            toast.style.background = isError ? '#F44336' : '#D4AF37';
-            toast.style.color = isError ? 'white' : '#050508';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-        
-        function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
-        
-        function getPrintMethodBadge(printMethod) {
-            if (printMethod === 'transparent') {
-                return '<span class="print-method-badge"><i class="fas fa-eye"></i> ✨ Transparent Print (No Background)</span>';
-            } else if (printMethod === 'fullbg') {
-                return '<span class="print-method-badge"><i class="fas fa-fill-drip"></i> 🖼️ Print with Background</span>';
-            }
-            return '<span class="print-method-badge"><i class="fas fa-question-circle"></i> Not specified</span>';
-        }
-        
-        async function loadOrders() {
-            try {
-                const snap = await db.collection('orders').orderBy('orderDate', 'desc').get();
-                allOrders = [];
-                snap.forEach(doc => allOrders.push({ id: doc.id, ...doc.data() }));
-                // Identify custom orders: has frontDesignImage OR backDesignImage OR customDesignImage OR isCustomized OR isCustomOrder
-                regularOrders = allOrders.filter(o => !o.frontDesignImage && !o.backDesignImage && !o.customDesignImage && !o.isCustomized && !o.isCustomOrder);
-                customOrders = allOrders.filter(o => o.frontDesignImage || o.backDesignImage || o.customDesignImage || o.isCustomized === true || o.isCustomOrder === true);
-                console.log("✅ Custom orders loaded:", customOrders.length);
-                saveCache();
-                renderOrdersTables();
-                updateStats();
-            } catch(e) { console.error("Failed to load orders", e); showToast("Error loading orders", true); }
-        }
-        
-        function saveCache() {
-            localStorage.setItem('admin_regular_cache', JSON.stringify(regularOrders));
-            localStorage.setItem('admin_custom_cache', JSON.stringify(customOrders));
-        }
-        
-        async function loadProducts() {
-            try {
-                const snap = await db.collection('products').orderBy('createdAt', 'desc').get();
-                products = [];
-                snap.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
-                renderProducts();
-                updateStats();
-            } catch(e) { console.log(e); }
-        }
-        
-        function calculateSplitRevenue() {
-            let regularTotal = 0, customTotal = 0;
-            regularOrders.forEach(o => { if (o.status !== 'cancelled') regularTotal += (o.total || 0); });
-            customOrders.forEach(o => { if (o.status !== 'cancelled') customTotal += (o.total || 0); });
-            return { regularTotal, customTotal };
-        }
-        
-        function updateStats() {
-            const totalProducts = document.getElementById('totalProducts');
-            const totalOrdersSpan = document.getElementById('totalOrders');
-            const totalRevenueSpan = document.getElementById('totalRevenue');
-            const totalCustomersSpan = document.getElementById('totalCustomers');
-            const regularRevenueSpan = document.getElementById('regularRevenue');
-            const customRevenueSpan = document.getElementById('customRevenue');
-            if (totalProducts) totalProducts.innerText = products.length;
-            const activeOrders = allOrders.filter(o => o.status !== 'cancelled').length;
-            if (totalOrdersSpan) totalOrdersSpan.innerText = activeOrders;
-            const totalRev = allOrders.filter(o => o.status !== 'cancelled').reduce((s,o) => s+(o.total||0),0);
-            if (totalRevenueSpan) totalRevenueSpan.innerText = '₹' + totalRev.toLocaleString('en-IN');
-            if (totalCustomersSpan) {
-                const unique = new Set(allOrders.filter(o => o.status !== 'cancelled').map(o => o.customerEmail).filter(Boolean)).size;
-                totalCustomersSpan.innerText = unique;
-            }
-            const revs = calculateSplitRevenue();
-            if (regularRevenueSpan) regularRevenueSpan.innerText = '₹' + revs.regularTotal.toLocaleString('en-IN');
-            if (customRevenueSpan) customRevenueSpan.innerText = '₹' + revs.customTotal.toLocaleString('en-IN');
-        }
-        
-        function filterByDateAndStatus(ordersArray) {
-            let filtered = [...ordersArray];
-            if (currentStatusFilter !== 'all') filtered = filtered.filter(o => o.status === currentStatusFilter);
-            filtered = filtered.filter(o => {
-                const orderDate = o.orderDate ? new Date(o.orderDate) : null;
-                if (!orderDate) return currentDateFilter === 'all';
-                const today = new Date();
-                if (currentDateFilter === 'today') return orderDate.toDateString() === today.toDateString();
-                if (currentDateFilter === 'week') {
-                    const start = new Date(today); start.setDate(today.getDate() - today.getDay()); start.setHours(0,0,0,0);
-                    const end = new Date(start); end.setDate(start.getDate()+6); end.setHours(23,59,59,999);
-                    return orderDate >= start && orderDate <= end;
-                }
-                if (currentDateFilter === 'month') return orderDate.getMonth() === today.getMonth() && orderDate.getFullYear() === today.getFullYear();
-                if (currentDateFilter === 'custom' && customStartDate) {
-                    const [dS,mS,yS] = customStartDate.split('/');
-                    const startD = new Date(parseInt(yS), parseInt(mS)-1, parseInt(dS)); startD.setHours(0,0,0,0);
-                    if (customEndDate) {
-                        const [dE,mE,yE] = customEndDate.split('/');
-                        const endD = new Date(parseInt(yE), parseInt(mE)-1, parseInt(dE)); endD.setHours(23,59,59,999);
-                        return orderDate >= startD && orderDate <= endD;
-                    }
-                    return orderDate.toDateString() === startD.toDateString();
-                }
-                return true;
-            });
-            filtered.sort((a,b) => new Date(b.orderDate) - new Date(a.orderDate));
-            return filtered;
-        }
-        
-        function renderOrdersTables() {
-            const regularContainer = document.getElementById('regularOrdersList');
-            const customContainer = document.getElementById('customOrdersList');
-            if (!regularContainer || !customContainer) return;
-            const filteredRegular = filterByDateAndStatus(regularOrders);
-            const filteredCustom = filterByDateAndStatus(customOrders);
-            regularContainer.innerHTML = filteredRegular.length ? filteredRegular.map(o => renderOrderRow(o, false)).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;">📭 No regular orders</td></tr>';
-            customContainer.innerHTML = filteredCustom.length ? filteredCustom.map(o => renderOrderRow(o, true)).join('') : '<tr><td colspan="7" style="text-align:center;padding:40px;">🎨 No custom design orders yet</td></tr>';
-            updateStats();
-        }
-        
-        function renderOrderRow(order, isCustom) {
-            const statusClass = (() => {
-                switch(order.status) {
-                    case 'confirmed': return 'status-confirmed';
-                    case 'processing': return 'status-processing';
-                    case 'shipped': return 'status-shipped';
-                    case 'delivered': return 'status-delivered';
-                    case 'cancelled': return 'status-cancelled';
-                    default: return 'status-confirmed';
-                }
-            })();
-            const customFlag = isCustom ? `<span class="custom-badge"><i class="fas fa-paintbrush"></i> CUSTOM DESIGN</span>` : '';
-            return `
-                <tr>
-                    <td>${order.orderId || order.id} ${customFlag}</td>
-                    <td>${order.orderDate ? new Date(order.orderDate).toLocaleDateString('en-IN') : 'N/A'}</td>
-                    <td>${escapeHtml(order.customerName || 'Guest')}</td>
-                    <td>₹${(order.total || 0).toLocaleString('en-IN')}</td>
-                    <td><span class="status-badge ${statusClass}">${order.status || 'Confirmed'}</span></td>
-                    <td><select class="status-select" onchange="updateOrderStatus('${order.id}', this.value)">
-                        <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                        <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                    </select></td>
-                    <td><button class="view-details" onclick="viewOrderDetails('${order.id}')"><i class="fas fa-eye"></i> View</button>
-                    <button class="delete-order-btn" onclick="deleteOrder('${order.id}')"><i class="fas fa-trash"></i> Delete</button></td>
-                </tr>
-            `;
-        }
-        
-        async function updateOrderStatus(orderId, newStatus) {
-            try {
-                await db.collection('orders').doc(orderId).update({ status: newStatus, updatedAt: new Date().toISOString() });
-                showToast(`✅ Status updated to ${newStatus}`);
-                await loadOrders();
-                if (document.querySelector('.tab-btn.active')?.dataset.tab === 'orders') renderOrdersTables();
-            } catch(e) { showToast('Update failed', true); }
-        }
-        
-        async function deleteOrder(orderId) {
-            if (confirm('⚠️ Permanently delete this order?')) {
-                try {
-                    await db.collection('orders').doc(orderId).delete();
-                    showToast('✅ Order deleted');
-                    await loadOrders();
-                    if (document.querySelector('.tab-btn.active')?.dataset.tab === 'orders') renderOrdersTables();
-                } catch(e) { showToast('Delete failed', true); }
-            }
-        }
-        
-        function downloadImageFromUrl(url, filename) {
-            if (!url) { showToast("No image available", true); return; }
-            fetch(url, { mode: 'cors' })
-                .then(res => res.blob())
-                .then(blob => {
-                    const link = document.createElement('a');
-                    const objectUrl = URL.createObjectURL(blob);
-                    link.href = objectUrl;
-                    link.download = filename;
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(objectUrl);
-                    showToast(`Downloading ${filename}`);
-                })
-                .catch(err => { console.error("Download error", err); showToast("Download failed", true); });
-        }
-        
-        function viewOrderDetails(orderId) {
-            const order = allOrders.find(o => o.id == orderId);
-            if (!order) return;
-            
-            const isCustom = !!(order.frontDesignImage || order.backDesignImage || order.customDesignImage || order.isCustomized || order.isCustomOrder);
-            const frontImage = order.frontDesignImage || order.customDesignImage || null;
-            const backImage = order.backDesignImage || null;
-            const selectedColor = order.selectedColor || order.tshirtColor || order.color || 'Black';
-            const printMethod = order.printMethod || order.items?.[0]?.printMethod || null;
-            
-            let itemsHtml = '';
-            if (order.items && order.items.length) {
-                itemsHtml = order.items.map(item => {
-                    const product = products.find(p => p.id == item.id);
-                    const imgUrl = (product && product.images && product.images[0]) ? product.images[0] : null;
-                    return `<div style="display:flex; gap:12px; margin-bottom:14px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:12px;">
-                        <div style="width:55px;height:55px;background:#0E0E14;border-radius:12px;overflow:hidden;">${imgUrl ? `<img src="${imgUrl}" style="width:100%;height:100%;object-fit:cover;">` : '<i class="fas fa-tshirt" style="font-size:28px;margin:14px;"></i>'}</div>
-                        <div style="flex:1;"><strong>${escapeHtml(item.name)}</strong><br>Qty: ${item.quantity} × ₹${(item.price||0).toLocaleString()}<br>Size: ${item.size || item.selectedSize || 'N/A'} | Color: ${item.selectedColor || item.color || selectedColor}</div>
-                        <div>₹${((item.price||0)*(item.quantity||1)).toLocaleString()}</div>
-                    </div>`;
-                }).join('');
-            }
-            
-            let customBlock = '';
-            if (isCustom && (frontImage || backImage)) {
-                customBlock = `
-                    <div class="custom-design-preview">
-                        <div class="custom-image-grid">
-                            ${frontImage ? `
-                            <div class="custom-image-card">
-                                <h4><i class="fas fa-tshirt"></i> 👕 FRONT DESIGN - Print File</h4>
-                                <img src="${frontImage}" class="preview-img" alt="Front Design" onerror="this.src='https://placehold.co/400x400?text=Front+Design+Preview'">
-                                <button class="download-btn" onclick="downloadImageFromUrl('${frontImage}', 'front_design_${order.orderId || order.id}.png')"><i class="fas fa-download"></i> Download Front Design</button>
-                            </div>
-                            ` : ''}
-                            ${backImage ? `
-                            <div class="custom-image-card">
-                                <h4><i class="fas fa-undo-alt"></i> 🔙 BACK DESIGN - Print File</h4>
-                                <img src="${backImage}" class="preview-img" alt="Back Design" onerror="this.src='https://placehold.co/400x400?text=Back+Design+Preview'">
-                                <button class="download-btn" onclick="downloadImageFromUrl('${backImage}', 'back_design_${order.orderId || order.id}.png')"><i class="fas fa-download"></i> Download Back Design</button>
-                            </div>
-                            ` : ''}
+
+<div class="header">
+    <div class="logo">VEDANTA</div>
+    <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
+    <div class="cart-icon-header" id="cartIconBtn">
+        <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
+    </div>
+</div>
+
+<div class="save-loading-overlay" id="saveLoadingOverlay">
+    <div class="save-loading-spinner"></div>
+    <div class="save-loading-text">Saving Your Design...</div>
+    <div class="save-loading-subtext">Please wait while we upload your creation</div>
+</div>
+
+<div class="designer-container">
+    <div class="cors-warning" id="corsWarning">
+        ⚠️ <strong>Note:</strong> Images same folder mein hone chahiye jahan ye HTML file hai
+    </div>
+    
+    <div class="style-section">
+        <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
+        <div class="style-grid" id="styleGrid"></div>
+    </div>
+
+    <div class="designer-grid">
+        <div>
+            <div class="design-tools-box">
+                <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
+                
+                <div class="tool-group">
+                    <label>📝 Add Text</label>
+                    <input type="text" id="textInput" placeholder="Enter your text...">
+                    <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🎨 Text Color (100+ Colors)</label>
+                    <div class="color-grid" id="colorPalette"></div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>✨ Text Effects</label>
+                    <div class="effect-row">
+                        <button class="effect-btn" id="glowBtn"><i class="fas fa-magic"></i> Glow</button>
+                        <button class="effect-btn" id="roundedBtn"><i class="fas fa-circle"></i> Rounded/Circle</button>
+                        <button class="effect-btn" id="borderBtn"><i class="fas fa-border-all"></i> Toggle Border</button>
+                    </div>
+                    <div id="glowControls" style="display: none; margin-top: 12px;">
+                        <div class="slider-row">
+                            <span style="font-size:11px;">Glow Size:</span>
+                            <input type="range" id="glowSizeSlider" min="0" max="20" step="1" value="5">
+                            <span id="glowSizeValue" style="font-size:11px;">5px</span>
                         </div>
-                        <div style="margin-top:16px; padding:12px; background:rgba(0,0,0,0.3); border-radius:20px;">
-                            ${selectedColor ? `<span class="design-attr"><i class="fas fa-palette"></i> T-Shirt Base Color: ${escapeHtml(selectedColor)}</span>` : ''}
-                            ${order.size ? `<span class="design-attr"><i class="fas fa-ruler"></i> Size: ${escapeHtml(order.size)}</span>` : ''}
-                            ${printMethod ? getPrintMethodBadge(printMethod) : '<span class="print-method-badge"><i class="fas fa-question-circle"></i> Print Method: Not specified</span>'}
-                            ${order.printMethod ? '' : (order.items?.[0]?.printMethod ? getPrintMethodBadge(order.items[0].printMethod) : '')}
+                        <div class="slider-row" style="margin-top: 8px;">
+                            <span style="font-size:11px;">Glow Color:</span>
+                            <input type="color" id="glowColorPicker" value="#D4AF37" style="height: 30px; width: 50px;">
                         </div>
                     </div>
-                `;
-            } else if (isCustom && !frontImage && !backImage) {
-                customBlock = `<div class="custom-design-preview"><strong>🎨 Custom order (design details pending)</strong></div>`;
-            }
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔤 Font Family</label>
+                    <select id="fontSelect">
+                        <option value="Space Grotesk">Space Grotesk</option>
+                        <option value="Arial">Arial</option>
+                        <option value="Poppins">Poppins</option>
+                        <option value="Montserrat">Montserrat</option>
+                        <option value="Playfair Display">Playfair Display</option>
+                        <option value="Dancing Script">Dancing Script</option>
+                        <option value="Pacifico">Pacifico</option>
+                        <option value="Oswald">Oswald</option>
+                        <option value="Lobster">Lobster</option>
+                        <option value="Bebas Neue">Bebas Neue</option>
+                        <option value="Great Vibes">Great Vibes</option>
+                    </select>
+                    <div class="font-preview" id="fontPreview">Sample Text</div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>📏 Text Size</label>
+                    <div class="slider-row">
+                        <input type="range" id="fontSizeSlider" min="12" max="120" step="1" value="36">
+                        <span class="slider-value" id="fontSizeValue">36px</span>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔄 Text Transform</label>
+                    <div class="two-col-btns">
+                        <button class="btn-icon" id="flipHorizontalBtn"><i class="fas fa-arrows-alt-h"></i> Flip H</button>
+                        <button class="btn-icon" id="flipVerticalBtn"><i class="fas fa-arrows-alt-v"></i> Flip V</button>
+                        <button class="btn-icon" id="boldBtn"><i class="fas fa-bold"></i> Bold</button>
+                        <button class="btn-icon" id="italicBtn"><i class="fas fa-italic"></i> Italic</button>
+                        <button class="btn-icon" id="underlineBtn"><i class="fas fa-underline"></i> Underline</button>
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🖼️ Upload Your Design</label>
+                    <div class="upload-area" id="uploadArea">
+                        <i class="fas fa-cloud-upload-alt" style="font-size:24px;"></i>
+                        <p>Click to upload PNG/JPG</p>
+                        <input type="file" id="imageUpload" accept="image/*" style="display:none">
+                    </div>
+                </div>
+                
+                <div class="tool-group">
+                    <label>🔧 Manage</label>
+                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button>
+                    <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Current Side</button>
+                </div>
+            </div>
             
-            document.getElementById('orderDetailContent').innerHTML = `
-                <div class="order-detail-row"><strong>📋 Order ID:</strong> ${order.orderId || order.id} ${isCustom ? '<span class="custom-badge">CUSTOM DESIGN</span>' : ''}</div>
-                <div class="order-detail-row"><strong>📅 Date:</strong> ${new Date(order.orderDate).toLocaleString()}</div>
-                <div class="order-detail-row"><strong>📊 Status:</strong> <span class="status-badge status-${order.status || 'confirmed'}">${order.status || 'Confirmed'}</span></div>
-                <div class="order-detail-row"><strong>💳 Payment:</strong> ${order.paymentMethod || 'Cash on Delivery'}</div>
-                <div style="margin: 15px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
-                <strong>👤 Customer Details</strong>
-                <div class="order-detail-row"><strong>Name:</strong> ${escapeHtml(order.customerName || 'Guest')}</div>
-                <div class="order-detail-row"><strong>📞 Phone:</strong> ${order.customerPhone || 'N/A'}</div>
-                <div class="order-detail-row"><strong>✉️ Email:</strong> ${order.customerEmail || 'N/A'}</div>
-                <div class="order-detail-row"><strong>📍 Address:</strong> ${order.shippingAddress?.address || 'N/A'}, ${order.shippingAddress?.city || ''}, ${order.shippingAddress?.state || ''} - ${order.shippingAddress?.pincode || ''}</div>
-                <div style="margin: 15px 0; border-top: 1px solid rgba(255,255,255,0.1);"></div>
-                <strong>🛍️ Items Ordered</strong>
-                ${itemsHtml || '<div class="order-detail-row">No product items</div>'}
-                ${customBlock}
-                <div style="margin-top:16px; border-top:1px solid #D4AF37;"></div>
-                <div class="order-detail-row"><strong>💰 Grand Total:</strong> <span style="color:#D4AF37; font-size:20px;">₹${(order.total || 0).toLocaleString('en-IN')}</span></div>
-            `;
-            document.getElementById('orderModal').classList.add('show');
-        }
-        
-        function closeOrderModal() { document.getElementById('orderModal').classList.remove('show'); }
-        
-        function renderProducts() {
-            const container = document.getElementById('productsList');
-            if (!container) return;
-            if (!products.length) { container.innerHTML = '<div style="text-align:center;padding:40px;">📦 No products</div>'; return; }
-            container.innerHTML = products.map(p => `
-                <div class="product-item">
-                    <div class="product-img-preview">${p.images && p.images[0] ? `<img src="${p.images[0]}">` : `<i class="fas fa-gem"></i>`}</div>
-                    <h4>${escapeHtml(p.name)}</h4>
-                    <div class="product-price">₹${(p.price||0).toLocaleString()}</div>
-                    <div class="product-actions"><button class="edit-btn" onclick="alert('Edit product feature coming soon')">Edit</button><button class="delete-btn" onclick="alert('Delete disabled in demo')">Delete</button></div>
+            <div class="material-tools-box">
+                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE & PRINT METHOD</div>
+                
+                <div class="tool-group">
+                    <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
+                    <select id="sizeSelect">
+                        <option value="" disabled selected>-- Select Size --</option>
+                        <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option>
+                    </select>
                 </div>
-            `).join('');
-        }
-        
-        function applyDateFilter(filter) { currentDateFilter = filter; if(filter !== 'custom') { customStartDate=''; customEndDate=''; } renderOrdersTables(); }
-        function applyStatusFilter(filter) { currentStatusFilter = filter; renderOrdersTables(); }
-        function openDatePicker() { document.getElementById('datepickerModal').classList.add('show'); }
-        function closeDatePicker() { document.getElementById('datepickerModal').classList.remove('show'); }
-        function setStartDate() { const d = prompt("Start date (dd/mm/yyyy)"); if(d && d.match(/^\d{2}\/\d{2}\/\d{4}$/)) { tempStartDate = d; document.getElementById('startDateDisplay').innerHTML = `<span class="selected-date">${tempStartDate}</span>`; } }
-        function setEndDate() { const d = prompt("End date (dd/mm/yyyy) optional"); if(d && d.match(/^\d{2}\/\d{2}\/\d{4}$/)) { tempEndDate = d; document.getElementById('endDateDisplay').innerHTML = `<span class="selected-date">${tempEndDate}</span>`; } }
-        function applyDateRange() { if(!tempStartDate) { showToast("Start date required",true); return; } customStartDate=tempStartDate; customEndDate=tempEndDate||''; currentDateFilter='custom'; closeDatePicker(); renderOrdersTables(); showToast(`Custom range: ${customStartDate} ${customEndDate ? '→ '+customEndDate : ''}`); }
-        function clearDateRange() { customStartDate=''; customEndDate=''; tempStartDate=''; tempEndDate=''; currentDateFilter='all'; renderOrdersTables(); showToast("Date filter cleared"); }
-        function goToAddProduct() { window.location.href = 'admin-add-product.html'; }
-        function openReturnManagement() { window.location.href = 'return.html'; }
-        
-        function renderDashboard() {
-            document.getElementById('app').innerHTML = `
-                <div class="header"><div class="logo"><h1>VEDANTA ADMIN | CUSTOM + REGULAR</h1></div><div class="header-buttons"><button class="return-manage-btn" id="returnManageBtn"><i class="fas fa-undo-alt"></i> Returns</button><button class="logout-btn" id="logoutBtn">Logout</button></div></div>
-                <div class="stats-grid">${['totalProducts','totalOrders','totalRevenue','totalCustomers','regularRevenue','customRevenue'].map(id => `<div class="stat-card"><i class="${id==='regularRevenue'?'fas fa-store':id==='customRevenue'?'fas fa-paintbrush':id==='totalProducts'?'fas fa-box':id==='totalOrders'?'fas fa-shopping-cart':id==='totalRevenue'?'fas fa-rupee-sign':'fas fa-users'}"></i><div class="stat-number" id="${id}">0</div><div class="stat-label">${id==='regularRevenue'?'Regular Revenue':id==='customRevenue'?'Custom Revenue':id==='totalProducts'?'Products':id==='totalOrders'?'Total Orders':id==='totalRevenue'?'Total Revenue':'Customers'}</div></div>`).join('')}</div>
-                <div class="tabs"><button class="tab-btn active" data-tab="products">📦 Products</button><button class="tab-btn" data-tab="orders">📋 Orders</button></div>
-                <div class="tab-content active" id="productsTab"><div class="add-product-header"><h3>All Products</h3><button class="add-product-link" id="addProductBtn">+ Add New Product</button></div><div class="products-list" id="productsList"></div></div>
-                <div class="tab-content" id="ordersTab"><div class="order-filters"><div class="filter-group"><span>📅 Date:</span><button onclick="applyDateFilter('all')">All</button><button onclick="applyDateFilter('today')">Today</button><button onclick="applyDateFilter('week')">Week</button><button onclick="applyDateFilter('month')">Month</button><div class="date-range-box" onclick="openDatePicker()"><i class="fas fa-calendar-alt"></i><span class="date-range-text">Custom range</span></div><button onclick="clearDateRange()">Clear</button></div><div class="filter-group"><span>Status:</span><button onclick="applyStatusFilter('all')">All</button><button onclick="applyStatusFilter('confirmed')">Confirmed</button><button onclick="applyStatusFilter('processing')">Processing</button><button onclick="applyStatusFilter('shipped')">Shipped</button><button onclick="applyStatusFilter('delivered')">Delivered</button><button onclick="applyStatusFilter('cancelled')">Cancelled</button></div></div>
-                    <div class="section-title"><i class="fas fa-box-open"></i> Regular Orders</div><div class="orders-table"><table><thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Amount</th><th>Status</th><th>Update</th><th>Actions</th></tr></thead><tbody id="regularOrdersList"></tbody></table></div>
-                    <div class="section-title"><i class="fas fa-paintbrush"></i> Custom T-Shirt / Design Orders (Front + Back Designs)</div><div class="orders-table"><table><thead><tr><th>Order ID</th><th>Date</th><th>Customer</th><th>Amount</th><th>Status</th><th>Update</th><th>Actions</th></tr></thead><tbody id="customOrdersList"></tbody></table></div>
+                
+                <div class="tool-group print-method-group">
+                    <label>🖨️ Design Print Method</label>
+                    <div id="printMethodContainer">
+                        <div class="print-option" data-method="transparent">
+                            <input type="radio" name="printMethod" id="printTransparent" value="transparent">
+                            <label for="printTransparent">✨ Transparent Print (No Background)</label>
+                        </div>
+                        <div class="print-option" data-method="fullbg">
+                            <input type="radio" name="printMethod" id="printFullBg" value="fullbg">
+                            <label for="printFullBg">🖼️ Print with Background</label>
+                        </div>
+                    </div>
+                    <div class="hint">Select how your uploaded design should be printed.</div>
                 </div>
-                <div id="orderModal" class="order-modal"><div class="order-modal-content"><div class="order-modal-header"><h3>📄 Order Details</h3><button class="close-order-modal" onclick="closeOrderModal()">&times;</button></div><div id="orderDetailContent"></div></div></div>
-                <div id="datepickerModal" class="datepicker-modal"><div class="datepicker-content"><h3>Custom Range</h3><div class="datepicker-input-group"><label>Start Date</label><div class="clickable-date-input" onclick="setStartDate()"><span id="startDateDisplay"><span class="placeholder-text">dd/mm/yyyy</span></span><i class="fas fa-calendar"></i></div></div><div class="datepicker-input-group"><label>End Date</label><div class="clickable-date-input" onclick="setEndDate()"><span id="endDateDisplay"><span class="placeholder-text">dd/mm/yyyy</span></span><i class="fas fa-calendar"></i></div></div><div class="datepicker-buttons"><button class="datepicker-cancel" onclick="closeDatePicker()">Cancel</button><button class="datepicker-apply" onclick="applyDateRange()">Apply</button></div></div></div>
-            `;
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.addEventListener('click', () => {
-                document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
-                btn.classList.add('active');
-                document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));
-                document.getElementById(`${btn.dataset.tab}Tab`).classList.add('active');
-                if(btn.dataset.tab === 'orders') renderOrdersTables();
-            }));
-            document.getElementById('addProductBtn')?.addEventListener('click', goToAddProduct);
-            document.getElementById('logoutBtn')?.addEventListener('click', () => { localStorage.removeItem('adminLoggedIn'); isLoggedIn=false; renderLoginPage(); });
-            document.getElementById('returnManageBtn')?.addEventListener('click', openReturnManagement);
-            loadProducts(); loadOrders();
+            </div>
+        </div>
+        
+        <div class="editor-panel">
+            <div class="side-switcher">
+                <button class="side-btn active" id="frontSideBtn">
+                    <i class="fas fa-tshirt"></i> Front
+                </button>
+                <button class="side-btn" id="backSideBtn">
+                    <i class="fas fa-undo-alt"></i> Back
+                </button>
+            </div>
+            
+            <div class="canvas-container">
+                <canvas id="tshirtCanvas" width="550" height="600"></canvas>
+            </div>
+            
+            <div class="color-selector-section">
+                <div class="color-selector-title">
+                    <i class="fas fa-palette"></i> Choose T-Shirt Color
+                </div>
+                <div class="color-options" id="colorOptionsContainer">
+                </div>
+            </div>
+            
+            <div style="margin-top: 15px; display: flex; gap: 10px; justify-content: center;">
+                <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> 📸 Save Both Sides</button>
+            </div>
+            <p class="instruction-text">
+                <i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit
+            </p>
+            <p class="instruction-text" style="color: #D4AF37;">
+                <i class="fas fa-info-circle"></i> Switch between Front/Back to design both sides!
+            </p>
+        </div>
+        
+        <div class="order-panel">
+            <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
+            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
+            <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
+            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
+            <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
+            <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
+            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+            <div class="action-buttons">
+                <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD TO CART</button>
+                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+        <i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:24px;"></i>
+    </div>
+    <div id="cartItemsList" class="cart-items">
+        <div style="text-align:center; padding:20px;">Your cart is empty</div>
+    </div>
+    <div class="cart-total">
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+            <span>Subtotal:</span>
+            <span id="cartSubtotal">₹0</span>
+        </div>
+        <button id="cartCheckoutBtn" class="checkout-btn">Proceed to Checkout</button>
+    </div>
+</div>
+
+<div class="toast" id="toastMsg"></div>
+<div class="modal" id="loginModal">
+    <div class="modal-content">
+        <span class="close-modal" id="closeModalBtn">&times;</span>
+        <h3 style="color:#D4AF37;">Login to Continue</h3>
+        <input type="tel" id="loginPhone" placeholder="+91 9876543210">
+        <button id="sendOtpBtn">Send OTP</button>
+        <div id="otpSection" style="display:none; margin-top:15px;">
+            <input type="text" id="otpInput" placeholder="Enter OTP">
+            <button id="verifyOtpBtn">Verify</button>
+        </div>
+        <p style="font-size:11px; color:#888; margin-top:12px;">Demo OTP: 123456</p>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = {
+        apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+        authDomain: "nexi-53897.firebaseapp.com",
+        projectId: "nexi-53897",
+        storageBucket: "nexi-53897.firebasestorage.app",
+        messagingSenderId: "337349382612",
+        appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    const storage = firebase.storage();
+    const storageRef = storage.ref();
+    const auth = firebase.auth();
+
+    const IMAGE_PATH = "";
+    
+    const tshirtStyles = [
+        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg',
+          colors: ['white', 'warm grey', 'cream', 'black'] },
+        { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg',
+          colors: ['white', 'grey', 'cream', 'blue', 'black'] },
+        { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg',
+          colors: ['white', 'grey', 'blue', 'black'] },
+        { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg',
+          colors: ['white', 'warm grey', 'cream', 'black'] },
+        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg',
+          colors: ['green', 'black'] },
+        { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg',
+          colors: ['olive green', 'dark brown', 'blue', 'black'] }
+    ];
+    
+    let currentStyle = tshirtStyles[0];
+    let currentSize = null;
+    let currentPrintMethod = null;
+    let fabricCanvas = null;
+    let pendingBuyAfterLogin = false;
+    let imageCache = {};
+    let glowActive = false;
+    let roundedActive = false;
+    let borderActive = false;
+    let cart = [];
+    
+    // ========== FRONT AND BACK DESIGNS STORED SEPARATELY ==========
+    let currentSide = 'front';  // 'front' or 'back'
+    let frontDesignJSON = null;   // Only front design
+    let backDesignJSON = null;    // Only back design
+    let frontDesignImageURL = null;
+    let backDesignImageURL = null;
+    
+    let selectedColor = 'white';
+    let selectedColorDisplay = 'White';
+
+    console.log("🎨 Customize page opened - Front and Back designs are completely separate");
+
+    function showSaveLoading(show, message = "Saving Your Design...") {
+        const overlay = document.getElementById('saveLoadingOverlay');
+        const textEl = overlay.querySelector('.save-loading-text');
+        if (message) textEl.innerText = message;
+        if (show) {
+            overlay.classList.add('show');
+        } else {
+            overlay.classList.remove('show');
+        }
+    }
+
+    function loadImageAsDataURL(src, callback) {
+        if (imageCache[src]) { callback(imageCache[src]); return; }
+        const img = new Image();
+        img.crossOrigin = "Anonymous";
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            canvas.width = img.width; canvas.height = img.height;
+            canvas.getContext('2d').drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL('image/jpeg');
+            imageCache[src] = dataURL;
+            callback(dataURL);
+        };
+        img.onerror = function() { 
+            console.warn(`❌ 404: ${src}`);
+            callback(null); 
+        };
+        img.src = src;
+    }
+
+    // Load ONLY background image (t-shirt mockup) - preserves current designs
+    function loadBackgroundOnly(productName, colorName, side, preserveDesign = true) {
+        if (!fabricCanvas) return;
+        
+        const productLower = productName.toLowerCase().trim();
+        const colorLower = colorName.toLowerCase().trim();
+        
+        let imageName;
+        if (productLower === 'sweatshirt') {
+            if (side === 'front') {
+                imageName = `sweatshirt ${colorLower} color frunt t shirt.jpeg`;
+            } else {
+                imageName = colorLower === 'white' ? `sweatshirt white color back tt shirt.jpeg` : `sweatshirt ${colorLower} color back t shirt.jpeg`;
+            }
+        }
+        else if (productLower === 'regular fit') {
+            if (side === 'front') {
+                imageName = colorLower === 'blue' ? `regular fit bllue color frunt t shirt.jpg` : `regular fit ${colorLower} color frunt t shirt.jpg`;
+            } else {
+                if (colorLower === 'cream') imageName = `regular fit cream color back t shirt.jpg`;
+                else if (colorLower === 'blue') imageName = `regular fit blue color back t shirt.jpg`;
+                else imageName = `regular fit ${colorLower} color back t shirt.jpg`;
+            }
+        }
+        else if (productLower === 'polo') {
+            imageName = side === 'front' ? `polo ${colorLower} color frunt t shirt.jpeg` : `polo ${colorLower} color back t shirt.jpeg`;
+        }
+        else if (productLower === 'oversized') {
+            if (side === 'front') {
+                if (colorLower === 'warm grey') imageName = `oversized warm grey color frunt t shir.jpg`;
+                else if (colorLower === 'black') imageName = `oversized black color frunt t shirt.jpg`;
+                else imageName = `oversized ${colorLower} color frunt t shirt.jpg`;
+            } else {
+                if (colorLower === 'warm grey') imageName = `oversized warm grey color back t shirt.jpg`;
+                else if (colorLower === 'black') imageName = `oversized black color back t shirt.jpg`;
+                else imageName = `oversized ${colorLower} color back t shirt.jpg`;
+            }
+        }
+        else if (productLower === 'acid wash') {
+            imageName = side === 'front' ? `acid wash ${colorLower} color frunt t shirt.jpeg` : `acid wash ${colorLower} color back t shirt.jpeg`;
+        }
+        else if (productLower === 'hoodie') {
+            if (side === 'front') {
+                imageName = colorLower === 'dark brown' ? `hoodie dark brown color frunt t shirt.jpg` : `hoodie ${colorLower} color frunt t shirt.jpg`;
+            } else {
+                imageName = colorLower === 'dark brown' ? `hoodie dark brown color back t shirt.jpg` : `hoodie ${colorLower} color back t shirt.jpg`;
+            }
+        }
+        else {
+            imageName = side === 'front' ? `${productLower} ${colorLower} color frunt t shirt.jpeg` : `${productLower} ${colorLower} color back t shirt.jpeg`;
         }
         
-        function renderLoginPage() {
-            document.getElementById('app').innerHTML = `<div class="login-container"><div class="login-card"><h2>VEDANTA ADMIN</h2><p>Login</p><div class="input-group"><label>Username</label><input type="text" id="adminUsername"></div><div class="input-group"><label>Password</label><input type="password" id="adminPassword"></div><button class="login-btn" id="loginBtn">Login</button><div id="errorMsg" style="color:#F44336;text-align:center;display:none;margin-top:15px;">Invalid credentials</div></div></div>`;
-            document.getElementById('loginBtn').addEventListener('click', () => {
-                const u = document.getElementById('adminUsername').value.trim();
-                const p = document.getElementById('adminPassword').value.trim();
-                if(u===ADMIN_USERNAME && p===ADMIN_PASSWORD) { localStorage.setItem('adminLoggedIn','true'); showToast("Welcome Admin!"); renderDashboard(); }
-                else { document.getElementById('errorMsg').style.display='block'; setTimeout(()=>document.getElementById('errorMsg').style.display='none',2000); }
+        imageName = imageName.replace(/\s+/g, ' ').trim();
+        const imagePath = IMAGE_PATH + imageName;
+        
+        // Get current design objects to restore
+        let currentObjects = [];
+        if (preserveDesign) {
+            currentObjects = fabricCanvas.getObjects();
+        }
+        
+        loadImageAsDataURL(imagePath, function(dataURL) {
+            if (dataURL) {
+                fabric.Image.fromURL(dataURL, function(img) {
+                    const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
+                    fabricCanvas.setBackgroundImage(img, function() {
+                        if (preserveDesign && currentObjects.length > 0) {
+                            currentObjects.forEach(obj => fabricCanvas.add(obj));
+                            fabricCanvas.renderAll();
+                        } else {
+                            fabricCanvas.renderAll();
+                        }
+                    }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
+                });
+            } else {
+                fabricCanvas.setBackgroundColor('#1a1a2e', function() {
+                    if (preserveDesign && currentObjects.length > 0) {
+                        currentObjects.forEach(obj => fabricCanvas.add(obj));
+                        fabricCanvas.renderAll();
+                    }
+                });
+            }
+        });
+    }
+
+    // ========== SWITCH TO FRONT - Loads ONLY front design ==========
+    function switchToFront() {
+        if (currentSide === 'front') return;
+        
+        console.log("🔄 Switched to Front view");
+        
+        // Save current back design before leaving
+        backDesignJSON = fabricCanvas.toJSON();
+        
+        currentSide = 'front';
+        document.getElementById('frontSideBtn').classList.add('active');
+        document.getElementById('backSideBtn').classList.remove('active');
+        
+        // Load front design (if exists)
+        if (frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0) {
+            fabricCanvas.loadFromJSON(frontDesignJSON, () => {
+                loadBackgroundOnly(currentStyle.name, selectedColor, 'front', false);
+                console.log("✅ Front design restored with", frontDesignJSON.objects.length, "elements");
             });
+        } else {
+            // Clear canvas and load only background
+            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+            loadBackgroundOnly(currentStyle.name, selectedColor, 'front', false);
+            console.log("🆕 Front view - no saved design");
+        }
+        updateSummaryElements();
+    }
+    
+    // ========== SWITCH TO BACK - Loads ONLY back design ==========
+    function switchToBack() {
+        if (currentSide === 'back') return;
+        
+        console.log("🔄 Switched to Back view");
+        
+        // Save current front design before leaving
+        frontDesignJSON = fabricCanvas.toJSON();
+        
+        currentSide = 'back';
+        document.getElementById('frontSideBtn').classList.remove('active');
+        document.getElementById('backSideBtn').classList.add('active');
+        
+        // Load back design (if exists)
+        if (backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0) {
+            fabricCanvas.loadFromJSON(backDesignJSON, () => {
+                loadBackgroundOnly(currentStyle.name, selectedColor, 'back', false);
+                console.log("✅ Back design restored with", backDesignJSON.objects.length, "elements");
+            });
+        } else {
+            // Clear canvas and load only background
+            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+            loadBackgroundOnly(currentStyle.name, selectedColor, 'back', false);
+            console.log("🆕 Back view - no saved design");
+        }
+        updateSummaryElements();
+    }
+
+    // ========== CHANGE COLOR - Preserves current design ==========
+    function changeTShirtColor(color) {
+        console.log(`🎨 Changing color from ${selectedColor} to ${color}`);
+        
+        // Save current design before changing color
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
         }
         
-        window.updateOrderStatus = updateOrderStatus;
-        window.deleteOrder = deleteOrder;
-        window.viewOrderDetails = viewOrderDetails;
-        window.closeOrderModal = closeOrderModal;
-        window.applyDateFilter = applyDateFilter;
-        window.applyStatusFilter = applyStatusFilter;
-        window.openDatePicker = openDatePicker;
-        window.closeDatePicker = closeDatePicker;
-        window.applyDateRange = applyDateRange;
-        window.clearDateRange = clearDateRange;
-        window.setStartDate = setStartDate;
-        window.setEndDate = setEndDate;
-        window.downloadImageFromUrl = downloadImageFromUrl;
+        selectedColor = color;
+        const colorDisplayMap = {
+            'white': 'White', 'warm grey': 'Warm Grey', 'cream': 'Cream', 'black': 'Black',
+            'grey': 'Grey', 'blue': 'Blue', 'green': 'Green', 'olive green': 'Olive Green',
+            'dark brown': 'Dark Brown'
+        };
+        selectedColorDisplay = colorDisplayMap[color] || color;
         
-        if(isLoggedIn) renderDashboard(); else renderLoginPage();
-        if(typeof db !== 'undefined') {
-            db.collection('orders').onSnapshot(() => { if(isLoggedIn) { loadOrders(); if(document.querySelector('.tab-btn.active')?.dataset.tab === 'orders') renderOrdersTables(); } });
-            db.collection('products').onSnapshot(() => { if(isLoggedIn) loadProducts(); });
+        document.getElementById('summaryColor').innerText = selectedColorDisplay;
+        
+        // Update UI for color options
+        document.querySelectorAll('.color-option').forEach(opt => {
+            opt.classList.remove('active');
+            if (opt.dataset.color === color) opt.classList.add('active');
+        });
+        
+        // Load new background without losing design
+        loadBackgroundOnly(currentStyle.name, selectedColor, currentSide, true);
+        showToast(`✓ Color changed to ${selectedColorDisplay}`);
+    }
+
+    // ========== CHANGE PRODUCT - Preserves both front and back designs ==========
+    function changeProductStyle(selectedStyle) {
+        console.log(`📦 Changing product to: ${selectedStyle.displayName}`);
+        
+        // Save current side design before switching product
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
         }
-    </script>
+        
+        currentStyle = selectedStyle;
+        
+        // Load new product background with current design preserved
+        loadBackgroundOnly(currentStyle.name, selectedColor, currentSide, true);
+        updateSummary();
+        showToast(`✓ ${selectedStyle.displayName} selected!`);
+    }
+
+    // Clear current side only
+    function clearCurrentSide() {
+        fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+        fabricCanvas.renderAll();
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
+        }
+        updateSummaryElements();
+        showToast(`✓ ${currentSide === 'front' ? 'Front' : 'Back'} side cleared`);
+    }
+
+    // Delete selected object
+    function deleteSelected() {
+        const obj = fabricCanvas.getActiveObject();
+        if (obj) {
+            fabricCanvas.remove(obj);
+            fabricCanvas.renderAll();
+            if (currentSide === 'front') {
+                frontDesignJSON = fabricCanvas.toJSON();
+            } else {
+                backDesignJSON = fabricCanvas.toJSON();
+            }
+            updateSummaryElements();
+            showToast('✓ Deleted');
+        } else {
+            showToast('Select element first', true);
+        }
+    }
+
+    // Save designs to Firebase
+    async function saveDesignImageToFirebase(side, designJSON, productName, colorName) {
+        if (!designJSON) return null;
+        try {
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = 550; tempCanvas.height = 600;
+            const tempFabric = new fabric.Canvas(tempCanvas);
+            
+            const productLower = productName.toLowerCase().trim();
+            const colorLower = colorName.toLowerCase().trim();
+            let imageName;
+            if (productLower === 'sweatshirt') {
+                if (side === 'front') {
+                    imageName = `sweatshirt ${colorLower} color frunt t shirt.jpeg`;
+                } else {
+                    imageName = colorLower === 'white' ? `sweatshirt white color back tt shirt.jpeg` : `sweatshirt ${colorLower} color back t shirt.jpeg`;
+                }
+            }
+            else if (productLower === 'regular fit') {
+                if (side === 'front') {
+                    imageName = colorLower === 'blue' ? `regular fit bllue color frunt t shirt.jpg` : `regular fit ${colorLower} color frunt t shirt.jpg`;
+                } else {
+                    if (colorLower === 'cream') imageName = `regular fit cream color back t shirt.jpg`;
+                    else if (colorLower === 'blue') imageName = `regular fit blue color back t shirt.jpg`;
+                    else imageName = `regular fit ${colorLower} color back t shirt.jpg`;
+                }
+            }
+            else if (productLower === 'polo') {
+                imageName = side === 'front' ? `polo ${colorLower} color frunt t shirt.jpeg` : `polo ${colorLower} color back t shirt.jpeg`;
+            }
+            else if (productLower === 'oversized') {
+                if (side === 'front') {
+                    if (colorLower === 'warm grey') imageName = `oversized warm grey color frunt t shir.jpg`;
+                    else if (colorLower === 'black') imageName = `oversized black color frunt t shirt.jpg`;
+                    else imageName = `oversized ${colorLower} color frunt t shirt.jpg`;
+                } else {
+                    if (colorLower === 'warm grey') imageName = `oversized warm grey color back t shirt.jpg`;
+                    else if (colorLower === 'black') imageName = `oversized black color back t shirt.jpg`;
+                    else imageName = `oversized ${colorLower} color back t shirt.jpg`;
+                }
+            }
+            else if (productLower === 'acid wash') {
+                imageName = side === 'front' ? `acid wash ${colorLower} color frunt t shirt.jpeg` : `acid wash ${colorLower} color back t shirt.jpeg`;
+            }
+            else if (productLower === 'hoodie') {
+                if (side === 'front') {
+                    imageName = colorLower === 'dark brown' ? `hoodie dark brown color frunt t shirt.jpg` : `hoodie ${colorLower} color frunt t shirt.jpg`;
+                } else {
+                    imageName = colorLower === 'dark brown' ? `hoodie dark brown color back t shirt.jpg` : `hoodie ${colorLower} color back t shirt.jpg`;
+                }
+            }
+            else {
+                imageName = side === 'front' ? `${productLower} ${colorLower} color frunt t shirt.jpeg` : `${productLower} ${colorLower} color back t shirt.jpeg`;
+            }
+            imageName = imageName.replace(/\s+/g, ' ').trim();
+            
+            await new Promise((resolve) => {
+                loadImageAsDataURL(IMAGE_PATH + imageName, function(dataURL) {
+                    if (dataURL) {
+                        fabric.Image.fromURL(dataURL, function(img) {
+                            const scale = Math.max(tempCanvas.width / img.width, tempCanvas.height / img.height);
+                            tempFabric.setBackgroundImage(img, () => {
+                                tempFabric.loadFromJSON(designJSON, () => {
+                                    tempFabric.renderAll();
+                                    resolve();
+                                });
+                            }, { scaleX: scale, scaleY: scale });
+                        });
+                    } else {
+                        tempFabric.setBackgroundColor('#1a1a2e', () => {
+                            tempFabric.loadFromJSON(designJSON, () => {
+                                tempFabric.renderAll();
+                                resolve();
+                            });
+                        });
+                    }
+                });
+            });
+            
+            const dataURL = tempFabric.toDataURL({ format: 'png', quality: 1, multiplier: 2 });
+            const blob = dataURLToBlob(dataURL);
+            const fileName = `${side}_${productName.replace(/\s/g, '_')}_${colorName}_${Date.now()}.png`;
+            const designRef = storageRef.child(`custom-designs/${side}/${fileName}`);
+            await designRef.put(blob);
+            const downloadURL = await designRef.getDownloadURL();
+            tempFabric.dispose();
+            return downloadURL;
+        } catch (error) {
+            console.error(`Upload error for ${side}:`, error);
+            return null;
+        }
+    }
+    
+    async function saveBothDesigns() {
+        // Save current side before exporting
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
+        }
+        
+        showSaveLoading(true, "Saving front design...");
+        const frontURL = await saveDesignImageToFirebase('front', frontDesignJSON, currentStyle.name, selectedColor);
+        if (frontURL) {
+            frontDesignImageURL = frontURL;
+            document.getElementById('summaryFront').innerHTML = '<i class="fas fa-check-circle"></i> Custom';
+        }
+        
+        showSaveLoading(true, "Saving back design...");
+        const backURL = await saveDesignImageToFirebase('back', backDesignJSON, currentStyle.name, selectedColor);
+        if (backURL) {
+            backDesignImageURL = backURL;
+            document.getElementById('summaryBack').innerHTML = '<i class="fas fa-check-circle"></i> Custom';
+        }
+        
+        showSaveLoading(false);
+        if (frontURL && backURL) {
+            showToast("✅ Both front and back designs saved successfully!");
+        }
+        return { frontURL, backURL };
+    }
+    
+    function dataURLToBlob(dataURL) {
+        const arr = dataURL.split(',');
+        const mime = arr[0].match(/:(.*?);/)[1];
+        const bstr = atob(arr[1]);
+        let n = bstr.length;
+        const u8arr = new Uint8Array(n);
+        while (n--) u8arr[n] = bstr.charCodeAt(n);
+        return new Blob([u8arr], { type: mime });
+    }
+
+    // Add text to current canvas
+    function addText() {
+        const textValue = document.getElementById('textInput').value;
+        if (!textValue.trim()) { showToast('Enter text first', true); return; }
+        const text = new fabric.IText(textValue, {
+            left: fabricCanvas.width / 2, top: fabricCanvas.height / 2,
+            fontFamily: document.getElementById('fontSelect').value,
+            fill: '#D4AF37', fontSize: 36,
+            originX: 'center', originY: 'center'
+        });
+        fabricCanvas.add(text);
+        fabricCanvas.setActiveObject(text);
+        fabricCanvas.renderAll();
+        // Save to current side's JSON
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
+        }
+        updateSummaryElements();
+        showToast('✓ Text added to ' + (currentSide === 'front' ? 'Front' : 'Back') + '!');
+    }
+
+    // Add image to current canvas
+    function addImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            fabric.Image.fromURL(e.target.result, (img) => {
+                img.scaleToWidth(200);
+                img.set({ left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center' });
+                fabricCanvas.add(img);
+                fabricCanvas.setActiveObject(img);
+                fabricCanvas.renderAll();
+                if (currentSide === 'front') {
+                    frontDesignJSON = fabricCanvas.toJSON();
+                } else {
+                    backDesignJSON = fabricCanvas.toJSON();
+                }
+                updateSummaryElements();
+                showToast('✓ Image added to ' + (currentSide === 'front' ? 'Front' : 'Back') + '!');
+            });
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // Rest of the functions...
+    function renderColorSelector() {
+        const container = document.getElementById('colorOptionsContainer');
+        const colors = currentStyle.colors;
+        
+        const colorDisplayMap = {
+            'white': 'White', 'warm grey': 'Warm Grey', 'cream': 'Cream', 'black': 'Black',
+            'grey': 'Grey', 'blue': 'Blue', 'green': 'Green', 'olive green': 'Olive Green',
+            'dark brown': 'Dark Brown'
+        };
+        
+        const colorCodeMap = {
+            'white': '#f5f5f5', 'warm grey': '#a9a9a9', 'cream': '#fffdd0', 'black': '#1a1a1a',
+            'grey': '#808080', 'blue': '#1e3a5f', 'green': '#4a5d23', 'olive green': '#556b2f',
+            'dark brown': '#5c4033'
+        };
+        
+        container.innerHTML = colors.map(color => `
+            <div class="color-option ${selectedColor === color ? 'active' : ''}" data-color="${color}">
+                <div class="color-swatch-circle" style="background: ${colorCodeMap[color] || '#808080'};"></div>
+                <span class="color-option-name">${colorDisplayMap[color] || color}</span>
+            </div>
+        `).join('');
+        
+        document.querySelectorAll('.color-option').forEach(option => {
+            option.addEventListener('click', () => {
+                const color = option.dataset.color;
+                changeTShirtColor(color);
+            });
+        });
+    }
+
+    function renderStyles() {
+        const grid = document.getElementById('styleGrid');
+        grid.innerHTML = tshirtStyles.map(style => `
+            <div class="style-card ${style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
+                <img class="style-img" src="${IMAGE_PATH}${style.previewImg}" alt="${style.displayName}" 
+                     onerror="this.src='https://placehold.co/300x300/1a1a2e/D4AF37?text=${encodeURIComponent(style.displayName)}'">
+                <div class="style-name">${style.displayName}</div>
+                <div class="style-price"><i class="fas fa-rupee-sign"></i> ${style.price}</div>
+            </div>
+        `).join('');
+        document.querySelectorAll('.style-card').forEach(card => {
+            card.addEventListener('click', () => {
+                const id = card.dataset.id;
+                const selectedStyle = tshirtStyles.find(s => s.id === id);
+                if (selectedStyle) {
+                    changeProductStyle(selectedStyle);
+                }
+            });
+        });
+    }
+
+    function generateColorPalette() {
+        return ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D'];
+    }
+    
+    function renderColorPalette() {
+        const palette = generateColorPalette();
+        const container = document.getElementById('colorPalette');
+        container.innerHTML = '';
+        palette.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.addEventListener('click', () => { applyTextColor(color); document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); swatch.classList.add('active'); });
+            container.appendChild(swatch);
+        });
+    }
+
+    function applyTextColor(color) {
+        const active = fabricCanvas.getActiveObject();
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('fill', color);
+            fabricCanvas.renderAll();
+            if (currentSide === 'front') {
+                frontDesignJSON = fabricCanvas.toJSON();
+            } else {
+                backDesignJSON = fabricCanvas.toJSON();
+            }
+            showToast('✓ Color applied!');
+        } else showToast('⚠️ Select a text first', true);
+    }
+
+    function initCanvas() {
+        fabricCanvas = new fabric.Canvas('tshirtCanvas');
+        fabricCanvas.setWidth(550); fabricCanvas.setHeight(600);
+        fabricCanvas.selection = true;
+        fabricCanvas.on('object:modified', () => {
+            if (currentSide === 'front') {
+                frontDesignJSON = fabricCanvas.toJSON();
+            } else {
+                backDesignJSON = fabricCanvas.toJSON();
+            }
+            updateSummaryElements();
+        });
+        fabricCanvas.on('object:added', () => {
+            if (currentSide === 'front') {
+                frontDesignJSON = fabricCanvas.toJSON();
+            } else {
+                backDesignJSON = fabricCanvas.toJSON();
+            }
+            updateSummaryElements();
+        });
+        fabricCanvas.on('object:removed', () => {
+            if (currentSide === 'front') {
+                frontDesignJSON = fabricCanvas.toJSON();
+            } else {
+                backDesignJSON = fabricCanvas.toJSON();
+            }
+            updateSummaryElements();
+        });
+        fabricCanvas.on('selection:created', (e) => { if(e.selected?.[0]) loadEffectState(e.selected[0]); });
+        fabricCanvas.on('selection:updated', (e) => { if(e.selected?.[0]) loadEffectState(e.selected[0]); });
+        loadBackgroundOnly(currentStyle.name, selectedColor, currentSide, false);
+    }
+    
+    function loadEffectState(obj) {
+        if(obj.type !== 'i-text' && obj.type !== 'text') return;
+        glowActive = !!obj.shadow;
+        roundedActive = (obj.radius !== undefined && obj.radius > 0);
+        borderActive = (obj.stroke && obj.stroke !== 'transparent');
+        updateEffectButtonsUI();
+        if(glowActive && obj.shadow) {
+            document.getElementById('glowSizeSlider').value = obj.shadow.blur || 5;
+            document.getElementById('glowSizeValue').innerText = (obj.shadow.blur || 5) + 'px';
+            document.getElementById('glowColorPicker').value = obj.shadow.color || '#D4AF37';
+        }
+        document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none';
+    }
+    
+    function updateEffectButtonsUI() {
+        const glowBtn = document.getElementById('glowBtn');
+        const roundedBtn = document.getElementById('roundedBtn');
+        const borderBtn = document.getElementById('borderBtn');
+        if(glowActive) glowBtn.classList.add('active'); else glowBtn.classList.remove('active');
+        if(roundedActive) roundedBtn.classList.add('active'); else roundedBtn.classList.remove('active');
+        if(borderActive) borderBtn.classList.add('active'); else borderBtn.classList.remove('active');
+    }
+    
+    function applyGlow() {
+        const active = fabricCanvas.getActiveObject();
+        if(!active || (active.type !== 'i-text' && active.type !== 'text')) { showToast('Select a text first', true); return; }
+        glowActive = !glowActive;
+        if(glowActive) active.set('shadow', `${document.getElementById('glowColorPicker').value} 0px 0px ${document.getElementById('glowSizeSlider').value}px`);
+        else active.set('shadow', null);
+        fabricCanvas.renderAll();
+        document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none';
+        showToast(glowActive ? '✓ Glow enabled' : '✓ Glow disabled');
+    }
+    
+    function applyRounded() {
+        const active = fabricCanvas.getActiveObject();
+        if(!active || (active.type !== 'i-text' && active.type !== 'text')) { showToast('Select a text first', true); return; }
+        roundedActive = !roundedActive;
+        if(roundedActive) { active.set('radius', 50); active.set('rx', 50); active.set('ry', 50); }
+        else { active.set('radius', 0); active.set('rx', 0); active.set('ry', 0); }
+        fabricCanvas.renderAll();
+        showToast(roundedActive ? '✓ Rounded style applied' : '✓ Rounded style removed');
+    }
+    
+    function applyBorderToggle() {
+        const active = fabricCanvas.getActiveObject();
+        if(!active || (active.type !== 'i-text' && active.type !== 'text')) { showToast('Select a text first', true); return; }
+        borderActive = !borderActive;
+        if(borderActive) { active.set('stroke', '#D4AF37'); active.set('strokeWidth', 2); }
+        else { active.set('stroke', null); active.set('strokeWidth', 0); }
+        fabricCanvas.renderAll();
+        showToast(borderActive ? '✓ Border enabled' : '✓ Border disabled');
+    }
+    
+    function updateGlowFromSliders() {
+        const active = fabricCanvas.getActiveObject();
+        if(!glowActive || !active) return;
+        const size = document.getElementById('glowSizeSlider').value;
+        const color = document.getElementById('glowColorPicker').value;
+        document.getElementById('glowSizeValue').innerText = size + 'px';
+        if(active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('shadow', `${color} 0px 0px ${size}px`);
+            fabricCanvas.renderAll();
+        }
+    }
+    
+    function updateSelectedText() {
+        const active = fabricCanvas.getActiveObject();
+        if (!active || (active.type !== 'i-text' && active.type !== 'text')) return;
+        active.set('fontFamily', document.getElementById('fontSelect').value);
+        active.set('fontSize', parseInt(document.getElementById('fontSizeSlider').value));
+        fabricCanvas.renderAll();
+        if (currentSide === 'front') {
+            frontDesignJSON = fabricCanvas.toJSON();
+        } else {
+            backDesignJSON = fabricCanvas.toJSON();
+        }
+    }
+    
+    function flipHorizontal() {
+        const active = fabricCanvas.getActiveObject();
+        if (active) { active.set('flipX', !active.flipX); fabricCanvas.renderAll(); showToast('✓ Flipped Horizontal'); }
+        else showToast('Select element first', true);
+    }
+    
+    function flipVertical() {
+        const active = fabricCanvas.getActiveObject();
+        if (active) { active.set('flipY', !active.flipY); fabricCanvas.renderAll(); showToast('✓ Flipped Vertical'); }
+        else showToast('Select element first', true);
+    }
+    
+    function applyTextStyle(style) {
+        const active = fabricCanvas.getActiveObject();
+        if (active && active.type === 'i-text') {
+            if (style === 'bold') active.set('fontWeight', active.fontWeight === 'bold' ? 'normal' : 'bold');
+            if (style === 'italic') active.set('fontStyle', active.fontStyle === 'italic' ? 'normal' : 'italic');
+            if (style === 'underline') active.set('underline', !active.underline);
+            fabricCanvas.renderAll();
+            if (currentSide === 'front') {
+                frontDesignJSON = fabricCanvas.toJSON();
+            } else {
+                backDesignJSON = fabricCanvas.toJSON();
+            }
+            showToast(`✓ ${style} toggled`);
+        } else showToast('Select text first', true);
+    }
+    
+    function updateSummaryElements() {
+        const hasFront = frontDesignJSON && (frontDesignJSON.objects?.length > 0);
+        const hasBack = backDesignJSON && (backDesignJSON.objects?.length > 0);
+        document.getElementById('summaryFront').innerHTML = hasFront ? '<i class="fas fa-check-circle"></i> Custom' : 'None';
+        document.getElementById('summaryBack').innerHTML = hasBack ? '<i class="fas fa-check-circle"></i> Custom' : 'None';
+    }
+    
+    function updatePrintSummary() {
+        const methodText = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected');
+        document.getElementById('summaryPrintMethod').innerHTML = methodText;
+    }
+    
+    function updateSummary() {
+        document.getElementById('summaryStyle').innerText = currentStyle.displayName;
+        document.getElementById('summaryColor').innerText = selectedColorDisplay;
+        document.getElementById('summarySize').innerText = currentSize || '--';
+        document.getElementById('summaryPrintMethod').innerHTML = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected');
+        document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`;
+        updateSummaryElements();
+    }
+    
+    function showToast(msg, isErr = false) {
+        const t = document.getElementById('toastMsg');
+        t.innerText = msg;
+        t.style.background = isErr ? '#F44336' : '#D4AF37';
+        t.classList.add('show');
+        setTimeout(() => t.classList.remove('show'), 2500);
+    }
+
+    // Cart Functions
+    function loadCart() {
+        const saved = localStorage.getItem('vedanta_custom_cart');
+        if (saved) { try { cart = JSON.parse(saved); updateCartUI(); updateCartCount(); } catch(e) { cart = []; } }
+    }
+    function saveCart() { localStorage.setItem('vedanta_custom_cart', JSON.stringify(cart)); updateCartCount(); updateCartUI(); }
+    function updateCartCount() { document.getElementById('cartCount').innerText = cart.reduce((sum, item) => sum + item.quantity, 0); }
+    
+    function updateCartUI() {
+        const container = document.getElementById('cartItemsList');
+        if (!container) return;
+        if (cart.length === 0) { container.innerHTML = '<div style="text-align:center; padding:20px;">Your cart is empty</div>'; document.getElementById('cartSubtotal').innerText = '₹0'; return; }
+        let subtotal = 0;
+        container.innerHTML = '';
+        cart.forEach((item, index) => {
+            subtotal += item.price * item.quantity;
+            container.innerHTML += `
+                <div class="cart-item">
+                    <div class="cart-item-img">${item.frontDesignImage ? `<img src="${item.frontDesignImage}">` : '<i class="fas fa-tshirt"></i>'}</div>
+                    <div class="cart-item-details">
+                        <div class="cart-item-name">${item.styleName} ✨ Custom</div>
+                        <div class="cart-item-price">₹${item.price}</div>
+                        <div class="cart-item-variant">${item.size || 'M'} | ${item.selectedColor || 'White'}</div>
+                        <div class="cart-qty-control">
+                            <button class="cart-qty-dec" data-index="${index}">-</button><span>${item.quantity}</span>
+                            <button class="cart-qty-inc" data-index="${index}">+</button>
+                            <button class="cart-item-remove" data-index="${index}">Remove</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        });
+        document.getElementById('cartSubtotal').innerHTML = `₹${subtotal}`;
+        
+        document.querySelectorAll('.cart-qty-dec').forEach(btn => btn.onclick = () => { let i=parseInt(btn.dataset.index); if(cart[i].quantity>1) cart[i].quantity--; else cart.splice(i,1); saveCart(); updateCartUI(); showToast('Cart updated'); });
+        document.querySelectorAll('.cart-qty-inc').forEach(btn => btn.onclick = () => { let i=parseInt(btn.dataset.index); cart[i].quantity++; saveCart(); updateCartUI(); showToast('Quantity increased'); });
+        document.querySelectorAll('.cart-item-remove').forEach(btn => btn.onclick = () => { cart.splice(parseInt(btn.dataset.index),1); saveCart(); updateCartUI(); showToast('Item removed'); });
+    }
+
+    async function addCurrentDesignToCart() {
+        if (!currentSize) { showToast('Please select Size first', true); return false; }
+        if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
+        else backDesignJSON = fabricCanvas.toJSON();
+        
+        showSaveLoading(true, "Saving designs to cart...");
+        const { frontURL, backURL } = await saveBothDesigns();
+        if (!frontURL || !backURL) { showSaveLoading(false); showToast('Failed to save designs', true); return false; }
+        
+        cart.push({
+            id: Date.now(), styleId: currentStyle.id, styleName: currentStyle.displayName,
+            price: currentStyle.price, frontDesignImage: frontURL, backDesignImage: backURL,
+            frontDesignJSON: frontDesignJSON, backDesignJSON: backDesignJSON,
+            isCustomized: true, size: currentSize,
+            printMethod: currentPrintMethod || 'transparent', selectedColor: selectedColorDisplay,
+            selectedColorKey: selectedColor, quantity: 1
+        });
+        saveCart();
+        showSaveLoading(false);
+        showToast('✓ Both designs added to cart!');
+        return true;
+    }
+
+    async function handleSaveImage() {
+        if ((!frontDesignJSON && fabricCanvas.getObjects().length === 0 && currentSide === 'front') ||
+            (!backDesignJSON && fabricCanvas.getObjects().length === 0 && currentSide === 'back')) {
+            showToast('Please add some design first', true);
+            return;
+        }
+        await saveBothDesigns();
+    }
+
+    async function checkUserHasSavedAddress() {
+        try {
+            const user = auth.currentUser;
+            const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
+            const currentUserId = user?.uid || storedUser?.uid;
+            if (!currentUserId) return false;
+            const addressesSnapshot = await db.collection('addresses').where('userId', '==', currentUserId).limit(1).get();
+            return !addressesSnapshot.empty;
+        } catch (error) { return false; }
+    }
+
+    async function buyNow() {
+        const user = auth.currentUser;
+        const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        const currentUser = user || storedUser;
+        if (!currentUser) { pendingBuyAfterLogin = true; openLoginModal(); showToast('Please login first', false); return; }
+        if(!currentSize) { showToast('Please select Size first', true); return; }
+        
+        if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
+        else backDesignJSON = fabricCanvas.toJSON();
+        
+        showSaveLoading(true, "Preparing your order...");
+        const { frontURL, backURL } = await saveBothDesigns();
+        if (!frontURL || !backURL) { showSaveLoading(false); showToast('Failed to save designs', true); return; }
+        
+        localStorage.setItem('customCheckoutData', JSON.stringify({
+            isCustomized: true, frontDesignImage: frontURL, backDesignImage: backURL,
+            tshirtType: currentStyle.displayName, selectedColor: selectedColorDisplay,
+            selectedColorKey: selectedColor, size: currentSize,
+            printMethod: currentPrintMethod || 'transparent',
+            quantity: 1, price: currentStyle.price
+        }));
+        
+        const hasAddress = await checkUserHasSavedAddress();
+        showSaveLoading(false);
+        if (hasAddress) window.location.href = 'secure-checkout2.html';
+        else window.location.href = 'secure-checkout.html';
+    }
+
+    // Event Listeners
+    document.querySelectorAll('.print-option input').forEach(radio => {
+        radio.addEventListener('change', (e) => { if (e.target.checked) { currentPrintMethod = e.target.value; updatePrintSummary(); } });
+    });
+    
+    document.getElementById('sizeSelect')?.addEventListener('change', (e) => { currentSize = e.target.value; updateSummary(); });
+    
+    document.getElementById('glowBtn')?.addEventListener('click', applyGlow);
+    document.getElementById('roundedBtn')?.addEventListener('click', applyRounded);
+    document.getElementById('borderBtn')?.addEventListener('click', applyBorderToggle);
+    document.getElementById('glowSizeSlider')?.addEventListener('input', updateGlowFromSliders);
+    document.getElementById('glowColorPicker')?.addEventListener('input', updateGlowFromSliders);
+    document.getElementById('addTextBtn')?.addEventListener('click', addText);
+    document.getElementById('flipHorizontalBtn')?.addEventListener('click', flipHorizontal);
+    document.getElementById('flipVerticalBtn')?.addEventListener('click', flipVertical);
+    document.getElementById('boldBtn')?.addEventListener('click', () => applyTextStyle('bold'));
+    document.getElementById('italicBtn')?.addEventListener('click', () => applyTextStyle('italic'));
+    document.getElementById('underlineBtn')?.addEventListener('click', () => applyTextStyle('underline'));
+    document.getElementById('deleteBtn')?.addEventListener('click', deleteSelected);
+    document.getElementById('clearBtn')?.addEventListener('click', clearCurrentSide);
+    
+    document.getElementById('saveImageBtn')?.addEventListener('click', handleSaveImage);
+    document.getElementById('frontSideBtn')?.addEventListener('click', switchToFront);
+    document.getElementById('backSideBtn')?.addEventListener('click', switchToBack);
+    document.getElementById('fontSizeSlider')?.addEventListener('input', (e) => { document.getElementById('fontSizeValue').innerText = e.target.value + 'px'; updateSelectedText(); });
+    document.getElementById('fontSelect')?.addEventListener('change', () => { updateSelectedText(); document.getElementById('fontPreview').style.fontFamily = document.getElementById('fontSelect').value; });
+    document.getElementById('addToCartBtn')?.addEventListener('click', addCurrentDesignToCart);
+    document.getElementById('buyNowBtn')?.addEventListener('click', buyNow);
+    document.getElementById('cartIconBtn')?.addEventListener('click', () => document.getElementById('cartSidebar').classList.add('open'));
+    document.getElementById('closeCartBtn')?.addEventListener('click', () => document.getElementById('cartSidebar').classList.remove('open'));
+    document.getElementById('cartCheckoutBtn')?.addEventListener('click', () => { if (cart.length === 0) showToast('Cart is empty', true); else window.location.href = 'secure-checkout.html'; });
+    
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('imageUpload');
+    uploadArea?.addEventListener('click', () => fileInput.click());
+    fileInput?.addEventListener('change', (e) => { if (e.target.files[0]) addImage(e.target.files[0]); });
+    
+    function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
+    function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); document.getElementById('otpSection').style.display = 'none'; document.getElementById('otpInput').value = ''; }
+    
+    document.getElementById('sendOtpBtn')?.addEventListener('click', () => { const phone = document.getElementById('loginPhone').value; if (phone.length < 10) return; showToast('Demo OTP: 123456'); document.getElementById('otpSection').style.display = 'block'; });
+    document.getElementById('verifyOtpBtn')?.addEventListener('click', async () => {
+        if (document.getElementById('otpInput').value === '123456') {
+            const userId = Date.now().toString();
+            localStorage.setItem('vedantaUser', JSON.stringify({ uid: userId, phone: document.getElementById('loginPhone').value, name: 'Customer' }));
+            closeLoginModal();
+            showToast('✓ Login successful!');
+            if (pendingBuyAfterLogin) { pendingBuyAfterLogin = false; setTimeout(() => buyNow(), 500); }
+        } else showToast('Wrong OTP', true);
+    });
+    document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
+    
+    if (window.location.protocol === 'file:') document.getElementById('corsWarning').style.display = 'block';
+    else document.getElementById('corsWarning').style.display = 'none';
+    
+    initCanvas();
+    renderStyles();
+    renderColorPalette();
+    renderColorSelector();
+    updateSummary();
+    loadCart();
+    
+    frontDesignJSON = null;
+    backDesignJSON = null;
+    
+    console.log("✅ Customize page ready");
+    console.log("✅ Front and Back designs are stored COMPLETELY SEPARATE");
+    console.log("✅ Changing color preserves current design");
+    console.log("✅ Switching sides loads only that side's design");
+</script>
 </body>
 </html>
