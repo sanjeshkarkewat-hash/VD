@@ -431,6 +431,7 @@
             cursor: crosshair;
         }
 
+        /* Loading Overlay for Save Image */
         .save-loading-overlay {
             position: fixed;
             top: 0;
@@ -779,6 +780,7 @@
     </div>
 </div>
 
+<!-- Save Image Loading Overlay -->
 <div class="save-loading-overlay" id="saveLoadingOverlay">
     <div class="save-loading-spinner"></div>
     <div class="save-loading-text">Saving Your Design...</div>
@@ -1064,18 +1066,19 @@
     let borderActive = false;
     let cart = [];
     
-    // ========== FRONT AND BACK DESIGNS STORED SEPARATELY ==========
-    let currentSide = 'front';  // 'front' or 'back'
-    let frontDesignJSON = null;   // Only front design
-    let backDesignJSON = null;    // Only back design
+    // Front/Back Design Storage - ALAG ALAG STORE
+    let currentSide = 'front';
+    let frontDesignJSON = null;
+    let backDesignJSON = null;
     let frontDesignImageURL = null;
     let backDesignImageURL = null;
     
     let selectedColor = 'white';
     let selectedColorDisplay = 'White';
 
-    console.log("🎨 Customize page opened - Front and Back designs are completely separate");
+    console.log("🎨 Customize page opened - Front/Back designs stored separately");
 
+    // Show/Hide Loading Overlay
     function showSaveLoading(show, message = "Saving Your Design...") {
         const overlay = document.getElementById('saveLoadingOverlay');
         const textEl = overlay.querySelector('.save-loading-text');
@@ -1106,8 +1109,8 @@
         img.src = src;
     }
 
-    // Load ONLY background image (t-shirt mockup) - preserves current designs
-    function loadBackgroundOnly(productName, colorName, side, preserveDesign = true) {
+    // Load t-shirt background image without affecting design
+    function loadTshirtBackground(productName, colorName, side, preserveDesign = true) {
         if (!fabricCanvas) return;
         
         const productLower = productName.toLowerCase().trim();
@@ -1191,63 +1194,57 @@
         });
     }
 
-    // ========== SWITCH TO FRONT - Loads ONLY front design ==========
+    // Switch to Front - preserve front design
     function switchToFront() {
         if (currentSide === 'front') return;
         
         console.log("🔄 Switched to Front view");
         
-        // Save current back design before leaving
+        // Save current back design
         backDesignJSON = fabricCanvas.toJSON();
         
         currentSide = 'front';
         document.getElementById('frontSideBtn').classList.add('active');
         document.getElementById('backSideBtn').classList.remove('active');
         
-        // Load front design (if exists)
-        if (frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0) {
+        if (frontDesignJSON) {
             fabricCanvas.loadFromJSON(frontDesignJSON, () => {
-                loadBackgroundOnly(currentStyle.name, selectedColor, 'front', false);
-                console.log("✅ Front design restored with", frontDesignJSON.objects.length, "elements");
+                loadTshirtBackground(currentStyle.name, selectedColor, 'front', false);
+                console.log("✅ Front design restored");
             });
         } else {
-            // Clear canvas and load only background
-            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
-            loadBackgroundOnly(currentStyle.name, selectedColor, 'front', false);
+            loadTshirtBackground(currentStyle.name, selectedColor, 'front', false);
             console.log("🆕 Front view - no saved design");
         }
         updateSummaryElements();
     }
     
-    // ========== SWITCH TO BACK - Loads ONLY back design ==========
+    // Switch to Back - preserve back design
     function switchToBack() {
         if (currentSide === 'back') return;
         
         console.log("🔄 Switched to Back view");
         
-        // Save current front design before leaving
+        // Save current front design
         frontDesignJSON = fabricCanvas.toJSON();
         
         currentSide = 'back';
         document.getElementById('frontSideBtn').classList.remove('active');
         document.getElementById('backSideBtn').classList.add('active');
         
-        // Load back design (if exists)
-        if (backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0) {
+        if (backDesignJSON) {
             fabricCanvas.loadFromJSON(backDesignJSON, () => {
-                loadBackgroundOnly(currentStyle.name, selectedColor, 'back', false);
-                console.log("✅ Back design restored with", backDesignJSON.objects.length, "elements");
+                loadTshirtBackground(currentStyle.name, selectedColor, 'back', false);
+                console.log("✅ Back design restored");
             });
         } else {
-            // Clear canvas and load only background
-            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
-            loadBackgroundOnly(currentStyle.name, selectedColor, 'back', false);
+            loadTshirtBackground(currentStyle.name, selectedColor, 'back', false);
             console.log("🆕 Back view - no saved design");
         }
         updateSummaryElements();
     }
 
-    // ========== CHANGE COLOR - Preserves current design ==========
+    // Change color - preserve current design
     function changeTShirtColor(color) {
         console.log(`🎨 Changing color from ${selectedColor} to ${color}`);
         
@@ -1275,11 +1272,11 @@
         });
         
         // Load new background without losing design
-        loadBackgroundOnly(currentStyle.name, selectedColor, currentSide, true);
+        loadTshirtBackground(currentStyle.name, selectedColor, currentSide, true);
         showToast(`✓ Color changed to ${selectedColorDisplay}`);
     }
 
-    // ========== CHANGE PRODUCT - Preserves both front and back designs ==========
+    // Change product style - preserve designs for that product
     function changeProductStyle(selectedStyle) {
         console.log(`📦 Changing product to: ${selectedStyle.displayName}`);
         
@@ -1292,44 +1289,13 @@
         
         currentStyle = selectedStyle;
         
-        // Load new product background with current design preserved
-        loadBackgroundOnly(currentStyle.name, selectedColor, currentSide, true);
+        // Load new product background
+        loadTshirtBackground(currentStyle.name, selectedColor, currentSide, true);
         updateSummary();
         showToast(`✓ ${selectedStyle.displayName} selected!`);
     }
 
-    // Clear current side only
-    function clearCurrentSide() {
-        fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
-        fabricCanvas.renderAll();
-        if (currentSide === 'front') {
-            frontDesignJSON = fabricCanvas.toJSON();
-        } else {
-            backDesignJSON = fabricCanvas.toJSON();
-        }
-        updateSummaryElements();
-        showToast(`✓ ${currentSide === 'front' ? 'Front' : 'Back'} side cleared`);
-    }
-
-    // Delete selected object
-    function deleteSelected() {
-        const obj = fabricCanvas.getActiveObject();
-        if (obj) {
-            fabricCanvas.remove(obj);
-            fabricCanvas.renderAll();
-            if (currentSide === 'front') {
-                frontDesignJSON = fabricCanvas.toJSON();
-            } else {
-                backDesignJSON = fabricCanvas.toJSON();
-            }
-            updateSummaryElements();
-            showToast('✓ Deleted');
-        } else {
-            showToast('Select element first', true);
-        }
-    }
-
-    // Save designs to Firebase
+    // Save both designs to Firebase with loading animation
     async function saveDesignImageToFirebase(side, designJSON, productName, colorName) {
         if (!designJSON) return null;
         try {
@@ -1337,17 +1303,14 @@
             tempCanvas.width = 550; tempCanvas.height = 600;
             const tempFabric = new fabric.Canvas(tempCanvas);
             
+            // Build image path
             const productLower = productName.toLowerCase().trim();
             const colorLower = colorName.toLowerCase().trim();
             let imageName;
             if (productLower === 'sweatshirt') {
-                if (side === 'front') {
-                    imageName = `sweatshirt ${colorLower} color frunt t shirt.jpeg`;
-                } else {
-                    imageName = colorLower === 'white' ? `sweatshirt white color back tt shirt.jpeg` : `sweatshirt ${colorLower} color back t shirt.jpeg`;
-                }
-            }
-            else if (productLower === 'regular fit') {
+                imageName = side === 'front' ? `sweatshirt ${colorLower} color frunt t shirt.jpeg` : 
+                    (colorLower === 'white' ? `sweatshirt white color back tt shirt.jpeg` : `sweatshirt ${colorLower} color back t shirt.jpeg`);
+            } else if (productLower === 'regular fit') {
                 if (side === 'front') {
                     imageName = colorLower === 'blue' ? `regular fit bllue color frunt t shirt.jpg` : `regular fit ${colorLower} color frunt t shirt.jpg`;
                 } else {
@@ -1355,11 +1318,9 @@
                     else if (colorLower === 'blue') imageName = `regular fit blue color back t shirt.jpg`;
                     else imageName = `regular fit ${colorLower} color back t shirt.jpg`;
                 }
-            }
-            else if (productLower === 'polo') {
+            } else if (productLower === 'polo') {
                 imageName = side === 'front' ? `polo ${colorLower} color frunt t shirt.jpeg` : `polo ${colorLower} color back t shirt.jpeg`;
-            }
-            else if (productLower === 'oversized') {
+            } else if (productLower === 'oversized') {
                 if (side === 'front') {
                     if (colorLower === 'warm grey') imageName = `oversized warm grey color frunt t shir.jpg`;
                     else if (colorLower === 'black') imageName = `oversized black color frunt t shirt.jpg`;
@@ -1369,18 +1330,15 @@
                     else if (colorLower === 'black') imageName = `oversized black color back t shirt.jpg`;
                     else imageName = `oversized ${colorLower} color back t shirt.jpg`;
                 }
-            }
-            else if (productLower === 'acid wash') {
+            } else if (productLower === 'acid wash') {
                 imageName = side === 'front' ? `acid wash ${colorLower} color frunt t shirt.jpeg` : `acid wash ${colorLower} color back t shirt.jpeg`;
-            }
-            else if (productLower === 'hoodie') {
+            } else if (productLower === 'hoodie') {
                 if (side === 'front') {
                     imageName = colorLower === 'dark brown' ? `hoodie dark brown color frunt t shirt.jpg` : `hoodie ${colorLower} color frunt t shirt.jpg`;
                 } else {
                     imageName = colorLower === 'dark brown' ? `hoodie dark brown color back t shirt.jpg` : `hoodie ${colorLower} color back t shirt.jpg`;
                 }
-            }
-            else {
+            } else {
                 imageName = side === 'front' ? `${productLower} ${colorLower} color frunt t shirt.jpeg` : `${productLower} ${colorLower} color back t shirt.jpeg`;
             }
             imageName = imageName.replace(/\s+/g, ' ').trim();
@@ -1461,52 +1419,20 @@
         return new Blob([u8arr], { type: mime });
     }
 
-    // Add text to current canvas
-    function addText() {
-        const textValue = document.getElementById('textInput').value;
-        if (!textValue.trim()) { showToast('Enter text first', true); return; }
-        const text = new fabric.IText(textValue, {
-            left: fabricCanvas.width / 2, top: fabricCanvas.height / 2,
-            fontFamily: document.getElementById('fontSelect').value,
-            fill: '#D4AF37', fontSize: 36,
-            originX: 'center', originY: 'center'
-        });
-        fabricCanvas.add(text);
-        fabricCanvas.setActiveObject(text);
+    // Clear current side only
+    function clearCurrentSide() {
+        fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
         fabricCanvas.renderAll();
-        // Save to current side's JSON
         if (currentSide === 'front') {
             frontDesignJSON = fabricCanvas.toJSON();
         } else {
             backDesignJSON = fabricCanvas.toJSON();
         }
         updateSummaryElements();
-        showToast('✓ Text added to ' + (currentSide === 'front' ? 'Front' : 'Back') + '!');
+        showToast(`✓ ${currentSide === 'front' ? 'Front' : 'Back'} side cleared`);
     }
 
-    // Add image to current canvas
-    function addImage(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            fabric.Image.fromURL(e.target.result, (img) => {
-                img.scaleToWidth(200);
-                img.set({ left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center' });
-                fabricCanvas.add(img);
-                fabricCanvas.setActiveObject(img);
-                fabricCanvas.renderAll();
-                if (currentSide === 'front') {
-                    frontDesignJSON = fabricCanvas.toJSON();
-                } else {
-                    backDesignJSON = fabricCanvas.toJSON();
-                }
-                updateSummaryElements();
-                showToast('✓ Image added to ' + (currentSide === 'front' ? 'Front' : 'Back') + '!');
-            });
-        };
-        reader.readAsDataURL(file);
-    }
-
-    // Rest of the functions...
+    // Rest of the functions (renderColorSelector, renderStyles, etc.) remain same
     function renderColorSelector() {
         const container = document.getElementById('colorOptionsContainer');
         const colors = currentStyle.colors;
@@ -1559,68 +1485,16 @@
         });
     }
 
-    function generateColorPalette() {
-        return ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D'];
-    }
-    
-    function renderColorPalette() {
-        const palette = generateColorPalette();
-        const container = document.getElementById('colorPalette');
-        container.innerHTML = '';
-        palette.forEach(color => {
-            const swatch = document.createElement('div');
-            swatch.className = 'color-swatch';
-            swatch.style.backgroundColor = color;
-            swatch.addEventListener('click', () => { applyTextColor(color); document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); swatch.classList.add('active'); });
-            container.appendChild(swatch);
-        });
-    }
-
-    function applyTextColor(color) {
-        const active = fabricCanvas.getActiveObject();
-        if (active && (active.type === 'i-text' || active.type === 'text')) {
-            active.set('fill', color);
-            fabricCanvas.renderAll();
-            if (currentSide === 'front') {
-                frontDesignJSON = fabricCanvas.toJSON();
-            } else {
-                backDesignJSON = fabricCanvas.toJSON();
-            }
-            showToast('✓ Color applied!');
-        } else showToast('⚠️ Select a text first', true);
-    }
-
     function initCanvas() {
         fabricCanvas = new fabric.Canvas('tshirtCanvas');
         fabricCanvas.setWidth(550); fabricCanvas.setHeight(600);
         fabricCanvas.selection = true;
-        fabricCanvas.on('object:modified', () => {
-            if (currentSide === 'front') {
-                frontDesignJSON = fabricCanvas.toJSON();
-            } else {
-                backDesignJSON = fabricCanvas.toJSON();
-            }
-            updateSummaryElements();
-        });
-        fabricCanvas.on('object:added', () => {
-            if (currentSide === 'front') {
-                frontDesignJSON = fabricCanvas.toJSON();
-            } else {
-                backDesignJSON = fabricCanvas.toJSON();
-            }
-            updateSummaryElements();
-        });
-        fabricCanvas.on('object:removed', () => {
-            if (currentSide === 'front') {
-                frontDesignJSON = fabricCanvas.toJSON();
-            } else {
-                backDesignJSON = fabricCanvas.toJSON();
-            }
-            updateSummaryElements();
-        });
+        fabricCanvas.on('object:modified', () => updateSummaryElements());
+        fabricCanvas.on('object:added', () => updateSummaryElements());
+        fabricCanvas.on('object:removed', () => updateSummaryElements());
         fabricCanvas.on('selection:created', (e) => { if(e.selected?.[0]) loadEffectState(e.selected[0]); });
         fabricCanvas.on('selection:updated', (e) => { if(e.selected?.[0]) loadEffectState(e.selected[0]); });
-        loadBackgroundOnly(currentStyle.name, selectedColor, currentSide, false);
+        loadTshirtBackground(currentStyle.name, selectedColor, currentSide, false);
     }
     
     function loadEffectState(obj) {
@@ -1628,7 +1502,6 @@
         glowActive = !!obj.shadow;
         roundedActive = (obj.radius !== undefined && obj.radius > 0);
         borderActive = (obj.stroke && obj.stroke !== 'transparent');
-        updateEffectButtonsUI();
         if(glowActive && obj.shadow) {
             document.getElementById('glowSizeSlider').value = obj.shadow.blur || 5;
             document.getElementById('glowSizeValue').innerText = (obj.shadow.blur || 5) + 'px';
@@ -1689,17 +1562,37 @@
         }
     }
     
+    function addText() {
+        const textValue = document.getElementById('textInput').value;
+        if (!textValue.trim()) { showToast('Enter text first', true); return; }
+        const text = new fabric.IText(textValue, {
+            left: fabricCanvas.width / 2, top: fabricCanvas.height / 2,
+            fontFamily: document.getElementById('fontSelect').value,
+            fill: '#D4AF37', fontSize: 36,
+            originX: 'center', originY: 'center'
+        });
+        fabricCanvas.add(text);
+        fabricCanvas.setActiveObject(text);
+        fabricCanvas.renderAll();
+        showToast('✓ Text added!');
+        updateSummaryElements();
+    }
+    
     function updateSelectedText() {
         const active = fabricCanvas.getActiveObject();
         if (!active || (active.type !== 'i-text' && active.type !== 'text')) return;
         active.set('fontFamily', document.getElementById('fontSelect').value);
         active.set('fontSize', parseInt(document.getElementById('fontSizeSlider').value));
         fabricCanvas.renderAll();
-        if (currentSide === 'front') {
-            frontDesignJSON = fabricCanvas.toJSON();
-        } else {
-            backDesignJSON = fabricCanvas.toJSON();
-        }
+    }
+    
+    function applyTextColor(color) {
+        const active = fabricCanvas.getActiveObject();
+        if (active && (active.type === 'i-text' || active.type === 'text')) {
+            active.set('fill', color);
+            fabricCanvas.renderAll();
+            showToast('✓ Color applied!');
+        } else showToast('⚠️ Select a text first', true);
     }
     
     function flipHorizontal() {
@@ -1721,13 +1614,24 @@
             if (style === 'italic') active.set('fontStyle', active.fontStyle === 'italic' ? 'normal' : 'italic');
             if (style === 'underline') active.set('underline', !active.underline);
             fabricCanvas.renderAll();
-            if (currentSide === 'front') {
-                frontDesignJSON = fabricCanvas.toJSON();
-            } else {
-                backDesignJSON = fabricCanvas.toJSON();
-            }
             showToast(`✓ ${style} toggled`);
         } else showToast('Select text first', true);
+    }
+    
+    function addImage(file) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            fabric.Image.fromURL(e.target.result, (img) => {
+                img.scaleToWidth(200);
+                img.set({ left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center' });
+                fabricCanvas.add(img);
+                fabricCanvas.setActiveObject(img);
+                fabricCanvas.renderAll();
+                showToast('✓ Image added!');
+                updateSummaryElements();
+            });
+        };
+        reader.readAsDataURL(file);
     }
     
     function updateSummaryElements() {
@@ -1759,6 +1663,23 @@
         t.style.background = isErr ? '#F44336' : '#D4AF37';
         t.classList.add('show');
         setTimeout(() => t.classList.remove('show'), 2500);
+    }
+    
+    function generateColorPalette() {
+        return ['#FF6633', '#FFB399', '#FF33FF', '#FFFF99', '#00B3E6', '#E6B333', '#3366E6', '#999966', '#99FF99', '#B34D4D'];
+    }
+    
+    function renderColorPalette() {
+        const palette = generateColorPalette();
+        const container = document.getElementById('colorPalette');
+        container.innerHTML = '';
+        palette.forEach(color => {
+            const swatch = document.createElement('div');
+            swatch.className = 'color-swatch';
+            swatch.style.backgroundColor = color;
+            swatch.addEventListener('click', () => { applyTextColor(color); document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active')); swatch.classList.add('active'); });
+            container.appendChild(swatch);
+        });
     }
 
     // Cart Functions
@@ -1890,7 +1811,11 @@
     document.getElementById('boldBtn')?.addEventListener('click', () => applyTextStyle('bold'));
     document.getElementById('italicBtn')?.addEventListener('click', () => applyTextStyle('italic'));
     document.getElementById('underlineBtn')?.addEventListener('click', () => applyTextStyle('underline'));
-    document.getElementById('deleteBtn')?.addEventListener('click', deleteSelected);
+    document.getElementById('deleteBtn')?.addEventListener('click', () => {
+        const obj = fabricCanvas.getActiveObject();
+        if (obj) { fabricCanvas.remove(obj); fabricCanvas.renderAll(); updateSummaryElements(); showToast('✓ Deleted'); }
+        else showToast('Select element first', true);
+    });
     document.getElementById('clearBtn')?.addEventListener('click', clearCurrentSide);
     
     document.getElementById('saveImageBtn')?.addEventListener('click', handleSaveImage);
@@ -1934,13 +1859,13 @@
     updateSummary();
     loadCart();
     
-    frontDesignJSON = null;
+    frontDesignJSON = fabricCanvas.toJSON();
     backDesignJSON = null;
     
     console.log("✅ Customize page ready");
-    console.log("✅ Front and Back designs are stored COMPLETELY SEPARATE");
-    console.log("✅ Changing color preserves current design");
-    console.log("✅ Switching sides loads only that side's design");
+    console.log("✅ Front and Back designs stored separately");
+    console.log("✅ Color changes preserve designs");
+    console.log("✅ Loading animation added for save operations");
 </script>
 </body>
 </html>
