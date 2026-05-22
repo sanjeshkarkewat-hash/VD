@@ -925,15 +925,15 @@
         
         <div class="order-panel">
             <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Full Sleeve T-Shirt</span></div>
-            <div class="order-detail"><span>Color:</span><span id="summaryColor">Black</span></div>
+            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
+            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
             <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
             <div class="order-detail"><span>GSM:</span><span id="summaryGSM">--</span></div>
             <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">--</span></div>
             <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
             <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
             <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
-            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,699</span></div>
+            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
             <div class="action-buttons">
                 <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD TO CART</button>
                 <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
@@ -994,22 +994,16 @@
     
     // Product styles with preview images (front side default color)
     const tshirtStyles = [
-        { id: 'fullsleeve', name: 'full sleeve', displayName: 'Full Sleeve T-Shirt', price: 1699, previewImg: 'full sleeve oversized T shirt.jpeg',
-          colors: ['black'] },
-        { id: 'oversized', name: 'oversized', displayName: 'Oversized T-Shirt', price: 1499, previewImg: 'full sleeve oversized T shirt.jpeg',
+        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg',
           colors: ['white', 'warm grey', 'cream', 'black'] },
-        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt T shirt.jpeg',
-          colors: ['white', 'warm grey', 'cream', 'black'] },
-        { id: 'oversized_hoodie', name: 'oversized hoodie', displayName: 'Oversized Hoodie', price: 2499, previewImg: 'oversized hoodie.jpeg',
-          colors: ['olive green', 'dark brown', 'blue', 'black'] },
-        { id: 'polo', name: 'polo', displayName: 'Polo T-Shirt', price: 1599, previewImg: 'Polo T shirt.jpeg',
-          colors: ['white', 'grey', 'blue', 'black'] },
-        { id: 'dropshoulder', name: 'drop shoulder', displayName: 'Drop Shoulder', price: 1699, previewImg: 'drop shoulder T shirt.jpeg',
-          colors: ['white', 'black'] },
-        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash T shirt.jpeg',
-          colors: ['green', 'black'] },
         { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg',
           colors: ['white', 'grey', 'cream', 'blue', 'black'] },
+        { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg',
+          colors: ['white', 'grey', 'blue', 'black'] },
+        { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg',
+          colors: ['white', 'warm grey', 'cream', 'black'] },
+        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg',
+          colors: ['green', 'black'] },
         { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg',
           colors: ['olive green', 'dark brown', 'blue', 'black'] }
     ];
@@ -1033,17 +1027,110 @@
     let frontDesignImageURL = null;
     let backDesignImageURL = null;
     
-    let selectedColor = 'black';
-    let selectedColorDisplay = 'Black';
+    let selectedColor = 'white';
+    let selectedColorDisplay = 'White';
 
     console.log("🎨 Customize page opened");
 
+    // ========== EXACT FILE NAME GENERATION ==========
+    function getDynamicImagePath(productName, colorName, side) {
+        const productLower = productName.toLowerCase().trim();
+        const colorLower = colorName.toLowerCase().trim();
+        
+        let imageName;
+        
+        if (productLower === 'sweatshirt') {
+            if (side === 'front') {
+                imageName = `sweatshirt ${colorLower} color frunt t shirt.jpeg`;
+            } else {
+                if (colorLower === 'white') {
+                    imageName = `sweatshirt white color back tt shirt.jpeg`;
+                } else {
+                    imageName = `sweatshirt ${colorLower} color back t shirt.jpeg`;
+                }
+            }
+        }
+        else if (productLower === 'regular fit') {
+            if (side === 'front') {
+                if (colorLower === 'blue') {
+                    imageName = `regular fit bllue color frunt t shirt.jpg`;
+                } else {
+                    imageName = `regular fit ${colorLower} color frunt t shirt.jpg`;
+                }
+            } else {
+                if (colorLower === 'cream') {
+                    imageName = `regular fit cream color back t shirt.jpg`;
+                } else if (colorLower === 'blue') {
+                    imageName = `regular fit blue color back t shirt.jpg`;
+                } else {
+                    imageName = `regular fit ${colorLower} color back t shirt.jpg`;
+                }
+            }
+        }
+        else if (productLower === 'polo') {
+            if (side === 'front') {
+                imageName = `polo ${colorLower} color frunt t shirt.jpeg`;
+            } else {
+                imageName = `polo ${colorLower} color back t shirt.jpeg`;
+            }
+        }
+        else if (productLower === 'oversized') {
+            if (side === 'front') {
+                if (colorLower === 'warm grey') {
+                    imageName = `oversized warm grey color frunt t shir.jpg`;
+                } else if (colorLower === 'black') {
+                    imageName = `oversized black color frunt t shirt.jpg`;
+                } else {
+                    imageName = `oversized ${colorLower} color frunt t shirt.jpg`;
+                }
+            } else {
+                if (colorLower === 'warm grey') {
+                    imageName = `oversized warm grey color back t shirt.jpg`;
+                } else if (colorLower === 'black') {
+                    imageName = `oversized black color back t shirt.jpg`;
+                } else {
+                    imageName = `oversized ${colorLower} color back t shirt.jpg`;
+                }
+            }
+        }
+        else if (productLower === 'acid wash') {
+            if (side === 'front') {
+                imageName = `acid wash ${colorLower} color frunt t shirt.jpeg`;
+            } else {
+                imageName = `acid wash ${colorLower} color back t shirt.jpeg`;
+            }
+        }
+        else if (productLower === 'hoodie') {
+            if (side === 'front') {
+                if (colorLower === 'dark brown') {
+                    imageName = `hoodie dark brown color frunt t shirt.jpg`;
+                } else {
+                    imageName = `hoodie ${colorLower} color frunt t shirt.jpg`;
+                }
+            } else {
+                if (colorLower === 'dark brown') {
+                    imageName = `hoodie dark brown color back t shirt.jpg`;
+                } else {
+                    imageName = `hoodie ${colorLower} color back t shirt.jpg`;
+                }
+            }
+        }
+        else {
+            if (side === 'front') {
+                imageName = `${productLower} ${colorLower} color frunt t shirt.jpeg`;
+            } else {
+                imageName = `${productLower} ${colorLower} color back t shirt.jpeg`;
+            }
+        }
+        
+        imageName = imageName.replace(/\s+/g, ' ').trim();
+        return IMAGE_PATH + imageName;
+    }
+    
     function loadTshirtImageDynamic(productName, colorName, side, preserveDesign = true) {
         if (!fabricCanvas) return;
         
-        // For preview, use the default preview image
-        let imagePath = currentStyle.previewImg;
-        
+        const imagePath = getDynamicImagePath(productName, colorName, side);
         console.log(`🖼️ Loading: ${imagePath}`);
         
         let currentObjects = [];
@@ -1051,7 +1138,7 @@
             currentObjects = fabricCanvas.getObjects();
         }
         
-        loadImageAsDataURL(IMAGE_PATH + imagePath, function(dataURL) {
+        loadImageAsDataURL(imagePath, function(dataURL) {
             if (dataURL) {
                 fabric.Image.fromURL(dataURL, function(img) {
                     const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
@@ -1126,16 +1213,7 @@
         if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
         else backDesignJSON = fabricCanvas.toJSON();
         
-        // For color change, we just change background color, not the image
-        fabricCanvas.setBackgroundColor(selectedColorDisplay === 'White' ? '#f5f5f5' : selectedColorDisplay === 'Black' ? '#1a1a1a' : '#1a1a2e', function() {
-            if (frontDesignJSON && currentSide === 'front') {
-                fabricCanvas.loadFromJSON(frontDesignJSON, () => fabricCanvas.renderAll());
-            } else if (backDesignJSON && currentSide === 'back') {
-                fabricCanvas.loadFromJSON(backDesignJSON, () => fabricCanvas.renderAll());
-            } else {
-                fabricCanvas.renderAll();
-            }
-        });
+        loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true);
         showToast(`✓ Color changed to ${selectedColorDisplay}`);
     }
 
@@ -1149,11 +1227,10 @@
         
         if (frontDesignJSON && frontDesignJSON.objects?.length > 0) {
             fabricCanvas.loadFromJSON(frontDesignJSON, () => {
-                fabricCanvas.renderAll();
+                loadTshirtImageDynamic(currentStyle.name, selectedColor, 'front', false);
             });
         } else {
-            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
-            fabricCanvas.renderAll();
+            loadTshirtImageDynamic(currentStyle.name, selectedColor, 'front', false);
         }
         updateSummaryElements();
     }
@@ -1168,11 +1245,10 @@
         
         if (backDesignJSON && backDesignJSON.objects?.length > 0) {
             fabricCanvas.loadFromJSON(backDesignJSON, () => {
-                fabricCanvas.renderAll();
+                loadTshirtImageDynamic(currentStyle.name, selectedColor, 'back', false);
             });
         } else {
-            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
-            fabricCanvas.renderAll();
+            loadTshirtImageDynamic(currentStyle.name, selectedColor, 'back', false);
         }
         updateSummaryElements();
     }
@@ -1183,12 +1259,10 @@
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 550; tempCanvas.height = 600;
             const tempFabric = new fabric.Canvas(tempCanvas);
-            
-            // Use current style preview image as background
-            const imagePath = currentStyle.previewImg;
+            const imagePath = getDynamicImagePath(productName, colorName, side);
             
             await new Promise((resolve) => {
-                loadImageAsDataURL(IMAGE_PATH + imagePath, function(dataURL) {
+                loadImageAsDataURL(imagePath, function(dataURL) {
                     if (dataURL) {
                         fabric.Image.fromURL(dataURL, function(img) {
                             const scale = Math.max(tempCanvas.width / img.width, tempCanvas.height / img.height);
@@ -1277,7 +1351,7 @@
                     <div class="cart-item-details">
                         <div class="cart-item-name">${item.styleName} ✨ Custom</div>
                         <div class="cart-item-price">₹${item.price}</div>
-                        <div class="cart-item-variant">${item.size || 'M'} | ${item.selectedColor || 'Black'}</div>
+                        <div class="cart-item-variant">${item.size || 'M'} | ${item.selectedColor || 'White'}</div>
                         <div class="cart-qty-control">
                             <button class="cart-qty-dec" data-index="${index}">-</button><span>${item.quantity}</span>
                             <button class="cart-qty-inc" data-index="${index}">+</button>
@@ -1594,6 +1668,7 @@
                 const selectedStyle = tshirtStyles.find(s => s.id === id);
                 if (selectedStyle) {
                     currentStyle = selectedStyle;
+                    // Set default color to first color in the list
                     selectedColor = currentStyle.colors[0];
                     const colorDisplayMap = { 'white': 'White', 'warm grey': 'Warm Grey', 'cream': 'Cream', 'black': 'Black', 'grey': 'Grey', 'blue': 'Blue', 'green': 'Green', 'olive green': 'Olive Green', 'dark brown': 'Dark Brown' };
                     selectedColorDisplay = colorDisplayMap[selectedColor] || selectedColor;
@@ -1685,7 +1760,7 @@
     backDesignJSON = null;
     
     console.log("✅ Customize page ready");
-    console.log("📸 All products now show preview images in Choose Your Style section");
+    console.log("📸 Each product now shows a preview image in Choose Your Style section");
 </script>
 </body>
 </html>
