@@ -117,7 +117,7 @@
     .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
     .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
     
-    /* Custom Design Preview Section */
+    /* Custom Design Preview Section - Front and Back */
     .custom-design-preview-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
@@ -154,6 +154,29 @@
       display: inline-block;
       margin-bottom: 10px;
     }
+    .custom-preview-row {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .custom-preview-item {
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+    .custom-preview-item img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #1a1a2e;
+    }
+    .custom-preview-item p {
+      font-size: 11px;
+      color: #D4AF37;
+      margin-top: 8px;
+    }
   </style>
 </head>
 <body>
@@ -186,8 +209,16 @@
       <!-- Custom Design Preview Section -->
       <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
-        <h4><i class="fas fa-star-of-life"></i> Final Edited Design</h4>
-        <img id="customCheckoutPreview" class="custom-design-preview-img" alt="Your Custom T-Shirt Design">
+        <div class="custom-preview-row" id="customPreviewRow">
+          <div class="custom-preview-item">
+            <p><i class="fas fa-tshirt"></i> Front Design</p>
+            <img id="frontDesignPreview" class="custom-design-preview-img" alt="Front Design">
+          </div>
+          <div class="custom-preview-item">
+            <p><i class="fas fa-undo-alt"></i> Back Design</p>
+            <img id="backDesignPreview" class="custom-design-preview-img" alt="Back Design">
+          </div>
+        </div>
         <p style="font-size: 10px; color: #888; margin-top: 8px;"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> This is exactly how your design will be printed</p>
       </div>
       <div id="orderItemsList"></div>
@@ -216,7 +247,8 @@
   // ========== CUSTOM CHECKOUT DATA FROM CUSTOMIZE PAGE ==========
   let customCheckoutData = null;
   let isCustomizedOrder = false;
-  let customDesignImageURL = null;
+  let frontDesignImageURL = null;
+  let backDesignImageURL = null;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
@@ -225,21 +257,35 @@
   function loadCustomCheckoutData() {
     try {
       const savedData = localStorage.getItem('customCheckoutData');
+      console.log("📦 Loading customCheckoutData from localStorage:", savedData);
+      
       if (savedData) {
         customCheckoutData = JSON.parse(savedData);
-        console.log("✅ Custom checkout data loaded:", customCheckoutData);
+        console.log("✅ Parsed customCheckoutData:", customCheckoutData);
         
         if (customCheckoutData && customCheckoutData.isCustomized === true) {
           isCustomizedOrder = true;
-          customDesignImageURL = customCheckoutData.customDesignImage;
-          console.log("🎨 Customized order detected! Redirect will be skipped.");
-          console.log("📸 Custom design image URL:", customDesignImageURL);
           
-          // Show custom preview
+          // Get image URLs - support both old and new format
+          frontDesignImageURL = customCheckoutData.frontDesignImage || customCheckoutData.customDesignImage || null;
+          backDesignImageURL = customCheckoutData.backDesignImage || null;
+          
+          console.log("🎨 Customized order detected!");
+          console.log("📸 Front Design Image URL:", frontDesignImageURL);
+          console.log("📸 Back Design Image URL:", backDesignImageURL);
+          
+          // Show custom preview with both front and back designs
           const previewContainer = document.getElementById('customDesignPreviewContainer');
-          const previewImg = document.getElementById('customCheckoutPreview');
-          if (previewContainer && previewImg && customDesignImageURL) {
-            previewImg.src = customDesignImageURL;
+          const frontPreview = document.getElementById('frontDesignPreview');
+          const backPreview = document.getElementById('backDesignPreview');
+          
+          if (previewContainer && frontPreview && backPreview) {
+            if (frontDesignImageURL) {
+              frontPreview.src = frontDesignImageURL;
+            }
+            if (backDesignImageURL) {
+              backPreview.src = backDesignImageURL;
+            }
             previewContainer.style.display = 'block';
             console.log("✅ Custom design preview displayed");
           }
@@ -252,7 +298,9 @@
               price: customCheckoutData.price || 1699,
               quantity: customCheckoutData.quantity || 1,
               size: customCheckoutData.size || 'M',
-              customDesignImage: customDesignImageURL,
+              selectedColor: customCheckoutData.selectedColor || 'Black',
+              frontDesignImage: frontDesignImageURL,
+              backDesignImage: backDesignImageURL,
               isCustomized: true
             }];
             cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0);
@@ -260,6 +308,30 @@
           }
         }
       }
+      
+      // Also check localStorage for front/back design images separately
+      if (!frontDesignImageURL) {
+        frontDesignImageURL = localStorage.getItem('frontDesignImage');
+        if (frontDesignImageURL) {
+          isCustomizedOrder = true;
+          console.log("📸 Found frontDesignImage in localStorage:", frontDesignImageURL);
+          const frontPreview = document.getElementById('frontDesignPreview');
+          if (frontPreview) frontPreview.src = frontDesignImageURL;
+          document.getElementById('customDesignPreviewContainer').style.display = 'block';
+        }
+      }
+      
+      if (!backDesignImageURL) {
+        backDesignImageURL = localStorage.getItem('backDesignImage');
+        if (backDesignImageURL) {
+          isCustomizedOrder = true;
+          console.log("📸 Found backDesignImage in localStorage:", backDesignImageURL);
+          const backPreview = document.getElementById('backDesignPreview');
+          if (backPreview) backPreview.src = backDesignImageURL;
+          document.getElementById('customDesignPreviewContainer').style.display = 'block';
+        }
+      }
+      
     } catch(e) {
       console.error("Error loading custom checkout data:", e);
     }
@@ -400,7 +472,9 @@
     const itemsWithDetails = cart.map(item => ({ 
       id: item.id, name: item.name, price: item.price, quantity: item.quantity, 
       size: item.size || 'N/A', total: item.price * item.quantity,
-      customDesignImage: customDesignImageURL || item.customDesignImage || null,
+      selectedColor: item.selectedColor || 'Black',
+      frontDesignImage: frontDesignImageURL || item.frontDesignImage || null,
+      backDesignImage: backDesignImageURL || item.backDesignImage || null,
       isCustomized: isCustomizedOrder || item.isCustomized || false
     }));
     
@@ -413,30 +487,47 @@
       status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, 
       subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, 
       total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid,
-      isCustomized: isCustomizedOrder, customDesignImage: customDesignImageURL,
-      tshirtType: customCheckoutData?.tshirtType || null,
-      tshirtColor: customCheckoutData?.tshirtColor || null
+      isCustomized: isCustomizedOrder, frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL,
+      tshirtType: customCheckoutData?.tshirtType || cart[0]?.name || null,
+      tshirtColor: customCheckoutData?.selectedColor || cart[0]?.selectedColor || null
     };
+    console.log("📦 Saving order:", orderData);
     try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error("Order save error:", e); return { success: false }; }
   }
 
   async function processOrderAfterSave(orderId) { 
     localStorage.removeItem('vedantaCart');
     localStorage.removeItem('customCheckoutData');
+    localStorage.removeItem('frontDesignImage');
+    localStorage.removeItem('backDesignImage');
     window.location.href = `order-success.html?orderId=${orderId}`; 
   }
   
-  async function saveOrderCOD() { if (!validateOrder() || isProcessing) return; isProcessing = true; showLoading(true); const res = await saveOrderToFirebase('Cash on Delivery'); showLoading(false); if (res.success) { showToast(`✅ Order placed! ID: ${res.orderId}`); setTimeout(() => processOrderAfterSave(res.orderId), 1500); } else { showToast('❌ Failed', true); isProcessing = false; } }
+  async function saveOrderCOD() { 
+    if (!validateOrder() || isProcessing) return; 
+    isProcessing = true; 
+    showLoading(true); 
+    const res = await saveOrderToFirebase('Cash on Delivery'); 
+    showLoading(false); 
+    if (res.success) { 
+      showToast(`✅ Order placed! ID: ${res.orderId}`); 
+      setTimeout(() => processOrderAfterSave(res.orderId), 1500); 
+    } else { 
+      showToast('❌ Failed to place order', true); 
+      isProcessing = false; 
+    } 
+  }
   
   async function initiateRazorpayPayment() { 
     if (!validateOrder() || isProcessing) return; 
-    isProcessing = true; showLoading(true); 
+    isProcessing = true; 
+    showLoading(true); 
     const finalAmount = discountedTotal; 
     if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } 
     const addr = getSelectedAddress(); 
     const options = { 
       key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount)*100, currency: 'INR', 
-      name: 'VEDANTA', description: 'Order Payment', 
+      name: 'VEDANTA', description: 'Custom T-Shirt Order', 
       prefill: { name: addr.fullName, email: addr.email, contact: addr.phone }, 
       theme: { color: '#D4AF37' }, 
       handler: async (response) => { 
@@ -445,7 +536,9 @@
         if (result.success) { 
           showToast(`✅ Payment success! Order: ${result.orderId}`); 
           setTimeout(() => processOrderAfterSave(result.orderId), 1500); 
-        } else { showToast('⚠️ Order save issue', true); } 
+        } else { 
+          showToast('⚠️ Order save issue', true); 
+        } 
         isProcessing = false; 
       }, 
       modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing=false; } } 
@@ -483,11 +576,11 @@
           const order = JSON.parse(pendingOrder);
           if (order.customDesignImage) {
             isCustomizedOrder = true;
-            customDesignImageURL = order.customDesignImage;
+            frontDesignImageURL = order.customDesignImage;
             cart = [{ 
               id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, 
               price: order.price || 1699, quantity: 1, size: order.size || 'M', 
-              customDesignImage: order.customDesignImage,
+              frontDesignImage: order.customDesignImage,
               isCustomized: true
             }];
             console.log("✅ Loaded from pendingCheckoutOrder");
@@ -522,11 +615,12 @@
       const infoDiv = document.createElement('div');
       infoDiv.className = 'order-item-info';
       
-      // Check for custom design image
-      const designImage = item.customDesignImage || customDesignImageURL;
-      if (designImage) {
+      // Check for custom design images
+      const hasCustomDesign = (frontDesignImageURL || backDesignImageURL || item.frontDesignImage || item.backDesignImage);
+      if (hasCustomDesign) {
         const img = document.createElement('img');
-        img.src = designImage;
+        const designImg = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
+        img.src = designImg;
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
@@ -535,7 +629,7 @@
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
       }
       
-      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>${designImage ? '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>' : ''}`;
+      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p><p>Color: ${item.selectedColor || 'Black'}</p>${hasCustomDesign ? '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>' : ''}`;
       const priceDiv = document.createElement('div');
       priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
