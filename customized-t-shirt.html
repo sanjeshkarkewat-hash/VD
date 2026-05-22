@@ -1134,6 +1134,7 @@
         imageName = imageName.replace(/\s+/g, ' ').trim();
         
         console.log(`📸 Generated: ${imageName}`);
+        console.log(`📸 Full path: ${IMAGE_PATH}${imageName}`);
         return IMAGE_PATH + imageName;
     }
     
@@ -1156,13 +1157,16 @@
                         if (preserveDesign && currentObjects.length > 0) {
                             currentObjects.forEach(obj => fabricCanvas.add(obj));
                             fabricCanvas.renderAll();
+                            console.log(`✅ ${side} ${colorName} loaded successfully`);
                         } else {
                             fabricCanvas.renderAll();
+                            console.log(`✅ ${side} ${colorName} loaded`);
                         }
                     }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
             } else {
                 console.warn(`⚠️ Image not found: ${imagePath}`);
+                console.warn(`⚠️ Please check if file exists with exact name: ${imagePath}`);
                 fabricCanvas.setBackgroundColor('#1a1a2e', function() {
                     if (preserveDesign && currentObjects.length > 0) {
                         currentObjects.forEach(obj => fabricCanvas.add(obj));
@@ -1475,7 +1479,11 @@
             imageCache[src] = dataURL;
             callback(dataURL);
         };
-        img.onerror = function() { console.warn(`⚠️ 404: ${src}`); callback(null); };
+        img.onerror = function() { 
+            console.warn(`❌ 404: ${src}`);
+            console.warn(`❌ File not found. Please check if file exists with exact name.`);
+            callback(null); 
+        };
         img.src = src;
     }
 
@@ -1767,6 +1775,10 @@
     backDesignJSON = null;
     
     console.log("✅ Customize page ready");
+    console.log("📸 If images not loading, check:");
+    console.log("📸 1. Files exist in same folder as HTML");
+    console.log("📸 2. File names match exactly (including spaces and case)");
+    console.log("📸 3. Check console for exact file path being requested");
 </script>
 </body>
 </html>
