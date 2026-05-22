@@ -99,14 +99,14 @@
         }
         .style-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
             gap: 20px;
         }
         .style-card {
             background: rgba(20,20,30,0.75);
             backdrop-filter: blur(10px);
             border-radius: 24px;
-            padding: 20px 15px;
+            padding: 18px 12px;
             text-align: center;
             cursor: pointer;
             border: 2px solid transparent;
@@ -119,22 +119,24 @@
         }
         .style-card:hover {
             transform: translateY(-5px);
-            background: rgba(212,175,55,0.1);
         }
-        .style-icon {
-            font-size: 48px;
-            color: #D4AF37;
-            margin-bottom: 15px;
+        .style-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-bottom: 12px;
+            background: #1a1a2e;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
         }
         .style-name { 
             font-weight: 700; 
-            font-size: 18px; 
+            font-size: 16px; 
             margin-bottom: 8px;
-            letter-spacing: 0.5px;
         }
         .style-price { 
             color: #D4AF37; 
-            font-size: 16px; 
+            font-size: 15px; 
             font-weight: 700;
         }
         .style-price i {
@@ -725,9 +727,6 @@
             .style-price {
                 font-size: 13px;
             }
-            .style-icon {
-                font-size: 36px;
-            }
         }
     </style>
 </head>
@@ -926,15 +925,15 @@
         
         <div class="order-panel">
             <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
-            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
+            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Full Sleeve T-Shirt</span></div>
+            <div class="order-detail"><span>Color:</span><span id="summaryColor">Black</span></div>
             <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
             <div class="order-detail"><span>GSM:</span><span id="summaryGSM">--</span></div>
             <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">--</span></div>
             <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
             <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
             <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
-            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,699</span></div>
             <div class="action-buttons">
                 <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD TO CART</button>
                 <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY NOW</button>
@@ -990,22 +989,28 @@
     const storageRef = storage.ref();
     const auth = firebase.auth();
 
-    // ========== IMAGE PATH SETTINGS ==========
-    const IMAGE_PATH = "";  // Change this to your folder path if images are in subfolder
+    // ========== IMAGE PATH ==========
+    const IMAGE_PATH = "";  // Change if images are in subfolder
     
-    // Product styles with exact names and prices
+    // Product styles with preview images (front side default color)
     const tshirtStyles = [
-        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999,
+        { id: 'fullsleeve', name: 'full sleeve', displayName: 'Full Sleeve T-Shirt', price: 1699, previewImg: 'full sleeve oversized T shirt.jpeg',
+          colors: ['black'] },
+        { id: 'oversized', name: 'oversized', displayName: 'Oversized T-Shirt', price: 1499, previewImg: 'full sleeve oversized T shirt.jpeg',
           colors: ['white', 'warm grey', 'cream', 'black'] },
-        { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699,
-          colors: ['white', 'grey', 'cream', 'blue', 'black'] },
-        { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599,
+        { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt T shirt.jpeg',
+          colors: ['white', 'warm grey', 'cream', 'black'] },
+        { id: 'oversized_hoodie', name: 'oversized hoodie', displayName: 'Oversized Hoodie', price: 2499, previewImg: 'oversized hoodie.jpeg',
+          colors: ['olive green', 'dark brown', 'blue', 'black'] },
+        { id: 'polo', name: 'polo', displayName: 'Polo T-Shirt', price: 1599, previewImg: 'Polo T shirt.jpeg',
           colors: ['white', 'grey', 'blue', 'black'] },
-        { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499,
-          colors: ['white', 'warm grey', 'cream', 'black'] },
-        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799,
+        { id: 'dropshoulder', name: 'drop shoulder', displayName: 'Drop Shoulder', price: 1699, previewImg: 'drop shoulder T shirt.jpeg',
+          colors: ['white', 'black'] },
+        { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash T shirt.jpeg',
           colors: ['green', 'black'] },
-        { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499,
+        { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg',
+          colors: ['white', 'grey', 'cream', 'blue', 'black'] },
+        { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg',
           colors: ['olive green', 'dark brown', 'blue', 'black'] }
     ];
     
@@ -1028,120 +1033,17 @@
     let frontDesignImageURL = null;
     let backDesignImageURL = null;
     
-    let selectedColor = 'white';
-    let selectedColorDisplay = 'White';
+    let selectedColor = 'black';
+    let selectedColorDisplay = 'Black';
 
     console.log("🎨 Customize page opened");
 
-    // ========== EXACT FILE NAME GENERATION AS PER YOUR LIST ==========
-    function getDynamicImagePath(productName, colorName, side) {
-        const productLower = productName.toLowerCase().trim();
-        const colorLower = colorName.toLowerCase().trim();
-        
-        let imageName;
-        
-        // SWEATSHIRT - all .jpeg
-        if (productLower === 'sweatshirt') {
-            if (side === 'front') {
-                imageName = `sweatshirt ${colorLower} color frunt t shirt.jpeg`;
-            } else {
-                if (colorLower === 'white') {
-                    imageName = `sweatshirt white color back tt shirt.jpeg`;
-                } else {
-                    imageName = `sweatshirt ${colorLower} color back t shirt.jpeg`;
-                }
-            }
-        }
-        // REGULAR FIT - .jpg except some cases
-        else if (productLower === 'regular fit') {
-            if (side === 'front') {
-                if (colorLower === 'blue') {
-                    imageName = `regular fit bllue color frunt t shirt.jpg`;
-                } else {
-                    imageName = `regular fit ${colorLower} color frunt t shirt.jpg`;
-                }
-            } else {
-                if (colorLower === 'cream') {
-                    imageName = `regular fit cream color back t shirt.jpg`;
-                } else if (colorLower === 'blue') {
-                    imageName = `regular fit blue color back t shirt.jpg`;
-                } else {
-                    imageName = `regular fit ${colorLower} color back t shirt.jpg`;
-                }
-            }
-        }
-        // POLO - all .jpeg
-        else if (productLower === 'polo') {
-            if (side === 'front') {
-                imageName = `polo ${colorLower} color frunt t shirt.jpeg`;
-            } else {
-                imageName = `polo ${colorLower} color back t shirt.jpeg`;
-            }
-        }
-        // OVERSIZED - .jpg
-        else if (productLower === 'oversized') {
-            if (side === 'front') {
-                if (colorLower === 'warm grey') {
-                    imageName = `oversized warm grey color frunt t shir.jpg`;
-                } else if (colorLower === 'black') {
-                    imageName = `oversized black color frunt t shirt.jpg`;
-                } else {
-                    imageName = `oversized ${colorLower} color frunt t shirt.jpg`;
-                }
-            } else {
-                if (colorLower === 'warm grey') {
-                    imageName = `oversized warm grey color back t shirt.jpg`;
-                } else if (colorLower === 'black') {
-                    imageName = `oversized black color back t shirt.jpg`;
-                } else {
-                    imageName = `oversized ${colorLower} color back t shirt.jpg`;
-                }
-            }
-        }
-        // ACID WASH - .jpeg
-        else if (productLower === 'acid wash') {
-            if (side === 'front') {
-                imageName = `acid wash ${colorLower} color frunt t shirt.jpeg`;
-            } else {
-                imageName = `acid wash ${colorLower} color back t shirt.jpeg`;
-            }
-        }
-        // HOODIE - .jpg
-        else if (productLower === 'hoodie') {
-            if (side === 'front') {
-                if (colorLower === 'dark brown') {
-                    imageName = `hoodie dark brown color frunt t shirt.jpg`;
-                } else {
-                    imageName = `hoodie ${colorLower} color frunt t shirt.jpg`;
-                }
-            } else {
-                if (colorLower === 'dark brown') {
-                    imageName = `hoodie dark brown color back t shirt.jpg`;
-                } else {
-                    imageName = `hoodie ${colorLower} color back t shirt.jpg`;
-                }
-            }
-        }
-        else {
-            // Default fallback
-            if (side === 'front') {
-                imageName = `${productLower} ${colorLower} color frunt t shirt.jpeg`;
-            } else {
-                imageName = `${productLower} ${colorLower} color back t shirt.jpeg`;
-            }
-        }
-        
-        imageName = imageName.replace(/\s+/g, ' ').trim();
-        
-        console.log(`📸 Generated: ${imageName}`);
-        console.log(`📸 Full path: ${IMAGE_PATH}${imageName}`);
-        return IMAGE_PATH + imageName;
-    }
-    
     function loadTshirtImageDynamic(productName, colorName, side, preserveDesign = true) {
         if (!fabricCanvas) return;
         
-        const imagePath = getDynamicImagePath(productName, colorName, side);
+        // For preview, use the default preview image
+        let imagePath = currentStyle.previewImg;
+        
         console.log(`🖼️ Loading: ${imagePath}`);
         
         let currentObjects = [];
@@ -1149,7 +1051,7 @@
             currentObjects = fabricCanvas.getObjects();
         }
         
-        loadImageAsDataURL(imagePath, function(dataURL) {
+        loadImageAsDataURL(IMAGE_PATH + imagePath, function(dataURL) {
             if (dataURL) {
                 fabric.Image.fromURL(dataURL, function(img) {
                     const scale = Math.max(fabricCanvas.width / img.width, fabricCanvas.height / img.height);
@@ -1157,16 +1059,13 @@
                         if (preserveDesign && currentObjects.length > 0) {
                             currentObjects.forEach(obj => fabricCanvas.add(obj));
                             fabricCanvas.renderAll();
-                            console.log(`✅ ${side} ${colorName} loaded successfully`);
                         } else {
                             fabricCanvas.renderAll();
-                            console.log(`✅ ${side} ${colorName} loaded`);
                         }
                     }, { scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 });
                 });
             } else {
                 console.warn(`⚠️ Image not found: ${imagePath}`);
-                console.warn(`⚠️ Please check if file exists with exact name: ${imagePath}`);
                 fabricCanvas.setBackgroundColor('#1a1a2e', function() {
                     if (preserveDesign && currentObjects.length > 0) {
                         currentObjects.forEach(obj => fabricCanvas.add(obj));
@@ -1227,7 +1126,16 @@
         if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
         else backDesignJSON = fabricCanvas.toJSON();
         
-        loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true);
+        // For color change, we just change background color, not the image
+        fabricCanvas.setBackgroundColor(selectedColorDisplay === 'White' ? '#f5f5f5' : selectedColorDisplay === 'Black' ? '#1a1a1a' : '#1a1a2e', function() {
+            if (frontDesignJSON && currentSide === 'front') {
+                fabricCanvas.loadFromJSON(frontDesignJSON, () => fabricCanvas.renderAll());
+            } else if (backDesignJSON && currentSide === 'back') {
+                fabricCanvas.loadFromJSON(backDesignJSON, () => fabricCanvas.renderAll());
+            } else {
+                fabricCanvas.renderAll();
+            }
+        });
         showToast(`✓ Color changed to ${selectedColorDisplay}`);
     }
 
@@ -1241,10 +1149,11 @@
         
         if (frontDesignJSON && frontDesignJSON.objects?.length > 0) {
             fabricCanvas.loadFromJSON(frontDesignJSON, () => {
-                loadTshirtImageDynamic(currentStyle.name, selectedColor, 'front', false);
+                fabricCanvas.renderAll();
             });
         } else {
-            loadTshirtImageDynamic(currentStyle.name, selectedColor, 'front', false);
+            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+            fabricCanvas.renderAll();
         }
         updateSummaryElements();
     }
@@ -1259,10 +1168,11 @@
         
         if (backDesignJSON && backDesignJSON.objects?.length > 0) {
             fabricCanvas.loadFromJSON(backDesignJSON, () => {
-                loadTshirtImageDynamic(currentStyle.name, selectedColor, 'back', false);
+                fabricCanvas.renderAll();
             });
         } else {
-            loadTshirtImageDynamic(currentStyle.name, selectedColor, 'back', false);
+            fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
+            fabricCanvas.renderAll();
         }
         updateSummaryElements();
     }
@@ -1273,10 +1183,12 @@
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 550; tempCanvas.height = 600;
             const tempFabric = new fabric.Canvas(tempCanvas);
-            const imagePath = getDynamicImagePath(productName, colorName, side);
+            
+            // Use current style preview image as background
+            const imagePath = currentStyle.previewImg;
             
             await new Promise((resolve) => {
-                loadImageAsDataURL(imagePath, function(dataURL) {
+                loadImageAsDataURL(IMAGE_PATH + imagePath, function(dataURL) {
                     if (dataURL) {
                         fabric.Image.fromURL(dataURL, function(img) {
                             const scale = Math.max(tempCanvas.width / img.width, tempCanvas.height / img.height);
@@ -1365,7 +1277,7 @@
                     <div class="cart-item-details">
                         <div class="cart-item-name">${item.styleName} ✨ Custom</div>
                         <div class="cart-item-price">₹${item.price}</div>
-                        <div class="cart-item-variant">${item.size || 'M'} | ${item.selectedColor || 'White'}</div>
+                        <div class="cart-item-variant">${item.size || 'M'} | ${item.selectedColor || 'Black'}</div>
                         <div class="cart-qty-control">
                             <button class="cart-qty-dec" data-index="${index}">-</button><span>${item.quantity}</span>
                             <button class="cart-qty-inc" data-index="${index}">+</button>
@@ -1481,7 +1393,6 @@
         };
         img.onerror = function() { 
             console.warn(`❌ 404: ${src}`);
-            console.warn(`❌ File not found. Please check if file exists with exact name.`);
             callback(null); 
         };
         img.src = src;
@@ -1671,9 +1582,8 @@
         const grid = document.getElementById('styleGrid');
         grid.innerHTML = tshirtStyles.map(style => `
             <div class="style-card ${style.id === currentStyle.id ? 'active' : ''}" data-id="${style.id}">
-                <div class="style-icon">
-                    <i class="fas fa-tshirt"></i>
-                </div>
+                <img class="style-img" src="${IMAGE_PATH}${style.previewImg}" alt="${style.displayName}" 
+                     onerror="this.src='https://placehold.co/300x300/1a1a2e/D4AF37?text=${encodeURIComponent(style.displayName)}'">
                 <div class="style-name">${style.displayName}</div>
                 <div class="style-price"><i class="fas fa-rupee-sign"></i> ${style.price}</div>
             </div>
@@ -1775,10 +1685,7 @@
     backDesignJSON = null;
     
     console.log("✅ Customize page ready");
-    console.log("📸 If images not loading, check:");
-    console.log("📸 1. Files exist in same folder as HTML");
-    console.log("📸 2. File names match exactly (including spaces and case)");
-    console.log("📸 3. Check console for exact file path being requested");
+    console.log("📸 All products now show preview images in Choose Your Style section");
 </script>
 </body>
 </html>
