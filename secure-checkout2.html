@@ -206,7 +206,7 @@
     </div>
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-      <!-- Custom Design Preview Section -->
+      <!-- Custom Design Preview Section (Only for customized orders) -->
       <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
         <div class="custom-preview-row" id="customPreviewRow">
@@ -249,9 +249,37 @@
   let isCustomizedOrder = false;
   let frontDesignImageURL = null;
   let backDesignImageURL = null;
+  
+  // Product images cache
+  let productImagesCache = {};
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
+
+  // ========== FETCH PRODUCT IMAGES FOR NORMAL ORDERS ==========
+  async function fetchProductImages() {
+    try {
+      const snapshot = await db.collection('products').get();
+      snapshot.forEach(doc => {
+        const product = doc.data();
+        if (product.images && product.images.length > 0) {
+          productImagesCache[product.name] = product.images[0];
+          productImagesCache[doc.id] = product.images[0];
+        }
+      });
+      console.log("📦 Product images cached:", Object.keys(productImagesCache).length);
+    } catch(e) {
+      console.error("Error fetching product images:", e);
+    }
+  }
+  
+  function getProductImage(productName, productId) {
+    // Try to get image by product name first
+    if (productImagesCache[productName]) return productImagesCache[productName];
+    // Try by product ID
+    if (productImagesCache[productId]) return productImagesCache[productId];
+    return null;
+  }
 
   // ========== LOAD CUSTOM CHECKOUT DATA FROM STORAGE ==========
   function loadCustomCheckoutData() {
@@ -266,7 +294,6 @@
         if (customCheckoutData && customCheckoutData.isCustomized === true) {
           isCustomizedOrder = true;
           
-          // Get image URLs - support both old and new format
           frontDesignImageURL = customCheckoutData.frontDesignImage || customCheckoutData.customDesignImage || null;
           backDesignImageURL = customCheckoutData.backDesignImage || null;
           
@@ -274,23 +301,17 @@
           console.log("📸 Front Design Image URL:", frontDesignImageURL);
           console.log("📸 Back Design Image URL:", backDesignImageURL);
           
-          // Show custom preview with both front and back designs
           const previewContainer = document.getElementById('customDesignPreviewContainer');
           const frontPreview = document.getElementById('frontDesignPreview');
           const backPreview = document.getElementById('backDesignPreview');
           
           if (previewContainer && frontPreview && backPreview) {
-            if (frontDesignImageURL) {
-              frontPreview.src = frontDesignImageURL;
-            }
-            if (backDesignImageURL) {
-              backPreview.src = backDesignImageURL;
-            }
+            if (frontDesignImageURL) frontPreview.src = frontDesignImageURL;
+            if (backDesignImageURL) backPreview.src = backDesignImageURL;
             previewContainer.style.display = 'block';
             console.log("✅ Custom design preview displayed");
           }
           
-          // Build cart from custom data
           if (cart.length === 0) {
             cart = [{
               id: 'custom_' + Date.now(),
@@ -309,12 +330,10 @@
         }
       }
       
-      // Also check localStorage for front/back design images separately
       if (!frontDesignImageURL) {
         frontDesignImageURL = localStorage.getItem('frontDesignImage');
         if (frontDesignImageURL) {
           isCustomizedOrder = true;
-          console.log("📸 Found frontDesignImage in localStorage:", frontDesignImageURL);
           const frontPreview = document.getElementById('frontDesignPreview');
           if (frontPreview) frontPreview.src = frontDesignImageURL;
           document.getElementById('customDesignPreviewContainer').style.display = 'block';
@@ -325,7 +344,6 @@
         backDesignImageURL = localStorage.getItem('backDesignImage');
         if (backDesignImageURL) {
           isCustomizedOrder = true;
-          console.log("📸 Found backDesignImage in localStorage:", backDesignImageURL);
           const backPreview = document.getElementById('backDesignPreview');
           if (backPreview) backPreview.src = backDesignImageURL;
           document.getElementById('customDesignPreviewContainer').style.display = 'block';
@@ -473,6 +491,7 @@
       id: item.id, name: item.name, price: item.price, quantity: item.quantity, 
       size: item.size || 'N/A', total: item.price * item.quantity,
       selectedColor: item.selectedColor || 'Black',
+      productImage: item.productImage || null,
       frontDesignImage: frontDesignImageURL || item.frontDesignImage || null,
       backDesignImage: backDesignImageURL || item.backDesignImage || null,
       isCustomized: isCustomizedOrder || item.isCustomized || false
@@ -547,61 +566,7 @@
     razorpay.open(); 
   }
 
-  function loadCart() { 
-    // First, try to load custom checkout data
-    loadCustomCheckoutData();
-    
-    // If customized order exists, cart is already built from custom data
-    if (isCustomizedOrder && cart.length > 0) {
-      console.log("✅ Customized order active, cart loaded from custom data");
-      calculateOnlineDiscount();
-      renderOrderSummary();
-      updateTotalDisplay();
-      return;
-    }
-    
-    // Normal cart loading for regular products
-    const savedCart = localStorage.getItem('vedantaCart');
-    if (savedCart) {
-      try {
-        cart = JSON.parse(savedCart);
-      } catch(e) { cart = []; }
-    }
-    
-    // Also check pendingCheckoutOrder
-    if (cart.length === 0) { 
-      const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
-      if (pendingOrder) {
-        try {
-          const order = JSON.parse(pendingOrder);
-          if (order.customDesignImage) {
-            isCustomizedOrder = true;
-            frontDesignImageURL = order.customDesignImage;
-            cart = [{ 
-              id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, 
-              price: order.price || 1699, quantity: 1, size: order.size || 'M', 
-              frontDesignImage: order.customDesignImage,
-              isCustomized: true
-            }];
-            console.log("✅ Loaded from pendingCheckoutOrder");
-          }
-        } catch(e) {}
-      }
-    }
-    
-    if (cart.length === 0 && !isCustomizedOrder) { 
-      console.log("❌ Cart empty and no custom order, redirecting to home");
-      showToast('Cart empty! Redirecting...', true); 
-      setTimeout(()=> window.location.href='index.html',1500); 
-      return; 
-    }
-    
-    cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0); 
-    calculateOnlineDiscount(); 
-    renderOrderSummary(); 
-    updateTotalDisplay();
-  }
-
+  // ========== RENDER ORDER SUMMARY WITH PRODUCT IMAGES ==========
   async function renderOrderSummary() { 
     const container = document.getElementById('orderItemsList'); 
     if (!container) return; 
@@ -615,12 +580,26 @@
       const infoDiv = document.createElement('div');
       infoDiv.className = 'order-item-info';
       
-      // Check for custom design images
-      const hasCustomDesign = (frontDesignImageURL || backDesignImageURL || item.frontDesignImage || item.backDesignImage);
-      if (hasCustomDesign) {
+      let imageUrl = null;
+      let isCustom = false;
+      
+      // Check for custom design images first
+      if (frontDesignImageURL || backDesignImageURL || item.frontDesignImage || item.backDesignImage || item.isCustomized) {
+        isCustom = true;
+        imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
+      } 
+      // Check if item has product image
+      else if (item.productImage) {
+        imageUrl = item.productImage;
+      }
+      // Try to get product image from cache using product name
+      else if (item.name) {
+        imageUrl = getProductImage(item.name, item.id);
+      }
+      
+      if (imageUrl) {
         const img = document.createElement('img');
-        const designImg = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
-        img.src = designImg;
+        img.src = imageUrl;
         img.style.width = '100%';
         img.style.height = '100%';
         img.style.objectFit = 'cover';
@@ -629,7 +608,14 @@
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
       }
       
-      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p><p>Color: ${item.selectedColor || 'Black'}</p>${hasCustomDesign ? '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>' : ''}`;
+      let designText = '';
+      if (isCustom && (frontDesignImageURL || backDesignImageURL)) {
+        designText = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Front + Back Custom Design</div>';
+      } else if (item.isCustomized || isCustom) {
+        designText = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>';
+      }
+      
+      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p><p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}</p>${designText}`;
       const priceDiv = document.createElement('div');
       priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
@@ -639,6 +625,60 @@
       container.appendChild(itemDiv);
     }
     updateTotalDisplay(); 
+  }
+  
+  function loadCart() { 
+    // First, fetch product images from Firestore
+    fetchProductImages().then(() => {
+      loadCustomCheckoutData();
+      
+      if (isCustomizedOrder && cart.length > 0) {
+        console.log("✅ Customized order active, cart loaded from custom data");
+        calculateOnlineDiscount();
+        renderOrderSummary();
+        updateTotalDisplay();
+        return;
+      }
+      
+      const savedCart = localStorage.getItem('vedantaCart');
+      if (savedCart) {
+        try {
+          cart = JSON.parse(savedCart);
+        } catch(e) { cart = []; }
+      }
+      
+      if (cart.length === 0) { 
+        const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
+        if (pendingOrder) {
+          try {
+            const order = JSON.parse(pendingOrder);
+            if (order.customDesignImage) {
+              isCustomizedOrder = true;
+              frontDesignImageURL = order.customDesignImage;
+              cart = [{ 
+                id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, 
+                price: order.price || 1699, quantity: 1, size: order.size || 'M', 
+                frontDesignImage: order.customDesignImage,
+                isCustomized: true
+              }];
+              console.log("✅ Loaded from pendingCheckoutOrder");
+            }
+          } catch(e) {}
+        }
+      }
+      
+      if (cart.length === 0 && !isCustomizedOrder) { 
+        console.log("❌ Cart empty and no custom order, redirecting to home");
+        showToast('Cart empty! Redirecting...', true); 
+        setTimeout(()=> window.location.href='index.html',1500); 
+        return; 
+      }
+      
+      cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0); 
+      calculateOnlineDiscount(); 
+      renderOrderSummary(); 
+      updateTotalDisplay();
+    });
   }
   
   function calculateOnlineDiscount() { 
@@ -679,7 +719,7 @@
     document.getElementById('displayEmail').innerText = currentUser.email || ''; 
     
     await loadAndRenderAddressSelection();
-    loadCart(); // This will also handle custom checkout data
+    loadCart();
     
     document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateOnlineDiscount(); });
     document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateOnlineDiscount(); });
