@@ -885,36 +885,13 @@
             </div>
             
             <div class="material-tools-box">
-                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE & FABRIC</div>
+                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE & PRINT METHOD</div>
                 
                 <div class="tool-group">
                     <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
                     <select id="sizeSelect">
                         <option value="" disabled selected>-- Select Size --</option>
                         <option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option>
-                    </select>
-                </div>
-                
-                <div class="tool-group">
-                    <label>⚖️ GSM <span style="color:#ff8888;">(Required)</span></label>
-                    <select id="gsmSelect">
-                        <option value="" disabled selected>-- Select GSM --</option>
-                        <option>180 GSM (Light)</option>
-                        <option>220 GSM (Standard)</option>
-                        <option>260 GSM (Heavy)</option>
-                        <option>300 GSM (Premium)</option>
-                    </select>
-                </div>
-                
-                <div class="tool-group">
-                    <label>🧵 Fabric Type <span style="color:#ff8888;">(Required)</span></label>
-                    <select id="fabricSelect">
-                        <option value="" disabled selected>-- Select Fabric --</option>
-                        <option>100% Cotton</option>
-                        <option>Cotton Blend</option>
-                        <option>Polyester</option>
-                        <option>Linen</option>
-                        <option>Organic Cotton</option>
                     </select>
                 </div>
                 
@@ -973,8 +950,6 @@
             <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
             <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
             <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
-            <div class="order-detail"><span>GSM:</span><span id="summaryGSM">--</span></div>
-            <div class="order-detail"><span>Fabric:</span><span id="summaryFabric">--</span></div>
             <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
             <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
             <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
@@ -1053,8 +1028,6 @@
     
     let currentStyle = tshirtStyles[0];
     let currentSize = null;
-    let currentGSM = null;
-    let currentFabric = null;
     let currentPrintMethod = null;
     let fabricCanvas = null;
     let pendingBuyAfterLogin = false;
@@ -1746,11 +1719,9 @@
         document.getElementById('summaryStyle').innerText = currentStyle.displayName;
         document.getElementById('summaryColor').innerText = selectedColorDisplay;
         document.getElementById('summarySize').innerText = currentSize || '--';
-        document.getElementById('summaryGSM').innerText = currentGSM || '--';
-        document.getElementById('summaryFabric').innerText = currentFabric || '--';
+        document.getElementById('summaryPrintMethod').innerHTML = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected');
         document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`;
         updateSummaryElements();
-        updatePrintSummary();
     }
     
     function showToast(msg, isErr = false) {
@@ -1801,7 +1772,7 @@
     }
 
     async function addCurrentDesignToCart() {
-        if (!currentSize || !currentGSM || !currentFabric) { showToast('Please select Size, GSM and Fabric first', true); return false; }
+        if (!currentSize) { showToast('Please select Size first', true); return false; }
         if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
         else backDesignJSON = fabricCanvas.toJSON();
         
@@ -1813,7 +1784,7 @@
             id: Date.now(), styleId: currentStyle.id, styleName: currentStyle.displayName,
             price: currentStyle.price, frontDesignImage: frontURL, backDesignImage: backURL,
             frontDesignJSON: frontDesignJSON, backDesignJSON: backDesignJSON,
-            isCustomized: true, size: currentSize, gsm: currentGSM, fabric: currentFabric,
+            isCustomized: true, size: currentSize,
             printMethod: currentPrintMethod || 'transparent', selectedColor: selectedColorDisplay,
             selectedColorKey: selectedColor, quantity: 1
         });
@@ -1848,7 +1819,7 @@
         const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
         const currentUser = user || storedUser;
         if (!currentUser) { pendingBuyAfterLogin = true; openLoginModal(); showToast('Please login first', false); return; }
-        if(!currentSize || !currentGSM || !currentFabric) { showToast('Please select Size, GSM and Fabric first', true); return; }
+        if(!currentSize) { showToast('Please select Size first', true); return; }
         
         if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
         else backDesignJSON = fabricCanvas.toJSON();
@@ -1860,8 +1831,9 @@
         localStorage.setItem('customCheckoutData', JSON.stringify({
             isCustomized: true, frontDesignImage: frontURL, backDesignImage: backURL,
             tshirtType: currentStyle.displayName, selectedColor: selectedColorDisplay,
-            selectedColorKey: selectedColor, size: currentSize, gsm: currentGSM,
-            fabric: currentFabric, quantity: 1, price: currentStyle.price
+            selectedColorKey: selectedColor, size: currentSize,
+            printMethod: currentPrintMethod || 'transparent',
+            quantity: 1, price: currentStyle.price
         }));
         
         const hasAddress = await checkUserHasSavedAddress();
@@ -1876,8 +1848,6 @@
     });
     
     document.getElementById('sizeSelect')?.addEventListener('change', (e) => { currentSize = e.target.value; updateSummary(); });
-    document.getElementById('gsmSelect')?.addEventListener('change', (e) => { currentGSM = e.target.value; updateSummary(); });
-    document.getElementById('fabricSelect')?.addEventListener('change', (e) => { currentFabric = e.target.value; updateSummary(); });
     
     document.getElementById('glowBtn')?.addEventListener('click', applyGlow);
     document.getElementById('roundedBtn')?.addEventListener('click', applyRounded);
