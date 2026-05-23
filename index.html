@@ -808,7 +808,7 @@
             overflow: hidden;
         }
 
-        /* ===== NEW: Size Selection Modal (added without changing any existing style) ===== */
+        /* Size Selection Modal */
         .size-modal {
             display: none;
             position: fixed;
@@ -863,7 +863,7 @@
 </head>
 <body>
 
-<!-- ===== ALL ORIGINAL HTML ELEMENTS - NO CHANGES ===== -->
+<!-- ALL ORIGINAL HTML ELEMENTS -->
 <div class="floating-cart" id="floatingCart">
     <div class="cart-icon-container"><i class="fas fa-shopping-cart"></i><span class="cart-count" id="cartCount">0</span></div>
 </div>
@@ -879,7 +879,7 @@
     <div class="cart-footer"><div class="cart-total"><span>Total:</span><span id="cartTotal">₹0</span></div><button class="checkout-btn" id="checkoutBtn">💰 Proceed to Checkout</button></div>
 </div>
 
-<!-- Size Selection Modal (added) -->
+<!-- Size Selection Modal -->
 <div id="sizeModal" class="size-modal"><div class="size-modal-content"><h3><i class="fas fa-tshirt"></i> Select Size</h3><div class="size-options" id="sizeOptionsContainer"><div class="size-btn" data-size="S">S</div><div class="size-btn" data-size="M">M</div><div class="size-btn" data-size="L">L</div><div class="size-btn" data-size="XL">XL</div><div class="size-btn" data-size="XXL">XXL</div></div><button class="size-confirm-btn" id="confirmSizeBtn">Confirm & Continue</button></div></div>
 
 <div class="login-modal" id="loginModal">
@@ -955,7 +955,7 @@
 <div class="toast" id="toastMsg"></div>
 
 <script>
-    // Firebase config (unchanged)
+    // Firebase config
     const firebaseConfig = { 
         apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", 
         authDomain: "nexi-53897.firebaseapp.com", 
@@ -973,11 +973,116 @@
     let promoCurrentIndex = 0, promoInterval = null, promoTotal = 2;
     let modalRecaptchaVerifier = null, modalConfirmationResult = null, pendingBuyProduct = null, modalCountdownTimer = null;
     
-    // ===== NEW: Size selection variables =====
+    // Size selection variables
     let selectedSize = null;
-    let pendingActionProduct = null;   // { product, actionType } where actionType = 'add' or 'buy'
+    let pendingActionProduct = null;
     
-    // ===== NEW: Size Modal Functions =====
+    // ===== INTELLIGENT CHECKOUT ROUTING =====
+    // Function to check if user has saved address in Firestore
+    async function checkUserHasSavedAddress(phoneNumber) {
+        if (!phoneNumber) return false;
+        try {
+            // Query Firestore to check if any address exists for this phone number
+            const addressesQuery = await db.collection('addresses')
+                .where('phone', '==', phoneNumber)
+                .limit(1)
+                .get();
+            return !addressesQuery.empty;
+        } catch (error) {
+            console.error("Error checking address:", error);
+            return false;
+        }
+    }
+    
+    // Function to redirect to appropriate checkout page
+    async function redirectToCheckout() {
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        if (currentUser && currentUser.phone) {
+            const hasAddress = await checkUserHasSavedAddress(currentUser.phone);
+            if (hasAddress) {
+                window.location.href = 'secure-checkout2.html';
+            } else {
+                window.location.href = 'secure-checkout.html';
+            }
+        } else {
+            // User not logged in, will redirect after login
+            pendingCartCheckout = true;
+            openLoginModal();
+        }
+    }
+    
+    // Modified buyNowWithSize to check address before redirect
+    async function buyNowWithSize(product, size) {
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        if (currentUser && currentUser.phone) {
+            // Save cart with selected product and size
+            const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1, selectedSize: size }];
+            localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+            
+            // Check if user has saved address
+            const hasAddress = await checkUserHasSavedAddress(currentUser.phone);
+            if (hasAddress) {
+                window.location.href = 'secure-checkout2.html';
+            } else {
+                window.location.href = 'secure-checkout.html';
+            }
+        } else {
+            // Store product and size for after login
+            pendingBuyProduct = { ...product, selectedSize: size };
+            openLoginModal();
+        }
+    }
+    
+    // Modified checkout function for cart
+    let pendingCartCheckout = false;
+    async function checkoutWithSmartRedirect() {
+        const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
+        if (currentCart.length === 0) {
+            showToastMessage('🛒 Cart is empty!', true);
+            return;
+        }
+        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
+        if (currentUser && currentUser.phone) {
+            const hasAddress = await checkUserHasSavedAddress(currentUser.phone);
+            if (hasAddress) {
+                window.location.href = 'secure-checkout2.html';
+            } else {
+                window.location.href = 'secure-checkout.html';
+            }
+        } else {
+            pendingCartCheckout = true;
+            openLoginModal();
+        }
+    }
+    
+    // Modified login success handler to redirect to appropriate checkout
+    async function handleLoginSuccess(user) {
+        localStorage.setItem('vedantaUser', JSON.stringify({ phone: user.phoneNumber, email: user.email || '' }));
+        showToastMessage('✅ Login Successful!');
+        closeLoginModal();
+        
+        if (pendingBuyProduct) {
+            const tempCart = [{ id: pendingBuyProduct.id, name: pendingBuyProduct.name, price: pendingBuyProduct.price, quantity: 1, selectedSize: pendingBuyProduct.selectedSize }];
+            localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+            const hasAddress = await checkUserHasSavedAddress(user.phoneNumber);
+            if (hasAddress) {
+                window.location.href = 'secure-checkout2.html';
+            } else {
+                window.location.href = 'secure-checkout.html';
+            }
+            pendingBuyProduct = null;
+        } else if (pendingCartCheckout) {
+            const hasAddress = await checkUserHasSavedAddress(user.phoneNumber);
+            if (hasAddress) {
+                window.location.href = 'secure-checkout2.html';
+            } else {
+                window.location.href = 'secure-checkout.html';
+            }
+            pendingCartCheckout = false;
+        }
+    }
+    
+    // Size Modal Functions
     function openSizeModal(product, actionType) {
         pendingActionProduct = { product: product, actionType: actionType };
         selectedSize = null;
@@ -989,7 +1094,7 @@
         pendingActionProduct = null;
         selectedSize = null;
     }
-    // Size button click handlers
+    
     document.querySelectorAll('.size-btn').forEach(btn => {
         btn.addEventListener('click', function() {
             document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
@@ -1012,7 +1117,6 @@
         closeSizeModal();
     });
     
-    // Modified addToCart to include size
     function addToCartWithSize(product, size) {
         const existing = cart.find(item => item.id == product.id && item.selectedSize === size);
         if (existing) {
@@ -1024,30 +1128,7 @@
         showToastMessage(`🛍️ ${product.name} (${size}) added!`);
     }
     
-    // Modified buyNow to include size and use real OTP login
-    function buyNowWithSize(product, size) {
-        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (currentUser && currentUser.phone) {
-            const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1, selectedSize: size }];
-            localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-            window.location.href = 'secure-checkout.html';
-        } else {
-            // Store product and size for after login
-            pendingBuyProduct = { ...product, selectedSize: size };
-            openLoginModal();
-        }
-    }
-    
-    // Original addToCart (without size) - we will override product buttons to use size modal
-    function originalAddToCart(product) {
-        const existing = cart.find(item => item.id == product.id && !item.selectedSize);
-        if (existing) { existing.quantity++; } 
-        else { cart.push({ ...product, quantity: 1 }); }
-        saveCart(); 
-        showToastMessage(`🛍️ ${product.name} added!`);
-    }
-    
-    // ===== REAL FIREBASE OTP SYSTEM =====
+    // Real Firebase OTP functions
     function initRecaptcha() {
         if (!modalRecaptchaVerifier) {
             modalRecaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container-modal', { size: 'invisible' });
@@ -1076,19 +1157,7 @@
         }
         try {
             const result = await modalConfirmationResult.confirm(code);
-            const user = result.user;
-            localStorage.setItem('vedantaUser', JSON.stringify({ phone: user.phoneNumber, email: user.email || '' }));
-            showToastMessage('✅ Login Successful!');
-            closeLoginModal();
-            if (pendingBuyProduct) {
-                const tempCart = [{ id: pendingBuyProduct.id, name: pendingBuyProduct.name, price: pendingBuyProduct.price, quantity: 1, selectedSize: pendingBuyProduct.selectedSize }];
-                localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-                window.location.href = 'secure-checkout.html';
-                pendingBuyProduct = null;
-            } else if (pendingCartCheckout) {
-                window.location.href = 'secure-checkout.html';
-                pendingCartCheckout = false;
-            }
+            await handleLoginSuccess(result.user);
         } catch (error) {
             showToastMessage('❌ Invalid OTP. Please try again.', true);
         }
@@ -1110,7 +1179,6 @@
         }, 1000);
     }
     
-    let pendingCartCheckout = false;
     function openLoginModal(product = null) {
         if (product) pendingBuyProduct = product;
         else pendingBuyProduct = null;
@@ -1123,26 +1191,9 @@
         document.getElementById('modalOtpInput').value = '';
         document.getElementById('modalPhoneInput').value = '';
         if (modalCountdownTimer) clearInterval(modalCountdownTimer);
-        pendingBuyProduct = null;
     }
     
-    // Modified checkout to use real OTP
-    async function checkoutWithSmartRedirect() {
-        const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
-        if (currentCart.length === 0) {
-            showToastMessage('🛒 Cart is empty!', true);
-            return;
-        }
-        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (currentUser && currentUser.phone) {
-            window.location.href = 'secure-checkout.html';
-        } else {
-            pendingCartCheckout = true;
-            openLoginModal();
-        }
-    }
-    
-    // ===== MODIFIED renderProducts: override ADD and BUY NOW to show size popup =====
+    // Render products with size selection
     function renderProducts() {
         const container = document.getElementById('productsContainer');
         if (!container) return;
@@ -1160,7 +1211,6 @@
             const firstImage = hasImage ? p.images[0] : null;
             container.innerHTML += `<div class="product-card" onclick="window.goToProductDetail('${p.id}')"><div class="product-img">${hasImage ? `<img src="${firstImage}" alt="${escapeHtml(p.name)}" loading="lazy">` : `<i class="fas ${p.icon || 'fa-gem'}"></i>`}<div class="badge-offer">${p.badge || 'New'}</div></div><div class="product-info"><div class="product-title">${escapeHtml(p.name)}</div><div class="product-category">${p.category || 'General'}</div><div class="product-price">₹${(p.price || 0).toLocaleString('en-IN')}</div><div class="product-buttons"><button class="buynow-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fas fa-bolt"></i> BUY NOW</button><button class="cart-btn" data-id="${p.id}" data-name="${escapeHtml(p.name)}" data-price="${p.price || 0}"><i class="fa-regular fa-bag-shopping"></i> ADD</button></div></div></div>`;
         });
-        // Attach event listeners for ADD button -> show size popup
         document.querySelectorAll('.cart-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1168,7 +1218,6 @@
                 openSizeModal(product, 'add');
             });
         });
-        // Attach event listeners for BUY NOW button -> show size popup
         document.querySelectorAll('.buynow-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
                 e.stopPropagation();
@@ -1178,7 +1227,7 @@
         });
     }
     
-    // ===== ALL OTHER ORIGINAL FUNCTIONS (unchanged) =====
+    // Utility functions
     function showToastMessage(msg, isError = false) { 
         let toast = document.getElementById('toastMsg'); 
         if(toast){ toast.innerText = msg; toast.style.background = isError ? '#F44336' : '#D4AF37'; toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500); } 
@@ -1193,7 +1242,7 @@
         let total = 0; cartItemsDiv.innerHTML = ''; 
         cart.forEach((item,idx)=>{ 
             const itemTotal = item.price * item.quantity; total += itemTotal; 
-            cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)}</h4>${item.combo?`<div class="combo-tag">${escapeHtml(item.combo)}</div>`:''}<p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p><div style="font-size:10px; color:#FFB347;">Size: ${item.selectedSize || 'M'}</div></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`; 
+            cartItemsDiv.innerHTML += `<div class="cart-item"><div class="cart-item-info"><h4>${escapeHtml(item.name)}</h4><p>₹${item.price} x ${item.quantity} = ₹${itemTotal}</p><div style="font-size:10px; color:#FFB347;">Size: ${item.selectedSize || 'M'}</div></div><div class="cart-item-actions"><button class="cart-qty-btn" data-action="decr" data-index="${idx}">-</button><span class="cart-qty">${item.quantity}</span><button class="cart-qty-btn" data-action="incr" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}"><i class="fas fa-trash"></i></button></div></div>`; 
         }); 
         document.querySelectorAll('.cart-qty-btn').forEach(btn=>{ 
             btn.addEventListener('click',(e)=>{ e.stopPropagation(); const idx = parseInt(btn.dataset.index); const action = btn.dataset.action; if(action==='incr') updateCartQuantity(idx, cart[idx].quantity + 1); else if(action==='decr') updateCartQuantity(idx, cart[idx].quantity - 1); }); 
@@ -1225,7 +1274,7 @@
     document.getElementById('customizeImageArea')?.addEventListener('click', () => window.location.href = 'customized-t-shirt.html');
     window.goToProductDetail = (id) => { localStorage.setItem('vedanta_selected_product_id', id); window.location.href = 'product-detail.html'; };
     
-    // Login Modal Event Listeners (Real OTP)
+    // Login Modal Event Listeners
     document.getElementById('closeModalBtn')?.addEventListener('click', closeLoginModal);
     document.getElementById('modalBackBtn')?.addEventListener('click', () => { 
         document.getElementById('modalPhoneSection').style.display = 'block'; 
@@ -1249,7 +1298,7 @@
         await sendOTP(phone); 
     });
     
-    // Chatbot (unchanged)
+    // Chatbot (unchanged from original)
     let currentLang = 'en', waitingForSatisfaction = false, lastSelectedTopic = null;
     const whatsappNumber = '916306128837';
     const faqData = { en: { how_to_order: "🛍️ How to Order...", check_order: "🔍 Check Order Status...", privacy_policy: "🔒 Privacy Policy...", return_days: "📦 Return Policy...", delivery_time: "🚚 Delivery Time...", packing: "🎁 Premium Packing...", cod: "💰 Cash on Delivery..." }, hi: { how_to_order: "🛍️ ऑर्डर कैसे करें...", check_order: "🔍 ऑर्डर स्टेटस चेक करें...", privacy_policy: "🔒 प्राइवेसी पॉलिसी...", return_days: "📦 रिटर्न पॉलिसी...", delivery_time: "🚚 डिलीवरी का समय...", packing: "🎁 प्रीमियम पैकिंग...", cod: "💰 कैश ऑन डिलीवरी..." } };
