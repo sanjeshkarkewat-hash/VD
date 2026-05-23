@@ -251,8 +251,8 @@
             background: rgba(212,175,55,0.05);
         }
         .order-item-img {
-            width: 65px;
-            height: 65px;
+            width: 70px;
+            height: 70px;
             background: #0E0E14;
             border-radius: 14px;
             display: flex;
@@ -300,6 +300,17 @@
             border-radius: 50%;
             display: inline-block;
             border: 1px solid rgba(255,255,255,0.2);
+        }
+        .custom-badge-order {
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 9px;
+            color: #D4AF37;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 4px;
         }
         .combo-badge-order {
             background: #4CAF50;
@@ -572,7 +583,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    // ========== FIREBASE CONFIGURATION - UPDATED (NEW CONFIG) ==========
+    // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
         authDomain: "nexi-53897.firebaseapp.com",
@@ -622,6 +633,43 @@
     function getOrderIdFromUrl() {
         const urlParams = new URLSearchParams(window.location.search);
         return urlParams.get('orderId');
+    }
+    
+    // ========== FIXED: Get product image for custom designs ==========
+    function getProductImageForItem(item, order) {
+        // Priority 1: Check item level custom images
+        if (item) {
+            if (item.frontDesignImage) return item.frontDesignImage;
+            if (item.backDesignImage) return item.backDesignImage;
+            if (item.designImage) return item.designImage;
+            if (item.isCustomized === true && item.designImage) return item.designImage;
+        }
+        
+        // Priority 2: Check order level design images
+        if (order) {
+            if (order.frontDesignImage) return order.frontDesignImage;
+            if (order.backDesignImage) return order.backDesignImage;
+            if (order.customDesignImage) return order.customDesignImage;
+            if (order.isCustomized === true && order.customDesignImage) return order.customDesignImage;
+        }
+        
+        // Priority 3: Check from products cache
+        if (item && item.id) {
+            const prod = productsCache.get(item.id);
+            if (prod && prod.images && prod.images.length > 0) {
+                return prod.images[0];
+            }
+        }
+        
+        return null;
+    }
+    
+    function isCustomizedItem(item, order) {
+        if (order && order.isCustomized === true) return true;
+        if (item && item.isCustomized === true) return true;
+        if (order && (order.frontDesignImage || order.backDesignImage || order.customDesignImage)) return true;
+        if (item && (item.frontDesignImage || item.backDesignImage || item.designImage)) return true;
+        return false;
     }
     
     function getDeliveryDate() {
@@ -700,15 +748,6 @@
         const orderId = getOrderIdFromUrl();
         if (!orderId) return false;
         
-        const cachedOrders = sessionStorage.getItem('vedanta_orders_fast');
-        if (cachedOrders) {
-            try {
-                const orders = JSON.parse(cachedOrders);
-                const cached = orders.find(o => (o.orderId === orderId || o.id === orderId));
-                if (cached) { currentOrder = cached; return true; }
-            } catch(e) {}
-        }
-        
         try {
             const doc = await db.collection('orders').doc(orderId).get();
             if (doc.exists) {
@@ -785,7 +824,6 @@
         } catch(e) { showToast("Failed to cancel", true); }
     }
     
-    // Redirect to return.html with same orderId (preserves original order for new return request)
     function goToReturn() {
         const orderId = currentOrder?.orderId || currentOrder?.id;
         if (orderId) {
@@ -793,11 +831,6 @@
         } else {
             showToast("Order ID not found", true);
         }
-    }
-    
-    function getProductImage(id) {
-        const prod = productsCache.get(id);
-        return prod?.images?.[0] || null;
     }
     
     function getStatusLabel(status) {
@@ -833,26 +866,43 @@
             }).join('')}</div>`;
         }
         
+        // ========== FIXED: Render items with custom design images ==========
         const itemsHtml = (currentOrder.items || []).map(item => {
-            const img = getProductImage(item.id);
+            const productImg = getProductImageForItem(item, currentOrder);
+            const isCustom = isCustomizedItem(item, currentOrder);
             const selectedSize = item.size || item.selectedSize || '';
             const selectedColor = item.color || item.selectedColor || '';
             const colorCode = getColorCode(selectedColor);
             const comboInfo = item.combo || '';
+            
             let comboHtml = '';
             if (comboInfo) {
                 comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> ${escapeHtml(comboInfo)}</div>`;
             } else if (item.isCombo && item.comboMultiplier) {
                 comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> Combo Pack (${item.comboMultiplier} items per pack)</div>`;
             }
+            
+            let customBadgeHtml = '';
+            if (isCustom) {
+                customBadgeHtml = `<div class="custom-badge-order"><i class="fas fa-palette"></i> Custom Designed</div>`;
+            }
+            
+            let imageHtml = '';
+            if (productImg) {
+                imageHtml = `<img src="${productImg}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fas fa-gem\'></i>';">`;
+            } else {
+                imageHtml = `<i class="fas fa-gem"></i>`;
+            }
+            
             return `<div class="order-item">
-                <div class="order-item-img">${img ? `<img src="${img}" alt="${escapeHtml(item.name)}" loading="lazy">` : `<i class="fas fa-gem"></i>`}</div>
+                <div class="order-item-img">${imageHtml}</div>
                 <div class="order-item-info">
                     <div class="order-item-name">${escapeHtml(item.name)}</div>
                     <div class="item-attributes">
                         ${selectedSize ? `<span class="size-badge"><i class="fas fa-tshirt"></i> ${escapeHtml(selectedSize)}</span>` : ''}
                         ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background: ${colorCode};"></span> ${escapeHtml(selectedColor)}</span>` : ''}
                     </div>
+                    ${customBadgeHtml}
                     ${comboHtml}
                     <div class="order-item-qty">Qty: ${item.quantity}</div>
                 </div>
