@@ -189,6 +189,18 @@
             font-size: 12px;
             color: #D4AF37;
         }
+        .custom-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
+            padding: 4px 12px;
+            border-radius: 40px;
+            font-size: 10px;
+            font-weight: 600;
+            color: #D4AF37;
+            margin-top: 8px;
+        }
         .status-badge {
             display: inline-flex;
             align-items: center;
@@ -438,7 +450,7 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    // ========== 🔥 FIREBASE CONFIGURATION - NEW CONFIG ==========
+    // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
         authDomain: "nexi-53897.firebaseapp.com",
@@ -521,14 +533,54 @@
         return productsCache;
     }
     
-    function getProductImage(productId) {
-        const prod = productsCache.get(productId);
-        return (prod && prod.images && prod.images.length > 0) ? prod.images[0] : null;
+    // ========== FIXED: Get product image - supports custom designs ==========
+    function getProductImageForOrder(item, order) {
+        // Priority 1: Check if this is a customized order with front design image
+        if (order && order.isCustomized === true) {
+            if (order.frontDesignImage) return order.frontDesignImage;
+            if (order.customDesignImage) return order.customDesignImage;
+        }
+        
+        // Priority 2: Check item level custom images
+        if (item) {
+            if (item.frontDesignImage) return item.frontDesignImage;
+            if (item.backDesignImage) return item.backDesignImage;
+            if (item.designImage) return item.designImage;
+            if (item.isCustomized === true && item.designImage) return item.designImage;
+        }
+        
+        // Priority 3: Check order level design images
+        if (order) {
+            if (order.frontDesignImage) return order.frontDesignImage;
+            if (order.backDesignImage) return order.backDesignImage;
+            if (order.customDesignImage) return order.customDesignImage;
+        }
+        
+        // Priority 4: Check from products cache
+        if (item && item.id) {
+            const prod = productsCache.get(item.id);
+            if (prod && prod.images && prod.images.length > 0) {
+                return prod.images[0];
+            }
+        }
+        
+        return null;
     }
     
-    function getProductIcon(productId) {
-        const prod = productsCache.get(productId);
-        return (prod && prod.icon) ? prod.icon : 'fa-gem';
+    function getProductIconForOrder(item) {
+        if (item && item.id) {
+            const prod = productsCache.get(item.id);
+            if (prod && prod.icon) return prod.icon;
+        }
+        return 'fa-tshirt';
+    }
+    
+    function isCustomizedOrder(order, item) {
+        if (order && order.isCustomized === true) return true;
+        if (item && item.isCustomized === true) return true;
+        if (order && (order.frontDesignImage || order.backDesignImage || order.customDesignImage)) return true;
+        if (item && (item.frontDesignImage || item.backDesignImage || item.designImage)) return true;
+        return false;
     }
     
     function getStatusClass(status) {
@@ -565,7 +617,6 @@
         });
     }
     
-    // ✅ FIXED: Phone number se bhi orders fetch honge
     async function fetchOrdersForUser() {
         if (!currentUser) return [];
         
@@ -573,7 +624,7 @@
         const seenOrderIds = new Set();
         
         try {
-            // Query 1: By customerPhone (most common)
+            // Query by customerPhone
             if (currentUser.phone) {
                 const phoneSnapshot = await db.collection('orders')
                     .where('customerPhone', '==', currentUser.phone)
@@ -589,7 +640,7 @@
                 console.log(`✅ Found ${phoneSnapshot.size} orders by phone: ${currentUser.phone}`);
             }
             
-            // Query 2: By customerEmail
+            // Query by customerEmail
             if (currentUser.email) {
                 const emailSnapshot = await db.collection('orders')
                     .where('customerEmail', '==', currentUser.email)
@@ -602,32 +653,30 @@
                         orders.push({ id: doc.id, ...doc.data() });
                     }
                 });
-                console.log(`✅ Found ${emailSnapshot.size} orders by email: ${currentUser.email}`);
+                console.log(`✅ Found ${emailSnapshot.size} orders by email`);
             }
             
-            // Query 3: By userEmail (optional)
-            if (currentUser.email) {
-                const userEmailSnapshot = await db.collection('orders')
-                    .where('userEmail', '==', currentUser.email)
+            // Query by userId
+            if (currentUser.uid) {
+                const uidSnapshot = await db.collection('orders')
+                    .where('userId', '==', currentUser.uid)
                     .orderBy('orderDate', 'desc')
                     .get();
                 
-                userEmailSnapshot.forEach(doc => {
+                uidSnapshot.forEach(doc => {
                     if (!seenOrderIds.has(doc.id)) {
                         seenOrderIds.add(doc.id);
                         orders.push({ id: doc.id, ...doc.data() });
                     }
                 });
-                console.log(`✅ Found ${userEmailSnapshot.size} orders by userEmail`);
+                console.log(`✅ Found ${uidSnapshot.size} orders by userId`);
             }
             
         } catch(e) {
             console.error("Error fetching orders:", e);
         }
         
-        // Sort by date descending
         orders.sort((a, b) => new Date(b.orderDate) - new Date(a.orderDate));
-        
         return orders;
     }
     
@@ -658,9 +707,12 @@
         
         container.innerHTML = '';
         filtered.forEach((order, index) => {
-            const mainItem = order.items && order.items[0] ? order.items[0] : { id: 0, name: 'Product', price: order.total || 0, quantity: 1 };
-            const productImgUrl = getProductImage(mainItem.id);
-            const iconClass = getProductIcon(mainItem.id);
+            const mainItem = order.items && order.items[0] ? order.items[0] : { id: null, name: 'Product', price: order.total || 0, quantity: 1 };
+            
+            // Get the correct image URL for display
+            const productImgUrl = getProductImageForOrder(mainItem, order);
+            const isCustom = isCustomizedOrder(order, mainItem);
+            const iconClass = getProductIconForOrder(mainItem);
             const statusClass = getStatusClass(order.status);
             const statusLabel = getStatusLabel(order.status);
             const priceAmount = order.total || (mainItem.price * mainItem.quantity);
@@ -673,9 +725,17 @@
             else if (order.status === 'confirmed') statusIcon = 'fa-check';
             else if (order.status === 'shipped') statusIcon = 'fa-truck';
             
-            const imageHtml = productImgUrl 
-                ? `<img src="${productImgUrl}" alt="${escapeHtml(mainItem.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;">` 
-                : `<i class="fas ${iconClass}"></i>`;
+            // Build image HTML - priority to custom design image
+            let imageHtml = '';
+            if (productImgUrl) {
+                imageHtml = `<img src="${productImgUrl}" alt="${escapeHtml(mainItem.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:20px;" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fas ${iconClass}\'></i>';">`;
+            } else {
+                imageHtml = `<i class="fas ${iconClass}" style="font-size:44px;color:#D4AF37;"></i>`;
+            }
+            
+            // Custom design badge
+            const customBadgeHtml = isCustom ? 
+                `<div class="custom-badge"><i class="fas fa-palette"></i> Custom Designed</div>` : '';
             
             container.innerHTML += `
                 <div class="booking-card" style="animation-delay: ${index * 0.05}s">
@@ -689,6 +749,7 @@
                                 <span><i class="fas fa-hashtag"></i> ${escapeHtml(orderIdDisplay)}</span>
                                 <span><i class="far fa-calendar-alt"></i> ${orderDate}</span>
                             </div>
+                            ${customBadgeHtml}
                             <div class="status-badge ${statusClass}">
                                 <i class="fas ${statusIcon}"></i> ${statusLabel}
                             </div>
@@ -765,11 +826,11 @@
         
         console.log(`✅ Loaded ${orders.length} total orders`);
         
-        if (orders.length === 0) {
-            console.log("No orders found for this user");
+        if (orders.length > 0) {
+            console.log("📦 Sample order custom data:", orders[0].isCustomized, orders[0].frontDesignImage ? "Has front image" : "No front image");
         }
         
-        // Real-time listener for phone number
+        // Real-time listener
         if (currentUser.phone) {
             db.collection('orders')
                 .where('customerPhone', '==', currentUser.phone)
