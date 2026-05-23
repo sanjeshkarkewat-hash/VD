@@ -1130,29 +1130,42 @@
     }
 
     async function saveDesignImageToFirebase(side, designJSON, productName, colorName) {
-        if (!designJSON) return null;
+        if (!designJSON || (designJSON.objects && designJSON.objects.length === 0)) return null;
         try {
             const tempCanvas = document.createElement('canvas');
             tempCanvas.width = 550; tempCanvas.height = 600;
             const tempFabric = new fabric.Canvas(tempCanvas);
             const imagePath = getDynamicImagePath(productName, colorName, side);
+            
+            // Ensure background loads before serializing
             await new Promise((resolve) => {
                 loadImageAsDataURL(imagePath, function(dataURL) {
                     if (dataURL) {
                         fabric.Image.fromURL(dataURL, function(img) {
                             const scale = Math.max(tempCanvas.width / img.width, tempCanvas.height / img.height);
                             tempFabric.setBackgroundImage(img, () => {
-                                tempFabric.loadFromJSON(designJSON, () => { tempFabric.renderAll(); resolve(); });
+                                // Load design after background is set
+                                tempFabric.loadFromJSON(designJSON, () => {
+                                    tempFabric.renderAll();
+                                    // Give a small delay for fabric to finish rendering
+                                    setTimeout(resolve, 100);
+                                });
                             }, { scaleX: scale, scaleY: scale });
-                        });
+                        }, { crossOrigin: 'Anonymous' });
                     } else {
                         tempFabric.setBackgroundColor('#1a1a2e', () => {
-                            tempFabric.loadFromJSON(designJSON, () => { tempFabric.renderAll(); resolve(); });
+                            tempFabric.loadFromJSON(designJSON, () => {
+                                tempFabric.renderAll();
+                                setTimeout(resolve, 100);
+                            });
                         });
                     }
                 });
             });
+            
             const dataURL = tempFabric.toDataURL({ format: 'png', quality: 1, multiplier: 2 });
+            if (!dataURL || dataURL === 'data:,') return null;
+            
             const blob = dataURLToBlob(dataURL);
             const fileName = `${side}_${productName.replace(/\s/g, '_')}_${colorName}_${Date.now()}.png`;
             const designRef = storageRef.child(`custom-designs/${side}/${fileName}`);
@@ -1160,7 +1173,10 @@
             const downloadURL = await designRef.getDownloadURL();
             tempFabric.dispose();
             return downloadURL;
-        } catch (error) { return null; }
+        } catch (error) {
+            console.error("Save image error:", error);
+            return null;
+        }
     }
 
     function dataURLToBlob(dataURL) {
@@ -1173,13 +1189,33 @@
     async function saveBothDesigns() {
         if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
         else backDesignJSON = fabricCanvas.toJSON();
-        showToast("📸 Saving front design...");
-        const frontURL = await saveDesignImageToFirebase('front', frontDesignJSON, currentStyle.name, selectedColor);
-        if (frontURL) { frontDesignImageURL = frontURL; document.getElementById('summaryFront').innerHTML = '<i class="fas fa-check-circle"></i> Custom'; }
-        showToast("📸 Saving back design...");
-        const backURL = await saveDesignImageToFirebase('back', backDesignJSON, currentStyle.name, selectedColor);
-        if (backURL) { backDesignImageURL = backURL; document.getElementById('summaryBack').innerHTML = '<i class="fas fa-check-circle"></i> Custom'; }
-        if (frontURL && backURL) showToast("✅ Both designs saved!");
+        
+        let frontURL = null, backURL = null;
+        
+        if (frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0) {
+            showToast("📸 Saving front design...");
+            frontURL = await saveDesignImageToFirebase('front', frontDesignJSON, currentStyle.name, selectedColor);
+            if (frontURL) { frontDesignImageURL = frontURL; document.getElementById('summaryFront').innerHTML = '<i class="fas fa-check-circle"></i> Custom'; }
+            else { showToast("Front design save failed", true); return null; }
+        } else {
+            document.getElementById('summaryFront').innerHTML = 'None';
+        }
+        
+        if (backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0) {
+            showToast("📸 Saving back design...");
+            backURL = await saveDesignImageToFirebase('back', backDesignJSON, currentStyle.name, selectedColor);
+            if (backURL) { backDesignImageURL = backURL; document.getElementById('summaryBack').innerHTML = '<i class="fas fa-check-circle"></i> Custom'; }
+            else { showToast("Back design save failed", true); return null; }
+        } else {
+            document.getElementById('summaryBack').innerHTML = 'None';
+        }
+        
+        if ((frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0 && !frontURL) ||
+            (backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0 && !backURL)) {
+            return null;
+        }
+        
+        showToast("✅ Designs saved successfully!");
         return { frontURL, backURL };
     }
 
@@ -1189,11 +1225,24 @@
         try {
             if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
             else backDesignJSON = fabricCanvas.toJSON();
-            const { frontURL, backURL } = await saveBothDesigns();
-            if (!frontURL || !backURL) { showToast('Failed to save designs', true); return false; }
+            
+            // Only save if there is actual design content
+            let hasFrontDesign = frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0;
+            let hasBackDesign = backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0;
+            
+            let frontURL = null, backURL = null;
+            if (hasFrontDesign) {
+                frontURL = await saveDesignImageToFirebase('front', frontDesignJSON, currentStyle.name, selectedColor);
+                if (!frontURL) { showToast('Failed to save front design', true); return false; }
+            }
+            if (hasBackDesign) {
+                backURL = await saveDesignImageToFirebase('back', backDesignJSON, currentStyle.name, selectedColor);
+                if (!backURL) { showToast('Failed to save back design', true); return false; }
+            }
+            
             cart.push({
                 id: Date.now(), styleId: currentStyle.id, styleName: currentStyle.displayName,
-                price: currentStyle.price, frontDesignImage: frontURL, backDesignImage: backURL,
+                price: currentStyle.price, frontDesignImage: frontURL || null, backDesignImage: backURL || null,
                 frontDesignJSON: frontDesignJSON, backDesignJSON: backDesignJSON,
                 isCustomized: true, size: currentSize, printMethod: currentPrintMethod || 'transparent', 
                 selectedColor: selectedColorDisplay, selectedColorKey: selectedColor, quantity: 1
@@ -1203,14 +1252,20 @@
     }
 
     async function handleSaveImage() {
-        if ((!frontDesignJSON && fabricCanvas.getObjects().length === 0 && currentSide === 'front') ||
-            (!backDesignJSON && fabricCanvas.getObjects().length === 0 && currentSide === 'back')) {
+        let hasFront = frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0;
+        let hasBack = backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0;
+        if ((currentSide === 'front' && fabricCanvas.getObjects().length === 0 && !hasFront) ||
+            (currentSide === 'back' && fabricCanvas.getObjects().length === 0 && !hasBack)) {
             showToast('Please add some design first', true); return;
         }
         showLoading("SAVING BOTH SIDES...");
-        try { await saveBothDesigns(); } catch(e) { showToast("Save failed", true); } finally { hideLoading(); }
+        try { 
+            const result = await saveBothDesigns();
+            if (!result && (hasFront || hasBack)) showToast("Save failed - please try again", true);
+        } catch(e) { showToast("Save failed", true); } finally { hideLoading(); }
     }
 
+    // Rest of the functions remain IDENTICAL to original (no changes)
     async function checkUserHasSavedAddress() {
         try {
             const user = auth.currentUser;
@@ -1231,8 +1286,20 @@
         try {
             if (currentSide === 'front') frontDesignJSON = fabricCanvas.toJSON();
             else backDesignJSON = fabricCanvas.toJSON();
-            const { frontURL, backURL } = await saveBothDesigns();
-            if (!frontURL || !backURL) { showToast('Failed to save designs', true); return; }
+            
+            let hasFront = frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0;
+            let hasBack = backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0;
+            
+            let frontURL = null, backURL = null;
+            if (hasFront) {
+                frontURL = await saveDesignImageToFirebase('front', frontDesignJSON, currentStyle.name, selectedColor);
+                if (!frontURL) { showToast('Failed to save front design', true); return; }
+            }
+            if (hasBack) {
+                backURL = await saveDesignImageToFirebase('back', backDesignJSON, currentStyle.name, selectedColor);
+                if (!backURL) { showToast('Failed to save back design', true); return; }
+            }
+            
             localStorage.setItem('customCheckoutData', JSON.stringify({
                 isCustomized: true, frontDesignImage: frontURL, backDesignImage: backURL,
                 tshirtType: currentStyle.displayName, selectedColor: selectedColorDisplay,
@@ -1244,55 +1311,13 @@
         } catch(e) { showToast('Error during buy now', true); } finally { hideLoading(); }
     }
 
-    function setupRecaptcha() {
-        if (window.recaptchaVerifier) return;
-        window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
-            size: 'invisible', callback: () => {}
-        });
-    }
-
-    document.getElementById('sendOtpBtn').onclick = async () => {
-        const phone = document.getElementById('loginPhone').value;
-        if (!phone || phone.length < 10) { showToast('Enter valid phone number', true); return; }
-        const fullPhone = phone.startsWith('+') ? phone : '+91' + phone;
-        showLoading("SENDING OTP...");
-        try {
-            setupRecaptcha();
-            const confirmationResult = await auth.signInWithPhoneNumber(fullPhone, window.recaptchaVerifier);
-            globalConfirmationResult = confirmationResult;
-            hideLoading();
-            showToast("OTP sent successfully!");
-            document.getElementById('otpSection').style.display = 'block';
-        } catch (error) {
-            hideLoading();
-            showToast("Error sending OTP: " + error.message, true);
-        }
-    };
-
-    document.getElementById('verifyOtpBtn').onclick = async () => {
-        const otp = document.getElementById('otpInput').value;
-        if (!otp || otp.length < 6) { showToast('Enter valid OTP', true); return; }
-        if (!globalConfirmationResult) { showToast('Please request OTP first', true); return; }
-        showLoading("VERIFYING OTP...");
-        try {
-            const result = await globalConfirmationResult.confirm(otp);
-            const user = result.user;
-            localStorage.setItem('vedantaUser', JSON.stringify({ uid: user.uid, phone: user.phoneNumber, name: 'Customer' }));
-            hideLoading();
-            closeLoginModal();
-            showToast('✓ Login successful!');
-            if (pendingBuyAfterLogin) { pendingBuyAfterLogin = false; setTimeout(() => buyNow(), 500); }
-        } catch (error) {
-            hideLoading();
-            showToast("Invalid OTP. Please try again.", true);
-        }
-    };
-
+    // All original UI functions unchanged
+    function setupRecaptcha() { if (window.recaptchaVerifier) return; window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', { size: 'invisible', callback: () => {} }); }
+    document.getElementById('sendOtpBtn').onclick = async () => { const phone = document.getElementById('loginPhone').value; if (!phone || phone.length < 10) { showToast('Enter valid phone number', true); return; } const fullPhone = phone.startsWith('+') ? phone : '+91' + phone; showLoading("SENDING OTP..."); try { setupRecaptcha(); const confirmationResult = await auth.signInWithPhoneNumber(fullPhone, window.recaptchaVerifier); globalConfirmationResult = confirmationResult; hideLoading(); showToast("OTP sent successfully!"); document.getElementById('otpSection').style.display = 'block'; } catch (error) { hideLoading(); showToast("Error sending OTP: " + error.message, true); } };
+    document.getElementById('verifyOtpBtn').onclick = async () => { const otp = document.getElementById('otpInput').value; if (!otp || otp.length < 6) { showToast('Enter valid OTP', true); return; } if (!globalConfirmationResult) { showToast('Please request OTP first', true); return; } showLoading("VERIFYING OTP..."); try { const result = await globalConfirmationResult.confirm(otp); const user = result.user; localStorage.setItem('vedantaUser', JSON.stringify({ uid: user.uid, phone: user.phoneNumber, name: 'Customer' })); hideLoading(); closeLoginModal(); showToast('✓ Login successful!'); if (pendingBuyAfterLogin) { pendingBuyAfterLogin = false; setTimeout(() => buyNow(), 500); } } catch (error) { hideLoading(); showToast("Invalid OTP. Please try again.", true); } };
     function openLoginModal() { document.getElementById('loginModal').classList.add('show'); }
     function closeLoginModal() { document.getElementById('loginModal').classList.remove('show'); document.getElementById('otpSection').style.display = 'none'; document.getElementById('otpInput').value = ''; }
     document.getElementById('closeModalBtn').addEventListener('click', closeLoginModal);
-
-    // ========== ALL ORIGINAL UI FUNCTIONS ==========
     function initCanvas() { fabricCanvas = new fabric.Canvas('tshirtCanvas'); fabricCanvas.setWidth(550); fabricCanvas.setHeight(600); fabricCanvas.selection = true; loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, false); frontDesignJSON = fabricCanvas.toJSON(); backDesignJSON = null; }
     function switchToFront() { if(currentSide==='front') return; backDesignJSON=fabricCanvas.toJSON(); currentSide='front'; document.getElementById('frontSideBtn').classList.add('active'); document.getElementById('backSideBtn').classList.remove('active'); if(frontDesignJSON?.objects?.length) fabricCanvas.loadFromJSON(frontDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false)); else { fabricCanvas.clear(); loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false); } updateSummaryElements(); }
     function switchToBack() { if(currentSide==='back') return; frontDesignJSON=fabricCanvas.toJSON(); currentSide='back'; document.getElementById('backSideBtn').classList.add('active'); document.getElementById('frontSideBtn').classList.remove('active'); if(backDesignJSON?.objects?.length) fabricCanvas.loadFromJSON(backDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false)); else { fabricCanvas.clear(); loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false); } updateSummaryElements(); }
@@ -1310,7 +1335,7 @@
     function updateSummary() { document.getElementById('summaryStyle').innerText = currentStyle.displayName; document.getElementById('summaryColor').innerText = selectedColorDisplay; document.getElementById('summarySize').innerText = currentSize || '--'; document.getElementById('totalPrice').innerHTML = `₹${currentStyle.price}`; updatePrintSummary(); }
     function updatePrintSummary() { const methodText = currentPrintMethod === 'transparent' ? 'Transparent Print' : (currentPrintMethod === 'fullbg' ? 'Full Background Print' : 'Not selected'); document.getElementById('summaryPrintMethod').innerHTML = methodText; }
     function changeTShirtColor(color) { selectedColor = color; const colorDisplayMap = {'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'}; selectedColorDisplay = colorDisplayMap[color] || color; document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active')); document.querySelector(`.color-option[data-color="${color}"]`).classList.add('active'); document.getElementById('summaryColor').innerText = selectedColorDisplay; if(currentSide === 'front'){ frontDesignJSON = fabricCanvas.toJSON(); loadTshirtImageDynamic(currentStyle.name, selectedColor, 'front', true); } else { backDesignJSON = fabricCanvas.toJSON(); loadTshirtImageDynamic(currentStyle.name, selectedColor, 'back', true); } showToast(`✓ Color changed to ${selectedColorDisplay}`); }
-    function renderColorSelectorFull() { const container = document.getElementById('colorOptionsContainer'); const colors = currentStyle.colors; const colorDisplayMap = {'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'}; const colorCodeMap={'white':'#f5f5f5','warm grey':'#a9a9a9','cream':'#fffdd0','black':'#1a1a1a','grey':'#808080','blue':'#1e3a5f','green':'#4a5d23','olive green':'#556b2f','dark brown':'#5c4033'}; container.innerHTML = colors.map(color => `<div class="color-option ${selectedColor===color?'active':''}" data-color="${color}"><div class="color-swatch-circle" style="background: ${colorCodeMap[color]||'#808080'};"></div><span class="color-option-name">${colorDisplayMap[color]||color}</span></div>`).join(''); document.querySelectorAll('.color-option').forEach(opt => opt.addEventListener('click', () => changeTShirtColor(opt.dataset.color))); }
+    function renderColorSelectorFull() { const container = document.getElementById('colorOptionsContainer'); const colors = currentStyle.colors; const colorDisplayMap={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'}; const colorCodeMap={'white':'#f5f5f5','warm grey':'#a9a9a9','cream':'#fffdd0','black':'#1a1a1a','grey':'#808080','blue':'#1e3a5f','green':'#4a5d23','olive green':'#556b2f','dark brown':'#5c4033'}; container.innerHTML = colors.map(color => `<div class="color-option ${selectedColor===color?'active':''}" data-color="${color}"><div class="color-swatch-circle" style="background: ${colorCodeMap[color]||'#808080'};"></div><span class="color-option-name">${colorDisplayMap[color]||color}</span></div>`).join(''); document.querySelectorAll('.color-option').forEach(opt => opt.addEventListener('click', () => changeTShirtColor(opt.dataset.color))); }
     function applyGlow() { const active = fabricCanvas.getActiveObject(); if(!active || (active.type !== 'i-text' && active.type !== 'text')) { showToast('Select a text first', true); return; } glowActive = !glowActive; if(glowActive) active.set('shadow', `${document.getElementById('glowColorPicker').value} 0px 0px ${document.getElementById('glowSizeSlider').value}px`); else active.set('shadow', null); fabricCanvas.renderAll(); document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none'; showToast(glowActive ? '✓ Glow enabled' : '✓ Glow disabled'); }
     function applyRounded() { const active = fabricCanvas.getActiveObject(); if(!active || (active.type !== 'i-text' && active.type !== 'text')) { showToast('Select a text first', true); return; } roundedActive = !roundedActive; if(roundedActive) { active.set('radius', 50); active.set('rx', 50); active.set('ry', 50); } else { active.set('radius', 0); active.set('rx', 0); active.set('ry', 0); } fabricCanvas.renderAll(); showToast(roundedActive ? '✓ Rounded style applied' : '✓ Rounded style removed'); }
     function applyBorderToggle() { const active = fabricCanvas.getActiveObject(); if(!active || (active.type !== 'i-text' && active.type !== 'text')) { showToast('Select a text first', true); return; } borderActive = !borderActive; if(borderActive) { active.set('stroke', '#D4AF37'); active.set('strokeWidth', 2); } else { active.set('stroke', null); active.set('strokeWidth', 0); } fabricCanvas.renderAll(); showToast(borderActive ? '✓ Border enabled' : '✓ Border disabled'); }
@@ -1351,7 +1376,7 @@
     initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON = fabricCanvas.toJSON(); backDesignJSON = null;
     if (window.location.protocol === 'file:') document.getElementById('corsWarning').style.display = 'block';
     else document.getElementById('corsWarning').style.display = 'none';
-    console.log("✅ Designer ready with real OTP & loading animation - Image saving restored");
+    console.log("✅ Designer ready with fixed image saving");
 </script>
 </body>
 </html>
