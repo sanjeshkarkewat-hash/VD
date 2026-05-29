@@ -20,23 +20,13 @@
             color: #FFFFFF;
             overflow-x: hidden;
         }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
-            pointer-events: none;
-            z-index: -1;
-        }
 
         .header {
             text-align: center;
             padding: 20px 15px;
             border-bottom: 1px solid rgba(212,175,55,0.2);
             position: relative;
+            background: #050508;
         }
         .logo {
             font-size: 32px;
@@ -75,15 +65,18 @@
             font-weight: bold;
         }
 
+        /* FULL WIDTH CONTAINER - NO GAPS */
         .designer-container {
-            max-width: 100%;
-            margin: 0 auto;
-            padding: 20px 15px;
+            width: 100%;
+            margin: 0;
+            padding: 0;
         }
 
-        /* STYLE SECTION - smaller cards for mobile */
+        /* STYLE SECTION - full width edge to edge */
         .style-section {
-            margin-bottom: 25px;
+            width: 100%;
+            padding: 15px;
+            background: transparent;
         }
         .section-title {
             font-size: 18px;
@@ -93,11 +86,13 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            padding-left: 5px;
         }
         .style-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
             gap: 12px;
+            width: 100%;
         }
         .style-card {
             background: rgba(20,20,30,0.75);
@@ -107,12 +102,11 @@
             text-align: center;
             cursor: pointer;
             border: 2px solid transparent;
-            transition: all 0.3s ease;
+            width: 100%;
         }
         .style-card.active {
             border-color: #D4AF37;
             background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
-            box-shadow: 0 0 15px rgba(212,175,55,0.3);
         }
         .style-img {
             width: 100%;
@@ -120,32 +114,20 @@
             object-fit: cover;
             border-radius: 12px;
             margin-bottom: 8px;
-            background: #1a1a2e;
         }
-        .style-name { 
-            font-weight: 700; 
-            font-size: 13px; 
-            margin-bottom: 4px;
-        }
-        .style-price { 
-            color: #D4AF37; 
-            font-size: 12px; 
-            font-weight: 700;
-        }
+        .style-name { font-weight: 700; font-size: 13px; }
+        .style-price { color: #D4AF37; font-size: 12px; font-weight: 700; }
         
-        /* EVERYTHING IN ONE VERTICAL FLOW - NO GRID COLUMNS */
+        /* EVERYTHING FULL WIDTH - NO BOXES, TOUCH TO TOUCH */
         .vertical-flow {
             display: flex;
             flex-direction: column;
-            gap: 20px;
             width: 100%;
         }
         
-        /* selected t-shirt area - full width */
+        /* selected t-shirt - full width */
         .selected-tshirt-area {
             background: rgba(10,10,18,0.6);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
             padding: 15px;
             text-align: center;
             width: 100%;
@@ -156,25 +138,15 @@
             justify-content: center;
             gap: 12px;
             margin-bottom: 15px;
-            padding: 6px;
-            background: rgba(15,15,22,0.5);
-            border-radius: 50px;
-            width: fit-content;
-            margin-left: auto;
-            margin-right: auto;
         }
         .side-btn {
             background: rgba(20,20,30,0.8);
             border: none;
-            padding: 8px 18px;
+            padding: 8px 20px;
             border-radius: 40px;
-            cursor: pointer;
             font-weight: 600;
             font-size: 13px;
             color: #aaa;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
         .side-btn.active {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -183,39 +155,26 @@
         .canvas-container {
             background: #1a1a24;
             border-radius: 20px;
-            display: inline-block;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
             width: 100%;
+            display: flex;
+            justify-content: center;
         }
         #tshirtCanvas { 
             border-radius: 16px; 
-            cursor: crosshair;
             width: 100%;
             height: auto;
-            max-width: 550px;
-            display: block;
-            margin: 0 auto;
+            max-width: 500px;
         }
         .color-selector-section {
             margin-top: 15px;
-            padding: 12px 15px;
+            padding: 12px;
             background: rgba(15,15,22,0.6);
             border-radius: 18px;
-            border: 1px solid rgba(212,175,55,0.2);
             width: 100%;
-        }
-        .color-selector-title {
-            font-size: 12px;
-            color: #D4AF37;
-            margin-bottom: 10px;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 6px;
         }
         .color-options {
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
             justify-content: center;
         }
@@ -228,10 +187,9 @@
             padding: 5px 8px;
             border-radius: 30px;
             background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(212,175,55,0.2);
         }
         .color-option.active {
-            border-color: #D4AF37;
+            border: 1px solid #D4AF37;
             background: rgba(212,175,55,0.15);
         }
         .color-swatch-circle {
@@ -240,11 +198,7 @@
             border-radius: 50%;
             border: 2px solid rgba(255,255,255,0.2);
         }
-        .color-option-name {
-            font-size: 10px;
-            font-weight: 600;
-            color: #ccc;
-        }
+        .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
         .btn-save-image {
             background: rgba(100,100,200,0.2);
             border: 1px solid #8A8AFF;
@@ -254,26 +208,17 @@
             font-weight: bold;
             cursor: pointer;
             margin-top: 12px;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
             font-size: 12px;
         }
-        .instruction-text {
-            font-size: 10px;
-            color: #888;
-            margin-top: 10px;
-        }
+        .instruction-text { font-size: 10px; color: #888; margin-top: 10px; }
         
-        /* DESIGN TOOLS BOX - full width */
+        /* DESIGN TOOLS - FULL WIDTH EDGE TO EDGE */
         .design-tools-box, .material-tools-box {
             background: rgba(15,15,22,0.92);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
             padding: 18px;
-            border: 1px solid rgba(212,175,55,0.25);
             width: 100%;
         }
+        .design-tools-box { margin-top: 0; }
         .material-tools-box { margin-top: 0; }
         .box-title {
             color: #D4AF37;
@@ -312,8 +257,6 @@
             grid-template-columns: repeat(8, 1fr);
             gap: 6px;
             margin-top: 6px;
-            max-height: 180px;
-            overflow-y: auto;
         }
         .color-swatch {
             width: 100%;
@@ -322,22 +265,15 @@
             cursor: pointer;
             border: 2px solid transparent;
         }
-        .effect-row {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            margin-top: 8px;
-        }
+        .effect-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
         .effect-btn, .btn-icon {
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.4);
-            padding: 5px 10px;
+            padding: 6px 12px;
             border-radius: 25px;
             font-size: 11px;
             cursor: pointer;
             color: #D4AF37;
-            margin-top: 5px;
-            display: inline-block;
         }
         .upload-area {
             border: 2px dashed rgba(212,175,55,0.4);
@@ -346,17 +282,9 @@
             text-align: center;
             cursor: pointer;
         }
-        .slider-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+        .slider-row { display: flex; align-items: center; gap: 10px; }
         .slider-row input { flex: 1; }
-        .two-col-btns {
-            display: flex;
-            gap: 6px;
-            flex-wrap: wrap;
-        }
+        .two-col-btns { display: flex; gap: 6px; flex-wrap: wrap; }
         .print-option {
             display: flex;
             align-items: center;
@@ -366,14 +294,7 @@
             background: rgba(0,0,0,0.3);
             border-radius: 14px;
         }
-        .print-option input {
-            width: 16px;
-            height: 16px;
-        }
-        .print-option label {
-            font-size: 11px;
-            margin: 0;
-        }
+        .print-option label { font-size: 11px; margin: 0; }
         .font-preview {
             font-size: 12px;
             margin-top: 6px;
@@ -383,13 +304,10 @@
             text-align: center;
         }
         
-        /* ORDER PANEL (INVOICE) - full width */
+        /* ORDER PANEL - FULL WIDTH */
         .order-panel {
             background: rgba(15,15,22,0.92);
-            backdrop-filter: blur(20px);
-            border-radius: 24px;
             padding: 18px;
-            border: 1px solid rgba(212,175,55,0.25);
             width: 100%;
         }
         .order-detail {
@@ -407,11 +325,7 @@
             font-weight: 800;
             color: #D4AF37;
         }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
+        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
         .btn-add, .btn-buy {
             flex: 1;
             padding: 12px;
@@ -445,39 +359,90 @@
             border-left: 2px solid rgba(212,175,55,0.4);
             z-index: 15000;
             transition: 0.3s ease;
-            display: flex;
-            flex-direction: column;
         }
         .cart-sidebar.open { right: 0; }
-        .cart-header { padding: 18px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; align-items: center; }
-        .cart-items { flex: 1; overflow-y: auto; padding: 15px; }
-        .cart-item { background: rgba(20,20,30,0.6); margin-bottom: 12px; border-radius: 16px; padding: 12px; display: flex; gap: 10px; align-items: center; }
-        .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cart-header { padding: 18px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 15px; max-height: 70vh; }
+        .cart-item { background: rgba(20,20,30,0.6); margin-bottom: 12px; border-radius: 16px; padding: 12px; display: flex; gap: 10px; }
+        .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .cart-item-details { flex: 1; }
-        .cart-item-name { font-size: 13px; font-weight: bold; }
-        .cart-item-price { color: #D4AF37; font-size: 12px; }
         .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; font-size: 10px; cursor: pointer; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; }
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 10px 20px; border-radius: 40px; font-weight: bold; z-index: 10000; display: none; font-size: 13px; white-space: nowrap; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            z-index: 10000;
+            display: none;
+            font-size: 13px;
+            white-space: nowrap;
+        }
         .toast.show { display: block; animation: fade 2.5s ease; }
         @keyframes fade { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); backdrop-filter: blur(8px); z-index: 30000; display: flex; justify-content: center; align-items: center; flex-direction: column; visibility: hidden; opacity: 0; transition: 0.2s; }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 30000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            visibility: hidden;
+            opacity: 0;
+        }
         .loading-overlay.active { visibility: visible; opacity: 1; }
-        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(212,175,55,0.2); border-top: 4px solid #D4AF37; border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 20000; align-items: center; justify-content: center; }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212,175,55,0.2);
+            border-top: 4px solid #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.96);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+        }
         .modal.show { display: flex; }
-        .modal-content { background: rgba(15,15,22,0.98); border-radius: 24px; padding: 25px; max-width: 340px; width: 90%; border: 1px solid rgba(212,175,55,0.3); text-align: center; }
+        .modal-content {
+            background: rgba(15,15,22,0.98);
+            border-radius: 24px;
+            padding: 25px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+        }
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; color: white; }
         .modal-content button { width: 100%; padding: 10px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 14px; font-weight: bold; cursor: pointer; }
         .close-modal { position: absolute; top: 12px; right: 20px; font-size: 24px; cursor: pointer; color: white; }
-        .cors-warning { background: rgba(255,100,0,0.2); border: 1px solid #FF6600; border-radius: 10px; padding: 8px; margin-bottom: 15px; font-size: 10px; text-align: center; }
+        .cors-warning { background: rgba(255,100,0,0.2); padding: 8px; margin-bottom: 0; font-size: 10px; text-align: center; width: 100%; }
         
         @media (min-width: 768px) {
-            .style-grid { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); }
+            .style-grid { grid-template-columns: repeat(3, 1fr); }
+            .designer-container { max-width: 1200px; margin: 0 auto; }
         }
     </style>
 </head>
@@ -497,19 +462,14 @@
 </div>
 
 <div class="designer-container">
-    <div class="cors-warning" id="corsWarning">
-        ⚠️ <strong>Note:</strong> Images same folder mein hone chahiye
-    </div>
+    <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein hone chahiye</div>
     
-    <!-- STYLE GRID -->
     <div class="style-section">
         <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <!-- EVERYTHING IN ONE VERTICAL FLOW -->
     <div class="vertical-flow">
-        <!-- SELECTED T-SHIRT -->
         <div class="selected-tshirt-area">
             <div class="side-switcher">
                 <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
@@ -526,7 +486,6 @@
             <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
         </div>
 
-        <!-- DESIGN TOOLS -->
         <div class="design-tools-box">
             <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
             <div class="tool-group">
@@ -584,7 +543,6 @@
             </div>
         </div>
 
-        <!-- SIZE & PRINT -->
         <div class="material-tools-box">
             <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
             <div class="tool-group">
@@ -600,7 +558,6 @@
             </div>
         </div>
 
-        <!-- ORDER SUMMARY (INVOICE) -->
         <div class="order-panel">
             <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
             <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
@@ -627,13 +584,13 @@
 <div class="modal" id="loginModal"><div class="modal-content"><span class="close-modal" id="closeModalBtn">&times;</span><h3>Login</h3><input type="tel" id="loginPhone" placeholder="+91 9876543210"><button id="sendOtpBtn">Send OTP</button><div id="otpSection" style="display:none;"><input type="text" id="otpInput" placeholder="Enter OTP"><button id="verifyOtpBtn">Verify</button></div></div></div>
 
 <script>
-// FULL ORIGINAL JAVASCRIPT - NO FUNCTIONAL CHANGES, ONLY LAYOUT CSS MODIFIED
+// FULL ORIGINAL JAVASCRIPT - NO FUNCTIONAL CHANGES
 const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(); const storage = firebase.storage(); const storageRef = storage.ref(); const auth = firebase.auth();
 auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = "";
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
-let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, frontDesignImageURL=null, backDesignImageURL=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
+let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 const loadingOverlay = document.getElementById('globalLoadingOverlay');
 function showLoading(m="SAVING DESIGN..."){ const t=loadingOverlay.querySelector('.loading-text'); if(t)t.innerText=m; loadingOverlay.classList.add('active'); }
 function hideLoading(){ loadingOverlay.classList.remove('active'); }
