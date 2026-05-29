@@ -10,8 +10,9 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding,marker&loading=async"></script>
   <style>
+    /* All existing styles remain exactly the same */
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; overflow-x: hidden; min-height: 100vh; }
     body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%); pointer-events: none; z-index: -1; }
@@ -117,7 +118,6 @@
     .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
     .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
     
-    /* Custom Design Preview Section */
     .custom-design-preview-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
@@ -177,6 +177,51 @@
       color: #D4AF37;
       margin-top: 8px;
     }
+    
+    /* Map Comment Box Styles */
+    .map-comment-box {
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+      border-radius: 16px;
+      padding: 15px;
+      margin-top: 15px;
+      border: 1px solid rgba(212,175,55,0.4);
+    }
+    .map-comment-box textarea {
+      width: 100%;
+      padding: 12px;
+      background: rgba(20,20,30,0.9);
+      border: 1px solid rgba(212,175,55,0.3);
+      border-radius: 12px;
+      color: white;
+      font-size: 13px;
+      font-family: inherit;
+      resize: vertical;
+      min-height: 80px;
+    }
+    .map-comment-box textarea:focus {
+      outline: none;
+      border-color: #D4AF37;
+    }
+    .map-comment-box label {
+      display: block;
+      margin-bottom: 8px;
+      color: #D4AF37;
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .pin-comment-badge {
+      background: rgba(33,150,243,0.2);
+      border: 1px solid #2196F3;
+      border-radius: 8px;
+      padding: 6px 10px;
+      margin-top: 10px;
+      font-size: 11px;
+      color: #2196F3;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
   </style>
 </head>
 <body>
@@ -206,7 +251,6 @@
     </div>
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-      <!-- Custom Design Preview Section (Only for customized orders) -->
       <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
         <div class="custom-preview-row" id="customPreviewRow">
@@ -244,19 +288,15 @@
   let selectedAddress = null;
   let savedAddressFromDb = null;
   
-  // Custom design data (no email)
   let customCheckoutData = null;
   let isCustomizedOrder = false;
   let frontDesignImageURL = null;
   let backDesignImageURL = null;
-  
-  // Product images cache for collection items
   let productImagesCache = {};
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
 
-  // Fetch product images for normal collection items
   async function fetchProductImages() {
     try {
       const snapshot = await db.collection('products').get();
@@ -276,7 +316,6 @@
     return null;
   }
 
-  // Load custom design data (NO EMAIL)
   function loadCustomCheckoutData() {
     try {
       const savedData = localStorage.getItem('customCheckoutData');
@@ -336,7 +375,6 @@
     } catch(e) { console.error("Error loading custom data:", e); }
   }
 
-  // Address Functions (NO EMAIL)
   async function fetchSavedAddressFromPhone() {
     if (!currentUser || !currentUser.phone) return null;
     try {
@@ -371,12 +409,14 @@
         <div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div>
         <div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode" maxlength="6"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Near..."></div></div>
         <button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
+        <button class="location-btn map-pin-btn" id="openMapWithCommentBtn" style="margin-top:8px;"><i class="fas fa-map-pin"></i> 🗺️ Pick on Map & Add Comment</button>
         <div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button><button class="location-btn cancel-address-btn" id="cancelNewAddressBtn" style="flex:0.5;">Cancel</button></div>
       </div>
     `;
     document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
     document.getElementById('cancelNewAddressBtn')?.addEventListener('click', () => { if (savedAddressFromDb) showSavedAddressOptions(); else showNewAddressForm(); });
     document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
+    document.getElementById('openMapWithCommentBtn')?.addEventListener('click', openMapWithCommentFeature);
   }
 
   function showSavedAddressOptions() {
@@ -448,6 +488,169 @@
       showToast('❌ Location failed. Please enter manually.', true);
       if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-dot"></i> 📍 Use My Current Location'; }
     }
+  }
+
+  // ========== NEW: MAP WITH PIN COMMENT SYSTEM ==========
+  let mapModal = null;
+  let mapInstance = null;
+  let mapMarker = null;
+  let selectedPinComment = '';
+  let currentMapLatLng = null;
+
+  function openMapWithCommentFeature() {
+    // Create modal if not exists
+    let modal = document.getElementById('mapCommentModal');
+    if (!modal) {
+      modal = document.createElement('div');
+      modal.id = 'mapCommentModal';
+      modal.className = 'map-modal';
+      modal.innerHTML = `
+        <div style="background:rgba(10,10,18,0.98); border-radius:32px; width:92%; max-width:700px; border:1px solid rgba(212,175,55,0.3); overflow:hidden;">
+          <div style="padding:16px; background:linear-gradient(135deg,rgba(212,175,55,0.1),rgba(255,140,0,0.1)); border-bottom:1px solid rgba(212,175,55,0.3);">
+            <h3 style="color:#D4AF37; font-size:18px;"><i class="fas fa-map-pin"></i> Select Location on Map</h3>
+            <p style="font-size:12px; color:#aaa;">Click anywhere on map to place a pin, then add a delivery note</p>
+          </div>
+          <div id="mapCommentContainer" style="height:350px; width:100%; background:#1a1a2e;"></div>
+          <div class="map-comment-box">
+            <label><i class="fas fa-edit"></i> Add Delivery Comment (Optional)</label>
+            <textarea id="pinCommentText" placeholder="e.g., Near the red gate, call before arriving, 3rd floor, near temple, etc..."></textarea>
+            <div class="pin-comment-badge" id="pinCommentPreview" style="display:none;">
+              <i class="fas fa-comment-dots"></i> <span id="commentPreviewText"></span>
+            </div>
+          </div>
+          <div style="padding:16px; display:flex; gap:12px;">
+            <button id="confirmMapWithCommentBtn" style="flex:1; background:#4CAF50; border:none; padding:14px; border-radius:30px; font-weight:700; color:white; cursor:pointer;"><i class="fas fa-check-circle"></i> Confirm & Use This Location</button>
+            <button id="closeMapCommentModalBtn" style="background:rgba(255,255,255,0.1); border:1px solid rgba(212,175,55,0.3); padding:14px; border-radius:30px; font-weight:700; color:#ccc; cursor:pointer;">Cancel</button>
+          </div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+    }
+    
+    modal.classList.add('active');
+    
+    // Initialize map
+    const container = document.getElementById('mapCommentContainer');
+    container.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#D4AF37;"><i class="fas fa-spinner fa-pulse"></i> Loading map...</div>';
+    
+    setTimeout(() => {
+      const mapDiv = document.createElement('div');
+      mapDiv.style.width = '100%';
+      mapDiv.style.height = '100%';
+      container.innerHTML = '';
+      container.appendChild(mapDiv);
+      
+      mapInstance = new google.maps.Map(mapDiv, { 
+        center: { lat: 20.5937, lng: 78.9629 }, 
+        zoom: 5,
+        styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+      });
+      
+      mapMarker = new google.maps.Marker({ map: mapInstance, draggable: true });
+      
+      mapInstance.addListener('click', (e) => {
+        mapMarker.setPosition(e.latLng);
+        currentMapLatLng = e.latLng;
+        mapInstance.panTo(e.latLng);
+        showToast('📍 Pin placed! You can add a comment below');
+      });
+      
+      mapMarker.addListener('dragend', () => {
+        currentMapLatLng = mapMarker.getPosition();
+        showToast('📍 Pin moved!');
+      });
+      
+      // Try to center on user location
+      if(navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          mapInstance.setCenter(loc);
+          mapMarker.setPosition(loc);
+          currentMapLatLng = loc;
+        }, () => {});
+      }
+    }, 100);
+    
+    // Handle comment input
+    const commentTextarea = document.getElementById('pinCommentText');
+    const commentPreview = document.getElementById('pinCommentPreview');
+    const commentPreviewText = document.getElementById('commentPreviewText');
+    
+    if (commentTextarea) {
+      commentTextarea.value = selectedPinComment || '';
+      commentTextarea.oninput = (e) => {
+        selectedPinComment = e.target.value;
+        if (selectedPinComment.trim()) {
+          commentPreview.style.display = 'flex';
+          commentPreviewText.innerText = selectedPinComment;
+        } else {
+          commentPreview.style.display = 'none';
+        }
+      };
+      if (selectedPinComment) {
+        commentPreview.style.display = 'flex';
+        commentPreviewText.innerText = selectedPinComment;
+      }
+    }
+    
+    // Confirm button
+    document.getElementById('confirmMapWithCommentBtn').onclick = async () => {
+      if(!currentMapLatLng) {
+        showToast('❌ Please click on the map to place a pin first', true);
+        return;
+      }
+      showToast('📍 Getting address from map pin...');
+      showLoading(true);
+      
+      const addrData = await getAddressFromLatLng(currentMapLatLng.lat(), currentMapLatLng.lng());
+      showLoading(false);
+      modal.classList.remove('active');
+      
+      if(addrData) {
+        document.getElementById('newStreet').value = addrData.street;
+        document.getElementById('newCity').value = addrData.city;
+        document.getElementById('newState').value = addrData.state;
+        document.getElementById('newPincode').value = addrData.pincode;
+        
+        // Add comment to landmark field
+        let finalLandmark = addrData.landmark || '';
+        if (selectedPinComment && selectedPinComment.trim()) {
+          finalLandmark = finalLandmark ? `${finalLandmark} | 📝 ${selectedPinComment}` : `📝 ${selectedPinComment}`;
+          document.getElementById('newLandmark').value = finalLandmark;
+          showToast(`✅ Location selected! Comment added: "${selectedPinComment.substring(0, 50)}"`);
+        } else {
+          document.getElementById('newLandmark').value = finalLandmark;
+          showToast(`✅ Location selected! Address filled.`);
+        }
+      } else {
+        showToast('⚠️ Could not get address, please fill manually', true);
+      }
+    };
+    
+    document.getElementById('closeMapCommentModalBtn').onclick = () => {
+      modal.classList.remove('active');
+    };
+  }
+  
+  async function getAddressFromLatLng(lat, lng) {
+    return new Promise((resolve) => {
+      const geocoder = new google.maps.Geocoder();
+      geocoder.geocode({ location: { lat, lng } }, (results, status) => {
+        if(status === 'OK' && results && results[0]) {
+          let street = "", city = "", state = "", pincode = "", landmark = "";
+          for(let comp of results[0].address_components) {
+            if(comp.types.includes('route')) street = comp.long_name;
+            if(comp.types.includes('sublocality_level_1')) street = street || comp.long_name;
+            if(comp.types.includes('locality')) city = comp.long_name;
+            if(comp.types.includes('administrative_area_level_1')) state = comp.long_name;
+            if(comp.types.includes('postal_code')) pincode = comp.long_name;
+            if(comp.types.includes('sublocality_level_2')) landmark = comp.long_name;
+          }
+          if(!street && results[0].formatted_address) street = results[0].formatted_address.split(',')[0];
+          resolve({ street, city, state, pincode, landmark });
+        } else resolve(null);
+      });
+    });
   }
 
   async function loadAndRenderAddressSelection() {
@@ -529,7 +732,6 @@
     razorpay.open(); 
   }
 
-  // Render Order Summary with proper images (custom + collection)
   async function renderOrderSummary() { 
     const container = document.getElementById('orderItemsList'); 
     if (!container) return; 
