@@ -90,10 +90,9 @@
     .benefit-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 11px; color: #aaa; }
     .benefit-row i { width: 20px; color: #4CAF50; font-size: 12px; }
     .total-row.grand-total { font-size: 20px; font-weight: 800; color: #D4AF37; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(212,175,55,0.3); }
-    .free-shipping-badge { background: rgba(76,175,80,0.15); padding: 8px; border-radius: 12px; text-align: center; margin: 12px 0; color: #4CAF50; font-size: 11px; }
     .rewards-points { background: rgba(212,175,55,0.1); border-radius: 12px; padding: 10px; margin-top: 12px; text-align: center; font-size: 11px; }
     .back-to-shop { display: block; text-align: center; margin-top: 16px; color: #888; text-decoration: none; font-size: 12px; }
-    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 12px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; text-align: center; }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 12px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; text-align: center; white-space: nowrap; }
     .toast.show { display: block; animation: fadeInOut 2s ease; }
     @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 15% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
     .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
@@ -118,7 +117,6 @@
     .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
     .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
     
-    /* Custom Design Preview Section */
     .custom-design-preview-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
@@ -179,7 +177,6 @@
       margin-top: 8px;
     }
     
-    /* Map Modal Styles */
     .map-picker-modal {
       display: none;
       position: fixed;
@@ -237,15 +234,6 @@
       color: #ccc;
       cursor: pointer;
     }
-    .address-preview-box {
-      background: rgba(76,175,80,0.1);
-      border: 1px solid rgba(76,175,80,0.3);
-      border-radius: 12px;
-      padding: 12px;
-      margin-top: 10px;
-      font-size: 12px;
-      color: #4CAF50;
-    }
   </style>
 </head>
 <body>
@@ -253,7 +241,6 @@
 <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Processing your order...</div></div>
 <div class="location-modal" id="locationModal"><div class="location-modal-content"><i class="fas fa-location-dot"></i><h3>Location Access Required</h3><p>Please enable location services to auto-fill your shipping address instantly</p><div class="location-modal-buttons"><button class="location-settings-btn" id="openSettingsBtn"><i class="fas fa-cog"></i> Enable Location</button><button class="location-cancel-btn" id="closeLocationModalBtn">Cancel</button></div></div></div>
 
-<!-- Map Picker Modal -->
 <div class="map-picker-modal" id="mapPickerModal">
   <div class="map-picker-container">
     <div class="map-picker-header">
@@ -290,25 +277,22 @@
     </div>
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-      <!-- Custom Design Preview Section (Only for customized orders) -->
       <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
         <div class="custom-preview-row" id="customPreviewRow">
-          <div class="custom-preview-item">
-            <p><i class="fas fa-tshirt"></i> Front Design</p>
-            <img id="frontDesignPreview" class="custom-design-preview-img" alt="Front Design">
-          </div>
-          <div class="custom-preview-item">
-            <p><i class="fas fa-undo-alt"></i> Back Design</p>
-            <img id="backDesignPreview" class="custom-design-preview-img" alt="Back Design">
-          </div>
+          <div class="custom-preview-item"><p><i class="fas fa-tshirt"></i> Front Design</p><img id="frontDesignPreview" class="custom-design-preview-img" alt="Front Design"></div>
+          <div class="custom-preview-item"><p><i class="fas fa-undo-alt"></i> Back Design</p><img id="backDesignPreview" class="custom-design-preview-img" alt="Back Design"></div>
         </div>
         <p style="font-size: 10px; color: #888; margin-top: 8px;"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> This is exactly how your design will be printed</p>
       </div>
       <div id="orderItemsList"></div>
       <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div></div>
-      <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | FREE PACKAGING | 0% TAX</div>
-      <div class="order-total"><div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div><div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div><div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div><div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div></div>
+      <div class="order-total">
+        <div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
+        <div class="total-row" id="shippingRow"><span>Shipping Charge</span><span id="shippingCharge">₹0</span></div>
+        <div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div>
+        <div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
+      </div>
       <div class="rewards-points"><i class="fas fa-coins" style="color: #D4AF37;"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins</div>
       <a href="#" class="back-to-shop" id="backToShopBtn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
     </div>
@@ -320,32 +304,52 @@
   const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
-  const auth = firebase.auth();
   const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   const ONLINE_DISCOUNT_PERCENT = 5;
+  
   let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
   let selectedPaymentMethod = 'cod', currentUser = null;
   let selectedAddress = null;
   let savedAddressFromDb = null;
+  let shippingCharge = 0;
   
-  // Custom design data (no email)
   let customCheckoutData = null;
   let isCustomizedOrder = false;
   let frontDesignImageURL = null;
   let backDesignImageURL = null;
-  
-  // Product images cache for collection items
   let productImagesCache = {};
 
-  // Map variables
   let mapInstance = null;
   let mapMarker = null;
   let currentSelectedLatLng = null;
+  let isLocationConfirmed = false;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
 
-  // Get FULL address with maximum details - street, city, state, pincode, landmark, village, sublocality, etc.
+  // Calculate shipping charge based on state
+  function calculateShippingCharge(state) {
+    if(!state) return 97;
+    const stateLower = state.toLowerCase().trim();
+    // Maharashtra - lowest rate
+    if(stateLower === 'maharashtra' || stateLower.includes('mumbai') || stateLower === 'mh') return 97;
+    // Nearby states - slightly higher
+    const nearbyStates = ['gujarat', 'gujrat', 'gj', 'madhya pradesh', 'mp', 'goa', 'dadra and nagar haveli', 'daman and diu'];
+    if(nearbyStates.some(s => stateLower.includes(s))) return 101;
+    // Medium distance states
+    const mediumStates = ['rajasthan', 'rj', 'delhi', 'ncr', 'haryana', 'hr', 'punjab', 'pb', 'chandigarh', 'uttar pradesh', 'up', 'uttarakhand', 'uk'];
+    if(mediumStates.some(s => stateLower.includes(s))) return 104;
+    // Far states
+    const farStates = ['bihar', 'br', 'jharkhand', 'jh', 'west bengal', 'wb', 'odisha', 'orissa', 'assam', 'arunachal pradesh', 'manipur', 'meghalaya', 'mizoram', 'nagaland', 'sikkim', 'tripura'];
+    if(farStates.some(s => stateLower.includes(s))) return 107;
+    // Very far / South India
+    const southStates = ['karnataka', 'ka', 'telangana', 'tg', 'andhra pradesh', 'ap', 'tamil nadu', 'tn', 'kerala', 'kl', 'puducherry', 'lakshadweep', 'andaman'];
+    if(southStates.some(s => stateLower.includes(s))) return 110;
+    
+    return 97; // default
+  }
+
+  // Get FULL address with maximum details
   async function getFullAddressFromLatLng(lat, lng) {
     return new Promise((resolve) => {
       const geocoder = new google.maps.Geocoder();
@@ -367,27 +371,15 @@
             if(comp.types.includes('premise')) landmark = landmark || comp.long_name;
           }
           
-          // Build complete street address
           let fullStreet = street || route || "";
           if(sublocality) fullStreet = fullStreet ? fullStreet + ", " + sublocality : sublocality;
           if(village) fullStreet = fullStreet ? fullStreet + ", " + village : village;
           if(neighborhood) fullStreet = fullStreet ? fullStreet + ", " + neighborhood : neighborhood;
+          if(!fullStreet && results[0].formatted_address) fullStreet = results[0].formatted_address.split(',')[0];
           
-          if(!fullStreet && results[0].formatted_address) {
-            fullStreet = results[0].formatted_address.split(',')[0];
-          }
-          
-          // Get landmark from nearby places if available
           let finalLandmark = landmark || sublocality || village || neighborhood || "";
           
-          resolve({ 
-            street: fullStreet, 
-            city: city || "", 
-            state: state || "", 
-            pincode: pincode || "", 
-            landmark: finalLandmark,
-            fullAddress: results[0].formatted_address
-          });
+          resolve({ street: fullStreet, city: city || "", state: state || "", pincode: pincode || "", landmark: finalLandmark });
         } else resolve(null);
       });
     });
@@ -395,13 +387,13 @@
 
   // Open Map Picker - Auto sets pin at user's live location
   function openMapPicker() {
+    isLocationConfirmed = false;
     const modal = document.getElementById('mapPickerModal');
     modal.classList.add('active');
     
     const mapContainer = document.getElementById('mapContainer');
     mapContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#D4AF37;"><i class="fas fa-spinner fa-pulse"></i> Getting your location...</div>';
     
-    // Try to get user's live location first
     if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
@@ -410,7 +402,6 @@
           initMapWithLocation(userLoc);
         },
         (error) => {
-          // Fallback to default location
           const defaultLoc = { lat: 28.6139, lng: 77.2090 };
           currentSelectedLatLng = defaultLoc;
           initMapWithLocation(defaultLoc);
@@ -432,19 +423,8 @@
         mapContainer.innerHTML = '';
         mapContainer.appendChild(mapDiv);
         
-        mapInstance = new google.maps.Map(mapDiv, { 
-          center: centerLoc, 
-          zoom: 16,
-          styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
-        });
-        
-        mapMarker = new google.maps.Marker({ 
-          map: mapInstance, 
-          position: centerLoc,
-          draggable: true, 
-          animation: google.maps.Animation.DROP,
-          title: 'Your location - Drag to adjust if needed'
-        });
+        mapInstance = new google.maps.Map(mapDiv, { center: centerLoc, zoom: 16 });
+        mapMarker = new google.maps.Marker({ map: mapInstance, position: centerLoc, draggable: true, animation: google.maps.Animation.DROP });
         
         mapInstance.addListener('click', (e) => {
           mapMarker.setPosition(e.latLng);
@@ -462,10 +442,10 @@
     }
   }
 
-  // Confirm location and fill address with maximum details
+  // Confirm location and fill address - THIS WORKS WITHOUT DRAG
   async function confirmAndFillAddress() {
     if(!currentSelectedLatLng) {
-      showToast('❌ Please wait for location detection or click on map', true);
+      showToast('❌ Please wait for location detection', true);
       return;
     }
     
@@ -475,8 +455,7 @@
     const addrData = await getFullAddressFromLatLng(currentSelectedLatLng.lat(), currentSelectedLatLng.lng());
     showLoading(false);
     
-    if(addrData) {
-      // Auto-fill all address fields with maximum details
+    if(addrData && addrData.street && addrData.city) {
       if(document.getElementById('newStreet')) {
         document.getElementById('newStreet').value = addrData.street || '';
         document.getElementById('newCity').value = addrData.city || '';
@@ -484,12 +463,15 @@
         document.getElementById('newPincode').value = addrData.pincode || '';
         if(addrData.landmark) document.getElementById('newLandmark').value = addrData.landmark;
         
-        // Show success message with address preview
-        showToast(`✅ Address found! ${addrData.city || ''}, ${addrData.state || ''} - ${addrData.pincode || ''}`);
+        // Calculate shipping charge based on state
+        const newShippingCharge = calculateShippingCharge(addrData.state);
+        shippingCharge = newShippingCharge;
+        updateTotalDisplay();
+        
+        showToast(`✅ Address found! ${addrData.city}, ${addrData.state} - Shipping: ₹${shippingCharge}`);
       }
-      
-      // Close modal
       document.getElementById('mapPickerModal').classList.remove('active');
+      isLocationConfirmed = true;
     } else {
       showToast('❌ Could not get address. Please try again or enter manually.', true);
     }
@@ -499,7 +481,6 @@
     document.getElementById('mapPickerModal').classList.remove('active');
   }
 
-  // Fetch product images for normal collection items
   async function fetchProductImages() {
     try {
       const snapshot = await db.collection('products').get();
@@ -519,7 +500,6 @@
     return null;
   }
 
-  // Load custom design data (NO EMAIL)
   function loadCustomCheckoutData() {
     try {
       const savedData = localStorage.getItem('customCheckoutData');
@@ -579,7 +559,6 @@
     } catch(e) { console.error("Error loading custom data:", e); }
   }
 
-  // Address Functions (NO EMAIL)
   async function fetchSavedAddressFromPhone() {
     if (!currentUser || !currentUser.phone) return null;
     try {
@@ -640,6 +619,8 @@
 
   function useSavedAddress(address) {
     selectedAddress = { fullName: address.fullName, phone: address.phone, address: address.street, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark || '' };
+    shippingCharge = calculateShippingCharge(address.state);
+    updateTotalDisplay();
     showToast(`✅ Address selected: ${address.fullName}`);
     displaySelectedAddressCard(selectedAddress);
   }
@@ -654,8 +635,10 @@
     if (!fullName || !street || !city || !state || !pincode) { showToast('❌ Please fill all required fields', true); return; }
     if (!/^\d{6}$/.test(pincode)) { showToast('❌ Enter valid 6-digit pincode', true); return; }
     selectedAddress = { fullName, phone: currentUser.phone, address: street, city, state, pincode, landmark };
+    shippingCharge = calculateShippingCharge(state);
     await saveNewAddressToFirebase(selectedAddress);
-    showToast(`✅ Address saved: ${fullName}`);
+    updateTotalDisplay();
+    showToast(`✅ Address saved: ${fullName} - Shipping: ₹${shippingCharge}`);
     displaySelectedAddressCard(selectedAddress);
   }
 
@@ -666,13 +649,15 @@
     try {
       const position = await new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 }); });
       const addrData = await getFullAddressFromLatLng(position.coords.latitude, position.coords.longitude);
-      if(addrData) {
+      if(addrData && addrData.street) {
         document.getElementById('newStreet').value = addrData.street || '';
         document.getElementById('newCity').value = addrData.city || '';
         document.getElementById('newState').value = addrData.state || '';
         document.getElementById('newPincode').value = addrData.pincode || '';
         if(addrData.landmark) document.getElementById('newLandmark').value = addrData.landmark;
-        showToast(`✅ Location detected! ${addrData.city || ''}, ${addrData.state || ''}`);
+        
+        const newShipping = calculateShippingCharge(addrData.state);
+        showToast(`✅ Location detected! Shipping: ₹${newShipping}`);
       } else throw new Error('Geocoding failed');
     } catch (err) {
       if (err.code === 1) document.getElementById('locationModal').classList.add('show');
@@ -706,13 +691,14 @@
       isCustomized: isCustomizedOrder || item.isCustomized || false
     }));
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
-    const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
+    const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal + shippingCharge : cartTotal + shippingCharge;
     const orderData = { 
       orderId, customerName: addr.fullName, customerPhone: addr.phone,
       shippingAddress: { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' }, 
       items: itemsWithDetails, paymentMethod, paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending', 
       status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, 
-      subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, 
+      subtotal: cartTotal, shippingCharge: shippingCharge,
+      discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, 
       total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid,
       isCustomized: isCustomizedOrder, frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
     };
@@ -739,7 +725,7 @@
   async function initiateRazorpayPayment() { 
     if (!validateOrder() || isProcessing) return; 
     isProcessing = true; showLoading(true); 
-    const finalAmount = discountedTotal; 
+    const finalAmount = discountedTotal + shippingCharge; 
     if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } 
     const addr = getSelectedAddress(); 
     const options = { 
@@ -760,7 +746,6 @@
     razorpay.open(); 
   }
 
-  // Render Order Summary with proper images (custom + collection)
   async function renderOrderSummary() { 
     const container = document.getElementById('orderItemsList'); 
     if (!container) return; 
@@ -861,12 +846,20 @@
   
   function updateTotalDisplay() { 
     document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; 
+    document.getElementById('shippingCharge').innerHTML = `₹${shippingCharge}`;
+    
     const discountRow = document.getElementById('discountRow'); 
+    let finalTotal;
     if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) { 
       discountRow.style.display = 'flex'; 
       document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`; 
-      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`; 
-    } else { discountRow.style.display = 'none'; document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; } 
+      finalTotal = discountedTotal + shippingCharge;
+      document.getElementById('grandTotal').innerHTML = `₹${finalTotal.toLocaleString('en-IN')}`; 
+    } else { 
+      discountRow.style.display = 'none'; 
+      finalTotal = cartTotal + shippingCharge;
+      document.getElementById('grandTotal').innerHTML = `₹${finalTotal.toLocaleString('en-IN')}`; 
+    } 
     document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100); 
   }
   
@@ -894,7 +887,6 @@
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('codOption').click();
     
-    // Map modal event listeners
     document.getElementById('confirmMapBtn')?.addEventListener('click', confirmAndFillAddress);
     document.getElementById('closeMapModalBtn')?.addEventListener('click', closeMapModal);
     document.getElementById('cancelMapBtn')?.addEventListener('click', closeMapModal);
