@@ -90,9 +90,10 @@
     .benefit-row { display: flex; align-items: center; gap: 10px; padding: 6px 0; font-size: 11px; color: #aaa; }
     .benefit-row i { width: 20px; color: #4CAF50; font-size: 12px; }
     .total-row.grand-total { font-size: 20px; font-weight: 800; color: #D4AF37; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(212,175,55,0.3); }
+    .free-shipping-badge { background: rgba(76,175,80,0.15); padding: 8px; border-radius: 12px; text-align: center; margin: 12px 0; color: #4CAF50; font-size: 11px; }
     .rewards-points { background: rgba(212,175,55,0.1); border-radius: 12px; padding: 10px; margin-top: 12px; text-align: center; font-size: 11px; }
     .back-to-shop { display: block; text-align: center; margin-top: 16px; color: #888; text-decoration: none; font-size: 12px; }
-    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 12px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; text-align: center; white-space: nowrap; }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 12px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; text-align: center; }
     .toast.show { display: block; animation: fadeInOut 2s ease; }
     @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 15% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
     .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
@@ -117,6 +118,7 @@
     .save-address-btn { background: #4CAF50 !important; color: white !important; border: none !important; }
     .cancel-address-btn { background: #F44336 !important; color: white !important; border: none !important; }
     
+    /* Custom Design Preview Section */
     .custom-design-preview-section {
       background: rgba(0,0,0,0.3);
       border-radius: 16px;
@@ -124,6 +126,24 @@
       margin-bottom: 20px;
       text-align: center;
       border: 1px solid rgba(212,175,55,0.2);
+    }
+    .custom-design-preview-section h4 {
+      color: #D4AF37;
+      font-size: 14px;
+      margin-bottom: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+    .custom-design-preview-img {
+      max-width: 100%;
+      max-height: 200px;
+      border-radius: 12px;
+      object-fit: contain;
+      background: #1a1a2e;
+      margin: 0 auto;
+      display: block;
     }
     .custom-badge {
       background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -135,11 +155,31 @@
       display: inline-block;
       margin-bottom: 10px;
     }
-    .custom-preview-row { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
-    .custom-preview-item { flex: 1; min-width: 150px; text-align: center; }
-    .custom-preview-item img { width: 100%; max-height: 150px; object-fit: contain; border-radius: 12px; background: #1a1a2e; }
-    .custom-preview-item p { font-size: 11px; color: #D4AF37; margin-top: 8px; }
+    .custom-preview-row {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .custom-preview-item {
+      flex: 1;
+      min-width: 150px;
+      text-align: center;
+    }
+    .custom-preview-item img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #1a1a2e;
+    }
+    .custom-preview-item p {
+      font-size: 11px;
+      color: #D4AF37;
+      margin-top: 8px;
+    }
     
+    /* Map Modal Styles */
     .map-picker-modal {
       display: none;
       position: fixed;
@@ -197,6 +237,15 @@
       color: #ccc;
       cursor: pointer;
     }
+    .address-preview-box {
+      background: rgba(76,175,80,0.1);
+      border: 1px solid rgba(76,175,80,0.3);
+      border-radius: 12px;
+      padding: 12px;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #4CAF50;
+    }
   </style>
 </head>
 <body>
@@ -204,6 +253,7 @@
 <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Processing your order...</div></div>
 <div class="location-modal" id="locationModal"><div class="location-modal-content"><i class="fas fa-location-dot"></i><h3>Location Access Required</h3><p>Please enable location services to auto-fill your shipping address instantly</p><div class="location-modal-buttons"><button class="location-settings-btn" id="openSettingsBtn"><i class="fas fa-cog"></i> Enable Location</button><button class="location-cancel-btn" id="closeLocationModalBtn">Cancel</button></div></div></div>
 
+<!-- Map Picker Modal -->
 <div class="map-picker-modal" id="mapPickerModal">
   <div class="map-picker-container">
     <div class="map-picker-header">
@@ -240,22 +290,25 @@
     </div>
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+      <!-- Custom Design Preview Section (Only for customized orders) -->
       <div id="customDesignPreviewContainer" class="custom-design-preview-section" style="display: none;">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
         <div class="custom-preview-row" id="customPreviewRow">
-          <div class="custom-preview-item"><p><i class="fas fa-tshirt"></i> Front Design</p><img id="frontDesignPreview" class="custom-design-preview-img" alt="Front Design"></div>
-          <div class="custom-preview-item"><p><i class="fas fa-undo-alt"></i> Back Design</p><img id="backDesignPreview" class="custom-design-preview-img" alt="Back Design"></div>
+          <div class="custom-preview-item">
+            <p><i class="fas fa-tshirt"></i> Front Design</p>
+            <img id="frontDesignPreview" class="custom-design-preview-img" alt="Front Design">
+          </div>
+          <div class="custom-preview-item">
+            <p><i class="fas fa-undo-alt"></i> Back Design</p>
+            <img id="backDesignPreview" class="custom-design-preview-img" alt="Back Design">
+          </div>
         </div>
         <p style="font-size: 10px; color: #888; margin-top: 8px;"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> This is exactly how your design will be printed</p>
       </div>
       <div id="orderItemsList"></div>
       <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 <strong>Free Express Shipping</strong> - 3-5 business days</span></div></div>
-      <div class="order-total">
-        <div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div>
-        <div class="total-row" id="shippingRow"><span>Shipping Charge</span><span id="shippingCharge">₹0</span></div>
-        <div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div>
-        <div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div>
-      </div>
+      <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | FREE PACKAGING | 0% TAX</div>
+      <div class="order-total"><div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div><div class="total-row"><span>Shipping Charge</span><span style="color: #4CAF50;">FREE</span></div><div class="total-row" id="discountRow" style="display: none;"><span>Online Payment Discount (5%)</span><span style="color: #4CAF50;" id="discountAmount">-₹0</span></div><div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div></div>
       <div class="rewards-points"><i class="fas fa-coins" style="color: #D4AF37;"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins</div>
       <a href="#" class="back-to-shop" id="backToShopBtn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
     </div>
@@ -267,21 +320,24 @@
   const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+  const auth = firebase.auth();
   const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   const ONLINE_DISCOUNT_PERCENT = 5;
-  
   let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
   let selectedPaymentMethod = 'cod', currentUser = null;
   let selectedAddress = null;
   let savedAddressFromDb = null;
-  let shippingCharge = 0;
   
+  // Custom design data (no email)
   let customCheckoutData = null;
   let isCustomizedOrder = false;
   let frontDesignImageURL = null;
   let backDesignImageURL = null;
+  
+  // Product images cache for collection items
   let productImagesCache = {};
 
+  // Map variables
   let mapInstance = null;
   let mapMarker = null;
   let currentSelectedLatLng = null;
@@ -289,39 +345,55 @@
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
 
-  // Calculate shipping charge based on state
-  function calculateShippingCharge(state) {
-    if(!state) return 97;
-    const s = state.toLowerCase();
-    if(s === 'maharashtra') return 97;
-    if(s.includes('gujarat') || s.includes('madhya pradesh') || s.includes('goa')) return 101;
-    if(s.includes('rajasthan') || s.includes('delhi') || s.includes('haryana') || s.includes('punjab') || s.includes('uttar pradesh') || s.includes('uttarakhand')) return 104;
-    if(s.includes('bihar') || s.includes('jharkhand') || s.includes('west bengal') || s.includes('odisha') || s.includes('assam')) return 107;
-    if(s.includes('karnataka') || s.includes('telangana') || s.includes('andhra') || s.includes('tamil nadu') || s.includes('kerala')) return 110;
-    return 97;
-  }
-
-  async function getAddressFromLatLng(lat, lng) {
+  // Get FULL address with maximum details - street, city, state, pincode, landmark, village, sublocality, etc.
+  async function getFullAddressFromLatLng(lat, lng) {
     return new Promise((resolve) => {
       const geocoder = new google.maps.Geocoder();
       geocoder.geocode({ location: { lat, lng } }, (results, status) => {
         if(status === 'OK' && results && results[0]) {
           let street = "", city = "", state = "", pincode = "", landmark = "";
+          let village = "", sublocality = "", neighborhood = "", route = "";
+          
           for(let comp of results[0].address_components) {
-            if(comp.types.includes('route')) street = comp.long_name;
-            if(comp.types.includes('sublocality_level_1')) street = street || comp.long_name;
+            if(comp.types.includes('route')) route = comp.long_name;
+            if(comp.types.includes('street_number')) street = comp.long_name + (route ? ' ' + route : '');
+            if(comp.types.includes('sublocality_level_1')) sublocality = comp.long_name;
+            if(comp.types.includes('sublocality_level_2')) village = comp.long_name;
+            if(comp.types.includes('neighborhood')) neighborhood = comp.long_name;
             if(comp.types.includes('locality')) city = comp.long_name;
             if(comp.types.includes('administrative_area_level_1')) state = comp.long_name;
             if(comp.types.includes('postal_code')) pincode = comp.long_name;
-            if(comp.types.includes('sublocality_level_2')) landmark = comp.long_name;
+            if(comp.types.includes('landmark')) landmark = comp.long_name;
+            if(comp.types.includes('premise')) landmark = landmark || comp.long_name;
           }
-          if(!street && results[0].formatted_address) street = results[0].formatted_address.split(',')[0];
-          resolve({ street, city, state, pincode, landmark });
+          
+          // Build complete street address
+          let fullStreet = street || route || "";
+          if(sublocality) fullStreet = fullStreet ? fullStreet + ", " + sublocality : sublocality;
+          if(village) fullStreet = fullStreet ? fullStreet + ", " + village : village;
+          if(neighborhood) fullStreet = fullStreet ? fullStreet + ", " + neighborhood : neighborhood;
+          
+          if(!fullStreet && results[0].formatted_address) {
+            fullStreet = results[0].formatted_address.split(',')[0];
+          }
+          
+          // Get landmark from nearby places if available
+          let finalLandmark = landmark || sublocality || village || neighborhood || "";
+          
+          resolve({ 
+            street: fullStreet, 
+            city: city || "", 
+            state: state || "", 
+            pincode: pincode || "", 
+            landmark: finalLandmark,
+            fullAddress: results[0].formatted_address
+          });
         } else resolve(null);
       });
     });
   }
 
+  // Open Map Picker - Auto sets pin at user's live location
   function openMapPicker() {
     const modal = document.getElementById('mapPickerModal');
     modal.classList.add('active');
@@ -329,28 +401,30 @@
     const mapContainer = document.getElementById('mapContainer');
     mapContainer.innerHTML = '<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#D4AF37;"><i class="fas fa-spinner fa-pulse"></i> Getting your location...</div>';
     
+    // Try to get user's live location first
     if(navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (pos) => {
           const userLoc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
           currentSelectedLatLng = userLoc;
-          initMap(userLoc);
+          initMapWithLocation(userLoc);
         },
-        (err) => {
+        (error) => {
+          // Fallback to default location
           const defaultLoc = { lat: 28.6139, lng: 77.2090 };
           currentSelectedLatLng = defaultLoc;
-          initMap(defaultLoc);
-          showToast('⚠️ Using default location', true);
+          initMapWithLocation(defaultLoc);
+          showToast('⚠️ Could not get your location. Using default. Click on map to select.', true);
         },
         { enableHighAccuracy: true, timeout: 10000 }
       );
     } else {
       const defaultLoc = { lat: 28.6139, lng: 77.2090 };
       currentSelectedLatLng = defaultLoc;
-      initMap(defaultLoc);
+      initMapWithLocation(defaultLoc);
     }
     
-    function initMap(centerLoc) {
+    function initMapWithLocation(centerLoc) {
       setTimeout(() => {
         const mapDiv = document.createElement('div');
         mapDiv.style.width = '100%';
@@ -358,8 +432,19 @@
         mapContainer.innerHTML = '';
         mapContainer.appendChild(mapDiv);
         
-        mapInstance = new google.maps.Map(mapDiv, { center: centerLoc, zoom: 16 });
-        mapMarker = new google.maps.Marker({ map: mapInstance, position: centerLoc, draggable: true, animation: google.maps.Animation.DROP });
+        mapInstance = new google.maps.Map(mapDiv, { 
+          center: centerLoc, 
+          zoom: 16,
+          styles: [{ featureType: "poi", elementType: "labels", stylers: [{ visibility: "off" }] }]
+        });
+        
+        mapMarker = new google.maps.Marker({ 
+          map: mapInstance, 
+          position: centerLoc,
+          draggable: true, 
+          animation: google.maps.Animation.DROP,
+          title: 'Your location - Drag to adjust if needed'
+        });
         
         mapInstance.addListener('click', (e) => {
           mapMarker.setPosition(e.latLng);
@@ -377,38 +462,44 @@
     }
   }
 
-  // CONFIRM FUNCTION - Works without drag
+  // Confirm location and fill address with maximum details
   async function confirmAndFillAddress() {
     if(!currentSelectedLatLng) {
-      showToast('❌ Please wait for location detection', true);
+      showToast('❌ Please wait for location detection or click on map', true);
       return;
     }
     
     showLoading(true);
-    showToast('📍 Getting address...');
+    showToast('📍 Getting complete address details...');
     
-    const addrData = await getAddressFromLatLng(currentSelectedLatLng.lat(), currentSelectedLatLng.lng());
+    const addrData = await getFullAddressFromLatLng(currentSelectedLatLng.lat(), currentSelectedLatLng.lng());
     showLoading(false);
     
-    if(addrData && document.getElementById('newStreet')) {
-      document.getElementById('newStreet').value = addrData.street || '';
-      document.getElementById('newCity').value = addrData.city || '';
-      document.getElementById('newState').value = addrData.state || '';
-      document.getElementById('newPincode').value = addrData.pincode || '';
-      if(addrData.landmark) document.getElementById('newLandmark').value = addrData.landmark;
+    if(addrData) {
+      // Auto-fill all address fields with maximum details
+      if(document.getElementById('newStreet')) {
+        document.getElementById('newStreet').value = addrData.street || '';
+        document.getElementById('newCity').value = addrData.city || '';
+        document.getElementById('newState').value = addrData.state || '';
+        document.getElementById('newPincode').value = addrData.pincode || '';
+        if(addrData.landmark) document.getElementById('newLandmark').value = addrData.landmark;
+        
+        // Show success message with address preview
+        showToast(`✅ Address found! ${addrData.city || ''}, ${addrData.state || ''} - ${addrData.pincode || ''}`);
+      }
       
-      shippingCharge = calculateShippingCharge(addrData.state);
-      updateTotalDisplay();
-      showToast(`✅ Address found! Shipping: ₹${shippingCharge}`);
-      
+      // Close modal
       document.getElementById('mapPickerModal').classList.remove('active');
     } else {
-      showToast('❌ Could not get address', true);
+      showToast('❌ Could not get address. Please try again or enter manually.', true);
     }
   }
 
-  function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
+  function closeMapModal() {
+    document.getElementById('mapPickerModal').classList.remove('active');
+  }
 
+  // Fetch product images for normal collection items
   async function fetchProductImages() {
     try {
       const snapshot = await db.collection('products').get();
@@ -419,300 +510,397 @@
           productImagesCache[doc.id] = product.images[0];
         }
       });
-    } catch(e) { console.error("Error:", e); }
+    } catch(e) { console.error("Error fetching product images:", e); }
   }
   
-  function getProductImage(name, id) { return productImagesCache[name] || productImagesCache[id] || null; }
+  function getProductImage(productName, productId) {
+    if (productImagesCache[productName]) return productImagesCache[productName];
+    if (productImagesCache[productId]) return productImagesCache[productId];
+    return null;
+  }
 
+  // Load custom design data (NO EMAIL)
   function loadCustomCheckoutData() {
     try {
-      const saved = localStorage.getItem('customCheckoutData');
-      if(saved) {
-        customCheckoutData = JSON.parse(saved);
-        if(customCheckoutData?.isCustomized) {
+      const savedData = localStorage.getItem('customCheckoutData');
+      if (savedData) {
+        customCheckoutData = JSON.parse(savedData);
+        if (customCheckoutData && customCheckoutData.isCustomized === true) {
           isCustomizedOrder = true;
-          frontDesignImageURL = customCheckoutData.frontDesignImage || customCheckoutData.customDesignImage;
-          backDesignImageURL = customCheckoutData.backDesignImage;
+          frontDesignImageURL = customCheckoutData.frontDesignImage || customCheckoutData.customDesignImage || null;
+          backDesignImageURL = customCheckoutData.backDesignImage || null;
           
-          const preview = document.getElementById('customDesignPreviewContainer');
-          if(frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
-          if(backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
-          if(preview) preview.style.display = 'block';
+          const previewContainer = document.getElementById('customDesignPreviewContainer');
+          const frontPreview = document.getElementById('frontDesignPreview');
+          const backPreview = document.getElementById('backDesignPreview');
           
-          if(cart.length === 0) {
-            cart = [{ id: 'custom_'+Date.now(), name: customCheckoutData.tshirtType || 'Custom T-Shirt', price: customCheckoutData.price || 1699, quantity: 1, size: customCheckoutData.size || 'M', isCustomized: true }];
+          if (previewContainer && frontPreview && backPreview) {
+            if (frontDesignImageURL) frontPreview.src = frontDesignImageURL;
+            if (backDesignImageURL) backPreview.src = backDesignImageURL;
+            previewContainer.style.display = 'block';
+          }
+          
+          if (cart.length === 0) {
+            cart = [{
+              id: 'custom_' + Date.now(),
+              name: customCheckoutData.tshirtType || 'Custom T-Shirt',
+              price: customCheckoutData.price || 1699,
+              quantity: customCheckoutData.quantity || 1,
+              size: customCheckoutData.size || 'M',
+              selectedColor: customCheckoutData.selectedColor || 'Black',
+              frontDesignImage: frontDesignImageURL,
+              backDesignImage: backDesignImageURL,
+              isCustomized: true
+            }];
             cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0);
           }
         }
       }
-      if(!frontDesignImageURL) frontDesignImageURL = localStorage.getItem('frontDesignImage');
-      if(!backDesignImageURL) backDesignImageURL = localStorage.getItem('backDesignImage');
-      if(frontDesignImageURL || backDesignImageURL) {
-        isCustomizedOrder = true;
-        document.getElementById('customDesignPreviewContainer').style.display = 'block';
-        if(frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
-        if(backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
+      
+      if (!frontDesignImageURL) {
+        frontDesignImageURL = localStorage.getItem('frontDesignImage');
+        if (frontDesignImageURL) {
+          isCustomizedOrder = true;
+          const frontPreview = document.getElementById('frontDesignPreview');
+          if (frontPreview) frontPreview.src = frontDesignImageURL;
+          document.getElementById('customDesignPreviewContainer').style.display = 'block';
+        }
       }
-    } catch(e) {}
+      
+      if (!backDesignImageURL) {
+        backDesignImageURL = localStorage.getItem('backDesignImage');
+        if (backDesignImageURL) {
+          isCustomizedOrder = true;
+          const backPreview = document.getElementById('backDesignPreview');
+          if (backPreview) backPreview.src = backDesignImageURL;
+          document.getElementById('customDesignPreviewContainer').style.display = 'block';
+        }
+      }
+    } catch(e) { console.error("Error loading custom data:", e); }
   }
 
-  async function fetchSavedAddress() {
-    if(!currentUser?.phone) return null;
+  // Address Functions (NO EMAIL)
+  async function fetchSavedAddressFromPhone() {
+    if (!currentUser || !currentUser.phone) return null;
     try {
-      const snap = await db.collection('orders').where('customerPhone', '==', currentUser.phone).orderBy('orderDate', 'desc').limit(1).get();
-      if(!snap.empty && snap.docs[0].data().shippingAddress) {
-        const a = snap.docs[0].data();
-        return { fullName: a.customerName, street: a.shippingAddress.address, city: a.shippingAddress.city, state: a.shippingAddress.state, pincode: a.shippingAddress.pincode, landmark: a.shippingAddress.landmark || '', phone: a.customerPhone };
+      const snapshot = await db.collection('orders').where('customerPhone', '==', currentUser.phone).orderBy('orderDate', 'desc').limit(1).get();
+      if (!snapshot.empty) {
+        const lastOrder = snapshot.docs[0].data();
+        if (lastOrder.shippingAddress) {
+          return { fullName: lastOrder.customerName, street: lastOrder.shippingAddress.address, city: lastOrder.shippingAddress.city, state: lastOrder.shippingAddress.state, pincode: lastOrder.shippingAddress.pincode, landmark: lastOrder.shippingAddress.landmark || '', phone: lastOrder.customerPhone };
+        }
       }
-      const addrSnap = await db.collection('addresses').where('userId', '==', currentUser.uid).limit(1).get();
-      if(!addrSnap.empty) {
-        const a = addrSnap.docs[0].data();
-        return { fullName: a.name, street: a.street, city: a.city, state: a.state, pincode: a.pincode, landmark: a.landmark || '', phone: a.phone };
+      const addrSnapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).orderBy('isDefault', 'desc').limit(1).get();
+      if (!addrSnapshot.empty) {
+        const addr = addrSnapshot.docs[0].data();
+        return { fullName: addr.name, street: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '', phone: addr.phone || currentUser.phone };
       }
       return null;
     } catch(e) { return null; }
   }
 
+  async function saveNewAddressToFirebase(addressData) {
+    if (!currentUser || !currentUser.uid) return null;
+    const addressToSave = { userId: currentUser.uid, name: addressData.fullName, street: addressData.street, city: addressData.city, state: addressData.state, pincode: addressData.pincode, landmark: addressData.landmark || '', phone: addressData.phone || currentUser.phone, isDefault: true, createdAt: new Date().toISOString() };
+    try { return (await db.collection('addresses').add(addressToSave)).id; } catch(e) { return null; }
+  }
+
   function showNewAddressForm() {
     const container = document.getElementById('addressSelectionArea');
     container.innerHTML = `
-      <div class="new-address-form show">
-        <div class="form-group"><label>Full Name *</label><input type="text" id="newFullName" value="${escapeHtml(currentUser?.name || '')}"></div>
-        <div class="form-group"><label>Street Address *</label><input type="text" id="newStreet"></div>
-        <div class="form-row"><div class="form-group"><label>City *</label><input type="text" id="newCity"></div><div class="form-group"><label>State *</label><input type="text" id="newState"></div></div>
-        <div class="form-row"><div class="form-group"><label>Pincode *</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div>
-        <button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
-        <button class="location-btn map-pin-btn" id="openMapBtn"><i class="fas fa-map-marked-alt"></i> 🗺️ Pick Location on Map</button>
-        <div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveAddrBtn">✅ Use This Address</button><button class="location-btn cancel-address-btn" id="cancelAddrBtn">Cancel</button></div>
+      <div class="new-address-form show" id="newAddressFormSection">
+        <div class="form-group"><label>Full Name <span class="required">*</span></label><input type="text" id="newFullName" placeholder="Recipient full name" value="${escapeHtml(currentUser?.name || '')}"></div>
+        <div class="form-group"><label>Street Address <span class="required">*</span></label><input type="text" id="newStreet" placeholder="House number, building, street"></div>
+        <div class="form-row"><div class="form-group"><label>City <span class="required">*</span></label><input type="text" id="newCity" placeholder="City"></div><div class="form-group"><label>State <span class="required">*</span></label><input type="text" id="newState" placeholder="State"></div></div>
+        <div class="form-row"><div class="form-group"><label>Pincode <span class="required">*</span></label><input type="text" id="newPincode" placeholder="6-digit pincode" maxlength="6"></div><div class="form-group"><label>Landmark (Optional)</label><input type="text" id="newLandmark" placeholder="Nearby temple, school, hospital, etc..."></div></div>
+        <button class="location-btn" id="useCurrentLocationForNewBtn"><i class="fas fa-location-dot"></i> 📍 Use My Current Location</button>
+        <button class="location-btn map-pin-btn" id="openMapPickerBtn" style="margin-top:8px;"><i class="fas fa-map-marked-alt"></i> 🗺️ Pick Location on Map (Auto-Detect)</button>
+        <div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddressBtn" style="flex:1;"><i class="fas fa-check-circle"></i> ✅ Use This Address</button><button class="location-btn cancel-address-btn" id="cancelNewAddressBtn" style="flex:0.5;">Cancel</button></div>
       </div>
     `;
-    document.getElementById('saveAddrBtn')?.addEventListener('click', saveNewAddress);
-    document.getElementById('cancelAddrBtn')?.addEventListener('click', () => savedAddressFromDb ? showSavedAddressOptions() : showNewAddressForm());
-    document.getElementById('useLocationBtn')?.addEventListener('click', getCurrentLocation);
-    document.getElementById('openMapBtn')?.addEventListener('click', openMapPicker);
+    document.getElementById('saveNewAddressBtn')?.addEventListener('click', () => saveNewAddressAndUse());
+    document.getElementById('cancelNewAddressBtn')?.addEventListener('click', () => { if (savedAddressFromDb) showSavedAddressOptions(); else showNewAddressForm(); });
+    document.getElementById('useCurrentLocationForNewBtn')?.addEventListener('click', fetchCurrentLocationAndFill);
+    document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
   }
 
   function showSavedAddressOptions() {
-    const a = savedAddressFromDb;
+    const address = savedAddressFromDb;
     const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSaved"><div class="address-name">Previously Used Address</div><div class="address-detail">${escapeHtml(a.fullName)}</div><div class="address-detail">${escapeHtml(a.street)}</div><div class="address-detail">${escapeHtml(a.city)}, ${escapeHtml(a.state)} - ${escapeHtml(a.pincode)}</div><div class="address-label">✓ Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="newAddrBtn">+ Add New Address</button></div>`;
-    document.getElementById('useSaved')?.addEventListener('click', () => useSavedAddress(a));
-    document.getElementById('newAddrBtn')?.addEventListener('click', showNewAddressForm);
+    container.innerHTML = `<div class="address-selection-card"><div class="saved-address-card" id="useSavedAddressBtn"><div class="address-name"><i class="fas fa-star-of-life" style="color:#D4AF37;"></i> Previously Used Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.street)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddressFormBtn"><i class="fas fa-plus-circle"></i> Add New Address</button></div>`;
+    document.getElementById('useSavedAddressBtn')?.addEventListener('click', () => { useSavedAddress(address); });
+    document.getElementById('showNewAddressFormBtn')?.addEventListener('click', () => { showNewAddressForm(); });
   }
 
-  function displaySelectedCard(addr) {
+  function displaySelectedAddressCard(address) {
     const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `<div class="selected-address-card"><div class="address-name"><i class="fas fa-check-circle" style="color:#4CAF50;"></i> Selected</div><div class="address-detail">${escapeHtml(addr.fullName)}</div><div class="address-detail">${escapeHtml(addr.address)}</div><div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div><div class="address-label">✓ Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="changeAddrBtn">✏️ Change Address</button>`;
-    document.getElementById('changeAddrBtn')?.addEventListener('click', showNewAddressForm);
+    container.innerHTML = `<div class="selected-address-card"><div class="address-name"><i class="fas fa-check-circle" style="color: #4CAF50;"></i> Selected Delivery Address</div><div class="address-detail">${escapeHtml(address.fullName)}</div><div class="address-detail">${escapeHtml(address.address)}</div><div class="address-detail">${escapeHtml(address.city)}, ${escapeHtml(address.state)} - ${escapeHtml(address.pincode)}</div>${address.landmark ? `<div class="address-detail">Landmark: ${escapeHtml(address.landmark)}</div>` : ''}<div class="address-phone">📞 ${escapeHtml(address.phone)}</div><div class="address-label">✓ Deliver to this address</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="changeAddressBtn"><i class="fas fa-edit"></i> Change Address</button>`;
+    document.getElementById('changeAddressBtn')?.addEventListener('click', () => { showNewAddressForm(); });
   }
 
-  function useSavedAddress(addr) {
-    selectedAddress = { fullName: addr.fullName, phone: addr.phone, address: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' };
-    shippingCharge = calculateShippingCharge(addr.state);
-    updateTotalDisplay();
-    showToast(`✅ Address selected - Shipping: ₹${shippingCharge}`);
-    displaySelectedCard(selectedAddress);
+  function useSavedAddress(address) {
+    selectedAddress = { fullName: address.fullName, phone: address.phone, address: address.street, city: address.city, state: address.state, pincode: address.pincode, landmark: address.landmark || '' };
+    showToast(`✅ Address selected: ${address.fullName}`);
+    displaySelectedAddressCard(selectedAddress);
   }
 
-  async function saveNewAddress() {
-    const full = document.getElementById('newFullName').value.trim();
+  async function saveNewAddressAndUse() {
+    const fullName = document.getElementById('newFullName').value.trim();
     const street = document.getElementById('newStreet').value.trim();
     const city = document.getElementById('newCity').value.trim();
     const state = document.getElementById('newState').value.trim();
-    const pin = document.getElementById('newPincode').value.trim();
+    const pincode = document.getElementById('newPincode').value.trim();
     const landmark = document.getElementById('newLandmark').value.trim();
-    if(!full || !street || !city || !state || !pin || pin.length !== 6) { showToast('❌ Fill all fields', true); return; }
-    selectedAddress = { fullName: full, phone: currentUser.phone, address: street, city, state, pincode: pin, landmark };
-    shippingCharge = calculateShippingCharge(state);
-    if(currentUser.uid) await db.collection('addresses').add({ userId: currentUser.uid, name: full, street, city, state, pincode: pin, landmark, phone: currentUser.phone });
-    updateTotalDisplay();
-    showToast(`✅ Address saved - Shipping: ₹${shippingCharge}`);
-    displaySelectedCard(selectedAddress);
+    if (!fullName || !street || !city || !state || !pincode) { showToast('❌ Please fill all required fields', true); return; }
+    if (!/^\d{6}$/.test(pincode)) { showToast('❌ Enter valid 6-digit pincode', true); return; }
+    selectedAddress = { fullName, phone: currentUser.phone, address: street, city, state, pincode, landmark };
+    await saveNewAddressToFirebase(selectedAddress);
+    showToast(`✅ Address saved: ${fullName}`);
+    displaySelectedAddressCard(selectedAddress);
   }
 
-  async function getCurrentLocation() {
-    const btn = document.getElementById('useLocationBtn');
-    if(btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Getting...'; }
-    showToast('📍 Getting location...');
+  async function fetchCurrentLocationAndFill() {
+    const btn = document.getElementById('useCurrentLocationForNewBtn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-pulse"></i> Fetching location...'; }
+    showToast('📍 Getting your exact location...');
     try {
-      const pos = await new Promise((res, rej) => navigator.geolocation.getCurrentPosition(res, rej, { enableHighAccuracy: true, timeout: 10000 }));
-      const addr = await getAddressFromLatLng(pos.coords.latitude, pos.coords.longitude);
-      if(addr) {
-        document.getElementById('newStreet').value = addr.street || '';
-        document.getElementById('newCity').value = addr.city || '';
-        document.getElementById('newState').value = addr.state || '';
-        document.getElementById('newPincode').value = addr.pincode || '';
-        if(addr.landmark) document.getElementById('newLandmark').value = addr.landmark;
-        showToast(`✅ Location detected! Shipping: ₹${calculateShippingCharge(addr.state)}`);
-      }
-    } catch(e) { if(e.code === 1) document.getElementById('locationModal').classList.add('show'); showToast('❌ Location failed', true); }
-    if(btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-dot"></i> 📍 Use My Current Location'; }
+      const position = await new Promise((resolve, reject) => { navigator.geolocation.getCurrentPosition(resolve, reject, { enableHighAccuracy: true, timeout: 10000 }); });
+      const addrData = await getFullAddressFromLatLng(position.coords.latitude, position.coords.longitude);
+      if(addrData) {
+        document.getElementById('newStreet').value = addrData.street || '';
+        document.getElementById('newCity').value = addrData.city || '';
+        document.getElementById('newState').value = addrData.state || '';
+        document.getElementById('newPincode').value = addrData.pincode || '';
+        if(addrData.landmark) document.getElementById('newLandmark').value = addrData.landmark;
+        showToast(`✅ Location detected! ${addrData.city || ''}, ${addrData.state || ''}`);
+      } else throw new Error('Geocoding failed');
+    } catch (err) {
+      if (err.code === 1) document.getElementById('locationModal').classList.add('show');
+      showToast('❌ Location failed. Please enter manually.', true);
+    }
+    if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-location-dot"></i> 📍 Use My Current Location'; }
   }
 
-  async function loadAndRenderAddress() {
+  async function loadAndRenderAddressSelection() {
     showLoading(true);
-    const addr = await fetchSavedAddress();
-    savedAddressFromDb = addr;
+    const address = await fetchSavedAddressFromPhone();
+    savedAddressFromDb = address;
     showLoading(false);
-    if(addr && !selectedAddress) showSavedAddressOptions();
-    else if(!selectedAddress) showNewAddressForm();
-    else displaySelectedCard(selectedAddress);
+    if (address && !selectedAddress) { showSavedAddressOptions(); }
+    else if (!selectedAddress) { showNewAddressForm(); }
+    else { displaySelectedAddressCard(selectedAddress); }
   }
 
   function getSelectedAddress() { return selectedAddress; }
+  function validateOrder() { if(!getSelectedAddress()){ showToast('❌ Please select or add a shipping address', true); return false; } return true; }
 
-  async function saveOrderToFirebase(payMethod, transId = null) {
-    const addr = getSelectedAddress();
-    if(!addr) return null;
-    const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*10000);
-    const finalTotal = payMethod === 'Razorpay' ? discountedTotal + shippingCharge : cartTotal + shippingCharge;
-    await db.collection('orders').doc(orderId).set({
+  async function saveOrderToFirebase(paymentMethod, transactionId = null) {
+    const addr = getSelectedAddress(); if (!addr) return { success: false };
+    const itemsWithDetails = cart.map(item => ({ 
+      id: item.id, name: item.name, price: item.price, quantity: item.quantity, 
+      size: item.size || 'N/A', total: item.price * item.quantity,
+      selectedColor: item.selectedColor || 'Black',
+      productImage: item.productImage || null,
+      frontDesignImage: frontDesignImageURL || item.frontDesignImage || null,
+      backDesignImage: backDesignImageURL || item.backDesignImage || null,
+      isCustomized: isCustomizedOrder || item.isCustomized || false
+    }));
+    const orderId = 'ORD' + Date.now() + Math.floor(Math.random() * 1000);
+    const finalTotal = (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountedTotal : cartTotal;
+    const orderData = { 
       orderId, customerName: addr.fullName, customerPhone: addr.phone,
-      shippingAddress: { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' },
-      items: cart.map(i => ({ name: i.name, price: i.price, quantity: i.quantity })),
-      paymentMethod: payMethod === 'cod' ? 'COD' : 'Razorpay',
-      paymentStatus: payMethod === 'Razorpay' ? 'paid' : 'pending',
-      subtotal: cartTotal, shippingCharge: shippingCharge,
-      discount: payMethod === 'Razorpay' ? discountAmount : 0,
-      total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid
-    });
-    return orderId;
-  }
-
-  async function placeCOD() {
-    if(!getSelectedAddress()) { showToast('❌ Add address first', true); return; }
-    if(isProcessing) return;
-    isProcessing = true; showLoading(true);
-    const id = await saveOrderToFirebase('cod');
-    if(id) {
-      localStorage.clear();
-      showToast(`✅ Order placed! ${id}`);
-      setTimeout(() => window.location.href = `order-success.html?orderId=${id}`, 1500);
-    } else { showToast('❌ Failed', true); isProcessing = false; showLoading(false); }
-  }
-
-  async function payRazor() {
-    if(!getSelectedAddress()) { showToast('❌ Add address first', true); return; }
-    if(isProcessing) return;
-    const amt = discountedTotal + shippingCharge;
-    if(amt <= 0) return;
-    const addr = getSelectedAddress();
-    const options = {
-      key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA',
-      prefill: { name: addr.fullName, contact: addr.phone }, theme: { color: '#D4AF37' },
-      handler: async (resp) => {
-        const id = await saveOrderToFirebase('Razorpay', resp.razorpay_payment_id);
-        if(id) { localStorage.clear(); showToast(`✅ Payment success!`); setTimeout(() => window.location.href = `order-success.html?orderId=${id}`, 1500); }
-        else showToast('⚠️ Order save issue', true);
-        isProcessing = false; showLoading(false);
-      },
-      modal: { ondismiss: () => { showLoading(false); isProcessing = false; } }
+      shippingAddress: { address: addr.address, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' }, 
+      items: itemsWithDetails, paymentMethod, paymentStatus: paymentMethod === 'Razorpay' ? 'paid' : 'pending', 
+      status: paymentMethod === 'Razorpay' ? 'confirmed' : 'pending', transactionId, 
+      subtotal: cartTotal, discountApplied: (paymentMethod === 'Razorpay' && discountAmount > 0) ? discountAmount : 0, 
+      total: finalTotal, orderDate: new Date().toISOString(), userId: currentUser?.uid,
+      isCustomized: isCustomizedOrder, frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
     };
-    const rzp = new Razorpay(options);
-    rzp.open();
-    isProcessing = true; showLoading(true);
+    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { return { success: false }; }
   }
 
-  function renderOrderSummary() {
-    const container = document.getElementById('orderItemsList');
-    container.innerHTML = '';
-    cart.forEach(item => {
-      const div = document.createElement('div'); div.className = 'order-item';
-      const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
-      if(frontDesignImageURL) imgDiv.innerHTML = `<img src="${frontDesignImageURL}">`;
-      else imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
-      const info = document.createElement('div'); info.className = 'order-item-info';
-      info.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price}</p>`;
-      const price = document.createElement('div'); price.className = 'order-item-price'; price.innerText = `₹${item.price * item.quantity}`;
-      div.appendChild(imgDiv); div.appendChild(info); div.appendChild(price);
-      container.appendChild(div);
-    });
-    updateTotalDisplay();
-  }
-
-  function loadCart() {
-    fetchProductImages().then(() => {
-      loadCustomCheckoutData();
-      if(isCustomizedOrder && cart.length > 0) {
-        calculateDiscount();
-        renderOrderSummary();
-        return;
-      }
-      const saved = localStorage.getItem('vedantaCart');
-      if(saved) { try { cart = JSON.parse(saved); } catch(e) {} }
-      if(cart.length === 0 && !isCustomizedOrder) { showToast('Cart empty!', true); setTimeout(()=> window.location.href='index.html',1500); return; }
-      cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0);
-      calculateDiscount();
-      renderOrderSummary();
-    });
-  }
-
-  function calculateDiscount() {
-    if(selectedPaymentMethod === 'razorpay') { discountAmount = Math.round(cartTotal * 0.05); discountedTotal = cartTotal - discountAmount; }
-    else { discountAmount = 0; discountedTotal = cartTotal; }
-    updateTotalDisplay();
-  }
-
-  function updateTotalDisplay() {
-    document.getElementById('subtotal').innerHTML = `₹${cartTotal}`;
-    document.getElementById('shippingCharge').innerHTML = `₹${shippingCharge}`;
-    const discountRow = document.getElementById('discountRow');
-    let finalTotal;
-    if(selectedPaymentMethod === 'razorpay' && discountAmount > 0) {
-      discountRow.style.display = 'flex';
-      document.getElementById('discountAmount').innerHTML = `-₹${discountAmount}`;
-      finalTotal = discountedTotal + shippingCharge;
-    } else {
-      discountRow.style.display = 'none';
-      finalTotal = cartTotal + shippingCharge;
-    }
-    document.getElementById('grandTotal').innerHTML = `₹${finalTotal}`;
-    document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100);
-  }
-
-  function escapeHtml(str) { if(!str) return ''; return str.replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
-
-  async function init() {
-    const stored = JSON.parse(localStorage.getItem('vedantaUser'));
-    if(stored) currentUser = stored;
-    else {
-      const phone = localStorage.getItem('userPhone');
-      if(phone) currentUser = { uid: 'guest_'+Date.now(), phone, name: '' };
-      else { showToast('Login required', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
-    }
-    document.getElementById('displayPhone').innerHTML = currentUser.phone || 'Guest';
-    await loadAndRenderAddress();
-    loadCart();
-    
-    document.getElementById('codOption').onclick = () => {
-      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected'));
-      document.getElementById('codOption').classList.add('selected');
-      selectedPaymentMethod = 'cod';
-      document.getElementById('codDetails').classList.add('show');
-      document.getElementById('razorpaySection').classList.remove('show');
-      calculateDiscount();
-    };
-    document.getElementById('razorpayOption').onclick = () => {
-      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected'));
-      document.getElementById('razorpayOption').classList.add('selected');
-      selectedPaymentMethod = 'razorpay';
-      document.getElementById('codDetails').classList.remove('show');
-      document.getElementById('razorpaySection').classList.add('show');
-      calculateDiscount();
-    };
-    document.getElementById('placeOrderCodBtn').onclick = placeCOD;
-    document.getElementById('payRazorpayBtn').onclick = payRazor;
-    document.getElementById('backToShopBtn').onclick = (e) => { e.preventDefault(); window.location.href = 'index.html'; };
-    document.getElementById('openSettingsBtn').onclick = () => { document.getElementById('locationModal').classList.remove('show'); showToast('Please allow location in browser', true); };
-    document.getElementById('closeLocationModalBtn').onclick = () => document.getElementById('locationModal').classList.remove('show');
-    document.getElementById('codOption').click();
-    
-    document.getElementById('confirmMapBtn').onclick = confirmAndFillAddress;
-    document.getElementById('closeMapModalBtn').onclick = closeMapModal;
-    document.getElementById('cancelMapBtn').onclick = closeMapModal;
+  async function processOrderAfterSave(orderId) { 
+    localStorage.removeItem('vedantaCart');
+    localStorage.removeItem('customCheckoutData');
+    localStorage.removeItem('frontDesignImage');
+    localStorage.removeItem('backDesignImage');
+    window.location.href = `order-success.html?orderId=${orderId}`; 
   }
   
-  init();
+  async function saveOrderCOD() { 
+    if (!validateOrder() || isProcessing) return; 
+    isProcessing = true; showLoading(true); 
+    const res = await saveOrderToFirebase('Cash on Delivery'); 
+    showLoading(false); 
+    if (res.success) { showToast(`✅ Order placed! ID: ${res.orderId}`); setTimeout(() => processOrderAfterSave(res.orderId), 1500); } 
+    else { showToast('❌ Failed to place order', true); isProcessing = false; } 
+  }
+  
+  async function initiateRazorpayPayment() { 
+    if (!validateOrder() || isProcessing) return; 
+    isProcessing = true; showLoading(true); 
+    const finalAmount = discountedTotal; 
+    if (finalAmount <= 0) { showLoading(false); isProcessing=false; return; } 
+    const addr = getSelectedAddress(); 
+    const options = { 
+      key: RAZORPAY_KEY_ID, amount: Math.round(finalAmount)*100, currency: 'INR', 
+      name: 'VEDANTA', description: 'T-Shirt Order', 
+      prefill: { name: addr.fullName, contact: addr.phone }, 
+      theme: { color: '#D4AF37' }, 
+      handler: async (response) => { 
+        const result = await saveOrderToFirebase('Razorpay', response.razorpay_payment_id); 
+        showLoading(false); 
+        if (result.success) { showToast(`✅ Payment success! Order: ${result.orderId}`); setTimeout(() => processOrderAfterSave(result.orderId), 1500); } 
+        else { showToast('⚠️ Order save issue', true); } 
+        isProcessing = false; 
+      }, 
+      modal: { ondismiss: () => { showLoading(false); showToast('Payment cancelled', true); isProcessing=false; } } 
+    }; 
+    const razorpay = new Razorpay(options); 
+    razorpay.open(); 
+  }
+
+  // Render Order Summary with proper images (custom + collection)
+  async function renderOrderSummary() { 
+    const container = document.getElementById('orderItemsList'); 
+    if (!container) return; 
+    container.innerHTML = '';
+    for (const item of cart) {
+      const itemDiv = document.createElement('div');
+      itemDiv.className = 'order-item';
+      const imgDiv = document.createElement('div');
+      imgDiv.className = 'order-item-img';
+      const infoDiv = document.createElement('div');
+      infoDiv.className = 'order-item-info';
+      
+      let imageUrl = null;
+      let isCustom = false;
+      
+      if (frontDesignImageURL || backDesignImageURL || item.frontDesignImage || item.backDesignImage || item.isCustomized) {
+        isCustom = true;
+        imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
+      } else if (item.productImage) {
+        imageUrl = item.productImage;
+      } else if (item.name) {
+        imageUrl = getProductImage(item.name, item.id);
+      }
+      
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl;
+        img.style.width = '100%';
+        img.style.height = '100%';
+        img.style.objectFit = 'cover';
+        imgDiv.appendChild(img);
+      } else {
+        imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
+      }
+      
+      let designText = '';
+      if (isCustom && (frontDesignImageURL || backDesignImageURL)) {
+        designText = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Front + Back Custom Design</div>';
+      } else if (item.isCustomized || isCustom) {
+        designText = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design Included</div>';
+      }
+      
+      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4><p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p><p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}</p>${designText}`;
+      const priceDiv = document.createElement('div');
+      priceDiv.className = 'order-item-price';
+      priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
+      itemDiv.appendChild(imgDiv);
+      itemDiv.appendChild(infoDiv);
+      itemDiv.appendChild(priceDiv);
+      container.appendChild(itemDiv);
+    }
+    updateTotalDisplay(); 
+  }
+  
+  function loadCart() { 
+    fetchProductImages().then(() => {
+      loadCustomCheckoutData();
+      if (isCustomizedOrder && cart.length > 0) {
+        calculateOnlineDiscount();
+        renderOrderSummary();
+        updateTotalDisplay();
+        return;
+      }
+      const savedCart = localStorage.getItem('vedantaCart');
+      if (savedCart) {
+        try { cart = JSON.parse(savedCart); } catch(e) { cart = []; }
+      }
+      if (cart.length === 0) { 
+        const pendingOrder = localStorage.getItem('pendingCheckoutOrder');
+        if (pendingOrder) {
+          try {
+            const order = JSON.parse(pendingOrder);
+            if (order.customDesignImage) {
+              isCustomizedOrder = true;
+              frontDesignImageURL = order.customDesignImage;
+              cart = [{ id: order.orderId, name: `Custom ${order.style || 'T-Shirt'}`, price: order.price || 1699, quantity: 1, size: order.size || 'M', frontDesignImage: order.customDesignImage, isCustomized: true }];
+            }
+          } catch(e) {}
+        }
+      }
+      if (cart.length === 0 && !isCustomizedOrder) { 
+        showToast('Cart empty! Redirecting...', true); 
+        setTimeout(()=> window.location.href='index.html',1500); 
+        return; 
+      }
+      cartTotal = cart.reduce((s,i)=> s + (i.price*i.quantity),0); 
+      calculateOnlineDiscount(); 
+      renderOrderSummary(); 
+      updateTotalDisplay();
+    });
+  }
+  
+  function calculateOnlineDiscount() { 
+    if (selectedPaymentMethod === 'razorpay') { discountAmount = Math.round(cartTotal * ONLINE_DISCOUNT_PERCENT / 100); discountedTotal = cartTotal - discountAmount; } 
+    else { discountAmount = 0; discountedTotal = cartTotal; } 
+    updateTotalDisplay(); 
+  }
+  
+  function updateTotalDisplay() { 
+    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; 
+    const discountRow = document.getElementById('discountRow'); 
+    if (selectedPaymentMethod === 'razorpay' && discountAmount > 0) { 
+      discountRow.style.display = 'flex'; 
+      document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`; 
+      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`; 
+    } else { discountRow.style.display = 'none'; document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`; } 
+    document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100); 
+  }
+  
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
+
+  async function initialize() {
+    const storedUser = JSON.parse(localStorage.getItem('vedantaUser'));
+    if (storedUser) currentUser = storedUser;
+    else {
+      const phone = localStorage.getItem('userPhone');
+      if (phone) currentUser = { uid: 'guest_' + Date.now(), phone: phone, name: '' };
+      else { showToast('Please login first', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
+    }
+    
+    document.getElementById('displayPhone').innerText = currentUser.phone || '';
+    await loadAndRenderAddressSelection();
+    loadCart();
+    
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateOnlineDiscount(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(opt=>opt.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateOnlineDiscount(); });
+    document.getElementById('placeOrderCodBtn')?.addEventListener('click', saveOrderCOD);
+    document.getElementById('payRazorpayBtn')?.addEventListener('click', initiateRazorpayPayment);
+    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href = 'index.html'; });
+    document.getElementById('openSettingsBtn')?.addEventListener('click', () => { document.getElementById('locationModal').classList.remove('show'); showToast('📍 Please allow location in browser settings', true); });
+    document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
+    document.getElementById('codOption').click();
+    
+    // Map modal event listeners
+    document.getElementById('confirmMapBtn')?.addEventListener('click', confirmAndFillAddress);
+    document.getElementById('closeMapModalBtn')?.addEventListener('click', closeMapModal);
+    document.getElementById('cancelMapBtn')?.addEventListener('click', closeMapModal);
+  }
+  
+  initialize();
 </script>
 </body>
 </html>
