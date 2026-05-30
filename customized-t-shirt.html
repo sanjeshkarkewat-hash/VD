@@ -133,6 +133,39 @@
         .style-name { font-weight: 700; font-size: 11px; }
         .style-price { color: #D4AF37; font-size: 10px; font-weight: 700; }
         
+        /* DESKTOP LAYOUT - TWO COLUMNS */
+        .preview-editor-wrapper {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        @media (min-width: 992px) {
+            .preview-editor-wrapper {
+                flex-direction: row;
+                gap: 20px;
+                align-items: flex-start;
+            }
+            
+            .left-preview-area {
+                flex: 1.2;
+                min-width: 0;
+            }
+            
+            .right-editor-area {
+                flex: 0.8;
+                min-width: 0;
+            }
+        }
+        
+        .left-preview-area {
+            width: 100%;
+        }
+        
+        .right-editor-area {
+            width: 100%;
+        }
+        
         .vertical-flow {
             display: flex;
             flex-direction: column;
@@ -177,7 +210,6 @@
             line-height: 0;
         }
         
-        /* FIX: Canvas height auto to remove empty space */
         #tshirtCanvas { 
             border-radius: 16px; 
             width: 100%;
@@ -242,14 +274,21 @@
             padding-bottom: 0;
         }
         
+        /* DESIGN TOOLS - RIGHT SIDE ON DESKTOP */
         .design-tools-box, .material-tools-box {
             background: rgba(15,15,22,0.92);
             padding: 18px;
             width: 100%;
             margin-top: 0;
         }
-        .design-tools-box { margin-top: 0; }
-        .material-tools-box { margin-top: 0; }
+        
+        /* On mobile, keep order as is */
+        @media (max-width: 991px) {
+            .design-tools-box, .material-tools-box {
+                margin-top: 0;
+            }
+        }
+        
         .box-title {
             color: #D4AF37;
             font-size: 16px;
@@ -487,7 +526,7 @@
                 height: auto;
                 aspect-ratio: 1/1;
             }
-            .designer-container { max-width: 1200px; margin: 0 auto; }
+            .designer-container { max-width: 1400px; margin: 0 auto; }
         }
 
         @media (max-width: 767px) {
@@ -820,109 +859,115 @@
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <div class="vertical-flow">
-        <div class="selected-tshirt-area">
-            <div class="side-switcher">
-                <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
-                <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
-            </div>
-            <div class="canvas-container">
-                <!-- FIX: Changed height from "600" to "auto" to remove empty space -->
-                <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
-            </div>
-            <div class="color-selector-section">
-                <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
-                <div class="color-options" id="colorOptionsContainer"></div>
-            </div>
-            <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> Save Both Sides</button>
-            <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
-        </div>
-
-        <div class="design-tools-box">
-            <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
-            <div class="tool-group">
-                <label>📝 Add Text</label>
-                <input type="text" id="textInput" placeholder="Enter your text...">
-                <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
-            </div>
-            <div class="tool-group">
-                <label>🎨 Text Color</label>
-                <div class="color-grid" id="colorPalette"></div>
-            </div>
-            <div class="tool-group">
-                <label>✨ Text Effects</label>
-                <div class="effect-row">
-                    <button class="effect-btn" id="glowBtn">Glow</button>
-                    <button class="effect-btn" id="roundedBtn">Rounded</button>
-                    <button class="effect-btn" id="borderBtn">Border</button>
+    <div class="preview-editor-wrapper">
+        <!-- LEFT SIDE: Preview and Colors -->
+        <div class="left-preview-area">
+            <div class="selected-tshirt-area">
+                <div class="side-switcher">
+                    <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
+                    <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
                 </div>
-                <div id="glowControls" style="display: none; margin-top: 10px;">
-                    <div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="20" value="5"><span id="glowSizeValue">5px</span></div>
-                    <div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div>
+                <div class="canvas-container">
+                    <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
                 </div>
-            </div>
-            <div class="tool-group">
-                <label>🔤 Font Family</label>
-                <select id="fontSelect">
-                    <option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option>
-                    <option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option>
-                    <option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option>
-                    <option value="Oswald">Oswald</option><option value="Lobster">Lobster</option>
-                </select>
-                <div class="font-preview" id="fontPreview">Sample Text</div>
-            </div>
-            <div class="tool-group">
-                <label>📏 Text Size</label>
-                <div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div>
-            </div>
-            <div class="tool-group">
-                <label>🔄 Text Transform</label>
-                <div class="two-col-btns">
-                    <button class="btn-icon" id="flipHorizontalBtn">Flip H</button>
-                    <button class="btn-icon" id="flipVerticalBtn">Flip V</button>
-                    <button class="btn-icon" id="boldBtn">Bold</button>
-                    <button class="btn-icon" id="italicBtn">Italic</button>
-                    <button class="btn-icon" id="underlineBtn">Underline</button>
+                <div class="color-selector-section">
+                    <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
+                    <div class="color-options" id="colorOptionsContainer"></div>
                 </div>
-            </div>
-            <div class="tool-group">
-                <label>🖼️ Upload Design</label>
-                <div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p><input type="file" id="imageUpload" accept="image/*" style="display:none"></div>
-            </div>
-            <div class="tool-group">
-                <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
-                <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button>
+                <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> Save Both Sides</button>
+                <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
             </div>
         </div>
 
-        <div class="material-tools-box">
-            <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
-            <div class="tool-group">
-                <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
-                <select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select>
-            </div>
-            <div class="tool-group">
-                <label>🖨️ Print Method</label>
-                <div id="printMethodContainer">
-                    <div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div>
-                    <div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div>
+        <!-- RIGHT SIDE: Design Tools -->
+        <div class="right-editor-area">
+            <div class="design-tools-box">
+                <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
+                <div class="tool-group">
+                    <label>📝 Add Text</label>
+                    <input type="text" id="textInput" placeholder="Enter your text...">
+                    <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
+                </div>
+                <div class="tool-group">
+                    <label>🎨 Text Color</label>
+                    <div class="color-grid" id="colorPalette"></div>
+                </div>
+                <div class="tool-group">
+                    <label>✨ Text Effects</label>
+                    <div class="effect-row">
+                        <button class="effect-btn" id="glowBtn">Glow</button>
+                        <button class="effect-btn" id="roundedBtn">Rounded</button>
+                        <button class="effect-btn" id="borderBtn">Border</button>
+                    </div>
+                    <div id="glowControls" style="display: none; margin-top: 10px;">
+                        <div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="20" value="5"><span id="glowSizeValue">5px</span></div>
+                        <div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div>
+                    </div>
+                </div>
+                <div class="tool-group">
+                    <label>🔤 Font Family</label>
+                    <select id="fontSelect">
+                        <option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option>
+                        <option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option>
+                        <option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option>
+                        <option value="Oswald">Oswald</option><option value="Lobster">Lobster</option>
+                    </select>
+                    <div class="font-preview" id="fontPreview">Sample Text</div>
+                </div>
+                <div class="tool-group">
+                    <label>📏 Text Size</label>
+                    <div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div>
+                </div>
+                <div class="tool-group">
+                    <label>🔄 Text Transform</label>
+                    <div class="two-col-btns">
+                        <button class="btn-icon" id="flipHorizontalBtn">Flip H</button>
+                        <button class="btn-icon" id="flipVerticalBtn">Flip V</button>
+                        <button class="btn-icon" id="boldBtn">Bold</button>
+                        <button class="btn-icon" id="italicBtn">Italic</button>
+                        <button class="btn-icon" id="underlineBtn">Underline</button>
+                    </div>
+                </div>
+                <div class="tool-group">
+                    <label>🖼️ Upload Design</label>
+                    <div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p><input type="file" id="imageUpload" accept="image/*" style="display:none"></div>
+                </div>
+                <div class="tool-group">
+                    <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
+                    <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button>
                 </div>
             </div>
         </div>
+    </div>
 
-        <div class="order-panel">
-            <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
-            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
-            <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
-            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
-            <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
-            <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
-            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
-            <div class="action-buttons">
-                <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
-                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
+    <!-- SIZE AND ORDER SECTION (BELOW BOTH COLUMNS) -->
+    <div class="material-tools-box">
+        <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
+        <div class="tool-group">
+            <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
+            <select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select>
+        </div>
+        <div class="tool-group">
+            <label>🖨️ Print Method</label>
+            <div id="printMethodContainer">
+                <div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div>
+                <div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div>
             </div>
+        </div>
+    </div>
+
+    <div class="order-panel">
+        <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+        <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
+        <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
+        <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
+        <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
+        <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
+        <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
+        <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+        <div class="action-buttons">
+            <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
+            <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
         </div>
     </div>
 </div>
