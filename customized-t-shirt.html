@@ -163,13 +163,14 @@
             font-weight: 600;
             font-size: 13px;
             color: #aaa;
+            cursor: pointer;
         }
         .side-btn.active {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             color: #050508;
         }
         
-        /* FIXED: Proper centering for canvas container */
+        /* FIXED: Canvas container centering */
         .canvas-container {
             background: transparent;
             border-radius: 20px;
@@ -177,25 +178,19 @@
             display: flex !important;
             justify-content: center !important;
             align-items: center !important;
-            line-height: 0;
-            height: auto;
-            min-height: 0;
-            overflow: visible;
             text-align: center;
             position: relative;
-            margin: 0 auto;
         }
         
-        /* FIXED: Canvas centering */
         #tshirtCanvas { 
             border-radius: 16px; 
             max-width: 100%;
-            max-height: 100%;
+            height: auto;
             display: block;
             margin: 0 auto !important;
+            box-shadow: 0 0 0 1px rgba(212,175,55,0.2);
         }
         
-        /* FIXED: Force all canvas elements to center */
         .canvas-container canvas {
             display: block !important;
             margin: 0 auto !important;
@@ -430,8 +425,8 @@
         .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .cart-item-details { flex: 1; }
         .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; }
         .toast {
@@ -722,78 +717,18 @@
                 text-align: center;
                 cursor: pointer;
             }
-        }
-        
-        /* FIXED: Mobile centering */
-        @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
-                width: 100%;
-                position: relative;
-            }
-            .designer-container {
-                overflow-x: hidden;
-                width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-            .header {
-                padding: 15px 12px;
-            }
-            .logo {
-                font-size: 24px;
-            }
-            .tagline {
-                font-size: 8px;
-                letter-spacing: 2px;
-            }
-            .cart-icon-header {
-                padding: 6px 10px;
-                font-size: 11px;
-                top: 14px;
-                right: 12px;
-            }
-            .cart-count {
-                font-size: 10px;
-                padding: 1px 6px;
-            }
-            .section-title {
-                font-size: 16px;
-                margin-bottom: 12px;
-            }
-            .selected-tshirt-area {
-                padding: 0 12px 0 12px;
-                padding-bottom: 0;
-            }
-            .side-switcher {
-                gap: 10px;
-                margin-bottom: 12px;
-                margin-top: 12px;
-            }
-            .side-btn {
-                padding: 6px 16px;
-                font-size: 12px;
-            }
             
             /* FIXED: Mobile canvas centering */
             .canvas-container {
-                width: 100%;
                 display: flex !important;
                 justify-content: center !important;
                 align-items: center !important;
-                line-height: 0;
-                height: auto;
-                min-height: 0;
-                overflow: visible;
-                text-align: center;
-                position: relative;
-                margin: 0 auto;
+                width: 100%;
             }
             
             #tshirtCanvas {
-                max-width: 100%;
-                display: block;
                 margin: 0 auto !important;
+                display: block !important;
             }
             
             .canvas-container canvas {
@@ -802,148 +737,6 @@
                 position: relative !important;
                 left: auto !important;
                 right: auto !important;
-            }
-            
-            .canvas-container .lower-canvas,
-            .canvas-container .upper-canvas {
-                display: block !important;
-                margin: 0 auto !important;
-                position: relative !important;
-                left: auto !important;
-                right: auto !important;
-                top: 0 !important;
-                float: none !important;
-            }
-            
-            .color-selector-section {
-                margin-top: 0px;
-                padding: 10px;
-            }
-            .color-selector-title {
-                font-size: 12px;
-                margin-bottom: 8px;
-            }
-            .color-options {
-                gap: 8px;
-            }
-            .color-option {
-                padding: 4px 6px;
-            }
-            .color-swatch-circle {
-                width: 28px;
-                height: 28px;
-            }
-            .color-option-name {
-                font-size: 9px;
-            }
-            .instruction-text {
-                font-size: 9px;
-                margin-top: 10px;
-            }
-            .material-tools-box, .order-panel {
-                padding: 14px;
-            }
-            .box-title {
-                font-size: 14px;
-                margin-bottom: 12px;
-                padding-bottom: 6px;
-            }
-            .tool-group {
-                margin-bottom: 14px;
-                padding-bottom: 10px;
-            }
-            .tool-group label {
-                font-size: 11px;
-                margin-bottom: 5px;
-            }
-            .tool-group input, .tool-group select {
-                padding: 7px 9px;
-                font-size: 11px;
-            }
-            .order-panel h3 {
-                font-size: 14px;
-            }
-            .order-detail {
-                padding: 8px 0;
-                font-size: 12px;
-            }
-            .order-total {
-                padding: 12px 0;
-                font-size: 18px;
-            }
-            .action-buttons {
-                gap: 8px;
-                margin-top: 12px;
-            }
-            .btn-add, .btn-buy {
-                padding: 10px;
-                font-size: 12px;
-            }
-            .cart-sidebar {
-                width: 90%;
-                max-width: 320px;
-            }
-            .cart-header {
-                padding: 14px;
-            }
-            .cart-header h3 {
-                font-size: 16px;
-            }
-            .cart-items {
-                padding: 12px;
-                max-height: 65vh;
-            }
-            .cart-item {
-                padding: 10px;
-                gap: 8px;
-            }
-            .cart-item-img {
-                width: 45px;
-                height: 45px;
-            }
-            .cart-item-details {
-                font-size: 11px;
-            }
-            .cart-qty-control button {
-                width: 22px;
-                height: 22px;
-                font-size: 12px;
-            }
-            .cart-total {
-                padding: 12px;
-            }
-            .checkout-btn {
-                padding: 10px;
-                font-size: 13px;
-            }
-            .modal-content {
-                padding: 20px;
-                max-width: 300px;
-            }
-            .modal-content h3 {
-                font-size: 18px;
-            }
-            .modal-content input {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .toast {
-                padding: 8px 16px;
-                font-size: 12px;
-                white-space: normal;
-                text-align: center;
-                max-width: 90%;
-            }
-            .loading-spinner {
-                width: 40px;
-                height: 40px;
-            }
-            .loading-text {
-                font-size: 13px;
-            }
-            .cors-warning {
-                font-size: 9px;
-                padding: 6px;
             }
         }
         
@@ -1205,6 +998,8 @@ function showLoading(m="SAVING DESIGN..."){ const t=loadingOverlay.querySelector
 function hideLoading(){ loadingOverlay.classList.remove('active'); }
 function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
 function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
+
+// FIXED: loadTshirtImageDynamic with proper centering using origin 'center'
 function loadTshirtImageDynamic(p,c,s,preserve=true){
     if(!fabricCanvas)return; 
     const path=getDynamicImagePath(p,c,s); 
@@ -1217,32 +1012,30 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 const scaleX = canvasWidth / img.width;
                 const scaleY = canvasHeight / img.height;
                 const scale = Math.min(scaleX, scaleY);
-                const scaledWidth = img.width * scale;
-                const scaledHeight = img.height * scale;
-                const left = (canvasWidth - scaledWidth) / 2;
-                const top = (canvasHeight - scaledHeight) / 2;
                 
+                // CRITICAL FIX: Use 'center' origin for perfect centering
                 fabricCanvas.setBackgroundImage(img,()=>{
-                    if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
+                    if(preserve && objs.length) objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
                 },{
                     scaleX: scale,
                     scaleY: scale,
-                    originX: 'left',
-                    originY: 'top',
-                    left: left,
-                    top: top
+                    originX: 'center',
+                    originY: 'center',
+                    left: canvasWidth / 2,
+                    top: canvasHeight / 2
                 });
             });
         } else {
             fabricCanvas.setBackgroundColor('#1a1a2e',()=>{
-                if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
+                if(preserve && objs.length) objs.forEach(o=>fabricCanvas.add(o)); 
                 fabricCanvas.renderAll();
             });
         }
     });
 }
-async function saveDesignImageToFirebase(side,designJSON,productName,colorName){ if(!designJSON||!designJSON.objects?.length)return null; try{ const tempCanvas=document.createElement('canvas'); tempCanvas.width=fabricCanvas.width; tempCanvas.height=fabricCanvas.height; const tmp=new fabric.Canvas(tempCanvas); const path=getDynamicImagePath(productName,colorName,side); await new Promise(res=>{ loadImageAsDataURL(path,data=>{ if(data){fabric.Image.fromURL(data,img=>{const scaleX = tmp.width / img.width; const scaleY = tmp.height / img.height; const scale = Math.min(scaleX, scaleY); const scaledWidth = img.width * scale; const scaledHeight = img.height * scale; const left = (tmp.width - scaledWidth) / 2; const top = (tmp.height - scaledHeight) / 2; tmp.setBackgroundImage(img,()=>{tmp.loadFromJSON(designJSON,()=>{tmp.renderAll();setTimeout(res,100);});},{scaleX:scale,scaleY:scale,originX:'left',originY:'top',left:left,top:top});});}else{tmp.setBackgroundColor('#1a1a2e',()=>{tmp.loadFromJSON(designJSON,()=>{tmp.renderAll();setTimeout(res,100);});});}});}); const d=tmp.toDataURL({format:'png',quality:1,multiplier:2}); if(!d||d==='data:,')return null; const blob=(function(b){const a=b.split(','),m=a[0].match(/:(.*?);/)[1],c=atob(a[1]),n=c.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=c.charCodeAt(i);return new Blob([u],{type:m});})(d); const fileName=`${side}_${productName.replace(/\s/g,'_')}_${colorName}_${Date.now()}.png`; const ref=storageRef.child(`custom-designs/${side}/${fileName}`); await ref.put(blob); const url=await ref.getDownloadURL(); tmp.dispose(); return url; }catch(e){console.error(e);return null;} }
+
+async function saveDesignImageToFirebase(side,designJSON,productName,colorName){ if(!designJSON||!designJSON.objects?.length)return null; try{ const tempCanvas=document.createElement('canvas'); tempCanvas.width=fabricCanvas.width; tempCanvas.height=fabricCanvas.height; const tmp=new fabric.Canvas(tempCanvas); const path=getDynamicImagePath(productName,colorName,side); await new Promise(res=>{ loadImageAsDataURL(path,data=>{ if(data){fabric.Image.fromURL(data,img=>{const scaleX = tmp.width / img.width; const scaleY = tmp.height / img.height; const scale = Math.min(scaleX, scaleY); tmp.setBackgroundImage(img,()=>{tmp.loadFromJSON(designJSON,()=>{tmp.renderAll();setTimeout(res,100);});},{scaleX:scale,scaleY:scale,originX:'center',originY:'center',left:tmp.width/2,top:tmp.height/2});});}else{tmp.setBackgroundColor('#1a1a2e',()=>{tmp.loadFromJSON(designJSON,()=>{tmp.renderAll();setTimeout(res,100);});});}});}); const d=tmp.toDataURL({format:'png',quality:1,multiplier:2}); if(!d||d==='data:,')return null; const blob=(function(b){const a=b.split(','),m=a[0].match(/:(.*?);/)[1],c=atob(a[1]),n=c.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=c.charCodeAt(i);return new Blob([u],{type:m});})(d); const fileName=`${side}_${productName.replace(/\s/g,'_')}_${colorName}_${Date.now()}.png`; const ref=storageRef.child(`custom-designs/${side}/${fileName}`); await ref.put(blob); const url=await ref.getDownloadURL(); tmp.dispose(); return url; }catch(e){console.error(e);return null;} }
 async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Designs added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
 async function buyNow(){ const user=auth.currentUser; const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} if(!currentSize){showToast('Please select Size first',true);return;} showLoading("PREPARING ORDER..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return;}} localStorage.setItem('customCheckoutData',JSON.stringify({isCustomized:true,frontDesignImage:frontURL,backDesignImage:backURL,tshirtType:currentStyle.displayName,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,size:currentSize,quantity:1,price:currentStyle.price})); const snap=await db.collection('addresses').where('userId','==',user?.uid||JSON.parse(localStorage.getItem('vedantaUser')).uid).limit(1).get(); if(!snap.empty)window.location.href='secure-checkout2.html'; else window.location.href='secure-checkout.html'; }catch(e){showToast('Error',true);}finally{hideLoading();} }
 function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.innerText=m; t.style.background=err?'#F44336':'#D4AF37'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
