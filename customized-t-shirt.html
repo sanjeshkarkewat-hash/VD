@@ -1016,7 +1016,7 @@
 </div>
 
 <div class="designer-container">
-    <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein hone chahiye</div>
+    <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein chahiye</div>
     
     <div class="style-section">
         <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
@@ -1085,6 +1085,22 @@
                     </div>
                 </div>
             </div>
+            
+            <!-- ================= TEXT BEND FEATURE START ================= -->
+            <div class="tool-group">
+                <label>🌀 Text Warp / Bend (Photoshop Arc Style)</label>
+                <div class="effect-row">
+                    <button class="effect-btn" id="bendUpBtn"><i class="fas fa-arrow-up"></i> Bend Up</button>
+                    <button class="effect-btn" id="bendDownBtn"><i class="fas fa-arrow-down"></i> Bend Down</button>
+                    <button class="effect-btn" id="resetBendBtn"><i class="fas fa-undo-alt"></i> Reset Bend</button>
+                </div>
+                <div class="slider-row" style="margin-top: 8px;">
+                    <span>Bend Strength:</span>
+                    <input type="range" id="bendStrengthSlider" min="0" max="100" value="0">
+                    <span id="bendStrengthValue">0</span>
+                </div>
+            </div>
+            <!-- ================= TEXT BEND FEATURE END ================= -->
             
             <div class="tool-group">
                 <label>🎨 Text Color</label>
@@ -1164,6 +1180,7 @@
                     <button class="tool-btn" data-tool="upload"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
                     <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
                     <button class="tool-btn" data-tool="curve"><i class="fas fa-arrow-circle-up"></i> Curve</button>
+                    <button class="tool-btn" data-tool="bend"><i class="fas fa-waveform"></i> Bend</button>
                     <button class="tool-btn" data-tool="color"><i class="fas fa-palette"></i> Color</button>
                     <button class="tool-btn" data-tool="font"><i class="fas fa-text-height"></i> Font</button>
                     <button class="tool-btn" data-tool="size"><i class="fas fa-arrows-alt-h"></i> Size</button>
@@ -1205,6 +1222,22 @@
                 </div>
                 <button class="tool-btn" id="mobileApplyCurveBtn" style="width:100%; margin-top:8px;">Apply Curve</button>
             </div>
+            
+            <!-- ================= TEXT BEND MOBILE PANEL START ================= -->
+            <div id="mobilePanelBend" class="tool-panel">
+                <div class="panel-title"><i class="fas fa-waveform"></i> Text Warp/Bend</div>
+                <div class="mobile-effect-buttons">
+                    <button class="mobile-effect-btn" id="mobileBendUpBtn"><i class="fas fa-arrow-up"></i> Bend Up</button>
+                    <button class="mobile-effect-btn" id="mobileBendDownBtn"><i class="fas fa-arrow-down"></i> Bend Down</button>
+                    <button class="mobile-effect-btn" id="mobileResetBendBtn"><i class="fas fa-undo-alt"></i> Reset</button>
+                </div>
+                <div class="slider-row" style="margin-top: 8px;">
+                    <span>Strength:</span>
+                    <input type="range" id="mobileBendStrengthSlider" min="0" max="100" value="0">
+                    <span id="mobileBendStrengthValue">0</span>
+                </div>
+            </div>
+            <!-- ================= TEXT BEND MOBILE PANEL END ================= -->
             
             <div id="mobilePanelColor" class="tool-panel">
                 <div class="panel-title"><i class="fas fa-palette"></i> Text Color</div>
@@ -1307,8 +1340,288 @@ auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = ""
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 
-// Curved text storage
-let curvedTextData = {};
+// ================= TEXT BEND FEATURE START =================
+// Apply Photoshop-style Arc warp to text using SVG warp emulation via custom path rendering
+// We use fabric.Image from canvas with custom path manipulation to achieve bend effect
+function applyTextBend(activeObj, direction, strength) {
+    if (!activeObj) return false;
+    if (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData) {
+        showToast('Select a text element first', true);
+        return false;
+    }
+    
+    // Get text properties
+    let text = activeObj.text || (activeObj.curveData ? activeObj.curveData.text : '');
+    let fontFamily = activeObj.fontFamily || (activeObj.curveData ? activeObj.curveData.fontFamily : 'Space Grotesk');
+    let fontSize = activeObj.fontSize || (activeObj.curveData ? activeObj.curveData.fontSize : 36);
+    let fill = activeObj.fill || (activeObj.curveData ? activeObj.curveData.fillColor : '#D4AF37');
+    let fontWeight = activeObj.fontWeight === 'bold' || (activeObj.curveData && activeObj.curveData.isBold) ? 'bold' : 'normal';
+    let fontStyle = activeObj.fontStyle === 'italic' || (activeObj.curveData && activeObj.curveData.isItalic) ? 'italic' : 'normal';
+    let underline = activeObj.underline || (activeObj.curveData && activeObj.curveData.isUnderline) || false;
+    let letterSpacing = activeObj.charSpacing || 0;
+    
+    if (!text || text.length === 0) return false;
+    
+    // Create temporary canvas to render text with warp
+    const canvas = document.createElement('canvas');
+    const ctx = canvas.getContext('2d');
+    
+    // Set font
+    ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+    const textMetrics = ctx.measureText(text);
+    const textWidth = textMetrics.width;
+    const textHeight = fontSize * 1.2;
+    
+    // Add padding for warp
+    const padding = fontSize * 2;
+    canvas.width = textWidth + padding;
+    canvas.height = textHeight + padding;
+    
+    // Draw text normally first to get baseline
+    ctx.fillStyle = fill;
+    ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, canvas.width/2, canvas.height/2);
+    
+    // Get image data for warp
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const srcWidth = canvas.width;
+    const srcHeight = canvas.height;
+    
+    // Create destination canvas for warp
+    const destCanvas = document.createElement('canvas');
+    destCanvas.width = srcWidth;
+    destCanvas.height = srcHeight;
+    const destCtx = destCanvas.getContext('2d');
+    const destData = destCtx.createImageData(srcWidth, srcHeight);
+    
+    const strengthNorm = strength / 100; // 0 to 1
+    const warpIntensity = strengthNorm * 1.2; // Max warp factor
+    
+    // Arc warp algorithm (Photoshop style)
+    for (let y = 0; y < srcHeight; y++) {
+        const ny = y / srcHeight; // 0 to 1 from top to bottom
+        // Arc mapping: center moves up or down based on strength
+        let offsetX = 0;
+        let offsetY = 0;
+        
+        if (direction === 'up') {
+            // Bend Up: center pulls upward, edges stay
+            const curveFactor = Math.sin(ny * Math.PI) * warpIntensity;
+            offsetX = curveFactor * srcWidth * 0.3;
+            offsetY = -curveFactor * srcHeight * 0.2;
+        } else if (direction === 'down') {
+            // Bend Down: center pulls downward
+            const curveFactor = Math.sin(ny * Math.PI) * warpIntensity;
+            offsetX = curveFactor * srcWidth * 0.3;
+            offsetY = curveFactor * srcHeight * 0.2;
+        } else {
+            // No bend
+            offsetX = 0;
+            offsetY = 0;
+        }
+        
+        for (let x = 0; x < srcWidth; x++) {
+            const nx = x / srcWidth;
+            // Additional horizontal stretching at edges
+            const srcX = x + offsetX * (1 - Math.abs(nx - 0.5) * 1.5);
+            const srcY = y + offsetY;
+            
+            if (srcX >= 0 && srcX < srcWidth && srcY >= 0 && srcY < srcHeight) {
+                const srcIdx = (Math.floor(srcY) * srcWidth + Math.floor(srcX)) * 4;
+                const destIdx = (y * srcWidth + x) * 4;
+                destData.data[destIdx] = imgData.data[srcIdx];
+                destData.data[destIdx + 1] = imgData.data[srcIdx + 1];
+                destData.data[destIdx + 2] = imgData.data[srcIdx + 2];
+                destData.data[destIdx + 3] = imgData.data[srcIdx + 3];
+            }
+        }
+    }
+    
+    destCtx.putImageData(destData, 0, 0);
+    
+    // Also draw stroke if needed
+    if (activeObj.stroke && activeObj.strokeWidth > 0) {
+        destCtx.save();
+        destCtx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+        destCtx.textAlign = 'center';
+        destCtx.textBaseline = 'middle';
+        destCtx.strokeStyle = activeObj.stroke;
+        destCtx.lineWidth = activeObj.strokeWidth;
+        destCtx.strokeText(text, destCanvas.width/2, destCanvas.height/2);
+        destCtx.restore();
+    }
+    
+    // Create fabric image from warped canvas
+    const dataURL = destCanvas.toDataURL();
+    const imgElement = document.createElement('img');
+    imgElement.src = dataURL;
+    
+    return new Promise((resolve) => {
+        imgElement.onload = () => {
+            const fabricImage = new fabric.Image(imgElement, {
+                left: activeObj.left || fabricCanvas.width/2,
+                top: activeObj.top || fabricCanvas.height/2,
+                originX: 'center',
+                originY: 'center',
+                scaleX: activeObj.scaleX || 1,
+                scaleY: activeObj.scaleY || 1,
+                angle: activeObj.angle || 0,
+                hasControls: true,
+                hasBorders: true
+            });
+            
+            // Store bend metadata for persistence
+            fabricImage.bendData = {
+                text: text,
+                fontFamily: fontFamily,
+                fontSize: fontSize,
+                fill: fill,
+                fontWeight: fontWeight,
+                fontStyle: fontStyle,
+                underline: underline,
+                letterSpacing: letterSpacing,
+                direction: direction,
+                strength: strength,
+                stroke: activeObj.stroke,
+                strokeWidth: activeObj.strokeWidth,
+                type: 'bent'
+            };
+            
+            resolve(fabricImage);
+        };
+    });
+}
+
+function updateBendFromUI() {
+    const activeObj = fabricCanvas.getActiveObject();
+    if (!activeObj) {
+        showToast('Select a text element first', true);
+        return;
+    }
+    const strength = parseInt(document.getElementById('bendStrengthSlider').value);
+    document.getElementById('bendStrengthValue').innerText = strength;
+    if(document.getElementById('mobileBendStrengthSlider')) {
+        document.getElementById('mobileBendStrengthSlider').value = strength;
+        document.getElementById('mobileBendStrengthValue').innerText = strength;
+    }
+    
+    let direction = 'none';
+    if (activeObj.bendData) direction = activeObj.bendData.direction;
+    else if (window._tempBendDirection) direction = window._tempBendDirection;
+    else direction = 'up';
+    
+    if (direction !== 'none' && strength > 0) {
+        showLoading('Applying bend...');
+        applyTextBend(activeObj, direction, strength).then(newObj => {
+            if (newObj) {
+                const oldLeft = activeObj.left;
+                const oldTop = activeObj.top;
+                const oldScaleX = activeObj.scaleX;
+                const oldScaleY = activeObj.scaleY;
+                const oldAngle = activeObj.angle;
+                fabricCanvas.remove(activeObj);
+                fabricCanvas.add(newObj);
+                newObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
+                fabricCanvas.setActiveObject(newObj);
+                fabricCanvas.renderAll();
+                hideLoading();
+                showToast('Bend strength updated');
+            } else hideLoading();
+        }).catch(() => hideLoading());
+    } else if (strength === 0 && activeObj.bendData) {
+        // Reset to normal text
+        const normalText = new fabric.IText(activeObj.bendData.text, {
+            left: activeObj.left, top: activeObj.top, fontFamily: activeObj.bendData.fontFamily,
+            fontSize: activeObj.bendData.fontSize, fill: activeObj.bendData.fill,
+            fontWeight: activeObj.bendData.fontWeight, fontStyle: activeObj.bendData.fontStyle,
+            underline: activeObj.bendData.underline, originX: 'center', originY: 'center',
+            scaleX: activeObj.scaleX, scaleY: activeObj.scaleY, angle: activeObj.angle
+        });
+        fabricCanvas.remove(activeObj);
+        fabricCanvas.add(normalText);
+        fabricCanvas.setActiveObject(normalText);
+        fabricCanvas.renderAll();
+        showToast('Bend reset to normal text');
+    }
+}
+
+function bendUpAction() {
+    const activeObj = fabricCanvas.getActiveObject();
+    if (!activeObj || (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData && !activeObj.bendData)) {
+        showToast('Select a text element first', true);
+        return;
+    }
+    let strength = parseInt(document.getElementById('bendStrengthSlider').value);
+    if (isNaN(strength)) strength = 50;
+    window._tempBendDirection = 'up';
+    showLoading('Applying Bend Up...');
+    applyTextBend(activeObj, 'up', strength).then(newObj => {
+        if (newObj) {
+            const oldLeft = activeObj.left, oldTop = activeObj.top, oldScaleX = activeObj.scaleX, oldScaleY = activeObj.scaleY, oldAngle = activeObj.angle;
+            fabricCanvas.remove(activeObj);
+            fabricCanvas.add(newObj);
+            newObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
+            fabricCanvas.setActiveObject(newObj);
+            fabricCanvas.renderAll();
+            showToast('✓ Bend Up applied');
+        }
+        hideLoading();
+    }).catch(() => hideLoading());
+}
+
+function bendDownAction() {
+    const activeObj = fabricCanvas.getActiveObject();
+    if (!activeObj || (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData && !activeObj.bendData)) {
+        showToast('Select a text element first', true);
+        return;
+    }
+    let strength = parseInt(document.getElementById('bendStrengthSlider').value);
+    if (isNaN(strength)) strength = 50;
+    window._tempBendDirection = 'down';
+    showLoading('Applying Bend Down...');
+    applyTextBend(activeObj, 'down', strength).then(newObj => {
+        if (newObj) {
+            const oldLeft = activeObj.left, oldTop = activeObj.top, oldScaleX = activeObj.scaleX, oldScaleY = activeObj.scaleY, oldAngle = activeObj.angle;
+            fabricCanvas.remove(activeObj);
+            fabricCanvas.add(newObj);
+            newObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
+            fabricCanvas.setActiveObject(newObj);
+            fabricCanvas.renderAll();
+            showToast('✓ Bend Down applied');
+        }
+        hideLoading();
+    }).catch(() => hideLoading());
+}
+
+function resetBend() {
+    const activeObj = fabricCanvas.getActiveObject();
+    if (!activeObj) { showToast('Select a text element first', true); return; }
+    if (activeObj.bendData) {
+        const normalText = new fabric.IText(activeObj.bendData.text, {
+            left: activeObj.left, top: activeObj.top, fontFamily: activeObj.bendData.fontFamily,
+            fontSize: activeObj.bendData.fontSize, fill: activeObj.bendData.fill,
+            fontWeight: activeObj.bendData.fontWeight, fontStyle: activeObj.bendData.fontStyle,
+            underline: activeObj.bendData.underline, originX: 'center', originY: 'center',
+            scaleX: activeObj.scaleX, scaleY: activeObj.scaleY, angle: activeObj.angle
+        });
+        fabricCanvas.remove(activeObj);
+        fabricCanvas.add(normalText);
+        fabricCanvas.setActiveObject(normalText);
+        fabricCanvas.renderAll();
+        document.getElementById('bendStrengthSlider').value = 0;
+        document.getElementById('bendStrengthValue').innerText = '0';
+        if(document.getElementById('mobileBendStrengthSlider')) {
+            document.getElementById('mobileBendStrengthSlider').value = 0;
+            document.getElementById('mobileBendStrengthValue').innerText = '0';
+        }
+        showToast('Bend reset to normal');
+    } else {
+        showToast('No bend effect found on selected text', true);
+    }
+}
+// ================= TEXT BEND FEATURE END =================
 
 const loadingOverlay = document.getElementById('globalLoadingOverlay');
 function showLoading(m="SAVING DESIGN..."){ const t=loadingOverlay.querySelector('.loading-text'); if(t)t.innerText=m; loadingOverlay.classList.add('active'); }
@@ -1316,34 +1629,24 @@ function hideLoading(){ loadingOverlay.classList.remove('active'); }
 function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
 function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
 
-// Function to create curved text
 function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) {
     if (!text || text.length === 0) return null;
-    
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
-    
-    // Set font for measurement
     let fontWeight = isBold ? 'bold' : 'normal';
     let fontStyle = isItalic ? 'italic' : 'normal';
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-    
-    // Measure each character
     const chars = text.split('');
     const charWidths = chars.map(char => ctx.measureText(char).width);
     const totalWidth = charWidths.reduce((sum, w) => sum + w, 0);
-    
     let radiusValue = radius;
     let startAngle, endAngle, clockwise;
-    
     if (shape === 'circle') {
-        // Full circle
         radiusValue = radius;
         startAngle = -Math.PI / 2;
         endAngle = startAngle + Math.PI * 2;
         clockwise = true;
     } else if (shape === 'arcUp') {
-        // Arc upward
         const curveNormalized = curveAmount / 100;
         const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8);
         startAngle = -angleRange / 2;
@@ -1351,7 +1654,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         clockwise = true;
         radiusValue = Math.max(radius, totalWidth / angleRange);
     } else if (shape === 'arcDown') {
-        // Arc downward
         const curveNormalized = curveAmount / 100;
         const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8);
         startAngle = Math.PI + angleRange / 2;
@@ -1359,24 +1661,13 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         clockwise = false;
         radiusValue = Math.max(radius, totalWidth / angleRange);
     } else {
-        // Straight text - return normal Fabric text
-        const textObj = new fabric.Text(text, {
-            fontSize: fontSize,
-            fontFamily: fontFamily,
-            fill: fillColor,
-            fontWeight: isBold ? 'bold' : 'normal',
-            fontStyle: isItalic ? 'italic' : 'normal',
-            underline: isUnderline
-        });
+        const textObj = new fabric.Text(text, { fontSize, fontFamily, fill: fillColor, fontWeight, fontStyle, underline: isUnderline });
         return textObj;
     }
-    
-    // Calculate positions for each character on the arc
     const positions = [];
     let currentAngle = startAngle;
     const totalAngle = Math.abs(endAngle - startAngle);
     const anglePerChar = totalAngle / chars.length;
-    
     for (let i = 0; i < chars.length; i++) {
         const angle = startAngle + (i * anglePerChar) + (anglePerChar / 2);
         const x = Math.cos(angle) * radiusValue;
@@ -1384,32 +1675,19 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         const rotation = angle + (shape === 'arcDown' ? Math.PI : 0);
         positions.push({ char: chars[i], x, y, rotation, angle });
     }
-    
-    // Calculate canvas dimensions
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    positions.forEach(pos => {
-        minX = Math.min(minX, pos.x);
-        minY = Math.min(minY, pos.y);
-        maxX = Math.max(maxX, pos.x);
-        maxY = Math.max(maxY, pos.y);
-    });
-    
+    positions.forEach(pos => { minX = Math.min(minX, pos.x); minY = Math.min(minY, pos.y); maxX = Math.max(maxX, pos.x); maxY = Math.max(maxY, pos.y); });
     const padding = fontSize;
     const canvasWidth = maxX - minX + padding * 2;
     const canvasHeight = maxY - minY + padding * 2;
     const offsetX = (canvasWidth / 2) - ((minX + maxX) / 2);
     const offsetY = (canvasHeight / 2) - ((minY + maxY) / 2);
-    
-    // Create temporary canvas to draw curved text
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvasWidth;
     tempCanvas.height = canvasHeight;
     const tempCtx = tempCanvas.getContext('2d');
-    
     tempCtx.fillStyle = 'transparent';
     tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
-    
-    // Draw each character
     positions.forEach(pos => {
         tempCtx.save();
         tempCtx.translate(pos.x + offsetX, pos.y + offsetY);
@@ -1419,136 +1697,40 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         tempCtx.textBaseline = 'middle';
         tempCtx.textAlign = 'center';
         tempCtx.fillText(pos.char, 0, 0);
-        if (isUnderline) {
-            const metrics = tempCtx.measureText(pos.char);
-            tempCtx.beginPath();
-            tempCtx.moveTo(-metrics.width / 2, fontSize / 2 + 2);
-            tempCtx.lineTo(metrics.width / 2, fontSize / 2 + 2);
-            tempCtx.stroke();
-        }
+        if (isUnderline) { const metrics = tempCtx.measureText(pos.char); tempCtx.beginPath(); tempCtx.moveTo(-metrics.width / 2, fontSize / 2 + 2); tempCtx.lineTo(metrics.width / 2, fontSize / 2 + 2); tempCtx.stroke(); }
         tempCtx.restore();
     });
-    
-    // Create Fabric image from canvas
     const dataURL = tempCanvas.toDataURL();
     const imgElement = document.createElement('img');
     imgElement.src = dataURL;
-    
     return new Promise((resolve) => {
         imgElement.onload = () => {
-            const fabricImage = new fabric.Image(imgElement, {
-                left: fabricCanvas.width / 2,
-                top: fabricCanvas.height / 2,
-                originX: 'center',
-                originY: 'center',
-                scaleX: 1,
-                scaleY: 1,
-                hasControls: true,
-                hasBorders: true,
-                lockScalingX: false,
-                lockScalingY: false
-            });
-            
-            // Store curve data for future updates
-            fabricImage.curveData = {
-                text: text,
-                fontFamily: fontFamily,
-                fontSize: fontSize,
-                fillColor: fillColor,
-                shape: shape,
-                curveAmount: curveAmount,
-                radius: radius,
-                isBold: isBold,
-                isItalic: isItalic,
-                isUnderline: isUnderline,
-                type: 'curved'
-            };
-            
+            const fabricImage = new fabric.Image(imgElement, { left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center', scaleX: 1, scaleY: 1, hasControls: true, hasBorders: true, lockScalingX: false, lockScalingY: false });
+            fabricImage.curveData = { text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline, type: 'curved' };
             resolve(fabricImage);
         };
     });
 }
 
-// Apply curve to selected text
 async function applyCurveToSelected() {
     const activeObj = fabricCanvas.getActiveObject();
-    if (!activeObj) {
-        showToast('Please select a text element first', true);
-        return;
-    }
-    
-    // Get text from either Fabric text or custom curved object
+    if (!activeObj) { showToast('Please select a text element first', true); return; }
     let text, fontFamily, fontSize, fillColor, isBold, isItalic, isUnderline;
-    
-    if (activeObj.type === 'i-text' || activeObj.type === 'text') {
-        text = activeObj.text;
-        fontFamily = activeObj.fontFamily;
-        fontSize = activeObj.fontSize;
-        fillColor = activeObj.fill;
-        isBold = activeObj.fontWeight === 'bold';
-        isItalic = activeObj.fontStyle === 'italic';
-        isUnderline = activeObj.underline || false;
-    } else if (activeObj.curveData) {
-        text = activeObj.curveData.text;
-        fontFamily = activeObj.curveData.fontFamily;
-        fontSize = activeObj.curveData.fontSize;
-        fillColor = activeObj.curveData.fillColor;
-        isBold = activeObj.curveData.isBold;
-        isItalic = activeObj.curveData.isItalic;
-        isUnderline = activeObj.curveData.isUnderline;
-    } else {
-        showToast('Please select a text element', true);
-        return;
-    }
-    
+    if (activeObj.type === 'i-text' || activeObj.type === 'text') { text = activeObj.text; fontFamily = activeObj.fontFamily; fontSize = activeObj.fontSize; fillColor = activeObj.fill; isBold = activeObj.fontWeight === 'bold'; isItalic = activeObj.fontStyle === 'italic'; isUnderline = activeObj.underline || false; }
+    else if (activeObj.curveData) { text = activeObj.curveData.text; fontFamily = activeObj.curveData.fontFamily; fontSize = activeObj.curveData.fontSize; fillColor = activeObj.curveData.fillColor; isBold = activeObj.curveData.isBold; isItalic = activeObj.curveData.isItalic; isUnderline = activeObj.curveData.isUnderline; }
+    else { showToast('Please select a text element', true); return; }
     const shape = document.querySelector('.curve-option-btn.active')?.dataset.shape || 'straight';
     const curveAmount = parseInt(document.getElementById('curveAmountSlider')?.value || document.getElementById('mobileCurveAmountSlider')?.value || 0);
     const radius = parseInt(document.getElementById('curveRadiusSlider')?.value || document.getElementById('mobileCurveRadiusSlider')?.value || 150);
-    
     if (shape === 'straight') {
-        // Convert to normal text
-        const newText = new fabric.IText(text, {
-            left: activeObj.left,
-            top: activeObj.top,
-            fontFamily: fontFamily,
-            fontSize: fontSize,
-            fill: fillColor,
-            fontWeight: isBold ? 'bold' : 'normal',
-            fontStyle: isItalic ? 'italic' : 'normal',
-            underline: isUnderline,
-            originX: 'center',
-            originY: 'center'
-        });
-        
-        fabricCanvas.remove(activeObj);
-        fabricCanvas.add(newText);
-        fabricCanvas.setActiveObject(newText);
-        fabricCanvas.renderAll();
-        showToast('Text converted to straight');
+        const newText = new fabric.IText(text, { left: activeObj.left, top: activeObj.top, fontFamily, fontSize, fill: fillColor, fontWeight: isBold ? 'bold' : 'normal', fontStyle: isItalic ? 'italic' : 'normal', underline: isUnderline, originX: 'center', originY: 'center' });
+        fabricCanvas.remove(activeObj); fabricCanvas.add(newText); fabricCanvas.setActiveObject(newText); fabricCanvas.renderAll(); showToast('Text converted to straight');
     } else {
-        // Create curved text
         showLoading('Creating curved text...');
         try {
             const curvedObj = await createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline);
-            if (curvedObj) {
-                curvedObj.set({
-                    left: activeObj.left,
-                    top: activeObj.top,
-                    scaleX: activeObj.scaleX || 1,
-                    scaleY: activeObj.scaleY || 1
-                });
-                fabricCanvas.remove(activeObj);
-                fabricCanvas.add(curvedObj);
-                fabricCanvas.setActiveObject(curvedObj);
-                fabricCanvas.renderAll();
-                showToast('✓ Curved text applied!');
-            }
-        } catch (error) {
-            console.error('Error creating curved text:', error);
-            showToast('Error creating curved text', true);
-        } finally {
-            hideLoading();
-        }
+            if (curvedObj) { curvedObj.set({ left: activeObj.left, top: activeObj.top, scaleX: activeObj.scaleX || 1, scaleY: activeObj.scaleY || 1 }); fabricCanvas.remove(activeObj); fabricCanvas.add(curvedObj); fabricCanvas.setActiveObject(curvedObj); fabricCanvas.renderAll(); showToast('✓ Curved text applied!'); }
+        } catch (error) { console.error(error); showToast('Error creating curved text', true); } finally { hideLoading(); }
     }
 }
 
@@ -1586,7 +1768,7 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
 function updateGlowFromSliders(){
     const a=fabricCanvas.getActiveObject();
     if(!glowActive||!a) return;
-    if(a.type !== 'i-text' && a.type !== 'text' && !a.curveData) return;
+    if(a.type !== 'i-text' && a.type !== 'text' && !a.curveData && !a.bendData) return;
     
     const size = parseInt(document.getElementById('glowSizeSlider')?.value || document.getElementById('mobileGlowSizeSlider')?.value || 8);
     const blur = parseInt(document.getElementById('glowBlurSlider')?.value || document.getElementById('mobileGlowBlurSlider')?.value || 5);
@@ -1608,7 +1790,7 @@ function updateGlowFromSliders(){
 }
 function applyGlow(){
     const a=fabricCanvas.getActiveObject();
-    if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){
+    if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData&&!a.bendData)){
         showToast('Please select a text element first',true);
         return;
     }
@@ -1747,15 +1929,14 @@ function changeTShirtColor(c){selectedColor=c;const map={'white':'White','warm g
 function renderColorSelectorFull(){const cont=document.getElementById('colorOptionsContainer');const cols=currentStyle.colors;const dmap={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};const cmap={'white':'#f5f5f5','warm grey':'#a9a9a9','cream':'#fffdd0','black':'#1a1a1a','grey':'#808080','blue':'#1e3a5f','green':'#4a5d23','olive green':'#556b2f','dark brown':'#5c4033'};cont.innerHTML=cols.map(c=>`<div class="color-option ${selectedColor===c?'active':''}" data-color="${c}"><div class="color-swatch-circle" style="background:${cmap[c]||'#808080'};"></div><span class="color-option-name">${dmap[c]||c}</span></div>`).join('');document.querySelectorAll('.color-option').forEach(o=>o.addEventListener('click',()=>changeTShirtColor(o.dataset.color)));}
 function addText(){const val=document.getElementById('textInput').value.trim() || document.getElementById('mobileTextInput')?.value.trim(); if(!val){showToast('Enter text first',true);return;}const t=new fabric.IText(val,{left:fabricCanvas.width/2,top:fabricCanvas.height/2,fontFamily:document.getElementById('fontSelect').value,fill:'#D4AF37',fontSize:36,originX:'center',originY:'center'});fabricCanvas.add(t);fabricCanvas.setActiveObject(t);fabricCanvas.renderAll();showToast('✓ Text added!');updateSummaryElements();if(document.getElementById('mobileTextInput')) document.getElementById('mobileTextInput').value='';}
 function generateColorPalette(){return ['#FF6633','#FFB399','#FF33FF','#FFFF99','#00B3E6','#E6B333','#3366E6','#999966','#99FF99','#B34D4D'];}
-function renderColorPalette(){const pal=generateColorPalette();const c=document.getElementById('colorPalette');c.innerHTML='';const mobileC=document.getElementById('mobileColorPalette');if(mobileC) mobileC.innerHTML='';pal.forEach(clr=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=clr;sw.onclick=()=>{const act=fabricCanvas.getActiveObject();if(act&&(act.type==='i-text'||act.type==='text'||act.curveData)){act.set('fill',clr);if(act.curveData) act.curveData.fillColor = clr;fabricCanvas.renderAll();showToast('✓ Color applied!');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}else showToast('Select text first', true);};c.appendChild(sw);if(mobileC){const sw2=document.createElement('div');sw2.className='mobile-color-swatch';sw2.style.backgroundColor=clr;sw2.onclick=sw.onclick;mobileC.appendChild(sw2);}});}
-function applyRounded(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}roundedActive=!roundedActive;if(roundedActive){a.set('radius',50);a.set('rx',50);a.set('ry',50);}else{a.set('radius',0);a.set('rx',0);a.set('ry',0);}fabricCanvas.renderAll();showToast(roundedActive?'Rounded applied':'Rounded removed');}
-function applyBorderToggle(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}borderActive=!borderActive;if(borderActive){a.set('stroke','#D4AF37');a.set('strokeWidth',2);}else{a.set('stroke',null);a.set('strokeWidth',0);}fabricCanvas.renderAll();showToast(borderActive?'Border enabled':'Border disabled');}
+function renderColorPalette(){const pal=generateColorPalette();const c=document.getElementById('colorPalette');c.innerHTML='';const mobileC=document.getElementById('mobileColorPalette');if(mobileC) mobileC.innerHTML='';pal.forEach(clr=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=clr;sw.onclick=()=>{const act=fabricCanvas.getActiveObject();if(act&&(act.type==='i-text'||act.type==='text'||act.curveData||act.bendData)){act.set('fill',clr);if(act.curveData) act.curveData.fillColor = clr;if(act.bendData) act.bendData.fill = clr;fabricCanvas.renderAll();showToast('✓ Color applied!');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}else showToast('Select text first', true);};c.appendChild(sw);if(mobileC){const sw2=document.createElement('div');sw2.className='mobile-color-swatch';sw2.style.backgroundColor=clr;sw2.onclick=sw.onclick;mobileC.appendChild(sw2);}});}
+function applyRounded(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData&&!a.bendData)){showToast('Select a text first',true);return;}roundedActive=!roundedActive;if(roundedActive){a.set('radius',50);a.set('rx',50);a.set('ry',50);}else{a.set('radius',0);a.set('rx',0);a.set('ry',0);}fabricCanvas.renderAll();showToast(roundedActive?'Rounded applied':'Rounded removed');}
+function applyBorderToggle(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData&&!a.bendData)){showToast('Select a text first',true);return;}borderActive=!borderActive;if(borderActive){a.set('stroke','#D4AF37');a.set('strokeWidth',2);}else{a.set('stroke',null);a.set('strokeWidth',0);}fabricCanvas.renderAll();showToast(borderActive?'Border enabled':'Border disabled');}
 function flipHorizontal(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipX',!a.flipX);fabricCanvas.renderAll();showToast('Flipped Horizontal');}else showToast('Select element',true);}
 function flipVertical(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipY',!a.flipY);fabricCanvas.renderAll();showToast('Flipped Vertical');}else showToast('Select element',true);}
-function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&(a.type==='i-text'||a.type==='text'||a.curveData)){if(st==='bold'){const isBold = a.fontWeight === 'bold' || a.curveData?.isBold;if(a.curveData) a.curveData.isBold = !isBold;else a.set('fontWeight', isBold ? 'normal' : 'bold');}if(st==='italic'){const isItalic = a.fontStyle === 'italic' || a.curveData?.isItalic;if(a.curveData) a.curveData.isItalic = !isItalic;else a.set('fontStyle', isItalic ? 'normal' : 'italic');}if(st==='underline'){if(a.curveData) a.curveData.isUnderline = !a.curveData.isUnderline;else a.set('underline', !a.underline);}fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
-function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData))return;const fontVal=document.getElementById('fontSelect')?.value || 'Space Grotesk';const sizeVal=parseInt(document.getElementById('fontSizeSlider')?.value || document.getElementById('mobileFontSizeSlider')?.value || 36);if(a.curveData){a.curveData.fontFamily = fontVal;a.curveData.fontSize = sizeVal;}else{a.set('fontFamily',fontVal);a.set('fontSize',sizeVal);}fabricCanvas.renderAll();}
+function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&(a.type==='i-text'||a.type==='text'||a.curveData||a.bendData)){if(st==='bold'){const isBold = a.fontWeight === 'bold' || a.curveData?.isBold || a.bendData?.fontWeight === 'bold';if(a.curveData) a.curveData.isBold = !isBold;else if(a.bendData) a.bendData.fontWeight = isBold ? 'normal' : 'bold';else a.set('fontWeight', isBold ? 'normal' : 'bold');}if(st==='italic'){const isItalic = a.fontStyle === 'italic' || a.curveData?.isItalic || a.bendData?.fontStyle === 'italic';if(a.curveData) a.curveData.isItalic = !isItalic;else if(a.bendData) a.bendData.fontStyle = isItalic ? 'normal' : 'italic';else a.set('fontStyle', isItalic ? 'normal' : 'italic');}if(st==='underline'){if(a.curveData) a.curveData.isUnderline = !a.curveData.isUnderline;else if(a.bendData) a.bendData.underline = !a.bendData.underline;else a.set('underline', !a.underline);}fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
+function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData&&!a.bendData))return;const fontVal=document.getElementById('fontSelect')?.value || 'Space Grotesk';const sizeVal=parseInt(document.getElementById('fontSizeSlider')?.value || document.getElementById('mobileFontSizeSlider')?.value || 36);if(a.curveData){a.curveData.fontFamily = fontVal;a.curveData.fontSize = sizeVal;}else if(a.bendData){a.bendData.fontFamily = fontVal;a.bendData.fontSize = sizeVal;}else{a.set('fontFamily',fontVal);a.set('fontSize',sizeVal);}fabricCanvas.renderAll();}
 
-// Curve panel event handlers
 function setupCurvePanel() {
     const curvePanel = document.getElementById('curvePanel');
     const curveBtn = document.getElementById('curveTextBtn');
@@ -1769,7 +1950,6 @@ function setupCurvePanel() {
     const mobileCurveRadiusValue = document.getElementById('mobileCurveRadiusValue');
     const mobileApplyCurveBtn = document.getElementById('mobileApplyCurveBtn');
     
-    // Toggle curve panel
     curveBtn.onclick = () => {
         if (curvePanel.style.display === 'none') {
             curvePanel.style.display = 'block';
@@ -1778,7 +1958,6 @@ function setupCurvePanel() {
         }
     };
     
-    // Shape selection
     document.querySelectorAll('.curve-option-btn').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active'));
@@ -1787,7 +1966,6 @@ function setupCurvePanel() {
         };
     });
     
-    // Slider updates
     if (curveAmountSlider) {
         curveAmountSlider.oninput = () => {
             curveAmountValue.innerText = curveAmountSlider.value;
@@ -1812,7 +1990,6 @@ function setupCurvePanel() {
         };
     }
     
-    // Mobile sliders
     if (mobileCurveAmountSlider) {
         mobileCurveAmountSlider.oninput = () => {
             mobileCurveAmountValue.innerText = mobileCurveAmountSlider.value;
@@ -1833,7 +2010,6 @@ function setupCurvePanel() {
         mobileApplyCurveBtn.onclick = applyCurveToSelected;
     }
     
-    // Sync mobile shape selection
     document.querySelectorAll('.mobile-toolbar .curve-option-btn').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active'));
@@ -1878,6 +2054,24 @@ if(mobileFontGrid){fonts.forEach(f=>{const div=document.createElement('div');div
 function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';} document.getElementById('closeModalBtn').onclick=closeLoginModal; function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});} document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}}; document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),500);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
 initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
 setupCurvePanel();
+
+// ================= TEXT BEND FEATURE START =================
+// Attach bend event handlers
+document.getElementById('bendUpBtn').onclick = bendUpAction;
+document.getElementById('bendDownBtn').onclick = bendDownAction;
+document.getElementById('resetBendBtn').onclick = resetBend;
+document.getElementById('bendStrengthSlider').oninput = updateBendFromUI;
+if(document.getElementById('mobileBendUpBtn')) document.getElementById('mobileBendUpBtn').onclick = bendUpAction;
+if(document.getElementById('mobileBendDownBtn')) document.getElementById('mobileBendDownBtn').onclick = bendDownAction;
+if(document.getElementById('mobileResetBendBtn')) document.getElementById('mobileResetBendBtn').onclick = resetBend;
+if(document.getElementById('mobileBendStrengthSlider')) document.getElementById('mobileBendStrengthSlider').oninput = function() {
+    let val = this.value;
+    document.getElementById('mobileBendStrengthValue').innerText = val;
+    document.getElementById('bendStrengthSlider').value = val;
+    document.getElementById('bendStrengthValue').innerText = val;
+    updateBendFromUI();
+};
+// ================= TEXT BEND FEATURE END =================
 </script>
 </body>
 </html>
