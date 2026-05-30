@@ -183,6 +183,7 @@
             overflow: visible;
             text-align: center;
             position: relative;
+            margin: 0 auto;
         }
         
         /* FIXED: Canvas centering */
@@ -199,8 +200,8 @@
             display: block !important;
             margin: 0 auto !important;
             position: relative !important;
-            left: 0 !important;
-            right: 0 !important;
+            left: auto !important;
+            right: auto !important;
             top: 0 !important;
             float: none !important;
         }
@@ -213,8 +214,8 @@
             border: none !important;
             outline: none !important;
             position: relative !important;
-            left: 0 !important;
-            right: 0 !important;
+            left: auto !important;
+            right: auto !important;
             top: 0 !important;
             float: none !important;
             background: transparent !important;
@@ -786,6 +787,7 @@
                 overflow: visible;
                 text-align: center;
                 position: relative;
+                margin: 0 auto;
             }
             
             #tshirtCanvas {
@@ -798,8 +800,8 @@
                 display: block !important;
                 margin: 0 auto !important;
                 position: relative !important;
-                left: 0 !important;
-                right: 0 !important;
+                left: auto !important;
+                right: auto !important;
             }
             
             .canvas-container .lower-canvas,
@@ -807,8 +809,8 @@
                 display: block !important;
                 margin: 0 auto !important;
                 position: relative !important;
-                left: 0 !important;
-                right: 0 !important;
+                left: auto !important;
+                right: auto !important;
                 top: 0 !important;
                 float: none !important;
             }
@@ -1210,15 +1212,15 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
     loadImageAsDataURL(path,data=>{ 
         if(data){
             fabric.Image.fromURL(data,img=>{
-                const scaleX = fabricCanvas.width / img.width;
-                const scaleY = fabricCanvas.height / img.height;
+                const canvasWidth = fabricCanvas.width;
+                const canvasHeight = fabricCanvas.height;
+                const scaleX = canvasWidth / img.width;
+                const scaleY = canvasHeight / img.height;
                 const scale = Math.min(scaleX, scaleY);
-                
                 const scaledWidth = img.width * scale;
                 const scaledHeight = img.height * scale;
-                
-                const left = (fabricCanvas.width - scaledWidth) / 2;
-                const top = (fabricCanvas.height - scaledHeight) / 2;
+                const left = (canvasWidth - scaledWidth) / 2;
+                const top = (canvasHeight - scaledHeight) / 2;
                 
                 fabricCanvas.setBackgroundImage(img,()=>{
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
