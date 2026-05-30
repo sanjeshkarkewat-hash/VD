@@ -65,7 +65,6 @@
             font-weight: bold;
         }
 
-        /* FULL WIDTH CONTAINER - NO GAPS */
         .designer-container {
             width: 100%;
             margin: 0;
@@ -135,20 +134,20 @@
         .style-name { font-weight: 700; font-size: 11px; }
         .style-price { color: #D4AF37; font-size: 10px; font-weight: 700; }
         
-        /* EVERYTHING FULL WIDTH - NO BOXES, TOUCH TO TOUCH */
         .vertical-flow {
             display: flex;
             flex-direction: column;
             width: 100%;
         }
         
-        /* selected t-shirt area - NO GAP AT BOTTOM */
+        /* NO GAP AT ALL - TIGHT COMPACT */
         .selected-tshirt-area {
             background: rgba(10,10,18,0.6);
-            padding: 15px 15px 0 15px;
+            padding: 15px;
             text-align: center;
             width: 100%;
             margin: 0;
+            padding-bottom: 0;
         }
         
         .side-switcher {
@@ -187,13 +186,13 @@
             display: block;
         }
         
-        /* Color selector - directly below canvas with no gap */
+        /* COLOR SELECTOR - DIRECTLY BELOW CANVAS, NO MARGIN TOP GAP */
         .color-selector-section {
-            margin-top: 15px;
             padding: 12px;
             background: rgba(15,15,22,0.6);
             border-radius: 18px;
             width: 100%;
+            margin-top: 12px;
             margin-bottom: 0;
         }
         .color-selector-title {
@@ -229,21 +228,20 @@
         }
         .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
         
-        /* Hide save button */
+        /* HIDE SAVE BUTTON */
         .btn-save-image {
             display: none;
         }
         
-        /* Instruction text directly after color selector */
         .instruction-text { 
             font-size: 10px; 
             color: #888; 
-            margin-top: 10px; 
+            margin-top: 12px; 
             margin-bottom: 0;
             padding-bottom: 0;
         }
         
-        /* DESIGN TOOLS - directly after instruction text */
+        /* DESIGN TOOLS - DIRECTLY AFTER */
         .design-tools-box, .material-tools-box {
             background: rgba(15,15,22,0.92);
             padding: 18px;
@@ -336,7 +334,6 @@
             text-align: center;
         }
         
-        /* ORDER PANEL - FULL WIDTH */
         .order-panel {
             background: rgba(15,15,22,0.92);
             padding: 18px;
@@ -378,7 +375,6 @@
             color: white;
         }
         
-        /* Sidebar, Modal, Toast */
         .cart-sidebar {
             position: fixed;
             top: 0;
@@ -472,7 +468,6 @@
         .close-modal { position: absolute; top: 12px; right: 20px; font-size: 24px; cursor: pointer; color: white; }
         .cors-warning { background: rgba(255,100,0,0.2); padding: 8px; margin-bottom: 0; font-size: 10px; text-align: center; width: 100%; }
         
-        /* Desktop view - keep original grid */
         @media (min-width: 768px) {
             .style-section {
                 overflow-x: visible;
@@ -495,7 +490,6 @@
             .designer-container { max-width: 1200px; margin: 0 auto; }
         }
 
-        /* Mobile view - horizontal scroll */
         @media (max-width: 767px) {
             .style-section {
                 overflow-x: auto;
@@ -524,10 +518,6 @@
                 font-size: 9px;
             }
         }
-
-        /* ============================================ */
-        /* RESPONSIVE MOBILE SCALING */
-        /* ============================================ */
         
         @media (max-width: 768px) {
             body {
@@ -535,255 +525,202 @@
                 width: 100%;
                 position: relative;
             }
-            
             .designer-container {
                 overflow-x: hidden;
                 width: 100%;
                 padding: 0;
                 margin: 0;
             }
-            
             .header {
                 padding: 15px 12px;
             }
-            
             .logo {
                 font-size: 24px;
             }
-            
             .tagline {
                 font-size: 8px;
                 letter-spacing: 2px;
             }
-            
             .cart-icon-header {
                 padding: 6px 10px;
                 font-size: 11px;
                 top: 14px;
                 right: 12px;
             }
-            
             .cart-count {
                 font-size: 10px;
                 padding: 1px 6px;
             }
-            
             .section-title {
                 font-size: 16px;
                 margin-bottom: 12px;
             }
-            
             .selected-tshirt-area {
-                padding: 12px 12px 0 12px;
+                padding: 12px;
             }
-            
             .side-switcher {
                 gap: 10px;
                 margin-bottom: 12px;
             }
-            
             .side-btn {
                 padding: 6px 16px;
                 font-size: 12px;
             }
-            
             .canvas-container {
                 width: 100%;
                 display: flex;
                 justify-content: center;
             }
-            
             #tshirtCanvas {
                 width: 100%;
                 height: auto;
                 max-width: 450px;
             }
-            
             .color-selector-section {
-                margin-top: 12px;
                 padding: 10px;
+                margin-top: 10px;
             }
-            
             .color-selector-title {
                 font-size: 12px;
                 margin-bottom: 8px;
             }
-            
             .color-options {
                 gap: 8px;
             }
-            
             .color-option {
                 padding: 4px 6px;
             }
-            
             .color-swatch-circle {
                 width: 28px;
                 height: 28px;
             }
-            
             .color-option-name {
                 font-size: 9px;
             }
-            
             .instruction-text {
                 font-size: 9px;
-                margin-top: 8px;
+                margin-top: 10px;
             }
-            
             .design-tools-box, .material-tools-box, .order-panel {
                 padding: 14px;
             }
-            
             .box-title {
                 font-size: 14px;
                 margin-bottom: 12px;
                 padding-bottom: 6px;
             }
-            
             .tool-group {
                 margin-bottom: 14px;
                 padding-bottom: 10px;
             }
-            
             .tool-group label {
                 font-size: 11px;
                 margin-bottom: 5px;
             }
-            
             .tool-group input, .tool-group select {
                 padding: 7px 9px;
                 font-size: 11px;
             }
-            
             .color-grid {
                 gap: 5px;
             }
-            
             .color-swatch {
                 border-radius: 8px;
             }
-            
             .effect-btn, .btn-icon {
                 padding: 5px 10px;
                 font-size: 10px;
             }
-            
             .upload-area {
                 padding: 10px;
                 font-size: 11px;
             }
-            
             .slider-row {
                 gap: 8px;
             }
-            
             .slider-row span {
                 font-size: 11px;
             }
-            
             .two-col-btns {
                 gap: 5px;
             }
-            
             .print-option {
                 padding: 6px 8px;
             }
-            
             .print-option label {
                 font-size: 10px;
             }
-            
             .font-preview {
                 font-size: 11px;
                 padding: 4px;
             }
-            
             .order-panel h3 {
                 font-size: 14px;
             }
-            
             .order-detail {
                 padding: 8px 0;
                 font-size: 12px;
             }
-            
             .order-total {
                 padding: 12px 0;
                 font-size: 18px;
             }
-            
             .action-buttons {
                 gap: 8px;
                 margin-top: 12px;
             }
-            
             .btn-add, .btn-buy {
                 padding: 10px;
                 font-size: 12px;
             }
-            
             .cart-sidebar {
                 width: 90%;
                 max-width: 320px;
             }
-            
             .cart-header {
                 padding: 14px;
             }
-            
             .cart-header h3 {
                 font-size: 16px;
             }
-            
             .cart-items {
                 padding: 12px;
                 max-height: 65vh;
             }
-            
             .cart-item {
                 padding: 10px;
                 gap: 8px;
             }
-            
             .cart-item-img {
                 width: 45px;
                 height: 45px;
             }
-            
             .cart-item-details {
                 font-size: 11px;
             }
-            
             .cart-qty-control button {
                 width: 22px;
                 height: 22px;
                 font-size: 12px;
             }
-            
             .cart-total {
                 padding: 12px;
             }
-            
             .checkout-btn {
                 padding: 10px;
                 font-size: 13px;
             }
-            
             .modal-content {
                 padding: 20px;
                 max-width: 300px;
             }
-            
             .modal-content h3 {
                 font-size: 18px;
             }
-            
             .modal-content input {
                 padding: 8px;
                 font-size: 14px;
             }
-            
             .toast {
                 padding: 8px 16px;
                 font-size: 12px;
@@ -791,16 +728,13 @@
                 text-align: center;
                 max-width: 90%;
             }
-            
             .loading-spinner {
                 width: 40px;
                 height: 40px;
             }
-            
             .loading-text {
                 font-size: 13px;
             }
-            
             .cors-warning {
                 font-size: 9px;
                 padding: 6px;
@@ -821,38 +755,30 @@
             .style-price {
                 font-size: 8px;
             }
-            
             .color-grid {
                 grid-template-columns: repeat(6, 1fr);
             }
-            
             .color-options {
                 gap: 6px;
             }
-            
             .color-swatch-circle {
                 width: 24px;
                 height: 24px;
             }
-            
             .btn-add, .btn-buy {
                 padding: 9px;
                 font-size: 11px;
             }
-            
             .design-tools-box, .material-tools-box, .order-panel {
                 padding: 12px;
             }
-            
             .tool-group {
                 margin-bottom: 12px;
                 padding-bottom: 8px;
             }
-            
             .effect-row {
                 gap: 6px;
             }
-            
             .effect-btn, .btn-icon {
                 padding: 4px 8px;
                 font-size: 9px;
