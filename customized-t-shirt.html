@@ -169,7 +169,6 @@
             color: #050508;
         }
         
-        /* FIXED: Proper centering for canvas container */
         .canvas-container {
             background: transparent;
             border-radius: 20px;
@@ -181,43 +180,47 @@
             height: auto;
             min-height: 0;
             overflow: visible;
-            text-align: center;
+            text-align: center !important;
             position: relative;
         }
         
-        /* FIXED: Canvas centering */
         #tshirtCanvas { 
             border-radius: 16px; 
             max-width: 100%;
             max-height: 100%;
-            display: block;
-            margin: 0 auto !important;
+            display: block !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            position: relative !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            transform: none !important;
         }
         
-        /* FIXED: Force all canvas elements to center */
         .canvas-container canvas {
             display: block !important;
-            margin: 0 auto !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
             position: relative !important;
-            left: 0 !important;
-            right: 0 !important;
-            top: 0 !important;
-            float: none !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            transform: none !important;
         }
         
         .canvas-container .lower-canvas,
         .canvas-container .upper-canvas {
             display: block !important;
-            margin: 0 auto !important;
-            padding: 0 !important;
+            margin-left: auto !important;
+            margin-right: auto !important;
+            position: relative !important;
+            left: auto !important;
+            right: auto !important;
+            top: auto !important;
+            transform: none !important;
             border: none !important;
             outline: none !important;
-            position: relative !important;
-            left: 0 !important;
-            right: 0 !important;
-            top: 0 !important;
-            float: none !important;
-            background: transparent !important;
         }
         
         .color-selector-section {
@@ -723,7 +726,6 @@
             }
         }
         
-        /* FIXED: Mobile centering */
         @media (max-width: 768px) {
             body {
                 overflow-x: hidden;
@@ -774,7 +776,6 @@
                 font-size: 12px;
             }
             
-            /* FIXED: Mobile canvas centering */
             .canvas-container {
                 width: 100%;
                 display: flex !important;
@@ -784,33 +785,39 @@
                 height: auto;
                 min-height: 0;
                 overflow: visible;
-                text-align: center;
+                text-align: center !important;
                 position: relative;
             }
             
             #tshirtCanvas {
                 max-width: 100%;
-                display: block;
-                margin: 0 auto !important;
+                display: block !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
+                position: relative !important;
+                left: auto !important;
+                right: auto !important;
             }
             
             .canvas-container canvas {
                 display: block !important;
-                margin: 0 auto !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
                 position: relative !important;
-                left: 0 !important;
-                right: 0 !important;
+                left: auto !important;
+                right: auto !important;
             }
             
             .canvas-container .lower-canvas,
             .canvas-container .upper-canvas {
                 display: block !important;
-                margin: 0 auto !important;
+                margin-left: auto !important;
+                margin-right: auto !important;
                 position: relative !important;
-                left: 0 !important;
-                right: 0 !important;
-                top: 0 !important;
-                float: none !important;
+                left: auto !important;
+                right: auto !important;
+                top: auto !important;
+                transform: none !important;
             }
             
             .color-selector-section {
@@ -1223,6 +1230,18 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 fabricCanvas.setBackgroundImage(img,()=>{
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
+                    
+                    setTimeout(function() {
+                        const canvases = document.querySelectorAll('.canvas-container canvas');
+                        canvases.forEach(function(canvas) {
+                            canvas.style.marginLeft = 'auto';
+                            canvas.style.marginRight = 'auto';
+                            canvas.style.display = 'block';
+                            canvas.style.position = 'relative';
+                            canvas.style.left = 'auto';
+                            canvas.style.right = 'auto';
+                        });
+                    }, 10);
                 },{
                     scaleX: scale,
                     scaleY: scale,
@@ -1267,6 +1286,18 @@ function resizeCanvas() {
                 loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true);
             }
             fabricCanvas.renderAll();
+            
+            setTimeout(function() {
+                const canvases = document.querySelectorAll('.canvas-container canvas');
+                canvases.forEach(function(canvas) {
+                    canvas.style.marginLeft = 'auto';
+                    canvas.style.marginRight = 'auto';
+                    canvas.style.display = 'block';
+                    canvas.style.position = 'relative';
+                    canvas.style.left = 'auto';
+                    canvas.style.right = 'auto';
+                });
+            }, 10);
         }
     }
 }
@@ -1280,11 +1311,31 @@ function initCanvas(){
     fabricCanvas.setWidth(maxWidth);
     fabricCanvas.setHeight(maxWidth * aspectRatio);
     fabricCanvas.selection = true;
+    
+    const canvasElement = document.getElementById('tshirtCanvas');
+    if (canvasElement) {
+        canvasElement.style.marginLeft = 'auto';
+        canvasElement.style.marginRight = 'auto';
+        canvasElement.style.display = 'block';
+        canvasElement.style.position = 'relative';
+        canvasElement.style.left = 'auto';
+        canvasElement.style.right = 'auto';
+    }
+    
     fabricCanvas.on('after:render', function() { 
         const canvasContainer = document.querySelector('.canvas-container'); 
         if (canvasContainer) { 
             canvasContainer.style.lineHeight = '0'; 
-        } 
+        }
+        const canvases = document.querySelectorAll('.canvas-container canvas');
+        canvases.forEach(function(canvas) {
+            canvas.style.marginLeft = 'auto';
+            canvas.style.marginRight = 'auto';
+            canvas.style.display = 'block';
+            canvas.style.position = 'relative';
+            canvas.style.left = 'auto';
+            canvas.style.right = 'auto';
+        });
     }); 
     loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false);
     frontDesignJSON = fabricCanvas.toJSON();
