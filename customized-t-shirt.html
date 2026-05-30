@@ -154,7 +154,7 @@
             padding: 0;
         }
         
-        /* T-SHIRT AREA - NO GAPS ANYWHERE */
+        /* T-SHIRT AREA - ZERO GAP BETWEEN IMAGE AND COLOR SELECTOR */
         .selected-tshirt-area {
             background: transparent;
             text-align: center;
@@ -204,7 +204,7 @@
             background: transparent;
         }
         
-        /* COLOR SELECTOR - ZERO GAP, DIRECTLY TOUCHING T-SHIRT IMAGE */
+        /* COLOR SELECTOR - NO MARGIN, DIRECTLY ATTACHED TO CANVAS */
         .color-selector-section {
             margin: 0;
             padding: 14px;
@@ -245,10 +245,12 @@
         }
         .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
         
+        /* INSTRUCTION TEXT - THIN MARGIN ONLY */
         .instruction-text { 
             font-size: 10px; 
             color: #888; 
-            margin: 12px 0 0 0;
+            margin-top: 8px;
+            margin-bottom: 0;
             padding: 0 0 12px 0;
         }
         
@@ -568,7 +570,7 @@
             .designer-container { max-width: 1400px; margin: 0 auto; }
         }
 
-        /* MOBILE STYLES */
+        /* MOBILE STYLES - ZERO GAP ON MOBILE ALSO */
         @media (max-width: 991px) {
             .desktop-layout {
                 flex-direction: column;
@@ -684,9 +686,16 @@
             .bottom-separate-box {
                 margin: 0;
             }
-            /* ZERO GAP ON MOBILE ALSO */
+            /* CRITICAL: ZERO GAP ON MOBILE - NO MARGIN ON COLOR SELECTOR */
             .color-selector-section {
                 margin: 0;
+            }
+            .canvas-container {
+                margin: 0;
+                padding: 0;
+            }
+            #tshirtCanvas {
+                margin: 0 auto;
             }
         }
         
@@ -731,7 +740,7 @@
 
     <!-- DESKTOP LAYOUT -->
     <div class="desktop-layout">
-        <!-- LEFT COLUMN: T-Shirt + Color Selector (TOUCHING - ZERO GAP) -->
+        <!-- LEFT COLUMN: T-Shirt + Color Selector (ZERO GAP - DIRECTLY TOUCHING) -->
         <div class="tshirt-column">
             <div class="selected-tshirt-area">
                 <div class="side-switcher">
@@ -741,7 +750,7 @@
                 <div class="canvas-container">
                     <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
                 </div>
-                <!-- COLOR SELECTOR - ZERO MARGIN, DIRECTLY BELOW T-SHIRT -->
+                <!-- COLOR SELECTOR - ZERO MARGIN, DIRECTLY TOUCHING CANVAS -->
                 <div class="color-selector-section">
                     <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
                     <div class="color-options" id="colorOptionsContainer"></div>
