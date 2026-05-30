@@ -1012,11 +1012,11 @@
 
 <div class="loading-overlay" id="globalLoadingOverlay">
     <div class="loading-spinner"></div>
-    <div class="loading-text">PROCESSING...</div>
+    <div class="loading-text">SAVING DESIGN...</div>
 </div>
 
 <div class="designer-container">
-    <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein chahiye</div>
+    <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein hone chahiye</div>
     
     <div class="style-section">
         <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
@@ -1085,26 +1085,6 @@
                     </div>
                 </div>
             </div>
-            
-            <!-- ================= TEXT BEND/WARP FEATURE START ================= -->
-            <div class="tool-group">
-                <label>🌀 Photoshop Arc Warp (Bend)</label>
-                <div class="effect-row">
-                    <button class="effect-btn" id="bendUpBtn"><i class="fas fa-arrow-up"></i> Bend Up</button>
-                    <button class="effect-btn" id="bendDownBtn"><i class="fas fa-arrow-down"></i> Bend Down</button>
-                    <button class="effect-btn" id="resetBendBtn"><i class="fas fa-undo-alt"></i> Reset Bend</button>
-                </div>
-                <div class="slider-row" style="margin-top: 8px;">
-                    <span>Bend Strength (0-100):</span>
-                    <input type="range" id="bendStrengthSlider" min="0" max="100" value="50">
-                    <span id="bendStrengthValue">50</span>
-                </div>
-                <div class="slider-row" style="margin-top: 8px;">
-                    <span>Real-time Update:</span>
-                    <button class="effect-btn" id="realtimeBendToggle" style="background:#D4AF37; color:#050508;">Auto Update ON</button>
-                </div>
-            </div>
-            <!-- ================= TEXT BEND/WARP FEATURE END ================= -->
             
             <div class="tool-group">
                 <label>🎨 Text Color</label>
@@ -1184,7 +1164,6 @@
                     <button class="tool-btn" data-tool="upload"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
                     <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
                     <button class="tool-btn" data-tool="curve"><i class="fas fa-arrow-circle-up"></i> Curve</button>
-                    <button class="tool-btn" data-tool="bend"><i class="fas fa-waveform"></i> Bend</button>
                     <button class="tool-btn" data-tool="color"><i class="fas fa-palette"></i> Color</button>
                     <button class="tool-btn" data-tool="font"><i class="fas fa-text-height"></i> Font</button>
                     <button class="tool-btn" data-tool="size"><i class="fas fa-arrows-alt-h"></i> Size</button>
@@ -1225,21 +1204,6 @@
                     <span id="mobileCurveRadiusValue">150px</span>
                 </div>
                 <button class="tool-btn" id="mobileApplyCurveBtn" style="width:100%; margin-top:8px;">Apply Curve</button>
-            </div>
-            
-            <!-- Mobile Bend Panel -->
-            <div id="mobilePanelBend" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-waveform"></i> Text Warp/Bend</div>
-                <div class="mobile-effect-buttons">
-                    <button class="mobile-effect-btn" id="mobileBendUpBtn"><i class="fas fa-arrow-up"></i> Bend Up</button>
-                    <button class="mobile-effect-btn" id="mobileBendDownBtn"><i class="fas fa-arrow-down"></i> Bend Down</button>
-                    <button class="mobile-effect-btn" id="mobileResetBendBtn"><i class="fas fa-undo-alt"></i> Reset</button>
-                </div>
-                <div class="slider-row" style="margin-top: 8px;">
-                    <span>Strength:</span>
-                    <input type="range" id="mobileBendStrengthSlider" min="0" max="100" value="50">
-                    <span id="mobileBendStrengthValue">50</span>
-                </div>
             </div>
             
             <div id="mobilePanelColor" class="tool-panel">
@@ -1343,179 +1307,161 @@ auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = ""
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 
-// ================= TEXT BEND/WARP FEATURE START =================
-let autoBendUpdate = true;
-let currentBendDirection = null;
-let currentBendStrength = 50;
+// Curved text storage
+let curvedTextData = {};
 
-// Photoshop Arc Warp function using canvas transformation
-function applyArcWarpToText(textObj, direction, strengthPercent) {
-    if (!textObj) return null;
-    
-    // Get all text properties
-    let text = '';
-    let fontFamily = 'Space Grotesk';
-    let fontSize = 36;
-    let fillColor = '#D4AF37';
-    let fontWeight = 'normal';
-    let fontStyle = 'normal';
-    let underline = false;
-    let strokeColor = null;
-    let strokeWidth = 0;
-    let letterSpacing = 0;
-    
-    if (textObj.type === 'i-text' || textObj.type === 'text') {
-        text = textObj.text;
-        fontFamily = textObj.fontFamily;
-        fontSize = textObj.fontSize;
-        fillColor = textObj.fill;
-        fontWeight = textObj.fontWeight === 'bold' ? 'bold' : 'normal';
-        fontStyle = textObj.fontStyle === 'italic' ? 'italic' : 'normal';
-        underline = textObj.underline || false;
-        strokeColor = textObj.stroke;
-        strokeWidth = textObj.strokeWidth || 0;
-        letterSpacing = textObj.charSpacing || 0;
-    } else if (textObj.bendData) {
-        text = textObj.bendData.originalText;
-        fontFamily = textObj.bendData.fontFamily;
-        fontSize = textObj.bendData.fontSize;
-        fillColor = textObj.bendData.fill;
-        fontWeight = textObj.bendData.fontWeight;
-        fontStyle = textObj.bendData.fontStyle;
-        underline = textObj.bendData.underline;
-        strokeColor = textObj.bendData.stroke;
-        strokeWidth = textObj.bendData.strokeWidth;
-    } else {
-        return null;
-    }
-    
+const loadingOverlay = document.getElementById('globalLoadingOverlay');
+function showLoading(m="SAVING DESIGN..."){ const t=loadingOverlay.querySelector('.loading-text'); if(t)t.innerText=m; loadingOverlay.classList.add('active'); }
+function hideLoading(){ loadingOverlay.classList.remove('active'); }
+function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
+function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
+
+// Function to create curved text
+function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) {
     if (!text || text.length === 0) return null;
     
-    const strength = Math.min(1, strengthPercent / 100);
-    const warpIntensity = strength * 0.8; // Max warp factor for visible effect
-    
-    // Create canvas for warped text
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Measure text dimensions
+    // Set font for measurement
+    let fontWeight = isBold ? 'bold' : 'normal';
+    let fontStyle = isItalic ? 'italic' : 'normal';
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-    const metrics = ctx.measureText(text);
-    let textWidth = metrics.width;
-    if (letterSpacing > 0) {
-        textWidth += (text.length - 1) * letterSpacing;
+    
+    // Measure each character
+    const chars = text.split('');
+    const charWidths = chars.map(char => ctx.measureText(char).width);
+    const totalWidth = charWidths.reduce((sum, w) => sum + w, 0);
+    
+    let radiusValue = radius;
+    let startAngle, endAngle, clockwise;
+    
+    if (shape === 'circle') {
+        // Full circle
+        radiusValue = radius;
+        startAngle = -Math.PI / 2;
+        endAngle = startAngle + Math.PI * 2;
+        clockwise = true;
+    } else if (shape === 'arcUp') {
+        // Arc upward
+        const curveNormalized = curveAmount / 100;
+        const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8);
+        startAngle = -angleRange / 2;
+        endAngle = angleRange / 2;
+        clockwise = true;
+        radiusValue = Math.max(radius, totalWidth / angleRange);
+    } else if (shape === 'arcDown') {
+        // Arc downward
+        const curveNormalized = curveAmount / 100;
+        const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8);
+        startAngle = Math.PI + angleRange / 2;
+        endAngle = Math.PI - angleRange / 2;
+        clockwise = false;
+        radiusValue = Math.max(radius, totalWidth / angleRange);
+    } else {
+        // Straight text - return normal Fabric text
+        const textObj = new fabric.Text(text, {
+            fontSize: fontSize,
+            fontFamily: fontFamily,
+            fill: fillColor,
+            fontWeight: isBold ? 'bold' : 'normal',
+            fontStyle: isItalic ? 'italic' : 'normal',
+            underline: isUnderline
+        });
+        return textObj;
     }
-    const textHeight = fontSize * 1.3;
     
-    // Canvas size with padding
-    const padding = fontSize * 2;
-    canvas.width = Math.max(200, textWidth + padding);
-    canvas.height = Math.max(100, textHeight + padding);
+    // Calculate positions for each character on the arc
+    const positions = [];
+    let currentAngle = startAngle;
+    const totalAngle = Math.abs(endAngle - startAngle);
+    const anglePerChar = totalAngle / chars.length;
     
-    ctx.fillStyle = 'transparent';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    for (let i = 0; i < chars.length; i++) {
+        const angle = startAngle + (i * anglePerChar) + (anglePerChar / 2);
+        const x = Math.cos(angle) * radiusValue;
+        const y = Math.sin(angle) * radiusValue;
+        const rotation = angle + (shape === 'arcDown' ? Math.PI : 0);
+        positions.push({ char: chars[i], x, y, rotation, angle });
+    }
     
-    // Draw text with letter spacing
-    ctx.save();
-    ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-    ctx.fillStyle = fillColor;
-    ctx.textBaseline = 'middle';
-    ctx.textAlign = 'center';
-    ctx.translate(canvas.width/2, canvas.height/2);
+    // Calculate canvas dimensions
+    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+    positions.forEach(pos => {
+        minX = Math.min(minX, pos.x);
+        minY = Math.min(minY, pos.y);
+        maxX = Math.max(maxX, pos.x);
+        maxY = Math.max(maxY, pos.y);
+    });
     
-    // Apply letter spacing
-    let xOffset = -textWidth/2;
-    for (let i = 0; i < text.length; i++) {
-        const char = text[i];
-        const charMetrics = ctx.measureText(char);
-        ctx.fillText(char, xOffset + charMetrics.width/2, 0);
-        if (strokeColor && strokeWidth > 0) {
-            ctx.strokeStyle = strokeColor;
-            ctx.lineWidth = strokeWidth;
-            ctx.strokeText(char, xOffset + charMetrics.width/2, 0);
+    const padding = fontSize;
+    const canvasWidth = maxX - minX + padding * 2;
+    const canvasHeight = maxY - minY + padding * 2;
+    const offsetX = (canvasWidth / 2) - ((minX + maxX) / 2);
+    const offsetY = (canvasHeight / 2) - ((minY + maxY) / 2);
+    
+    // Create temporary canvas to draw curved text
+    const tempCanvas = document.createElement('canvas');
+    tempCanvas.width = canvasWidth;
+    tempCanvas.height = canvasHeight;
+    const tempCtx = tempCanvas.getContext('2d');
+    
+    tempCtx.fillStyle = 'transparent';
+    tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
+    
+    // Draw each character
+    positions.forEach(pos => {
+        tempCtx.save();
+        tempCtx.translate(pos.x + offsetX, pos.y + offsetY);
+        tempCtx.rotate(pos.rotation);
+        tempCtx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+        tempCtx.fillStyle = fillColor;
+        tempCtx.textBaseline = 'middle';
+        tempCtx.textAlign = 'center';
+        tempCtx.fillText(pos.char, 0, 0);
+        if (isUnderline) {
+            const metrics = tempCtx.measureText(pos.char);
+            tempCtx.beginPath();
+            tempCtx.moveTo(-metrics.width / 2, fontSize / 2 + 2);
+            tempCtx.lineTo(metrics.width / 2, fontSize / 2 + 2);
+            tempCtx.stroke();
         }
-        xOffset += charMetrics.width + letterSpacing;
-    }
+        tempCtx.restore();
+    });
     
-    if (underline) {
-        ctx.beginPath();
-        ctx.moveTo(-textWidth/2, fontSize/2 + 2);
-        ctx.lineTo(textWidth/2, fontSize/2 + 2);
-        ctx.stroke();
-    }
-    
-    // Get image data for warp
-    const srcData = ctx.getImageData(0, -canvas.height/2, canvas.width, canvas.height);
-    const destData = ctx.createImageData(canvas.width, canvas.height);
-    ctx.restore();
-    
-    // Apply arc warp transformation
-    for (let y = 0; y < canvas.height; y++) {
-        for (let x = 0; x < canvas.width; x++) {
-            // Normalized coordinates (-1 to 1 from center)
-            const nx = (x - canvas.width/2) / (canvas.width/2);
-            
-            // Arc displacement formula: center moves vertically, edges stay
-            let displaceY = 0;
-            const effectFactor = warpIntensity * (1 - Math.abs(Math.pow(nx, 1.5)));
-            
-            if (direction === 'up') {
-                displaceY = -effectFactor * textHeight * 0.9;
-            } else if (direction === 'down') {
-                displaceY = effectFactor * textHeight * 0.9;
-            }
-            
-            const srcY = y + displaceY;
-            const srcX = x;
-            
-            if (srcX >= 0 && srcX < canvas.width && srcY >= 0 && srcY < canvas.height) {
-                const srcIdx = (Math.floor(srcY) * canvas.width + Math.floor(srcX)) * 4;
-                const destIdx = (y * canvas.width + x) * 4;
-                for (let i = 0; i < 4; i++) {
-                    destData.data[destIdx + i] = srcData.data[srcIdx + i];
-                }
-            }
-        }
-    }
-    
-    ctx.putImageData(destData, 0, 0);
-    
-    // Create fabric image from warped canvas
-    const dataURL = canvas.toDataURL();
-    const imgElement = new Image();
+    // Create Fabric image from canvas
+    const dataURL = tempCanvas.toDataURL();
+    const imgElement = document.createElement('img');
     imgElement.src = dataURL;
     
     return new Promise((resolve) => {
         imgElement.onload = () => {
             const fabricImage = new fabric.Image(imgElement, {
-                left: textObj.left || fabricCanvas.width/2,
-                top: textObj.top || fabricCanvas.height/2,
+                left: fabricCanvas.width / 2,
+                top: fabricCanvas.height / 2,
                 originX: 'center',
                 originY: 'center',
-                scaleX: textObj.scaleX || 1,
-                scaleY: textObj.scaleY || 1,
-                angle: textObj.angle || 0,
+                scaleX: 1,
+                scaleY: 1,
                 hasControls: true,
                 hasBorders: true,
                 lockScalingX: false,
                 lockScalingY: false
             });
             
-            // Store bend metadata
-            fabricImage.bendData = {
-                originalText: text,
+            // Store curve data for future updates
+            fabricImage.curveData = {
+                text: text,
                 fontFamily: fontFamily,
                 fontSize: fontSize,
-                fill: fillColor,
-                fontWeight: fontWeight,
-                fontStyle: fontStyle,
-                underline: underline,
-                stroke: strokeColor,
-                strokeWidth: strokeWidth,
-                letterSpacing: letterSpacing,
-                direction: direction,
-                strength: strengthPercent,
-                type: 'bent'
+                fillColor: fillColor,
+                shape: shape,
+                curveAmount: curveAmount,
+                radius: radius,
+                isBold: isBold,
+                isItalic: isItalic,
+                isUnderline: isUnderline,
+                type: 'curved'
             };
             
             resolve(fabricImage);
@@ -1523,153 +1469,88 @@ function applyArcWarpToText(textObj, direction, strengthPercent) {
     });
 }
 
-async function applyBendToSelected(direction) {
+// Apply curve to selected text
+async function applyCurveToSelected() {
     const activeObj = fabricCanvas.getActiveObject();
     if (!activeObj) {
         showToast('Please select a text element first', true);
-        return false;
-    }
-    
-    // Check if it's a text element
-    if (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.bendData) {
-        showToast('Please select a text element', true);
-        return false;
-    }
-    
-    currentBendDirection = direction;
-    currentBendStrength = parseInt(document.getElementById('bendStrengthSlider').value);
-    
-    showLoading('Applying warp effect...');
-    try {
-        const warpedObj = await applyArcWarpToText(activeObj, direction, currentBendStrength);
-        if (warpedObj) {
-            const oldLeft = activeObj.left;
-            const oldTop = activeObj.top;
-            const oldScaleX = activeObj.scaleX;
-            const oldScaleY = activeObj.scaleY;
-            const oldAngle = activeObj.angle;
-            
-            fabricCanvas.remove(activeObj);
-            fabricCanvas.add(warpedObj);
-            warpedObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
-            fabricCanvas.setActiveObject(warpedObj);
-            fabricCanvas.renderAll();
-            
-            showToast(`✓ Text ${direction === 'up' ? 'Bent Up' : 'Bent Down'} at ${currentBendStrength}%`);
-            updateSummaryElements();
-            return true;
-        }
-    } catch (err) {
-        console.error('Bend error:', err);
-        showToast('Error applying bend effect', true);
-    } finally {
-        hideLoading();
-    }
-    return false;
-}
-
-async function updateBendStrength() {
-    if (!autoBendUpdate) return;
-    
-    const strength = parseInt(document.getElementById('bendStrengthSlider').value);
-    document.getElementById('bendStrengthValue').innerText = strength;
-    if (document.getElementById('mobileBendStrengthSlider')) {
-        document.getElementById('mobileBendStrengthSlider').value = strength;
-        document.getElementById('mobileBendStrengthValue').innerText = strength;
-    }
-    
-    currentBendStrength = strength;
-    
-    const activeObj = fabricCanvas.getActiveObject();
-    if (activeObj && (activeObj.bendData || (activeObj.type === 'i-text' || activeObj.type === 'text')) && currentBendDirection) {
-        if (activeObj.bendData) {
-            // Update existing bend
-            const newWarped = await applyArcWarpToText(activeObj, currentBendDirection, strength);
-            if (newWarped) {
-                const oldLeft = activeObj.left;
-                const oldTop = activeObj.top;
-                const oldScaleX = activeObj.scaleX;
-                const oldScaleY = activeObj.scaleY;
-                const oldAngle = activeObj.angle;
-                fabricCanvas.remove(activeObj);
-                fabricCanvas.add(newWarped);
-                newWarped.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
-                fabricCanvas.setActiveObject(newWarped);
-                fabricCanvas.renderAll();
-            }
-        }
-    }
-}
-
-function resetBendEffect() {
-    const activeObj = fabricCanvas.getActiveObject();
-    if (!activeObj) {
-        showToast('Select a text element first', true);
         return;
     }
     
-    if (activeObj.bendData) {
-        // Restore original text
-        const originalText = new fabric.IText(activeObj.bendData.originalText, {
+    // Get text from either Fabric text or custom curved object
+    let text, fontFamily, fontSize, fillColor, isBold, isItalic, isUnderline;
+    
+    if (activeObj.type === 'i-text' || activeObj.type === 'text') {
+        text = activeObj.text;
+        fontFamily = activeObj.fontFamily;
+        fontSize = activeObj.fontSize;
+        fillColor = activeObj.fill;
+        isBold = activeObj.fontWeight === 'bold';
+        isItalic = activeObj.fontStyle === 'italic';
+        isUnderline = activeObj.underline || false;
+    } else if (activeObj.curveData) {
+        text = activeObj.curveData.text;
+        fontFamily = activeObj.curveData.fontFamily;
+        fontSize = activeObj.curveData.fontSize;
+        fillColor = activeObj.curveData.fillColor;
+        isBold = activeObj.curveData.isBold;
+        isItalic = activeObj.curveData.isItalic;
+        isUnderline = activeObj.curveData.isUnderline;
+    } else {
+        showToast('Please select a text element', true);
+        return;
+    }
+    
+    const shape = document.querySelector('.curve-option-btn.active')?.dataset.shape || 'straight';
+    const curveAmount = parseInt(document.getElementById('curveAmountSlider')?.value || document.getElementById('mobileCurveAmountSlider')?.value || 0);
+    const radius = parseInt(document.getElementById('curveRadiusSlider')?.value || document.getElementById('mobileCurveRadiusSlider')?.value || 150);
+    
+    if (shape === 'straight') {
+        // Convert to normal text
+        const newText = new fabric.IText(text, {
             left: activeObj.left,
             top: activeObj.top,
-            fontFamily: activeObj.bendData.fontFamily,
-            fontSize: activeObj.bendData.fontSize,
-            fill: activeObj.bendData.fill,
-            fontWeight: activeObj.bendData.fontWeight,
-            fontStyle: activeObj.bendData.fontStyle,
-            underline: activeObj.bendData.underline,
-            stroke: activeObj.bendData.stroke,
-            strokeWidth: activeObj.bendData.strokeWidth,
-            charSpacing: activeObj.bendData.letterSpacing || 0,
+            fontFamily: fontFamily,
+            fontSize: fontSize,
+            fill: fillColor,
+            fontWeight: isBold ? 'bold' : 'normal',
+            fontStyle: isItalic ? 'italic' : 'normal',
+            underline: isUnderline,
             originX: 'center',
-            originY: 'center',
-            scaleX: activeObj.scaleX,
-            scaleY: activeObj.scaleY,
-            angle: activeObj.angle
+            originY: 'center'
         });
-        fabricCanvas.remove(activeObj);
-        fabricCanvas.add(originalText);
-        fabricCanvas.setActiveObject(originalText);
-        fabricCanvas.renderAll();
         
-        document.getElementById('bendStrengthSlider').value = 50;
-        document.getElementById('bendStrengthValue').innerText = '50';
-        if(document.getElementById('mobileBendStrengthSlider')) {
-            document.getElementById('mobileBendStrengthSlider').value = 50;
-            document.getElementById('mobileBendStrengthValue').innerText = '50';
-        }
-        currentBendDirection = null;
-        showToast('Bend effect reset to normal text');
-        updateSummaryElements();
+        fabricCanvas.remove(activeObj);
+        fabricCanvas.add(newText);
+        fabricCanvas.setActiveObject(newText);
+        fabricCanvas.renderAll();
+        showToast('Text converted to straight');
     } else {
-        showToast('No bend effect found on selected text', true);
+        // Create curved text
+        showLoading('Creating curved text...');
+        try {
+            const curvedObj = await createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline);
+            if (curvedObj) {
+                curvedObj.set({
+                    left: activeObj.left,
+                    top: activeObj.top,
+                    scaleX: activeObj.scaleX || 1,
+                    scaleY: activeObj.scaleY || 1
+                });
+                fabricCanvas.remove(activeObj);
+                fabricCanvas.add(curvedObj);
+                fabricCanvas.setActiveObject(curvedObj);
+                fabricCanvas.renderAll();
+                showToast('✓ Curved text applied!');
+            }
+        } catch (error) {
+            console.error('Error creating curved text:', error);
+            showToast('Error creating curved text', true);
+        } finally {
+            hideLoading();
+        }
     }
 }
-
-function toggleAutoUpdate() {
-    autoBendUpdate = !autoBendUpdate;
-    const btn = document.getElementById('realtimeBendToggle');
-    if (btn) {
-        btn.style.background = autoBendUpdate ? '#D4AF37' : 'rgba(212,175,55,0.3)';
-        btn.style.color = autoBendUpdate ? '#050508' : '#D4AF37';
-        btn.innerText = autoBendUpdate ? 'Auto Update ON' : 'Auto Update OFF';
-        showToast(autoBendUpdate ? 'Real-time bend update enabled' : 'Real-time update disabled');
-    }
-}
-// ================= TEXT BEND/WARP FEATURE END =================
-
-const loadingOverlay = document.getElementById('globalLoadingOverlay');
-function showLoading(m="PROCESSING..."){ const t=loadingOverlay.querySelector('.loading-text'); if(t)t.innerText=m; loadingOverlay.classList.add('active'); }
-function hideLoading(){ loadingOverlay.classList.remove('active'); }
-function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
-function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
-
-// Keep existing createCurvedText function (shortened for brevity)
-function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) {
-    return new Promise((resolve) => { resolve(null); });
-}
-async function applyCurveToSelected() { showToast('Curve feature available', false); }
 
 function loadTshirtImageDynamic(p,c,s,preserve=true){
     if(!fabricCanvas)return; 
@@ -1681,12 +1562,17 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 const scaleX = fabricCanvas.width / img.width;
                 const scaleY = fabricCanvas.height / img.height;
                 const scale = Math.min(scaleX, scaleY);
+                
                 fabricCanvas.setBackgroundImage(img,()=>{
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
                 },{
-                    scaleX: scale, scaleY: scale, originX: 'center', originY: 'center',
-                    left: fabricCanvas.width / 2, top: fabricCanvas.height / 2
+                    scaleX: scale,
+                    scaleY: scale,
+                    originX: 'center',
+                    originY: 'center',
+                    left: fabricCanvas.width / 2,
+                    top: fabricCanvas.height / 2
                 });
             });
         } else {
@@ -1697,139 +1583,301 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
         }
     });
 }
-
 function updateGlowFromSliders(){
     const a=fabricCanvas.getActiveObject();
     if(!glowActive||!a) return;
-    const size = parseInt(document.getElementById('glowSizeSlider')?.value || 8);
-    const blur = parseInt(document.getElementById('glowBlurSlider')?.value || 5);
-    const color = document.getElementById('glowColorPicker')?.value || '#D4AF37';
-    const intensity = parseFloat(document.getElementById('glowIntensitySlider')?.value || 0.8);
+    if(a.type !== 'i-text' && a.type !== 'text' && !a.curveData) return;
+    
+    const size = parseInt(document.getElementById('glowSizeSlider')?.value || document.getElementById('mobileGlowSizeSlider')?.value || 8);
+    const blur = parseInt(document.getElementById('glowBlurSlider')?.value || document.getElementById('mobileGlowBlurSlider')?.value || 5);
+    const color = document.getElementById('glowColorPicker')?.value || document.getElementById('mobileGlowColorPicker')?.value || '#D4AF37';
+    const intensity = parseFloat(document.getElementById('glowIntensitySlider')?.value || document.getElementById('mobileGlowIntensitySlider')?.value || 0.8);
+    
     const adjustedBlur = Math.floor(blur * intensity);
-    a.set('shadow', `${color} 0px 0px ${size}px ${adjustedBlur}px`);
+    const shadowString = `${color} 0px 0px ${size}px ${adjustedBlur}px`;
+    
+    a.set('shadow', shadowString);
     fabricCanvas.renderAll();
+    
+    if(document.getElementById('glowSizeValue')) document.getElementById('glowSizeValue').innerText = size + 'px';
+    if(document.getElementById('glowBlurValue')) document.getElementById('glowBlurValue').innerText = blur + 'px';
+    if(document.getElementById('glowIntensityValue')) document.getElementById('glowIntensityValue').innerText = intensity;
+    if(document.getElementById('mobileGlowSizeValue')) document.getElementById('mobileGlowSizeValue').innerText = size + 'px';
+    if(document.getElementById('mobileGlowBlurValue')) document.getElementById('mobileGlowBlurValue').innerText = blur + 'px';
+    if(document.getElementById('mobileGlowIntensityValue')) document.getElementById('mobileGlowIntensityValue').innerText = intensity;
 }
 function applyGlow(){
     const a=fabricCanvas.getActiveObject();
-    if(!a){showToast('Select text first',true);return;}
+    if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){
+        showToast('Please select a text element first',true);
+        return;
+    }
     glowActive=!glowActive;
-    if(glowActive) updateGlowFromSliders();
-    else a.set('shadow', null);
-    fabricCanvas.renderAll();
+    if(glowActive){
+        updateGlowFromSliders();
+    } else {
+        a.set('shadow', null);
+        fabricCanvas.renderAll();
+    }
     if(document.getElementById('glowControls')) document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none';
-    showToast(glowActive ? 'Glow enabled' : 'Glow disabled');
+    if(document.getElementById('mobileGlowControls')) document.getElementById('mobileGlowControls').style.display = glowActive ? 'block' : 'none';
+    showToast(glowActive ? '✨ Glow effect enabled' : 'Glow effect disabled');
 }
 async function saveDesignImageToFirebase(side,designJSON,productName,colorName){ 
-    // Keep existing function
-    return null;
+    if(!designJSON||!designJSON.objects?.length)return null; 
+    try{ 
+        const tempCanvas=document.createElement('canvas'); 
+        tempCanvas.width=fabricCanvas.width; 
+        tempCanvas.height=fabricCanvas.height; 
+        const tmp=new fabric.Canvas(tempCanvas); 
+        const path=getDynamicImagePath(productName,colorName,side); 
+        await new Promise(res=>{ 
+            loadImageAsDataURL(path,data=>{ 
+                if(data){
+                    fabric.Image.fromURL(data,img=>{
+                        const scaleX = tmp.width / img.width; 
+                        const scaleY = tmp.height / img.height; 
+                        const scale = Math.min(scaleX, scaleY); 
+                        tmp.setBackgroundImage(img,()=>{
+                            tmp.loadFromJSON(designJSON,()=>{
+                                tmp.renderAll();
+                                setTimeout(res,100);
+                            });
+                        },{
+                            scaleX: scale,
+                            scaleY: scale,
+                            originX: 'center',
+                            originY: 'center',
+                            left: tmp.width / 2,
+                            top: tmp.height / 2
+                        });
+                    });
+                } else {
+                    tmp.setBackgroundColor('#1a1a2e',()=>{
+                        tmp.loadFromJSON(designJSON,()=>{
+                            tmp.renderAll();
+                            setTimeout(res,100);
+                        });
+                    });
+                }
+            });
+        }); 
+        const d=tmp.toDataURL({format:'png',quality:1,multiplier:2}); 
+        if(!d||d==='data:,')return null; 
+        const blob=(function(b){
+            const a=b.split(','),
+            m=a[0].match(/:(.*?);/)[1],
+            c=atob(a[1]),
+            n=c.length,
+            u=new Uint8Array(n);
+            for(let i=0;i<n;i++)u[i]=c.charCodeAt(i);
+            return new Blob([u],{type:m});
+        })(d); 
+        const fileName=`${side}_${productName.replace(/\s/g,'_')}_${colorName}_${Date.now()}.png`; 
+        const ref=storageRef.child(`custom-designs/${side}/${fileName}`); 
+        await ref.put(blob); 
+        const url=await ref.getDownloadURL(); 
+        tmp.dispose(); 
+        return url; 
+    } catch(e){
+        console.error(e);
+        return null;
+    } 
 }
-async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} showToast('Added to cart!'); return true; }
-async function buyNow(){ showToast('Proceed to checkout', false); }
+async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Designs added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
+async function buyNow(){ const user=auth.currentUser; const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} if(!currentSize){showToast('Please select Size first',true);return;} showLoading("PREPARING ORDER..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return;}} localStorage.setItem('customCheckoutData',JSON.stringify({isCustomized:true,frontDesignImage:frontURL,backDesignImage:backURL,tshirtType:currentStyle.displayName,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,size:currentSize,quantity:1,price:currentStyle.price})); const snap=await db.collection('addresses').where('userId','==',user?.uid||JSON.parse(localStorage.getItem('vedantaUser')).uid).limit(1).get(); if(!snap.empty)window.location.href='secure-checkout2.html'; else window.location.href='secure-checkout.html'; }catch(e){showToast('Error',true);}finally{hideLoading();} }
 function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.innerText=m; t.style.background=err?'#F44336':'#D4AF37'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function saveCart(){localStorage.setItem('vedanta_custom_cart',JSON.stringify(cart)); updateCartCount(); updateCartUI();}
 function loadCart(){const s=localStorage.getItem('vedanta_custom_cart'); if(s){try{cart=JSON.parse(s);updateCartUI();updateCartCount();}catch(e){cart=[];}}}
 function updateCartCount(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.quantity,0);}
-function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item">...</div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`;}
-function resizeCanvas() { if(fabricCanvas){ fabricCanvas.renderAll(); } }
+function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ✨ Custom</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
+function resizeCanvas() {
+    if (!fabricCanvas) return;
+    const container = document.querySelector('.canvas-container');
+    if (container) {
+        const containerWidth = container.clientWidth;
+        const maxWidth = Math.min(containerWidth, 500);
+        const aspectRatio = 1.2;
+        const newWidth = maxWidth;
+        const newHeight = newWidth * aspectRatio;
+        
+        if (fabricCanvas.width !== newWidth || fabricCanvas.height !== newHeight) {
+            fabricCanvas.setWidth(newWidth);
+            fabricCanvas.setHeight(newHeight);
+            
+            const currentBg = fabricCanvas.backgroundImage;
+            if (currentBg && currentBg._element) {
+                loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true);
+            }
+            fabricCanvas.renderAll();
+        }
+    }
+}
 function initCanvas(){
     const container = document.querySelector('.canvas-container');
     const containerWidth = container ? container.clientWidth : 500;
     const maxWidth = Math.min(containerWidth, 500);
+    const aspectRatio = 1.2;
+    
     fabricCanvas = new fabric.Canvas('tshirtCanvas');
     fabricCanvas.setWidth(maxWidth);
-    fabricCanvas.setHeight(maxWidth * 1.2);
+    fabricCanvas.setHeight(maxWidth * aspectRatio);
     fabricCanvas.selection = true;
+    
+    fabricCanvas.on('after:render', function() { 
+        const canvasContainer = document.querySelector('.canvas-container'); 
+        if (canvasContainer) { 
+            canvasContainer.style.lineHeight = '0'; 
+        }
+    }); 
     loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false);
     frontDesignJSON = fabricCanvas.toJSON();
-    window.addEventListener('resize', () => setTimeout(resizeCanvas, 100));
+    backDesignJSON = null;
+    
+    window.addEventListener('resize', function() {
+        setTimeout(resizeCanvas, 100);
+    });
 }
-function switchToFront(){ if(currentSide==='front')return; backDesignJSON=fabricCanvas.toJSON(); currentSide='front'; fabricCanvas.clear(); loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false); updateSummaryElements(); }
-function switchToBack(){ if(currentSide==='back')return; frontDesignJSON=fabricCanvas.toJSON(); currentSide='back'; fabricCanvas.clear(); loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false); updateSummaryElements(); }
-function updateSummaryElements(){ const hf=!!(frontDesignJSON?.objects?.length); const hb=!!(backDesignJSON?.objects?.length); document.getElementById('summaryFront').innerHTML=hf?'✓ Custom':'None'; document.getElementById('summaryBack').innerHTML=hb?'✓ Custom':'None'; }
-function renderStyles(){ const g=document.getElementById('styleGrid'); g.innerHTML=tshirtStyles.map(s=>`<div class="style-card ${s.id===currentStyle.id?'active':''}" data-id="${s.id}"><img class="style-img" src="${IMAGE_PATH}${s.previewImg}"><div class="style-name">${s.displayName}</div><div class="style-price">₹${s.price}</div></div>`).join(''); document.querySelectorAll('.style-card').forEach(c=>c.addEventListener('click',()=>{ const id=c.dataset.id; const sel=tshirtStyles.find(t=>t.id===id); if(sel){ currentStyle=sel; selectedColor=currentStyle.colors[0]; renderStyles(); renderColorSelectorFull(); loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,true); updateSummary(); showToast(`${sel.displayName} selected!`); } })); }
-function updateSummary(){ document.getElementById('summaryStyle').innerText=currentStyle.displayName; document.getElementById('summaryColor').innerText=selectedColorDisplay; document.getElementById('summarySize').innerText=currentSize||'--'; document.getElementById('totalPrice').innerHTML=`₹${currentStyle.price}`; }
-function changeTShirtColor(c){ selectedColor=c; selectedColorDisplay=c.charAt(0).toUpperCase()+c.slice(1); document.getElementById('summaryColor').innerText=selectedColorDisplay; if(currentSide==='front'){ frontDesignJSON=fabricCanvas.toJSON(); loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',true); }else{ backDesignJSON=fabricCanvas.toJSON(); loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',true); } showToast(`Color: ${selectedColorDisplay}`); }
-function renderColorSelectorFull(){ const cont=document.getElementById('colorOptionsContainer'); const cols=currentStyle.colors; cont.innerHTML=cols.map(c=>`<div class="color-option ${selectedColor===c?'active':''}" data-color="${c}"><div class="color-swatch-circle" style="background:${c==='white'?'#f5f5f5':c==='black'?'#1a1a1a':c==='blue'?'#1e3a5f':c==='green'?'#4a5d23':'#808080'};"></div><span class="color-option-name">${c}</span></div>`).join(''); document.querySelectorAll('.color-option').forEach(o=>o.addEventListener('click',()=>changeTShirtColor(o.dataset.color))); }
-function addText(){ const val=document.getElementById('textInput').value.trim(); if(!val){showToast('Enter text',true);return;} const t=new fabric.IText(val,{left:fabricCanvas.width/2,top:fabricCanvas.height/2,fontFamily:'Space Grotesk',fill:'#D4AF37',fontSize:36,originX:'center',originY:'center'}); fabricCanvas.add(t); fabricCanvas.setActiveObject(t); fabricCanvas.renderAll(); showToast('Text added!'); if(document.getElementById('mobileTextInput')) document.getElementById('mobileTextInput').value=''; }
-function renderColorPalette(){ const pal=['#FF6633','#FFB399','#FF33FF','#FFFF99','#00B3E6','#E6B333','#3366E6','#999966']; const c=document.getElementById('colorPalette'); c.innerHTML=''; pal.forEach(clr=>{ const sw=document.createElement('div'); sw.className='color-swatch'; sw.style.backgroundColor=clr; sw.onclick=()=>{ const a=fabricCanvas.getActiveObject(); if(a){ a.set('fill',clr); fabricCanvas.renderAll(); showToast('Color applied!'); }else showToast('Select text',true); }; c.appendChild(sw); }); }
-function applyRounded(){ const a=fabricCanvas.getActiveObject(); if(a){ roundedActive=!roundedActive; a.set('rx',roundedActive?50:0); a.set('ry',roundedActive?50:0); fabricCanvas.renderAll(); } }
-function applyBorderToggle(){ const a=fabricCanvas.getActiveObject(); if(a){ borderActive=!borderActive; a.set('stroke',borderActive?'#D4AF37':null); a.set('strokeWidth',borderActive?2:0); fabricCanvas.renderAll(); } }
-function flipHorizontal(){ const a=fabricCanvas.getActiveObject(); if(a){ a.set('flipX',!a.flipX); fabricCanvas.renderAll(); } }
-function flipVertical(){ const a=fabricCanvas.getActiveObject(); if(a){ a.set('flipY',!a.flipY); fabricCanvas.renderAll(); } }
-function applyTextStyle(st){ const a=fabricCanvas.getActiveObject(); if(a&&(a.type==='i-text'||a.type==='text')){ if(st==='bold') a.set('fontWeight', a.fontWeight==='bold'?'normal':'bold'); if(st==='italic') a.set('fontStyle', a.fontStyle==='italic'?'normal':'italic'); if(st==='underline') a.set('underline', !a.underline); fabricCanvas.renderAll(); } }
-function updateSelectedText(){ const a=fabricCanvas.getActiveObject(); if(a&&(a.type==='i-text'||a.type==='text')){ a.set('fontFamily', document.getElementById('fontSelect').value); a.set('fontSize', parseInt(document.getElementById('fontSizeSlider').value)); fabricCanvas.renderAll(); } }
-document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart;
-document.getElementById('buyNowBtn').onclick=buyNow;
-document.getElementById('frontSideBtn').onclick=switchToFront;
-document.getElementById('backSideBtn').onclick=switchToBack;
-document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();};
-document.getElementById('addTextBtn').onclick=addText;
-document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open');
-document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open');
-document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click();
-document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('Image added!');});};r.readAsDataURL(e.target.files[0]);}};
-document.getElementById('glowBtn').onclick=applyGlow;
-document.getElementById('roundedBtn').onclick=applyRounded;
-document.getElementById('borderBtn').onclick=applyBorderToggle;
-document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders;
+function switchToFront(){if(currentSide==='front')return;backDesignJSON=fabricCanvas.toJSON();currentSide='front';document.getElementById('frontSideBtn').classList.add('active');document.getElementById('backSideBtn').classList.remove('active');if(frontDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(frontDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false);}updateSummaryElements();}
+function switchToBack(){if(currentSide==='back')return;frontDesignJSON=fabricCanvas.toJSON();currentSide='back';document.getElementById('backSideBtn').classList.add('active');document.getElementById('frontSideBtn').classList.remove('active');if(backDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(backDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false);}updateSummaryElements();}
+function updateSummaryElements(){const hf=!!(frontDesignJSON?.objects?.length),hb=!!(backDesignJSON?.objects?.length);document.getElementById('summaryFront').innerHTML=hf?'✓ Custom':'None';document.getElementById('summaryBack').innerHTML=hb?'✓ Custom':'None';}
+function renderStyles(){const g=document.getElementById('styleGrid');g.innerHTML=tshirtStyles.map(s=>`<div class="style-card ${s.id===currentStyle.id?'active':''}" data-id="${s.id}"><img class="style-img" src="${IMAGE_PATH}${s.previewImg}" onerror="this.src='https://placehold.co/300x300/1a1a2e/D4AF37?text=${encodeURIComponent(s.displayName)}'"><div class="style-name">${s.displayName}</div><div class="style-price">₹${s.price}</div></div>`).join('');document.querySelectorAll('.style-card').forEach(c=>c.addEventListener('click',()=>{const id=c.dataset.id;const sel=tshirtStyles.find(t=>t.id===id);if(sel){currentStyle=sel;selectedColor=currentStyle.colors[0];const map={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};selectedColorDisplay=map[selectedColor]||selectedColor;renderStyles();renderColorSelectorFull();resizeCanvas();loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,true);updateSummary();showToast(`✓ ${sel.displayName} selected!`);}}));}
+function updateSummary(){document.getElementById('summaryStyle').innerText=currentStyle.displayName;document.getElementById('summaryColor').innerText=selectedColorDisplay;document.getElementById('summarySize').innerText=currentSize||'--';document.getElementById('totalPrice').innerHTML=`₹${currentStyle.price}`;const mt=currentPrintMethod==='transparent'?'Transparent Print':(currentPrintMethod==='fullbg'?'Full Background':'Not selected');document.getElementById('summaryPrintMethod').innerHTML=mt;}
+function changeTShirtColor(c){selectedColor=c;const map={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};selectedColorDisplay=map[c]||c;document.querySelectorAll('.color-option').forEach(o=>o.classList.remove('active'));document.querySelector(`.color-option[data-color="${c}"]`).classList.add('active');document.getElementById('summaryColor').innerText=selectedColorDisplay;if(currentSide==='front'){frontDesignJSON=fabricCanvas.toJSON();loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',true);}else{backDesignJSON=fabricCanvas.toJSON();loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',true);}showToast(`✓ Color changed to ${selectedColorDisplay}`);}
+function renderColorSelectorFull(){const cont=document.getElementById('colorOptionsContainer');const cols=currentStyle.colors;const dmap={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};const cmap={'white':'#f5f5f5','warm grey':'#a9a9a9','cream':'#fffdd0','black':'#1a1a1a','grey':'#808080','blue':'#1e3a5f','green':'#4a5d23','olive green':'#556b2f','dark brown':'#5c4033'};cont.innerHTML=cols.map(c=>`<div class="color-option ${selectedColor===c?'active':''}" data-color="${c}"><div class="color-swatch-circle" style="background:${cmap[c]||'#808080'};"></div><span class="color-option-name">${dmap[c]||c}</span></div>`).join('');document.querySelectorAll('.color-option').forEach(o=>o.addEventListener('click',()=>changeTShirtColor(o.dataset.color)));}
+function addText(){const val=document.getElementById('textInput').value.trim() || document.getElementById('mobileTextInput')?.value.trim(); if(!val){showToast('Enter text first',true);return;}const t=new fabric.IText(val,{left:fabricCanvas.width/2,top:fabricCanvas.height/2,fontFamily:document.getElementById('fontSelect').value,fill:'#D4AF37',fontSize:36,originX:'center',originY:'center'});fabricCanvas.add(t);fabricCanvas.setActiveObject(t);fabricCanvas.renderAll();showToast('✓ Text added!');updateSummaryElements();if(document.getElementById('mobileTextInput')) document.getElementById('mobileTextInput').value='';}
+function generateColorPalette(){return ['#FF6633','#FFB399','#FF33FF','#FFFF99','#00B3E6','#E6B333','#3366E6','#999966','#99FF99','#B34D4D'];}
+function renderColorPalette(){const pal=generateColorPalette();const c=document.getElementById('colorPalette');c.innerHTML='';const mobileC=document.getElementById('mobileColorPalette');if(mobileC) mobileC.innerHTML='';pal.forEach(clr=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=clr;sw.onclick=()=>{const act=fabricCanvas.getActiveObject();if(act&&(act.type==='i-text'||act.type==='text'||act.curveData)){act.set('fill',clr);if(act.curveData) act.curveData.fillColor = clr;fabricCanvas.renderAll();showToast('✓ Color applied!');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}else showToast('Select text first', true);};c.appendChild(sw);if(mobileC){const sw2=document.createElement('div');sw2.className='mobile-color-swatch';sw2.style.backgroundColor=clr;sw2.onclick=sw.onclick;mobileC.appendChild(sw2);}});}
+function applyRounded(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}roundedActive=!roundedActive;if(roundedActive){a.set('radius',50);a.set('rx',50);a.set('ry',50);}else{a.set('radius',0);a.set('rx',0);a.set('ry',0);}fabricCanvas.renderAll();showToast(roundedActive?'Rounded applied':'Rounded removed');}
+function applyBorderToggle(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}borderActive=!borderActive;if(borderActive){a.set('stroke','#D4AF37');a.set('strokeWidth',2);}else{a.set('stroke',null);a.set('strokeWidth',0);}fabricCanvas.renderAll();showToast(borderActive?'Border enabled':'Border disabled');}
+function flipHorizontal(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipX',!a.flipX);fabricCanvas.renderAll();showToast('Flipped Horizontal');}else showToast('Select element',true);}
+function flipVertical(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipY',!a.flipY);fabricCanvas.renderAll();showToast('Flipped Vertical');}else showToast('Select element',true);}
+function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&(a.type==='i-text'||a.type==='text'||a.curveData)){if(st==='bold'){const isBold = a.fontWeight === 'bold' || a.curveData?.isBold;if(a.curveData) a.curveData.isBold = !isBold;else a.set('fontWeight', isBold ? 'normal' : 'bold');}if(st==='italic'){const isItalic = a.fontStyle === 'italic' || a.curveData?.isItalic;if(a.curveData) a.curveData.isItalic = !isItalic;else a.set('fontStyle', isItalic ? 'normal' : 'italic');}if(st==='underline'){if(a.curveData) a.curveData.isUnderline = !a.curveData.isUnderline;else a.set('underline', !a.underline);}fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
+function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData))return;const fontVal=document.getElementById('fontSelect')?.value || 'Space Grotesk';const sizeVal=parseInt(document.getElementById('fontSizeSlider')?.value || document.getElementById('mobileFontSizeSlider')?.value || 36);if(a.curveData){a.curveData.fontFamily = fontVal;a.curveData.fontSize = sizeVal;}else{a.set('fontFamily',fontVal);a.set('fontSize',sizeVal);}fabricCanvas.renderAll();}
+
+// Curve panel event handlers
+function setupCurvePanel() {
+    const curvePanel = document.getElementById('curvePanel');
+    const curveBtn = document.getElementById('curveTextBtn');
+    const curveAmountSlider = document.getElementById('curveAmountSlider');
+    const curveRadiusSlider = document.getElementById('curveRadiusSlider');
+    const curveAmountValue = document.getElementById('curveAmountValue');
+    const curveRadiusValue = document.getElementById('curveRadiusValue');
+    const mobileCurveAmountSlider = document.getElementById('mobileCurveAmountSlider');
+    const mobileCurveRadiusSlider = document.getElementById('mobileCurveRadiusSlider');
+    const mobileCurveAmountValue = document.getElementById('mobileCurveAmountValue');
+    const mobileCurveRadiusValue = document.getElementById('mobileCurveRadiusValue');
+    const mobileApplyCurveBtn = document.getElementById('mobileApplyCurveBtn');
+    
+    // Toggle curve panel
+    curveBtn.onclick = () => {
+        if (curvePanel.style.display === 'none') {
+            curvePanel.style.display = 'block';
+        } else {
+            curvePanel.style.display = 'none';
+        }
+    };
+    
+    // Shape selection
+    document.querySelectorAll('.curve-option-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyCurveToSelected();
+        };
+    });
+    
+    // Slider updates
+    if (curveAmountSlider) {
+        curveAmountSlider.oninput = () => {
+            curveAmountValue.innerText = curveAmountSlider.value;
+            if (mobileCurveAmountSlider) mobileCurveAmountSlider.value = curveAmountSlider.value;
+            if (mobileCurveAmountValue) mobileCurveAmountValue.innerText = curveAmountSlider.value;
+            const activeShape = document.querySelector('.curve-option-btn.active')?.dataset.shape;
+            if (activeShape && activeShape !== 'straight') {
+                applyCurveToSelected();
+            }
+        };
+    }
+    
+    if (curveRadiusSlider) {
+        curveRadiusSlider.oninput = () => {
+            curveRadiusValue.innerText = curveRadiusSlider.value + 'px';
+            if (mobileCurveRadiusSlider) mobileCurveRadiusSlider.value = curveRadiusSlider.value;
+            if (mobileCurveRadiusValue) mobileCurveRadiusValue.innerText = curveRadiusSlider.value + 'px';
+            const activeShape = document.querySelector('.curve-option-btn.active')?.dataset.shape;
+            if (activeShape && activeShape !== 'straight') {
+                applyCurveToSelected();
+            }
+        };
+    }
+    
+    // Mobile sliders
+    if (mobileCurveAmountSlider) {
+        mobileCurveAmountSlider.oninput = () => {
+            mobileCurveAmountValue.innerText = mobileCurveAmountSlider.value;
+            if (curveAmountSlider) curveAmountSlider.value = mobileCurveAmountSlider.value;
+            if (curveAmountValue) curveAmountValue.innerText = mobileCurveAmountSlider.value;
+        };
+    }
+    
+    if (mobileCurveRadiusSlider) {
+        mobileCurveRadiusSlider.oninput = () => {
+            mobileCurveRadiusValue.innerText = mobileCurveRadiusSlider.value + 'px';
+            if (curveRadiusSlider) curveRadiusSlider.value = mobileCurveRadiusSlider.value;
+            if (curveRadiusValue) curveRadiusValue.innerText = mobileCurveRadiusSlider.value + 'px';
+        };
+    }
+    
+    if (mobileApplyCurveBtn) {
+        mobileApplyCurveBtn.onclick = applyCurveToSelected;
+    }
+    
+    // Sync mobile shape selection
+    document.querySelectorAll('.mobile-toolbar .curve-option-btn').forEach(btn => {
+        btn.onclick = () => {
+            document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            applyCurveToSelected();
+        };
+    });
+}
+
+document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart; document.getElementById('buyNowBtn').onclick=buyNow; document.getElementById('saveImageBtn').onclick=async()=>{showLoading("SAVING...");try{if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor);await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor);showToast('✅ Designs saved!');}catch(e){showToast('Save failed',true);}finally{hideLoading();}};
+document.getElementById('frontSideBtn').onclick=switchToFront; document.getElementById('backSideBtn').onclick=switchToBack; document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();}; document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();}); document.getElementById('addTextBtn').onclick=addText; document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open'); document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout.html';}; 
+document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click(); 
+document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
+document.getElementById('glowBtn').onclick=applyGlow; document.getElementById('roundedBtn').onclick=applyRounded; document.getElementById('borderBtn').onclick=applyBorderToggle; 
+document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders; 
 document.getElementById('glowColorPicker').oninput=updateGlowFromSliders;
 document.getElementById('glowBlurSlider').oninput=updateGlowFromSliders;
 document.getElementById('glowIntensitySlider').oninput=updateGlowFromSliders;
-document.getElementById('flipHorizontalBtn').onclick=flipHorizontal;
-document.getElementById('flipVerticalBtn').onclick=flipVertical;
-document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold');
-document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic');
-document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline');
-document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();showToast('Deleted');}};
-document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();showToast('Side cleared');};
-document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();};
-document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
-
-// ================= BEND EVENT HANDLERS =================
-document.getElementById('bendUpBtn').onclick = () => applyBendToSelected('up');
-document.getElementById('bendDownBtn').onclick = () => applyBendToSelected('down');
-document.getElementById('resetBendBtn').onclick = resetBendEffect;
-document.getElementById('bendStrengthSlider').oninput = updateBendStrength;
-document.getElementById('realtimeBendToggle').onclick = toggleAutoUpdate;
-
-// Mobile bend handlers
-if(document.getElementById('mobileBendUpBtn')) document.getElementById('mobileBendUpBtn').onclick = () => applyBendToSelected('up');
-if(document.getElementById('mobileBendDownBtn')) document.getElementById('mobileBendDownBtn').onclick = () => applyBendToSelected('down');
-if(document.getElementById('mobileResetBendBtn')) document.getElementById('mobileResetBendBtn').onclick = resetBendEffect;
-if(document.getElementById('mobileBendStrengthSlider')) {
-    document.getElementById('mobileBendStrengthSlider').oninput = function() {
-        document.getElementById('bendStrengthSlider').value = this.value;
-        updateBendStrength();
-    };
-}
-if(document.getElementById('mobileAddTextBtn')) document.getElementById('mobileAddTextBtn').onclick = addText;
-if(document.getElementById('mobileDeleteBtn')) document.getElementById('mobileDeleteBtn').onclick = () => { const o=fabricCanvas.getActiveObject(); if(o){ fabricCanvas.remove(o); fabricCanvas.renderAll(); showToast('Deleted'); } };
-if(document.getElementById('mobileClearBtn')) document.getElementById('mobileClearBtn').onclick = () => { fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o)); fabricCanvas.renderAll(); showToast('Cleared'); };
-if(document.getElementById('mobileGlowBtn')) document.getElementById('mobileGlowBtn').onclick = applyGlow;
-if(document.getElementById('mobileRoundedBtn')) document.getElementById('mobileRoundedBtn').onclick = applyRounded;
-if(document.getElementById('mobileBorderBtn')) document.getElementById('mobileBorderBtn').onclick = applyBorderToggle;
-if(document.getElementById('mobileFlipHBtn')) document.getElementById('mobileFlipHBtn').onclick = flipHorizontal;
-if(document.getElementById('mobileFlipVBtn')) document.getElementById('mobileFlipVBtn').onclick = flipVertical;
-if(document.getElementById('mobileBoldBtn')) document.getElementById('mobileBoldBtn').onclick = () => applyTextStyle('bold');
-if(document.getElementById('mobileItalicBtn')) document.getElementById('mobileItalicBtn').onclick = () => applyTextStyle('italic');
-if(document.getElementById('mobileUnderlineBtn')) document.getElementById('mobileUnderlineBtn').onclick = () => applyTextStyle('underline');
-if(document.getElementById('mobileFontSizeSlider')) document.getElementById('mobileFontSizeSlider').oninput = e => { document.getElementById('fontSizeSlider').value = e.target.value; updateSelectedText(); };
-if(document.getElementById('mobileUploadArea')) document.getElementById('mobileUploadArea').onclick = () => document.getElementById('mobileImageUpload').click();
-if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange = e => { if(e.target.files[0]){ const r=new FileReader(); r.onload=ev=>{ fabric.Image.fromURL(ev.target.result,img=>{ img.scaleToWidth(200); img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'}); fabricCanvas.add(img); fabricCanvas.renderAll(); showToast('Image added!'); }); }; r.readAsDataURL(e.target.files[0]); } };
-
+document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; document.getElementById('flipVerticalBtn').onclick=flipVertical; document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic'); document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline'); document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);}; document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');}; document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
+if(document.querySelectorAll('.tool-btn[data-tool]')){document.querySelectorAll('.tool-btn[data-tool]').forEach(btn=>{btn.onclick=()=>{const tool=btn.dataset.tool;document.querySelectorAll('.tool-panel').forEach(panel=>panel.classList.remove('open'));const targetPanel=document.getElementById(`mobilePanel${tool.charAt(0).toUpperCase()+tool.slice(1)}`);if(targetPanel)targetPanel.classList.add('open');}});}
+if(document.getElementById('mobileAddTextBtn')) document.getElementById('mobileAddTextBtn').onclick=addText;
+if(document.getElementById('mobileDeleteBtn')) document.getElementById('mobileDeleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);};
+if(document.getElementById('mobileClearBtn')) document.getElementById('mobileClearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');};
+if(document.getElementById('mobileGlowBtn')) document.getElementById('mobileGlowBtn').onclick=applyGlow;
+if(document.getElementById('mobileRoundedBtn')) document.getElementById('mobileRoundedBtn').onclick=applyRounded;
+if(document.getElementById('mobileBorderBtn')) document.getElementById('mobileBorderBtn').onclick=applyBorderToggle;
+if(document.getElementById('mobileFlipHBtn')) document.getElementById('mobileFlipHBtn').onclick=flipHorizontal;
+if(document.getElementById('mobileFlipVBtn')) document.getElementById('mobileFlipVBtn').onclick=flipVertical;
+if(document.getElementById('mobileBoldBtn')) document.getElementById('mobileBoldBtn').onclick=()=>applyTextStyle('bold');
+if(document.getElementById('mobileItalicBtn')) document.getElementById('mobileItalicBtn').onclick=()=>applyTextStyle('italic');
+if(document.getElementById('mobileUnderlineBtn')) document.getElementById('mobileUnderlineBtn').onclick=()=>applyTextStyle('underline');
+if(document.getElementById('mobileGlowSizeSlider')) document.getElementById('mobileGlowSizeSlider').oninput=updateGlowFromSliders;
+if(document.getElementById('mobileGlowColorPicker')) document.getElementById('mobileGlowColorPicker').oninput=updateGlowFromSliders;
+if(document.getElementById('mobileGlowBlurSlider')) document.getElementById('mobileGlowBlurSlider').oninput=updateGlowFromSliders;
+if(document.getElementById('mobileGlowIntensitySlider')) document.getElementById('mobileGlowIntensitySlider').oninput=updateGlowFromSliders;
+if(document.getElementById('mobileFontSizeSlider')) document.getElementById('mobileFontSizeSlider').oninput=e=>{if(document.getElementById('mobileFontSizeValue')) document.getElementById('mobileFontSizeValue').innerText=e.target.value+'px';updateSelectedText();};
+if(document.getElementById('mobileUploadArea')) document.getElementById('mobileUploadArea').onclick=()=>document.getElementById('mobileImageUpload').click();
+if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
 const fonts=['Space Grotesk','Arial','Poppins','Montserrat','Dancing Script','Pacifico','Oswald','Lobster'];
 const mobileFontGrid=document.getElementById('mobileFontGrid');
-if(mobileFontGrid){ fonts.forEach(f=>{ const div=document.createElement('div'); div.className='mobile-font-option'; div.innerText=f; div.style.fontFamily=f; div.onclick=()=>{ document.getElementById('fontSelect').value=f; updateSelectedText(); showToast(`Font: ${f}`); }; mobileFontGrid.appendChild(div); }); }
-
-function openLoginModal(){ document.getElementById('loginModal').classList.add('show'); }
-function closeLoginModal(){ document.getElementById('loginModal').classList.remove('show'); }
-document.getElementById('closeModalBtn').onclick=closeLoginModal;
-function setupRecaptcha(){ if(window.recaptchaVerifier)return; window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible'}); }
-document.getElementById('sendOtpBtn').onclick=async()=>{ const phone=document.getElementById('loginPhone').value; if(!phone){ showToast('Enter phone',true); return; } showLoading('Sending OTP...'); try{ setupRecaptcha(); const cr=await auth.signInWithPhoneNumber('+91'+phone,window.recaptchaVerifier); globalConfirmationResult=cr; hideLoading(); showToast('OTP sent!'); document.getElementById('otpSection').style.display='block'; }catch(e){ hideLoading(); showToast('Error: '+e.message,true); } };
-document.getElementById('verifyOtpBtn').onclick=async()=>{ const otp=document.getElementById('otpInput').value; if(!otp){ showToast('Enter OTP',true); return; } showLoading('Verifying...'); try{ const result=await globalConfirmationResult.confirm(otp); localStorage.setItem('vedantaUser',JSON.stringify({uid:result.user.uid})); hideLoading(); closeLoginModal(); showToast('Login successful!'); if(pendingBuyAfterLogin){ pendingBuyAfterLogin=false; buyNow(); } }catch(e){ hideLoading(); showToast('Invalid OTP',true); } };
-
-initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON();
-if(window.location.protocol==='file:') document.getElementById('corsWarning').style.display='block';
+if(mobileFontGrid){fonts.forEach(f=>{const div=document.createElement('div');div.className='mobile-font-option';div.innerText=f;div.style.fontFamily=f;div.onclick=()=>{document.getElementById('fontSelect').value=f;updateSelectedText();document.querySelectorAll('.mobile-font-option').forEach(opt=>opt.classList.remove('active'));div.classList.add('active');showToast(`Font: ${f}`);};mobileFontGrid.appendChild(div);});}
+function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';} document.getElementById('closeModalBtn').onclick=closeLoginModal; function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});} document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}}; document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),500);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
+initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
+setupCurvePanel();
 </script>
 </body>
-</html>
+</html>  
