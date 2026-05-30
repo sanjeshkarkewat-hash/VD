@@ -154,7 +154,7 @@
             padding: 0;
         }
         
-        /* T-SHIRT AREA - ZERO GAP BETWEEN IMAGE AND COLOR SELECTOR */
+        /* T-SHIRT AREA - CRITICAL: NO GAPS */
         .selected-tshirt-area {
             background: transparent;
             text-align: center;
@@ -204,9 +204,10 @@
             background: transparent;
         }
         
-        /* COLOR SELECTOR - NO MARGIN, DIRECTLY ATTACHED TO CANVAS */
+        /* CRITICAL FIX: COLOR SELECTOR - DIRECTLY TOUCHING CANVAS, NO MARGIN TOP */
         .color-selector-section {
             margin: 0;
+            margin-top: 0 !important;
             padding: 14px;
             background: rgba(15,15,22,0.6);
             width: 100%;
@@ -245,7 +246,6 @@
         }
         .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
         
-        /* INSTRUCTION TEXT - THIN MARGIN ONLY */
         .instruction-text { 
             font-size: 10px; 
             color: #888; 
@@ -312,9 +312,6 @@
             border-radius: 10px;
             cursor: pointer;
             border: 2px solid transparent;
-        }
-        .color-swatch:hover {
-            transform: scale(1.05);
         }
         .effect-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         .effect-btn, .btn-icon {
@@ -570,7 +567,7 @@
             .designer-container { max-width: 1400px; margin: 0 auto; }
         }
 
-        /* MOBILE STYLES - ZERO GAP ON MOBILE ALSO */
+        /* MOBILE STYLES - ZERO GAP */
         @media (max-width: 991px) {
             .desktop-layout {
                 flex-direction: column;
@@ -592,9 +589,6 @@
                 scrollbar-width: thin;
                 white-space: nowrap;
                 padding: 12px;
-            }
-            .toolbar-scroll::-webkit-scrollbar {
-                height: 3px;
             }
             .toolbar-items {
                 display: inline-flex;
@@ -686,9 +680,9 @@
             .bottom-separate-box {
                 margin: 0;
             }
-            /* CRITICAL: ZERO GAP ON MOBILE - NO MARGIN ON COLOR SELECTOR */
             .color-selector-section {
-                margin: 0;
+                margin: 0 !important;
+                margin-top: 0 !important;
             }
             .canvas-container {
                 margin: 0;
@@ -740,7 +734,7 @@
 
     <!-- DESKTOP LAYOUT -->
     <div class="desktop-layout">
-        <!-- LEFT COLUMN: T-Shirt + Color Selector (ZERO GAP - DIRECTLY TOUCHING) -->
+        <!-- LEFT COLUMN: T-Shirt + Color Selector (ZERO GAP) -->
         <div class="tshirt-column">
             <div class="selected-tshirt-area">
                 <div class="side-switcher">
@@ -750,8 +744,8 @@
                 <div class="canvas-container">
                     <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
                 </div>
-                <!-- COLOR SELECTOR - ZERO MARGIN, DIRECTLY TOUCHING CANVAS -->
-                <div class="color-selector-section">
+                <!-- COLOR SELECTOR - ZERO MARGIN -->
+                <div class="color-selector-section" style="margin-top: 0 !important;">
                     <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
                     <div class="color-options" id="colorOptionsContainer"></div>
                 </div>
