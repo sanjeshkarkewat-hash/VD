@@ -1088,7 +1088,7 @@
             
             <!-- ================= TEXT BEND FEATURE START ================= -->
             <div class="tool-group">
-                <label>🌀 Text Warp / Bend (Photoshop Arc Style)</label>
+                <label>🌀 Text Warp / Bend (Arc Style)</label>
                 <div class="effect-row">
                     <button class="effect-btn" id="bendUpBtn"><i class="fas fa-arrow-up"></i> Bend Up</button>
                     <button class="effect-btn" id="bendDownBtn"><i class="fas fa-arrow-down"></i> Bend Down</button>
@@ -1341,151 +1341,143 @@ const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Swe
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 
 // ================= TEXT BEND FEATURE START =================
-// Apply Photoshop-style Arc warp to text using SVG warp emulation via custom path rendering
-// We use fabric.Image from canvas with custom path manipulation to achieve bend effect
-function applyTextBend(activeObj, direction, strength) {
-    if (!activeObj) return false;
-    if (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData) {
-        showToast('Select a text element first', true);
-        return false;
-    }
+// Photoshop Arc Style Warp using canvas transformation
+function applyArcWarp(textObj, direction, strengthPercent) {
+    if (!textObj) return null;
     
     // Get text properties
-    let text = activeObj.text || (activeObj.curveData ? activeObj.curveData.text : '');
-    let fontFamily = activeObj.fontFamily || (activeObj.curveData ? activeObj.curveData.fontFamily : 'Space Grotesk');
-    let fontSize = activeObj.fontSize || (activeObj.curveData ? activeObj.curveData.fontSize : 36);
-    let fill = activeObj.fill || (activeObj.curveData ? activeObj.curveData.fillColor : '#D4AF37');
-    let fontWeight = activeObj.fontWeight === 'bold' || (activeObj.curveData && activeObj.curveData.isBold) ? 'bold' : 'normal';
-    let fontStyle = activeObj.fontStyle === 'italic' || (activeObj.curveData && activeObj.curveData.isItalic) ? 'italic' : 'normal';
-    let underline = activeObj.underline || (activeObj.curveData && activeObj.curveData.isUnderline) || false;
-    let letterSpacing = activeObj.charSpacing || 0;
+    const text = textObj.text || textObj.curveData?.text || '';
+    let fontFamily = textObj.fontFamily || textObj.curveData?.fontFamily || 'Space Grotesk';
+    let fontSize = textObj.fontSize || textObj.curveData?.fontSize || 36;
+    let fill = textObj.fill || textObj.curveData?.fillColor || '#D4AF37';
+    let fontWeight = (textObj.fontWeight === 'bold' || textObj.curveData?.isBold) ? 'bold' : 'normal';
+    let fontStyle = (textObj.fontStyle === 'italic' || textObj.curveData?.isItalic) ? 'italic' : 'normal';
+    let underline = textObj.underline || textObj.curveData?.isUnderline || false;
+    let stroke = textObj.stroke || null;
+    let strokeWidth = textObj.strokeWidth || 0;
     
-    if (!text || text.length === 0) return false;
+    if (!text) return null;
     
-    // Create temporary canvas to render text with warp
+    const strength = strengthPercent / 100; // 0 to 1
+    const warpIntensity = strength * 0.6; // Max bend factor
+    
+    // Create temporary canvas to render warped text
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Set font
+    // Measure text
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-    const textMetrics = ctx.measureText(text);
-    const textWidth = textMetrics.width;
+    const metrics = ctx.measureText(text);
+    const textWidth = metrics.width;
     const textHeight = fontSize * 1.2;
     
-    // Add padding for warp
-    const padding = fontSize * 2;
-    canvas.width = textWidth + padding;
-    canvas.height = textHeight + padding;
+    // Add padding for warp distortion
+    const padding = fontSize * 1.5;
+    canvas.width = textWidth + padding * 2;
+    canvas.height = textHeight + padding * 2;
     
-    // Draw text normally first to get baseline
-    ctx.fillStyle = fill;
+    // Clear canvas
+    ctx.fillStyle = 'transparent';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw text normally first
+    ctx.save();
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
+    ctx.fillStyle = fill;
     ctx.textBaseline = 'middle';
     ctx.textAlign = 'center';
-    ctx.fillText(text, canvas.width/2, canvas.height/2);
+    ctx.translate(canvas.width/2, canvas.height/2);
+    
+    // Apply arc warp transformation (Photoshop Arc style)
+    // We use a vertical displacement mapping based on horizontal position
+    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    ctx.putImageData(imgData, 0, 0);
+    
+    // Draw original text for warping reference
+    ctx.fillText(text, 0, 0);
+    if (stroke && strokeWidth > 0) {
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = strokeWidth;
+        ctx.strokeText(text, 0, 0);
+    }
+    if (underline) {
+        const underlineY = fontSize/2 + 2;
+        ctx.beginPath();
+        ctx.moveTo(-textWidth/2, underlineY);
+        ctx.lineTo(textWidth/2, underlineY);
+        ctx.stroke();
+    }
     
     // Get image data for warp
-    const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-    const srcWidth = canvas.width;
-    const srcHeight = canvas.height;
+    const srcData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+    const destData = ctx.createImageData(canvas.width, canvas.height);
     
-    // Create destination canvas for warp
-    const destCanvas = document.createElement('canvas');
-    destCanvas.width = srcWidth;
-    destCanvas.height = srcHeight;
-    const destCtx = destCanvas.getContext('2d');
-    const destData = destCtx.createImageData(srcWidth, srcHeight);
-    
-    const strengthNorm = strength / 100; // 0 to 1
-    const warpIntensity = strengthNorm * 1.2; // Max warp factor
-    
-    // Arc warp algorithm (Photoshop style)
-    for (let y = 0; y < srcHeight; y++) {
-        const ny = y / srcHeight; // 0 to 1 from top to bottom
-        // Arc mapping: center moves up or down based on strength
-        let offsetX = 0;
-        let offsetY = 0;
-        
-        if (direction === 'up') {
-            // Bend Up: center pulls upward, edges stay
-            const curveFactor = Math.sin(ny * Math.PI) * warpIntensity;
-            offsetX = curveFactor * srcWidth * 0.3;
-            offsetY = -curveFactor * srcHeight * 0.2;
-        } else if (direction === 'down') {
-            // Bend Down: center pulls downward
-            const curveFactor = Math.sin(ny * Math.PI) * warpIntensity;
-            offsetX = curveFactor * srcWidth * 0.3;
-            offsetY = curveFactor * srcHeight * 0.2;
-        } else {
-            // No bend
-            offsetX = 0;
-            offsetY = 0;
-        }
-        
-        for (let x = 0; x < srcWidth; x++) {
-            const nx = x / srcWidth;
-            // Additional horizontal stretching at edges
-            const srcX = x + offsetX * (1 - Math.abs(nx - 0.5) * 1.5);
-            const srcY = y + offsetY;
+    // Apply arc warp (vertical displacement based on x position)
+    for (let y = 0; y < canvas.height; y++) {
+        for (let x = 0; x < canvas.width; x++) {
+            // Normalized coordinates (-1 to 1 from center)
+            const nx = (x - canvas.width/2) / (canvas.width/2);
+            const ny = (y - canvas.height/2) / (canvas.height/2);
             
-            if (srcX >= 0 && srcX < srcWidth && srcY >= 0 && srcY < srcHeight) {
-                const srcIdx = (Math.floor(srcY) * srcWidth + Math.floor(srcX)) * 4;
-                const destIdx = (y * srcWidth + x) * 4;
-                destData.data[destIdx] = imgData.data[srcIdx];
-                destData.data[destIdx + 1] = imgData.data[srcIdx + 1];
-                destData.data[destIdx + 2] = imgData.data[srcIdx + 2];
-                destData.data[destIdx + 3] = imgData.data[srcIdx + 3];
+            // Arc displacement: center moves vertically, edges stay
+            let displaceY = 0;
+            if (direction === 'up') {
+                // Bend Up: center moves UP
+                displaceY = -warpIntensity * (1 - Math.abs(nx)) * textHeight * 0.8;
+            } else if (direction === 'down') {
+                // Bend Down: center moves DOWN
+                displaceY = warpIntensity * (1 - Math.abs(nx)) * textHeight * 0.8;
+            }
+            
+            const srcY = y + displaceY;
+            const srcX = x;
+            
+            if (srcX >= 0 && srcX < canvas.width && srcY >= 0 && srcY < canvas.height) {
+                const srcIdx = (Math.floor(srcY) * canvas.width + Math.floor(srcX)) * 4;
+                const destIdx = (y * canvas.width + x) * 4;
+                destData.data[destIdx] = srcData.data[srcIdx];
+                destData.data[destIdx+1] = srcData.data[srcIdx+1];
+                destData.data[destIdx+2] = srcData.data[srcIdx+2];
+                destData.data[destIdx+3] = srcData.data[srcIdx+3];
             }
         }
     }
     
-    destCtx.putImageData(destData, 0, 0);
-    
-    // Also draw stroke if needed
-    if (activeObj.stroke && activeObj.strokeWidth > 0) {
-        destCtx.save();
-        destCtx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-        destCtx.textAlign = 'center';
-        destCtx.textBaseline = 'middle';
-        destCtx.strokeStyle = activeObj.stroke;
-        destCtx.lineWidth = activeObj.strokeWidth;
-        destCtx.strokeText(text, destCanvas.width/2, destCanvas.height/2);
-        destCtx.restore();
-    }
+    ctx.putImageData(destData, 0, 0);
+    ctx.restore();
     
     // Create fabric image from warped canvas
-    const dataURL = destCanvas.toDataURL();
-    const imgElement = document.createElement('img');
+    const dataURL = canvas.toDataURL();
+    const imgElement = new Image();
     imgElement.src = dataURL;
     
     return new Promise((resolve) => {
         imgElement.onload = () => {
             const fabricImage = new fabric.Image(imgElement, {
-                left: activeObj.left || fabricCanvas.width/2,
-                top: activeObj.top || fabricCanvas.height/2,
+                left: textObj.left || fabricCanvas.width/2,
+                top: textObj.top || fabricCanvas.height/2,
                 originX: 'center',
                 originY: 'center',
-                scaleX: activeObj.scaleX || 1,
-                scaleY: activeObj.scaleY || 1,
-                angle: activeObj.angle || 0,
+                scaleX: textObj.scaleX || 1,
+                scaleY: textObj.scaleY || 1,
+                angle: textObj.angle || 0,
                 hasControls: true,
                 hasBorders: true
             });
             
-            // Store bend metadata for persistence
+            // Store metadata
             fabricImage.bendData = {
-                text: text,
+                originalText: text,
                 fontFamily: fontFamily,
                 fontSize: fontSize,
                 fill: fill,
                 fontWeight: fontWeight,
                 fontStyle: fontStyle,
                 underline: underline,
-                letterSpacing: letterSpacing,
+                stroke: stroke,
+                strokeWidth: strokeWidth,
                 direction: direction,
-                strength: strength,
-                stroke: activeObj.stroke,
-                strokeWidth: activeObj.strokeWidth,
+                strength: strengthPercent,
                 type: 'bent'
             };
             
@@ -1494,121 +1486,70 @@ function applyTextBend(activeObj, direction, strength) {
     });
 }
 
-function updateBendFromUI() {
+async function applyBend(direction) {
+    const activeObj = fabricCanvas.getActiveObject();
+    if (!activeObj || (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData && !activeObj.bendData)) {
+        showToast('Please select a text element first', true);
+        return;
+    }
+    
+    let strength = parseInt(document.getElementById('bendStrengthSlider').value);
+    if (isNaN(strength)) strength = 50;
+    
+    showLoading(`Applying ${direction === 'up' ? 'Bend Up' : 'Bend Down'}...`);
+    try {
+        const warpedObj = await applyArcWarp(activeObj, direction, strength);
+        if (warpedObj) {
+            const oldLeft = activeObj.left;
+            const oldTop = activeObj.top;
+            const oldScaleX = activeObj.scaleX;
+            const oldScaleY = activeObj.scaleY;
+            const oldAngle = activeObj.angle;
+            fabricCanvas.remove(activeObj);
+            fabricCanvas.add(warpedObj);
+            warpedObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
+            fabricCanvas.setActiveObject(warpedObj);
+            fabricCanvas.renderAll();
+            showToast(`✓ ${direction === 'up' ? 'Bend Up' : 'Bend Down'} applied at ${strength}%`);
+            updateSummaryElements();
+        }
+    } catch (err) {
+        console.error(err);
+        showToast('Error applying bend effect', true);
+    } finally {
+        hideLoading();
+    }
+}
+
+function resetBend() {
     const activeObj = fabricCanvas.getActiveObject();
     if (!activeObj) {
         showToast('Select a text element first', true);
         return;
     }
-    const strength = parseInt(document.getElementById('bendStrengthSlider').value);
-    document.getElementById('bendStrengthValue').innerText = strength;
-    if(document.getElementById('mobileBendStrengthSlider')) {
-        document.getElementById('mobileBendStrengthSlider').value = strength;
-        document.getElementById('mobileBendStrengthValue').innerText = strength;
-    }
     
-    let direction = 'none';
-    if (activeObj.bendData) direction = activeObj.bendData.direction;
-    else if (window._tempBendDirection) direction = window._tempBendDirection;
-    else direction = 'up';
-    
-    if (direction !== 'none' && strength > 0) {
-        showLoading('Applying bend...');
-        applyTextBend(activeObj, direction, strength).then(newObj => {
-            if (newObj) {
-                const oldLeft = activeObj.left;
-                const oldTop = activeObj.top;
-                const oldScaleX = activeObj.scaleX;
-                const oldScaleY = activeObj.scaleY;
-                const oldAngle = activeObj.angle;
-                fabricCanvas.remove(activeObj);
-                fabricCanvas.add(newObj);
-                newObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
-                fabricCanvas.setActiveObject(newObj);
-                fabricCanvas.renderAll();
-                hideLoading();
-                showToast('Bend strength updated');
-            } else hideLoading();
-        }).catch(() => hideLoading());
-    } else if (strength === 0 && activeObj.bendData) {
-        // Reset to normal text
-        const normalText = new fabric.IText(activeObj.bendData.text, {
-            left: activeObj.left, top: activeObj.top, fontFamily: activeObj.bendData.fontFamily,
-            fontSize: activeObj.bendData.fontSize, fill: activeObj.bendData.fill,
-            fontWeight: activeObj.bendData.fontWeight, fontStyle: activeObj.bendData.fontStyle,
-            underline: activeObj.bendData.underline, originX: 'center', originY: 'center',
-            scaleX: activeObj.scaleX, scaleY: activeObj.scaleY, angle: activeObj.angle
-        });
-        fabricCanvas.remove(activeObj);
-        fabricCanvas.add(normalText);
-        fabricCanvas.setActiveObject(normalText);
-        fabricCanvas.renderAll();
-        showToast('Bend reset to normal text');
-    }
-}
-
-function bendUpAction() {
-    const activeObj = fabricCanvas.getActiveObject();
-    if (!activeObj || (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData && !activeObj.bendData)) {
-        showToast('Select a text element first', true);
-        return;
-    }
-    let strength = parseInt(document.getElementById('bendStrengthSlider').value);
-    if (isNaN(strength)) strength = 50;
-    window._tempBendDirection = 'up';
-    showLoading('Applying Bend Up...');
-    applyTextBend(activeObj, 'up', strength).then(newObj => {
-        if (newObj) {
-            const oldLeft = activeObj.left, oldTop = activeObj.top, oldScaleX = activeObj.scaleX, oldScaleY = activeObj.scaleY, oldAngle = activeObj.angle;
-            fabricCanvas.remove(activeObj);
-            fabricCanvas.add(newObj);
-            newObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
-            fabricCanvas.setActiveObject(newObj);
-            fabricCanvas.renderAll();
-            showToast('✓ Bend Up applied');
-        }
-        hideLoading();
-    }).catch(() => hideLoading());
-}
-
-function bendDownAction() {
-    const activeObj = fabricCanvas.getActiveObject();
-    if (!activeObj || (activeObj.type !== 'i-text' && activeObj.type !== 'text' && !activeObj.curveData && !activeObj.bendData)) {
-        showToast('Select a text element first', true);
-        return;
-    }
-    let strength = parseInt(document.getElementById('bendStrengthSlider').value);
-    if (isNaN(strength)) strength = 50;
-    window._tempBendDirection = 'down';
-    showLoading('Applying Bend Down...');
-    applyTextBend(activeObj, 'down', strength).then(newObj => {
-        if (newObj) {
-            const oldLeft = activeObj.left, oldTop = activeObj.top, oldScaleX = activeObj.scaleX, oldScaleY = activeObj.scaleY, oldAngle = activeObj.angle;
-            fabricCanvas.remove(activeObj);
-            fabricCanvas.add(newObj);
-            newObj.set({ left: oldLeft, top: oldTop, scaleX: oldScaleX, scaleY: oldScaleY, angle: oldAngle });
-            fabricCanvas.setActiveObject(newObj);
-            fabricCanvas.renderAll();
-            showToast('✓ Bend Down applied');
-        }
-        hideLoading();
-    }).catch(() => hideLoading());
-}
-
-function resetBend() {
-    const activeObj = fabricCanvas.getActiveObject();
-    if (!activeObj) { showToast('Select a text element first', true); return; }
     if (activeObj.bendData) {
-        const normalText = new fabric.IText(activeObj.bendData.text, {
-            left: activeObj.left, top: activeObj.top, fontFamily: activeObj.bendData.fontFamily,
-            fontSize: activeObj.bendData.fontSize, fill: activeObj.bendData.fill,
-            fontWeight: activeObj.bendData.fontWeight, fontStyle: activeObj.bendData.fontStyle,
-            underline: activeObj.bendData.underline, originX: 'center', originY: 'center',
-            scaleX: activeObj.scaleX, scaleY: activeObj.scaleY, angle: activeObj.angle
+        // Restore original text
+        const originalText = new fabric.IText(activeObj.bendData.originalText, {
+            left: activeObj.left,
+            top: activeObj.top,
+            fontFamily: activeObj.bendData.fontFamily,
+            fontSize: activeObj.bendData.fontSize,
+            fill: activeObj.bendData.fill,
+            fontWeight: activeObj.bendData.fontWeight,
+            fontStyle: activeObj.bendData.fontStyle,
+            underline: activeObj.bendData.underline,
+            stroke: activeObj.bendData.stroke,
+            strokeWidth: activeObj.bendData.strokeWidth,
+            originX: 'center',
+            originY: 'center',
+            scaleX: activeObj.scaleX,
+            scaleY: activeObj.scaleY,
+            angle: activeObj.angle
         });
         fabricCanvas.remove(activeObj);
-        fabricCanvas.add(normalText);
-        fabricCanvas.setActiveObject(normalText);
+        fabricCanvas.add(originalText);
+        fabricCanvas.setActiveObject(originalText);
         fabricCanvas.renderAll();
         document.getElementById('bendStrengthSlider').value = 0;
         document.getElementById('bendStrengthValue').innerText = '0';
@@ -1616,10 +1557,21 @@ function resetBend() {
             document.getElementById('mobileBendStrengthSlider').value = 0;
             document.getElementById('mobileBendStrengthValue').innerText = '0';
         }
-        showToast('Bend reset to normal');
+        showToast('Bend effect reset to normal text');
+        updateSummaryElements();
     } else {
         showToast('No bend effect found on selected text', true);
     }
+}
+
+function updateBendStrength() {
+    const strength = parseInt(document.getElementById('bendStrengthSlider').value);
+    document.getElementById('bendStrengthValue').innerText = strength;
+    if(document.getElementById('mobileBendStrengthSlider')) {
+        document.getElementById('mobileBendStrengthSlider').value = strength;
+        document.getElementById('mobileBendStrengthValue').innerText = strength;
+    }
+    // Strength updated, but we don't auto-apply - user must click Bend Up/Down again
 }
 // ================= TEXT BEND FEATURE END =================
 
@@ -1629,7 +1581,7 @@ function hideLoading(){ loadingOverlay.classList.remove('active'); }
 function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
 function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
 
-function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) {
+function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) { /* kept original function */ 
     if (!text || text.length === 0) return null;
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
@@ -1712,7 +1664,7 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
     });
 }
 
-async function applyCurveToSelected() {
+async function applyCurveToSelected() { /* kept original */ 
     const activeObj = fabricCanvas.getActiveObject();
     if (!activeObj) { showToast('Please select a text element first', true); return; }
     let text, fontFamily, fontSize, fillColor, isBold, isItalic, isUnderline;
@@ -2057,19 +2009,19 @@ setupCurvePanel();
 
 // ================= TEXT BEND FEATURE START =================
 // Attach bend event handlers
-document.getElementById('bendUpBtn').onclick = bendUpAction;
-document.getElementById('bendDownBtn').onclick = bendDownAction;
+document.getElementById('bendUpBtn').onclick = () => applyBend('up');
+document.getElementById('bendDownBtn').onclick = () => applyBend('down');
 document.getElementById('resetBendBtn').onclick = resetBend;
-document.getElementById('bendStrengthSlider').oninput = updateBendFromUI;
-if(document.getElementById('mobileBendUpBtn')) document.getElementById('mobileBendUpBtn').onclick = bendUpAction;
-if(document.getElementById('mobileBendDownBtn')) document.getElementById('mobileBendDownBtn').onclick = bendDownAction;
+document.getElementById('bendStrengthSlider').oninput = updateBendStrength;
+if(document.getElementById('mobileBendUpBtn')) document.getElementById('mobileBendUpBtn').onclick = () => applyBend('up');
+if(document.getElementById('mobileBendDownBtn')) document.getElementById('mobileBendDownBtn').onclick = () => applyBend('down');
 if(document.getElementById('mobileResetBendBtn')) document.getElementById('mobileResetBendBtn').onclick = resetBend;
 if(document.getElementById('mobileBendStrengthSlider')) document.getElementById('mobileBendStrengthSlider').oninput = function() {
     let val = this.value;
     document.getElementById('mobileBendStrengthValue').innerText = val;
     document.getElementById('bendStrengthSlider').value = val;
     document.getElementById('bendStrengthValue').innerText = val;
-    updateBendFromUI();
+    updateBendStrength();
 };
 // ================= TEXT BEND FEATURE END =================
 </script>
