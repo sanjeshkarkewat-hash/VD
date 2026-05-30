@@ -145,7 +145,7 @@
             text-align: center;
             width: 100%;
             margin: 0;
-            padding-bottom: 15px; /* consistent padding, but container will shrink-wrap canvas */
+            padding-bottom: 0;
         }
         
         .side-switcher {
@@ -168,29 +168,23 @@
             color: #050508;
         }
         
-        /* CRITICAL FIX: canvas container now tightly wraps the canvas without extra spacing */
         .canvas-container {
             background: #1a1a24;
             border-radius: 20px;
             width: 100%;
             display: flex;
             justify-content: center;
-            line-height: 0;  /* removes any inline spacing */
-            padding: 0;      /* no padding */
-            margin: 0;       /* no margin */
-            overflow: hidden; /* ensure clean edges */
+            line-height: 0;
         }
         
-        /* Canvas element: fixed width, auto height maintains aspect ratio, background perfectly fitted */
         #tshirtCanvas { 
             border-radius: 16px; 
             width: 100%;
             height: auto !important;
-            max-width: 550px;
+            max-width: 500px;
             display: block;
             margin: 0;
             vertical-align: top;
-            background-color: #1a1a24;
         }
         
         .color-selector-section {
@@ -560,7 +554,7 @@
             }
             .selected-tshirt-area {
                 padding: 12px;
-                padding-bottom: 12px;
+                padding-bottom: 0;
             }
             .side-switcher {
                 gap: 10px;
@@ -938,8 +932,8 @@
 <div class="modal" id="loginModal"><div class="modal-content"><span class="close-modal" id="closeModalBtn">&times;</span><h3>Login</h3><input type="tel" id="loginPhone" placeholder="+91 9876543210"><button id="sendOtpBtn">Send OTP</button><div id="otpSection" style="display:none;"><input type="text" id="otpInput" placeholder="Enter OTP"><button id="verifyOtpBtn">Verify</button></div></div></div>
 
 <script>
-// FULL JAVASCRIPT - MODIFIED: Canvas height fixed to match T-shirt image exactly, eliminating extra bottom space.
-// CRITICAL: Canvas dimensions and background scaling ensure no empty gaps below preview.
+// FULL ORIGINAL JAVASCRIPT - CHANGED CANVAS HEIGHT FROM 600 TO 450
+// AND TEMPCANVAS HEIGHT FROM 600 TO 450 TO REMOVE EMPTY SPACE
 const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(); const storage = firebase.storage(); const storageRef = storage.ref(); const auth = firebase.auth();
@@ -960,8 +954,8 @@ function saveCart(){localStorage.setItem('vedanta_custom_cart',JSON.stringify(ca
 function loadCart(){const s=localStorage.getItem('vedanta_custom_cart'); if(s){try{cart=JSON.parse(s);updateCartUI();updateCartCount();}catch(e){cart=[];}}}
 function updateCartCount(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.quantity,0);}
 function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ✨ Custom</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
-// FIXED: Canvas height set to match t-shirt aspect; background tightly fits image exactly without bottom extra gap
-function initCanvas(){fabricCanvas=new fabric.Canvas('tshirtCanvas');fabricCanvas.setWidth(550);fabricCanvas.setHeight(450); fabricCanvas.selection=true; loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null;}
+// FIX: Changed canvas height from 600 to 450 to remove empty space below t-shirt preview
+function initCanvas(){fabricCanvas=new fabric.Canvas('tshirtCanvas');fabricCanvas.setWidth(550);fabricCanvas.setHeight(450);fabricCanvas.selection=true;loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false);frontDesignJSON=fabricCanvas.toJSON();backDesignJSON=null;}
 function switchToFront(){if(currentSide==='front')return;backDesignJSON=fabricCanvas.toJSON();currentSide='front';document.getElementById('frontSideBtn').classList.add('active');document.getElementById('backSideBtn').classList.remove('active');if(frontDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(frontDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false);}updateSummaryElements();}
 function switchToBack(){if(currentSide==='back')return;frontDesignJSON=fabricCanvas.toJSON();currentSide='back';document.getElementById('backSideBtn').classList.add('active');document.getElementById('frontSideBtn').classList.remove('active');if(backDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(backDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false);}updateSummaryElements();}
 function updateSummaryElements(){const hf=!!(frontDesignJSON?.objects?.length),hb=!!(backDesignJSON?.objects?.length);document.getElementById('summaryFront').innerHTML=hf?'✓ Custom':'None';document.getElementById('summaryBack').innerHTML=hb?'✓ Custom':'None';}
