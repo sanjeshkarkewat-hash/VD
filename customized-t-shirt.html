@@ -133,39 +133,28 @@
         .style-name { font-weight: 700; font-size: 11px; }
         .style-price { color: #D4AF37; font-size: 10px; font-weight: 700; }
         
-        /* DESKTOP LAYOUT - Two columns */
+        /* DESKTOP LAYOUT - NO GAPS ANYWHERE */
         .desktop-layout {
             display: flex;
-            gap: 24px;
-            padding: 0 15px;
+            gap: 0;
+            padding: 0;
+            margin: 0;
         }
         
         .tshirt-column {
             flex: 1.2;
             min-width: 0;
+            margin: 0;
+            padding: 0;
         }
         
         .tools-column {
             flex: 1;
-            position: sticky;
-            top: 20px;
-            max-height: calc(100vh - 100px);
-            overflow-y: auto;
+            margin: 0;
+            padding: 0;
         }
         
-        .tools-column::-webkit-scrollbar {
-            width: 4px;
-        }
-        .tools-column::-webkit-scrollbar-track {
-            background: rgba(212,175,55,0.1);
-            border-radius: 10px;
-        }
-        .tools-column::-webkit-scrollbar-thumb {
-            background: #D4AF37;
-            border-radius: 10px;
-        }
-        
-        /* Common styles */
+        /* NO GAPS - T-shirt area */
         .selected-tshirt-area {
             background: transparent;
             text-align: center;
@@ -178,8 +167,7 @@
             display: flex;
             justify-content: center;
             gap: 12px;
-            margin-bottom: 15px;
-            margin-top: 10px;
+            margin: 12px 0;
         }
         .side-btn {
             background: rgba(20,20,30,0.8);
@@ -190,7 +178,6 @@
             font-size: 13px;
             color: #aaa;
             cursor: pointer;
-            transition: all 0.2s ease;
         }
         .side-btn.active {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -203,6 +190,8 @@
             display: flex;
             justify-content: center;
             line-height: 0;
+            margin: 0;
+            padding: 0;
         }
         
         #tshirtCanvas { 
@@ -213,15 +202,13 @@
             margin: 0 auto;
             vertical-align: top;
             background: transparent;
-            border-radius: 16px;
         }
         
-        /* Color selector - below t-shirt */
+        /* COLOR SELECTOR - TOUCHING T-SHIRT IMAGE (NO GAP) */
         .color-selector-section {
-            margin-top: 18px;
+            margin: 0;
             padding: 14px;
             background: rgba(15,15,22,0.6);
-            border-radius: 20px;
             width: 100%;
         }
         .color-selector-title {
@@ -245,7 +232,6 @@
             padding: 5px 8px;
             border-radius: 30px;
             background: rgba(0,0,0,0.3);
-            transition: all 0.2s ease;
         }
         .color-option.active {
             border: 1px solid #D4AF37;
@@ -264,15 +250,16 @@
             color: #888; 
             margin-top: 12px; 
             margin-bottom: 0;
+            padding: 0 0 12px 0;
         }
         
-        /* DESIGN TOOLS - Desktop sidebar */
+        /* DESIGN TOOLS - NO GAPS, TOUCHING T-SHIRT AREA */
         .design-tools-sidebar {
             background: rgba(15,15,22,0.92);
             backdrop-filter: blur(10px);
-            border-radius: 24px;
             padding: 20px;
-            border: 1px solid rgba(212,175,55,0.2);
+            height: 100%;
+            margin: 0;
         }
         
         .box-title {
@@ -324,7 +311,6 @@
             border-radius: 10px;
             cursor: pointer;
             border: 2px solid transparent;
-            transition: transform 0.1s ease;
         }
         .color-swatch:hover {
             transform: scale(1.05);
@@ -338,10 +324,6 @@
             font-size: 12px;
             cursor: pointer;
             color: #D4AF37;
-            transition: all 0.2s ease;
-        }
-        .effect-btn:hover, .btn-icon:hover {
-            background: rgba(212,175,55,0.3);
         }
         .upload-area {
             border: 2px dashed rgba(212,175,55,0.4);
@@ -349,11 +331,6 @@
             padding: 16px;
             text-align: center;
             cursor: pointer;
-            transition: all 0.2s ease;
-        }
-        .upload-area:hover {
-            border-color: #D4AF37;
-            background: rgba(212,175,55,0.05);
         }
         .slider-row { display: flex; align-items: center; gap: 12px; }
         .slider-row input { flex: 1; }
@@ -367,13 +344,12 @@
             text-align: center;
         }
         
-        /* SEPARATE BOTTOM BOX - Size, Print Method, Bill Invoice (Alag box, sabse niche) */
+        /* SEPARATE BOTTOM BOX - Size, Print Method, Bill Invoice */
         .bottom-separate-box {
-            margin: 24px 15px;
+            margin: 20px 0 0 0;
             background: rgba(15,15,22,0.92);
             backdrop-filter: blur(10px);
-            border-radius: 24px;
-            border: 1px solid rgba(212,175,55,0.2);
+            border-top: 1px solid rgba(212,175,55,0.2);
             overflow: hidden;
         }
         
@@ -459,7 +435,6 @@
             cursor: pointer;
             text-align: center;
             font-size: 13px;
-            transition: all 0.2s ease;
         }
         .btn-add-bottom {
             background: rgba(212,175,55,0.15);
@@ -598,7 +573,7 @@
         @media (max-width: 991px) {
             .desktop-layout {
                 flex-direction: column;
-                padding: 0 12px;
+                gap: 0;
             }
             .desktop-tools {
                 display: none;
@@ -606,10 +581,8 @@
             .mobile-toolbar {
                 display: block;
                 background: rgba(15,15,22,0.92);
-                margin-top: 16px;
+                margin-top: 0;
                 width: 100%;
-                border-radius: 20px;
-                margin-bottom: 0;
             }
             .toolbar-scroll {
                 overflow-x: auto;
@@ -621,14 +594,6 @@
             }
             .toolbar-scroll::-webkit-scrollbar {
                 height: 3px;
-            }
-            .toolbar-scroll::-webkit-scrollbar-track {
-                background: rgba(212,175,55,0.1);
-                border-radius: 10px;
-            }
-            .toolbar-scroll::-webkit-scrollbar-thumb {
-                background: #D4AF37;
-                border-radius: 10px;
             }
             .toolbar-items {
                 display: inline-flex;
@@ -652,8 +617,8 @@
                 display: none;
                 background: rgba(15,15,22,0.96);
                 padding: 15px;
-                margin: 0 12px 12px 12px;
-                border-radius: 16px;
+                margin: 0;
+                border-radius: 0;
             }
             .tool-panel.open {
                 display: block;
@@ -696,7 +661,6 @@
                 cursor: pointer;
                 text-align: center;
                 font-size: 12px;
-                border: 1px solid transparent;
             }
             .mobile-effect-buttons, .mobile-transform-buttons {
                 display: flex;
@@ -719,11 +683,10 @@
                 cursor: pointer;
             }
             .bottom-separate-box {
-                margin: 20px 12px;
+                margin: 0;
             }
-            .bottom-box-content {
-                flex-direction: column;
-                gap: 20px;
+            .color-selector-section {
+                margin: 0;
             }
         }
         
@@ -766,9 +729,9 @@
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <!-- DESKTOP LAYOUT: Two columns -->
+    <!-- DESKTOP LAYOUT: NO GAPS -->
     <div class="desktop-layout">
-        <!-- LEFT COLUMN: T-Shirt + Color Selector -->
+        <!-- LEFT COLUMN: T-Shirt + Color Selector (TOUCHING EACH OTHER) -->
         <div class="tshirt-column">
             <div class="selected-tshirt-area">
                 <div class="side-switcher">
@@ -778,7 +741,7 @@
                 <div class="canvas-container">
                     <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
                 </div>
-                <!-- Color selector - directly below t-shirt image -->
+                <!-- COLOR SELECTOR - DIRECTLY TOUCHING T-SHIRT (NO GAP) -->
                 <div class="color-selector-section">
                     <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
                     <div class="color-options" id="colorOptionsContainer"></div>
@@ -787,7 +750,7 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: DESIGN TOOLS (Desktop only) -->
+        <!-- RIGHT COLUMN: DESIGN TOOLS (TOUCHING T-SHIRT AREA - NO GAP) -->
         <div class="tools-column desktop-tools">
             <div class="design-tools-sidebar">
                 <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
@@ -851,7 +814,7 @@
         </div>
     </div>
 
-    <!-- MOBILE TOOLBAR (visible only on mobile) -->
+    <!-- MOBILE TOOLBAR -->
     <div class="mobile-toolbar">
         <div class="toolbar-scroll">
             <div class="toolbar-items">
@@ -877,13 +840,12 @@
         <div id="mobilePanelClear" class="tool-panel"><div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div><button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button></div>
     </div>
 
-    <!-- SEPARATE BOTTOM BOX - Size, Print Method, Bill Invoice (Alag box, sabse niche) -->
+    <!-- SEPARATE BOTTOM BOX - Size, Print Method, Bill Invoice -->
     <div class="bottom-separate-box">
         <div class="bottom-box-header">
             <h3><i class="fas fa-receipt"></i> ORDER & BILLING DETAILS</h3>
         </div>
         <div class="bottom-box-content">
-            <!-- Left side: Size & Print Method -->
             <div class="size-print-section">
                 <div class="tool-group">
                     <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
@@ -898,7 +860,6 @@
                 </div>
             </div>
             
-            <!-- Right side: Bill Invoice / Order Summary -->
             <div class="order-summary-section">
                 <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
                 <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
@@ -925,7 +886,7 @@
 <div class="modal" id="loginModal"><div class="modal-content"><span class="close-modal" id="closeModalBtn">&times;</span><h3>Login</h3><input type="tel" id="loginPhone" placeholder="+91 9876543210"><button id="sendOtpBtn">Send OTP</button><div id="otpSection" style="display:none;"><input type="text" id="otpInput" placeholder="Enter OTP"><button id="verifyOtpBtn">Verify</button></div></div></div>
 
 <script>
-// FULL JAVASCRIPT - NO FUNCTIONAL CHANGES, only added bottom box sync
+// FULL JAVASCRIPT - NO FUNCTIONAL CHANGES
 const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(); const storage = firebase.storage(); const storageRef = storage.ref(); const auth = firebase.auth();
