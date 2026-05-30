@@ -133,20 +133,50 @@
         .style-name { font-weight: 700; font-size: 11px; }
         .style-price { color: #D4AF37; font-size: 10px; font-weight: 700; }
         
-        .vertical-flow {
+        /* NEW LAYOUT: T-shirt preview + Color selector (left), Design tools (right) */
+        .designer-main-layout {
             display: flex;
             flex-direction: column;
-            width: 100%;
+            gap: 20px;
+            padding: 0 15px;
         }
         
-        /* FIX: Removed top padding to eliminate black space above t-shirt */
+        @media (min-width: 992px) {
+            .designer-main-layout {
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 24px;
+            }
+            .tshirt-col {
+                flex: 1.2;
+                min-width: 0;
+            }
+            .tools-col {
+                flex: 1;
+                position: sticky;
+                top: 20px;
+                max-height: calc(100vh - 100px);
+                overflow-y: auto;
+            }
+            .tools-col::-webkit-scrollbar {
+                width: 4px;
+            }
+            .tools-col::-webkit-scrollbar-track {
+                background: rgba(212,175,55,0.1);
+                border-radius: 10px;
+            }
+            .tools-col::-webkit-scrollbar-thumb {
+                background: #D4AF37;
+                border-radius: 10px;
+            }
+        }
+        
         .selected-tshirt-area {
-            background: rgba(10,10,18,0.6);
-            padding: 0 15px 0 15px;
+            background: transparent;
             text-align: center;
             width: 100%;
             margin: 0;
-            padding-bottom: 0;
+            padding: 0;
         }
         
         .side-switcher {
@@ -154,7 +184,7 @@
             justify-content: center;
             gap: 12px;
             margin-bottom: 15px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         .side-btn {
             background: rgba(20,20,30,0.8);
@@ -164,16 +194,16 @@
             font-weight: 600;
             font-size: 13px;
             color: #aaa;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
         .side-btn.active {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             color: #050508;
         }
         
-        /* FIX: Removed background color from canvas container - no extra box below t-shirt */
         .canvas-container {
             background: transparent;
-            border-radius: 20px;
             width: 100%;
             display: flex;
             justify-content: center;
@@ -181,27 +211,29 @@
         }
         
         #tshirtCanvas { 
-            border-radius: 16px; 
             width: 100%;
             height: auto !important;
             max-width: 500px;
             display: block;
-            margin: 0;
+            margin: 0 auto;
             vertical-align: top;
+            background: transparent;
+            border-radius: 16px;
         }
         
+        /* Color selector - right below t-shirt image */
         .color-selector-section {
-            margin-top: 12px;
-            padding: 12px;
+            margin-top: 18px;
+            padding: 14px;
             background: rgba(15,15,22,0.6);
-            border-radius: 18px;
+            border-radius: 20px;
             width: 100%;
-            margin-bottom: 0;
         }
         .color-selector-title {
             font-size: 13px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: #D4AF37;
+            font-weight: 600;
         }
         .color-options {
             display: flex;
@@ -218,6 +250,7 @@
             padding: 5px 8px;
             border-radius: 30px;
             background: rgba(0,0,0,0.3);
+            transition: all 0.2s ease;
         }
         .color-option.active {
             border: 1px solid #D4AF37;
@@ -231,56 +264,53 @@
         }
         .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
         
-        .btn-save-image {
-            display: none;
-        }
-        
         .instruction-text { 
             font-size: 10px; 
             color: #888; 
             margin-top: 12px; 
             margin-bottom: 0;
-            padding-bottom: 0;
         }
         
-        /* CAPCUT STYLE TOOLBAR - ONLY ON MOBILE */
-        .mobile-toolbar {
-            display: none;
-        }
-        
-        .design-tools-box, .material-tools-box {
+        /* DESIGN TOOLS - will appear on the right side on desktop */
+        .design-tools-sidebar {
             background: rgba(15,15,22,0.92);
-            padding: 18px;
-            width: 100%;
-            margin-top: 0;
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            padding: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
         }
         
         .box-title {
             color: #D4AF37;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: 700;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
+            margin-bottom: 18px;
+            padding-bottom: 10px;
             border-bottom: 1px solid rgba(212,175,55,0.3);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
         }
         .tool-group {
-            margin-bottom: 16px;
-            padding-bottom: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
             border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .tool-group:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
         }
         .tool-group label {
             display: block;
             font-size: 12px;
             color: #D4AF37;
-            margin-bottom: 6px;
+            margin-bottom: 8px;
             font-weight: 600;
         }
         .tool-group input, .tool-group select {
             width: 100%;
-            padding: 8px 10px;
+            padding: 8px 12px;
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(212,175,55,0.3);
             border-radius: 12px;
@@ -290,8 +320,8 @@
         .color-grid {
             display: grid;
             grid-template-columns: repeat(8, 1fr);
-            gap: 6px;
-            margin-top: 6px;
+            gap: 8px;
+            margin-top: 8px;
         }
         .color-swatch {
             width: 100%;
@@ -299,50 +329,73 @@
             border-radius: 10px;
             cursor: pointer;
             border: 2px solid transparent;
+            transition: transform 0.1s ease;
         }
-        .effect-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+        .color-swatch:hover {
+            transform: scale(1.05);
+        }
+        .effect-row { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
         .effect-btn, .btn-icon {
             background: rgba(212,175,55,0.15);
             border: 1px solid rgba(212,175,55,0.4);
-            padding: 6px 12px;
-            border-radius: 25px;
-            font-size: 11px;
+            padding: 8px 14px;
+            border-radius: 30px;
+            font-size: 12px;
             cursor: pointer;
             color: #D4AF37;
+            transition: all 0.2s ease;
+        }
+        .effect-btn:hover, .btn-icon:hover {
+            background: rgba(212,175,55,0.3);
         }
         .upload-area {
             border: 2px dashed rgba(212,175,55,0.4);
             border-radius: 14px;
-            padding: 12px;
+            padding: 16px;
             text-align: center;
             cursor: pointer;
+            transition: all 0.2s ease;
         }
-        .slider-row { display: flex; align-items: center; gap: 10px; }
+        .upload-area:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.05);
+        }
+        .slider-row { display: flex; align-items: center; gap: 12px; }
         .slider-row input { flex: 1; }
-        .two-col-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+        .two-col-btns { display: flex; gap: 8px; flex-wrap: wrap; }
+        .font-preview {
+            font-size: 12px;
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            text-align: center;
+        }
+        
+        /* T-SHIRT SIZE and ORDER PANEL */
+        .material-tools-box {
+            background: rgba(15,15,22,0.92);
+            padding: 18px;
+            border-radius: 20px;
+            margin-top: 16px;
+        }
+        
         .print-option {
             display: flex;
             align-items: center;
             gap: 10px;
             margin-top: 8px;
-            padding: 8px 10px;
+            padding: 8px 12px;
             background: rgba(0,0,0,0.3);
             border-radius: 14px;
         }
-        .print-option label { font-size: 11px; margin: 0; }
-        .font-preview {
-            font-size: 12px;
-            margin-top: 6px;
-            padding: 5px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 8px;
-            text-align: center;
-        }
+        .print-option label { font-size: 11px; margin: 0; cursor: pointer; }
         
         .order-panel {
             background: rgba(15,15,22,0.92);
             padding: 18px;
-            width: 100%;
+            border-radius: 20px;
+            margin-top: 16px;
         }
         .order-detail {
             padding: 10px 0;
@@ -359,7 +412,7 @@
             font-weight: 800;
             color: #D4AF37;
         }
-        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .action-buttons { display: flex; gap: 12px; margin-top: 16px; }
         .btn-add, .btn-buy {
             flex: 1;
             padding: 12px;
@@ -368,16 +421,33 @@
             cursor: pointer;
             text-align: center;
             font-size: 13px;
+            transition: all 0.2s ease;
         }
         .btn-add {
             background: rgba(212,175,55,0.15);
             border: 1.5px solid #D4AF37;
             color: #D4AF37;
         }
+        .btn-add:hover {
+            background: rgba(212,175,55,0.3);
+        }
         .btn-buy {
             background: linear-gradient(135deg, #FF4500, #FF8C00);
             border: none;
             color: white;
+        }
+        .btn-buy:hover {
+            filter: brightness(1.05);
+            transform: translateY(-1px);
+        }
+        
+        .btn-save-image {
+            display: none;
+        }
+        
+        /* MOBILE TOOLBAR - unchanged */
+        .mobile-toolbar {
+            display: none;
         }
         
         .cart-sidebar {
@@ -400,8 +470,8 @@
         .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .cart-item-details { flex: 1; }
         .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; }
         .toast {
@@ -493,10 +563,19 @@
                 height: auto;
                 aspect-ratio: 1/1;
             }
-            .designer-container { max-width: 1200px; margin: 0 auto; }
+            .designer-container { max-width: 1400px; margin: 0 auto; }
         }
 
         /* MOBILE STYLES */
+        @media (max-width: 991px) {
+            .designer-main-layout {
+                flex-direction: column;
+            }
+            .tools-col {
+                margin-top: 16px;
+            }
+        }
+        
         @media (max-width: 767px) {
             .style-section {
                 overflow-x: auto;
@@ -518,15 +597,11 @@
                 width: 80px;
                 height: 80px;
             }
-            .style-name {
-                font-size: 10px;
-            }
-            .style-price {
-                font-size: 9px;
-            }
+            .style-name { font-size: 10px; }
+            .style-price { font-size: 9px; }
             
             /* Hide desktop design tools on mobile */
-            .design-tools-box {
+            .design-tools-sidebar {
                 display: none;
             }
             
@@ -536,6 +611,7 @@
                 background: rgba(15,15,22,0.92);
                 margin-top: 12px;
                 width: 100%;
+                border-radius: 20px;
             }
             
             .toolbar-scroll {
@@ -579,16 +655,6 @@
                 align-items: center;
                 gap: 6px;
                 white-space: nowrap;
-            }
-            
-            .tool-btn i {
-                font-size: 14px;
-            }
-            
-            .tool-btn.active {
-                background: linear-gradient(135deg, #D4AF37, #FF8C00);
-                color: #050508;
-                border-color: transparent;
             }
             
             .tool-panel {
@@ -649,276 +715,24 @@
                 border: 1px solid transparent;
             }
             
-            .mobile-font-option.active {
-                border-color: #D4AF37;
-                background: rgba(212,175,55,0.15);
-            }
-            
-            .mobile-size-slider {
-                width: 100%;
-                margin: 10px 0;
-            }
-            
-            .mobile-effect-buttons {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            
-            .mobile-effect-btn {
-                background: rgba(212,175,55,0.15);
-                border: 1px solid rgba(212,175,55,0.3);
-                padding: 8px 16px;
-                border-radius: 30px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-            
-            .mobile-transform-buttons {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            
-            .mobile-transform-btn {
-                background: rgba(212,175,55,0.15);
-                border: 1px solid rgba(212,175,55,0.3);
-                padding: 8px 16px;
-                border-radius: 30px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-            
-            .mobile-upload-area {
-                border: 2px dashed rgba(212,175,55,0.4);
-                border-radius: 14px;
-                padding: 20px;
-                text-align: center;
-                cursor: pointer;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
-                width: 100%;
-                position: relative;
-            }
-            .designer-container {
-                overflow-x: hidden;
-                width: 100%;
+            .selected-tshirt-area {
                 padding: 0;
-                margin: 0;
             }
-            .header {
-                padding: 15px 12px;
+            
+            .color-selector-section {
+                margin-top: 12px;
+                padding: 12px;
             }
-            .logo {
-                font-size: 24px;
+            
+            .material-tools-box, .order-panel {
+                margin-top: 12px;
             }
-            .tagline {
-                font-size: 8px;
-                letter-spacing: 2px;
-            }
+            
             .cart-icon-header {
                 padding: 6px 10px;
                 font-size: 11px;
                 top: 14px;
                 right: 12px;
-            }
-            .cart-count {
-                font-size: 10px;
-                padding: 1px 6px;
-            }
-            .section-title {
-                font-size: 16px;
-                margin-bottom: 12px;
-            }
-            .selected-tshirt-area {
-                padding: 0 12px 0 12px;
-                padding-bottom: 0;
-            }
-            .side-switcher {
-                gap: 10px;
-                margin-bottom: 12px;
-                margin-top: 12px;
-            }
-            .side-btn {
-                padding: 6px 16px;
-                font-size: 12px;
-            }
-            .canvas-container {
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                line-height: 0;
-            }
-            #tshirtCanvas {
-                width: 100%;
-                height: auto !important;
-                max-width: 450px;
-                margin: 0;
-            }
-            .color-selector-section {
-                margin-top: 12px;
-                padding: 10px;
-            }
-            .color-selector-title {
-                font-size: 12px;
-                margin-bottom: 8px;
-            }
-            .color-options {
-                gap: 8px;
-            }
-            .color-option {
-                padding: 4px 6px;
-            }
-            .color-swatch-circle {
-                width: 28px;
-                height: 28px;
-            }
-            .color-option-name {
-                font-size: 9px;
-            }
-            .instruction-text {
-                font-size: 9px;
-                margin-top: 10px;
-            }
-            .material-tools-box, .order-panel {
-                padding: 14px;
-            }
-            .box-title {
-                font-size: 14px;
-                margin-bottom: 12px;
-                padding-bottom: 6px;
-            }
-            .tool-group {
-                margin-bottom: 14px;
-                padding-bottom: 10px;
-            }
-            .tool-group label {
-                font-size: 11px;
-                margin-bottom: 5px;
-            }
-            .tool-group input, .tool-group select {
-                padding: 7px 9px;
-                font-size: 11px;
-            }
-            .order-panel h3 {
-                font-size: 14px;
-            }
-            .order-detail {
-                padding: 8px 0;
-                font-size: 12px;
-            }
-            .order-total {
-                padding: 12px 0;
-                font-size: 18px;
-            }
-            .action-buttons {
-                gap: 8px;
-                margin-top: 12px;
-            }
-            .btn-add, .btn-buy {
-                padding: 10px;
-                font-size: 12px;
-            }
-            .cart-sidebar {
-                width: 90%;
-                max-width: 320px;
-            }
-            .cart-header {
-                padding: 14px;
-            }
-            .cart-header h3 {
-                font-size: 16px;
-            }
-            .cart-items {
-                padding: 12px;
-                max-height: 65vh;
-            }
-            .cart-item {
-                padding: 10px;
-                gap: 8px;
-            }
-            .cart-item-img {
-                width: 45px;
-                height: 45px;
-            }
-            .cart-item-details {
-                font-size: 11px;
-            }
-            .cart-qty-control button {
-                width: 22px;
-                height: 22px;
-                font-size: 12px;
-            }
-            .cart-total {
-                padding: 12px;
-            }
-            .checkout-btn {
-                padding: 10px;
-                font-size: 13px;
-            }
-            .modal-content {
-                padding: 20px;
-                max-width: 300px;
-            }
-            .modal-content h3 {
-                font-size: 18px;
-            }
-            .modal-content input {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .toast {
-                padding: 8px 16px;
-                font-size: 12px;
-                white-space: normal;
-                text-align: center;
-                max-width: 90%;
-            }
-            .loading-spinner {
-                width: 40px;
-                height: 40px;
-            }
-            .loading-text {
-                font-size: 13px;
-            }
-            .cors-warning {
-                font-size: 9px;
-                padding: 6px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .style-card {
-                width: 90px;
-            }
-            .style-img {
-                width: 70px;
-                height: 70px;
-            }
-            .style-name {
-                font-size: 9px;
-            }
-            .style-price {
-                font-size: 8px;
-            }
-            .color-options {
-                gap: 6px;
-            }
-            .color-swatch-circle {
-                width: 24px;
-                height: 24px;
-            }
-            .btn-add, .btn-buy {
-                padding: 9px;
-                font-size: 11px;
-            }
-            .tool-btn {
-                padding: 8px 14px;
-                font-size: 11px;
             }
         }
         
@@ -954,186 +768,144 @@
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <div class="vertical-flow">
-        <div class="selected-tshirt-area">
-            <div class="side-switcher">
-                <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
-                <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
-            </div>
-            <div class="canvas-container">
-                <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
-            </div>
-            <div class="color-selector-section">
-                <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
-                <div class="color-options" id="colorOptionsContainer"></div>
-            </div>
-            <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> Save Both Sides</button>
-            <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
-        </div>
-
-        <!-- DESKTOP DESIGN TOOLS -->
-        <div class="design-tools-box">
-            <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
-            <div class="tool-group">
-                <label>📝 Add Text</label>
-                <input type="text" id="textInput" placeholder="Enter your text...">
-                <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
-            </div>
-            <div class="tool-group">
-                <label>🎨 Text Color</label>
-                <div class="color-grid" id="colorPalette"></div>
-            </div>
-            <div class="tool-group">
-                <label>✨ Text Effects</label>
-                <div class="effect-row">
-                    <button class="effect-btn" id="glowBtn">Glow</button>
-                    <button class="effect-btn" id="roundedBtn">Rounded</button>
-                    <button class="effect-btn" id="borderBtn">Border</button>
+    <!-- MAIN LAYOUT: T-Shirt Preview (left) + Design Tools (right) -->
+    <div class="designer-main-layout">
+        <!-- LEFT COLUMN: T-Shirt Preview + Color Selector -->
+        <div class="tshirt-col">
+            <div class="selected-tshirt-area">
+                <div class="side-switcher">
+                    <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
+                    <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
                 </div>
-                <div id="glowControls" style="display: none; margin-top: 10px;">
-                    <div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="20" value="5"><span id="glowSizeValue">5px</span></div>
-                    <div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div>
+                <div class="canvas-container">
+                    <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
                 </div>
-            </div>
-            <div class="tool-group">
-                <label>🔤 Font Family</label>
-                <select id="fontSelect">
-                    <option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option>
-                    <option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option>
-                    <option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option>
-                    <option value="Oswald">Oswald</option><option value="Lobster">Lobster</option>
-                </select>
-                <div class="font-preview" id="fontPreview">Sample Text</div>
-            </div>
-            <div class="tool-group">
-                <label>📏 Text Size</label>
-                <div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div>
-            </div>
-            <div class="tool-group">
-                <label>🔄 Text Transform</label>
-                <div class="two-col-btns">
-                    <button class="btn-icon" id="flipHorizontalBtn">Flip H</button>
-                    <button class="btn-icon" id="flipVerticalBtn">Flip V</button>
-                    <button class="btn-icon" id="boldBtn">Bold</button>
-                    <button class="btn-icon" id="italicBtn">Italic</button>
-                    <button class="btn-icon" id="underlineBtn">Underline</button>
+                <!-- COLOR SELECTOR - directly below t-shirt image -->
+                <div class="color-selector-section">
+                    <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
+                    <div class="color-options" id="colorOptionsContainer"></div>
                 </div>
-            </div>
-            <div class="tool-group">
-                <label>🖼️ Upload Design</label>
-                <div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p><input type="file" id="imageUpload" accept="image/*" style="display:none"></div>
-            </div>
-            <div class="tool-group">
-                <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
-                <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button>
+                <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> Save Both Sides</button>
+                <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
             </div>
         </div>
 
-        <!-- MOBILE CAPCUT STYLE TOOLBAR -->
-        <div class="mobile-toolbar">
-            <div class="toolbar-scroll">
-                <div class="toolbar-items">
-                    <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
-                    <button class="tool-btn" data-tool="color"><i class="fas fa-palette"></i> Color</button>
-                    <button class="tool-btn" data-tool="font"><i class="fas fa-text-height"></i> Font</button>
-                    <button class="tool-btn" data-tool="size"><i class="fas fa-arrows-alt-h"></i> Size</button>
-                    <button class="tool-btn" data-tool="effects"><i class="fas fa-star"></i> Effects</button>
-                    <button class="tool-btn" data-tool="transform"><i class="fas fa-exchange-alt"></i> Transform</button>
-                    <button class="tool-btn" data-tool="upload"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
-                    <button class="tool-btn" data-tool="delete"><i class="fas fa-trash"></i> Delete</button>
-                    <button class="tool-btn" data-tool="clear"><i class="fas fa-eraser"></i> Clear</button>
+        <!-- RIGHT COLUMN: DESIGN TOOLS (fills empty space) -->
+        <div class="tools-col">
+            <div class="design-tools-sidebar">
+                <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
+                <div class="tool-group">
+                    <label>📝 Add Text</label>
+                    <input type="text" id="textInput" placeholder="Enter your text...">
+                    <button class="btn-icon" id="addTextBtn" style="margin-top: 8px; width: 100%;"><i class="fas fa-plus"></i> Add Text</button>
+                </div>
+                <div class="tool-group">
+                    <label>🎨 Text Color</label>
+                    <div class="color-grid" id="colorPalette"></div>
+                </div>
+                <div class="tool-group">
+                    <label>✨ Text Effects</label>
+                    <div class="effect-row">
+                        <button class="effect-btn" id="glowBtn">Glow</button>
+                        <button class="effect-btn" id="roundedBtn">Rounded</button>
+                        <button class="effect-btn" id="borderBtn">Border</button>
+                    </div>
+                    <div id="glowControls" style="display: none; margin-top: 10px;">
+                        <div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="20" value="5"><span id="glowSizeValue">5px</span></div>
+                        <div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div>
+                    </div>
+                </div>
+                <div class="tool-group">
+                    <label>🔤 Font Family</label>
+                    <select id="fontSelect">
+                        <option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option>
+                        <option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option>
+                        <option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option>
+                        <option value="Oswald">Oswald</option><option value="Lobster">Lobster</option>
+                    </select>
+                    <div class="font-preview" id="fontPreview">Sample Text</div>
+                </div>
+                <div class="tool-group">
+                    <label>📏 Text Size</label>
+                    <div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div>
+                </div>
+                <div class="tool-group">
+                    <label>🔄 Text Transform</label>
+                    <div class="two-col-btns">
+                        <button class="btn-icon" id="flipHorizontalBtn">Flip H</button>
+                        <button class="btn-icon" id="flipVerticalBtn">Flip V</button>
+                        <button class="btn-icon" id="boldBtn">Bold</button>
+                        <button class="btn-icon" id="italicBtn">Italic</button>
+                        <button class="btn-icon" id="underlineBtn">Underline</button>
+                    </div>
+                </div>
+                <div class="tool-group">
+                    <label>🖼️ Upload Design</label>
+                    <div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i> Click to upload image</div>
+                    <input type="file" id="imageUpload" accept="image/*" style="display:none">
+                </div>
+                <div class="tool-group">
+                    <div class="two-col-btns">
+                        <button class="btn-icon" id="deleteBtn" style="flex:1;"><i class="fas fa-trash"></i> Delete</button>
+                        <button class="btn-icon" id="clearBtn" style="flex:1;"><i class="fas fa-eraser"></i> Clear Side</button>
+                    </div>
                 </div>
             </div>
-            
-            <div id="mobilePanelText" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-font"></i> Add Text</div>
-                <input type="text" id="mobileTextInput" class="mobile-text-input" placeholder="Enter your text...">
-                <button class="tool-btn" id="mobileAddTextBtn" style="width:100%; justify-content:center;">Add Text</button>
-            </div>
-            
-            <div id="mobilePanelColor" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-palette"></i> Text Color</div>
-                <div class="mobile-color-grid" id="mobileColorPalette"></div>
-            </div>
-            
-            <div id="mobilePanelFont" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-text-height"></i> Font Family</div>
-                <div class="mobile-font-grid" id="mobileFontGrid"></div>
-            </div>
-            
-            <div id="mobilePanelSize" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-arrows-alt-h"></i> Text Size</div>
-                <input type="range" id="mobileFontSizeSlider" min="12" max="120" value="36" class="mobile-size-slider">
-                <div style="text-align:center; margin-top:8px;"><span id="mobileFontSizeValue">36px</span></div>
-            </div>
-            
-            <div id="mobilePanelEffects" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-star"></i> Text Effects</div>
-                <div class="mobile-effect-buttons">
-                    <button class="mobile-effect-btn" id="mobileGlowBtn">Glow</button>
-                    <button class="mobile-effect-btn" id="mobileRoundedBtn">Rounded</button>
-                    <button class="mobile-effect-btn" id="mobileBorderBtn">Border</button>
-                </div>
-                <div id="mobileGlowControls" style="display: none; margin-top: 10px;">
-                    <div class="slider-row"><span>Glow Size:</span><input type="range" id="mobileGlowSizeSlider" min="0" max="20" value="5"><span id="mobileGlowSizeValue">5px</span></div>
-                    <div class="slider-row"><span>Glow Color:</span><input type="color" id="mobileGlowColorPicker" value="#D4AF37"></div>
-                </div>
-            </div>
-            
-            <div id="mobilePanelTransform" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-exchange-alt"></i> Transform</div>
-                <div class="mobile-transform-buttons">
-                    <button class="mobile-transform-btn" id="mobileFlipHBtn">Flip H</button>
-                    <button class="mobile-transform-btn" id="mobileFlipVBtn">Flip V</button>
-                    <button class="mobile-transform-btn" id="mobileBoldBtn">Bold</button>
-                    <button class="mobile-transform-btn" id="mobileItalicBtn">Italic</button>
-                    <button class="mobile-transform-btn" id="mobileUnderlineBtn">Underline</button>
-                </div>
-            </div>
-            
-            <div id="mobilePanelUpload" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-cloud-upload-alt"></i> Upload Design</div>
-                <div class="mobile-upload-area" id="mobileUploadArea"><i class="fas fa-cloud-upload-alt"></i><p style="margin-top:5px;">Click to upload image</p><input type="file" id="mobileImageUpload" accept="image/*" style="display:none"></div>
-            </div>
-            
-            <div id="mobilePanelDelete" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-trash"></i> Delete Selected</div>
-                <button class="tool-btn" id="mobileDeleteBtn" style="width:100%; justify-content:center;">Delete Selected Element</button>
-            </div>
-            
-            <div id="mobilePanelClear" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div>
-                <button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button>
-            </div>
-        </div>
 
-        <div class="material-tools-box">
-            <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
-            <div class="tool-group">
-                <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
-                <select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select>
+            <!-- MOBILE TOOLBAR (visible only on mobile) -->
+            <div class="mobile-toolbar">
+                <div class="toolbar-scroll">
+                    <div class="toolbar-items">
+                        <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
+                        <button class="tool-btn" data-tool="color"><i class="fas fa-palette"></i> Color</button>
+                        <button class="tool-btn" data-tool="font"><i class="fas fa-text-height"></i> Font</button>
+                        <button class="tool-btn" data-tool="size"><i class="fas fa-arrows-alt-h"></i> Size</button>
+                        <button class="tool-btn" data-tool="effects"><i class="fas fa-star"></i> Effects</button>
+                        <button class="tool-btn" data-tool="transform"><i class="fas fa-exchange-alt"></i> Transform</button>
+                        <button class="tool-btn" data-tool="upload"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
+                        <button class="tool-btn" data-tool="delete"><i class="fas fa-trash"></i> Delete</button>
+                        <button class="tool-btn" data-tool="clear"><i class="fas fa-eraser"></i> Clear</button>
+                    </div>
+                </div>
+                <div id="mobilePanelText" class="tool-panel"><div class="panel-title"><i class="fas fa-font"></i> Add Text</div><input type="text" id="mobileTextInput" class="mobile-text-input" placeholder="Enter your text..."><button class="tool-btn" id="mobileAddTextBtn" style="width:100%; justify-content:center;">Add Text</button></div>
+                <div id="mobilePanelColor" class="tool-panel"><div class="panel-title"><i class="fas fa-palette"></i> Text Color</div><div class="mobile-color-grid" id="mobileColorPalette"></div></div>
+                <div id="mobilePanelFont" class="tool-panel"><div class="panel-title"><i class="fas fa-text-height"></i> Font Family</div><div class="mobile-font-grid" id="mobileFontGrid"></div></div>
+                <div id="mobilePanelSize" class="tool-panel"><div class="panel-title"><i class="fas fa-arrows-alt-h"></i> Text Size</div><input type="range" id="mobileFontSizeSlider" min="12" max="120" value="36" class="mobile-size-slider"><div style="text-align:center; margin-top:8px;"><span id="mobileFontSizeValue">36px</span></div></div>
+                <div id="mobilePanelEffects" class="tool-panel"><div class="panel-title"><i class="fas fa-star"></i> Text Effects</div><div class="mobile-effect-buttons"><button class="mobile-effect-btn" id="mobileGlowBtn">Glow</button><button class="mobile-effect-btn" id="mobileRoundedBtn">Rounded</button><button class="mobile-effect-btn" id="mobileBorderBtn">Border</button></div><div id="mobileGlowControls" style="display: none; margin-top: 10px;"><div class="slider-row"><span>Glow Size:</span><input type="range" id="mobileGlowSizeSlider" min="0" max="20" value="5"><span id="mobileGlowSizeValue">5px</span></div><div class="slider-row"><span>Glow Color:</span><input type="color" id="mobileGlowColorPicker" value="#D4AF37"></div></div></div>
+                <div id="mobilePanelTransform" class="tool-panel"><div class="panel-title"><i class="fas fa-exchange-alt"></i> Transform</div><div class="mobile-transform-buttons"><button class="mobile-transform-btn" id="mobileFlipHBtn">Flip H</button><button class="mobile-transform-btn" id="mobileFlipVBtn">Flip V</button><button class="mobile-transform-btn" id="mobileBoldBtn">Bold</button><button class="mobile-transform-btn" id="mobileItalicBtn">Italic</button><button class="mobile-transform-btn" id="mobileUnderlineBtn">Underline</button></div></div>
+                <div id="mobilePanelUpload" class="tool-panel"><div class="panel-title"><i class="fas fa-cloud-upload-alt"></i> Upload Design</div><div class="mobile-upload-area" id="mobileUploadArea"><i class="fas fa-cloud-upload-alt"></i><p style="margin-top:5px;">Click to upload image</p><input type="file" id="mobileImageUpload" accept="image/*" style="display:none"></div></div>
+                <div id="mobilePanelDelete" class="tool-panel"><div class="panel-title"><i class="fas fa-trash"></i> Delete Selected</div><button class="tool-btn" id="mobileDeleteBtn" style="width:100%; justify-content:center;">Delete Selected Element</button></div>
+                <div id="mobilePanelClear" class="tool-panel"><div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div><button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button></div>
             </div>
-            <div class="tool-group">
-                <label>🖨️ Print Method</label>
-                <div id="printMethodContainer">
-                    <div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div>
-                    <div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div>
+
+            <div class="material-tools-box">
+                <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
+                <div class="tool-group">
+                    <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
+                    <select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select>
+                </div>
+                <div class="tool-group">
+                    <label>🖨️ Print Method</label>
+                    <div id="printMethodContainer">
+                        <div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div>
+                        <div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div>
+                    </div>
                 </div>
             </div>
-        </div>
 
-        <div class="order-panel">
-            <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
-            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
-            <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
-            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
-            <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
-            <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
-            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
-            <div class="action-buttons">
-                <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
-                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
+            <div class="order-panel">
+                <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+                <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
+                <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
+                <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
+                <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
+                <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
+                <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
+                <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+                <div class="action-buttons">
+                    <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
+                    <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1217,4 +989,4 @@ function openLoginModal(){document.getElementById('loginModal').classList.add('s
 initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
 </script>
 </body>
-</html>  
+</html>
