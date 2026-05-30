@@ -133,7 +133,7 @@
         .style-name { font-weight: 700; font-size: 11px; }
         .style-price { color: #D4AF37; font-size: 10px; font-weight: 700; }
         
-        /* DESKTOP LAYOUT - NO GAPS ANYWHERE */
+        /* DESKTOP LAYOUT */
         .desktop-layout {
             display: flex;
             gap: 0;
@@ -154,7 +154,7 @@
             padding: 0;
         }
         
-        /* NO GAPS - T-shirt area */
+        /* T-SHIRT AREA - NO GAPS ANYWHERE */
         .selected-tshirt-area {
             background: transparent;
             text-align: center;
@@ -204,7 +204,7 @@
             background: transparent;
         }
         
-        /* COLOR SELECTOR - TOUCHING T-SHIRT IMAGE (NO GAP) */
+        /* COLOR SELECTOR - ZERO GAP, DIRECTLY TOUCHING T-SHIRT IMAGE */
         .color-selector-section {
             margin: 0;
             padding: 14px;
@@ -248,12 +248,11 @@
         .instruction-text { 
             font-size: 10px; 
             color: #888; 
-            margin-top: 12px; 
-            margin-bottom: 0;
+            margin: 12px 0 0 0;
             padding: 0 0 12px 0;
         }
         
-        /* DESIGN TOOLS - NO GAPS, TOUCHING T-SHIRT AREA */
+        /* DESIGN TOOLS */
         .design-tools-sidebar {
             background: rgba(15,15,22,0.92);
             backdrop-filter: blur(10px);
@@ -344,7 +343,7 @@
             text-align: center;
         }
         
-        /* SEPARATE BOTTOM BOX - Size, Print Method, Bill Invoice */
+        /* SEPARATE BOTTOM BOX */
         .bottom-separate-box {
             margin: 20px 0 0 0;
             background: rgba(15,15,22,0.92);
@@ -685,6 +684,7 @@
             .bottom-separate-box {
                 margin: 0;
             }
+            /* ZERO GAP ON MOBILE ALSO */
             .color-selector-section {
                 margin: 0;
             }
@@ -729,9 +729,9 @@
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <!-- DESKTOP LAYOUT: NO GAPS -->
+    <!-- DESKTOP LAYOUT -->
     <div class="desktop-layout">
-        <!-- LEFT COLUMN: T-Shirt + Color Selector (TOUCHING EACH OTHER) -->
+        <!-- LEFT COLUMN: T-Shirt + Color Selector (TOUCHING - ZERO GAP) -->
         <div class="tshirt-column">
             <div class="selected-tshirt-area">
                 <div class="side-switcher">
@@ -741,7 +741,7 @@
                 <div class="canvas-container">
                     <canvas id="tshirtCanvas" width="550" height="auto"></canvas>
                 </div>
-                <!-- COLOR SELECTOR - DIRECTLY TOUCHING T-SHIRT (NO GAP) -->
+                <!-- COLOR SELECTOR - ZERO MARGIN, DIRECTLY BELOW T-SHIRT -->
                 <div class="color-selector-section">
                     <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
                     <div class="color-options" id="colorOptionsContainer"></div>
@@ -750,7 +750,7 @@
             </div>
         </div>
 
-        <!-- RIGHT COLUMN: DESIGN TOOLS (TOUCHING T-SHIRT AREA - NO GAP) -->
+        <!-- RIGHT COLUMN: DESIGN TOOLS -->
         <div class="tools-column desktop-tools">
             <div class="design-tools-sidebar">
                 <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
@@ -840,7 +840,7 @@
         <div id="mobilePanelClear" class="tool-panel"><div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div><button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button></div>
     </div>
 
-    <!-- SEPARATE BOTTOM BOX - Size, Print Method, Bill Invoice -->
+    <!-- SEPARATE BOTTOM BOX -->
     <div class="bottom-separate-box">
         <div class="bottom-box-header">
             <h3><i class="fas fa-receipt"></i> ORDER & BILLING DETAILS</h3>
