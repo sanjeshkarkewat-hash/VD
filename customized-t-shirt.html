@@ -139,14 +139,13 @@
             width: 100%;
         }
         
-        /* FIX: Removed top padding to eliminate black space above t-shirt */
+        /* FIX: Removed background, padding, margin — NO container around t-shirt */
         .selected-tshirt-area {
-            background: rgba(10,10,18,0.6);
-            padding: 0 15px 0 15px;
+            background: transparent;
+            padding: 0;
             text-align: center;
             width: 100%;
             margin: 0;
-            padding-bottom: 0;
         }
         
         .side-switcher {
@@ -154,7 +153,7 @@
             justify-content: center;
             gap: 12px;
             margin-bottom: 15px;
-            margin-top: 15px;
+            margin-top: 10px;
         }
         .side-btn {
             background: rgba(20,20,30,0.8);
@@ -170,28 +169,32 @@
             color: #050508;
         }
         
-        /* FIX: Removed background color from canvas container - no extra box below t-shirt */
+        /* Canvas container: fully transparent, no background, no spacing */
         .canvas-container {
             background: transparent;
-            border-radius: 20px;
+            border-radius: 0;
             width: 100%;
             display: flex;
             justify-content: center;
             line-height: 0;
+            margin: 0;
+            padding: 0;
         }
         
         #tshirtCanvas { 
-            border-radius: 16px; 
+            border-radius: 0;
             width: 100%;
             height: auto !important;
             max-width: 500px;
             display: block;
-            margin: 0;
+            margin: 0 auto;
             vertical-align: top;
+            background: transparent;
+            box-shadow: none;
         }
         
         .color-selector-section {
-            margin-top: 12px;
+            margin-top: 18px;
             padding: 12px;
             background: rgba(15,15,22,0.6);
             border-radius: 18px;
@@ -494,9 +497,13 @@
                 aspect-ratio: 1/1;
             }
             .designer-container { max-width: 1200px; margin: 0 auto; }
+            /* no extra container background */
+            .selected-tshirt-area {
+                padding: 0;
+            }
         }
 
-        /* MOBILE STYLES */
+        /* MOBILE STYLES - keep original but ensure no background gaps */
         @media (max-width: 767px) {
             .style-section {
                 overflow-x: auto;
@@ -525,12 +532,10 @@
                 font-size: 9px;
             }
             
-            /* Hide desktop design tools on mobile */
             .design-tools-box {
                 display: none;
             }
             
-            /* Show mobile toolbar */
             .mobile-toolbar {
                 display: block;
                 background: rgba(15,15,22,0.92);
@@ -696,6 +701,14 @@
                 text-align: center;
                 cursor: pointer;
             }
+            .selected-tshirt-area {
+                padding: 0;
+                margin: 0;
+                background: transparent;
+            }
+            .canvas-container {
+                padding: 0;
+            }
         }
         
         @media (max-width: 768px) {
@@ -735,8 +748,8 @@
                 margin-bottom: 12px;
             }
             .selected-tshirt-area {
-                padding: 0 12px 0 12px;
-                padding-bottom: 0;
+                padding: 0;
+                margin: 0;
             }
             .side-switcher {
                 gap: 10px;
@@ -955,6 +968,7 @@
     </div>
 
     <div class="vertical-flow">
+        <!-- NO container background div around t-shirt, only canvas wrapper with zero styling -->
         <div class="selected-tshirt-area">
             <div class="side-switcher">
                 <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
@@ -971,7 +985,7 @@
             <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
         </div>
 
-        <!-- DESKTOP DESIGN TOOLS -->
+        <!-- DESKTOP DESIGN TOOLS (unchanged) -->
         <div class="design-tools-box">
             <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
             <div class="tool-group">
@@ -1029,7 +1043,7 @@
             </div>
         </div>
 
-        <!-- MOBILE CAPCUT STYLE TOOLBAR -->
+        <!-- MOBILE TOOLBAR unchanged -->
         <div class="mobile-toolbar">
             <div class="toolbar-scroll">
                 <div class="toolbar-items">
@@ -1044,67 +1058,16 @@
                     <button class="tool-btn" data-tool="clear"><i class="fas fa-eraser"></i> Clear</button>
                 </div>
             </div>
-            
-            <div id="mobilePanelText" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-font"></i> Add Text</div>
-                <input type="text" id="mobileTextInput" class="mobile-text-input" placeholder="Enter your text...">
-                <button class="tool-btn" id="mobileAddTextBtn" style="width:100%; justify-content:center;">Add Text</button>
-            </div>
-            
-            <div id="mobilePanelColor" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-palette"></i> Text Color</div>
-                <div class="mobile-color-grid" id="mobileColorPalette"></div>
-            </div>
-            
-            <div id="mobilePanelFont" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-text-height"></i> Font Family</div>
-                <div class="mobile-font-grid" id="mobileFontGrid"></div>
-            </div>
-            
-            <div id="mobilePanelSize" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-arrows-alt-h"></i> Text Size</div>
-                <input type="range" id="mobileFontSizeSlider" min="12" max="120" value="36" class="mobile-size-slider">
-                <div style="text-align:center; margin-top:8px;"><span id="mobileFontSizeValue">36px</span></div>
-            </div>
-            
-            <div id="mobilePanelEffects" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-star"></i> Text Effects</div>
-                <div class="mobile-effect-buttons">
-                    <button class="mobile-effect-btn" id="mobileGlowBtn">Glow</button>
-                    <button class="mobile-effect-btn" id="mobileRoundedBtn">Rounded</button>
-                    <button class="mobile-effect-btn" id="mobileBorderBtn">Border</button>
-                </div>
-                <div id="mobileGlowControls" style="display: none; margin-top: 10px;">
-                    <div class="slider-row"><span>Glow Size:</span><input type="range" id="mobileGlowSizeSlider" min="0" max="20" value="5"><span id="mobileGlowSizeValue">5px</span></div>
-                    <div class="slider-row"><span>Glow Color:</span><input type="color" id="mobileGlowColorPicker" value="#D4AF37"></div>
-                </div>
-            </div>
-            
-            <div id="mobilePanelTransform" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-exchange-alt"></i> Transform</div>
-                <div class="mobile-transform-buttons">
-                    <button class="mobile-transform-btn" id="mobileFlipHBtn">Flip H</button>
-                    <button class="mobile-transform-btn" id="mobileFlipVBtn">Flip V</button>
-                    <button class="mobile-transform-btn" id="mobileBoldBtn">Bold</button>
-                    <button class="mobile-transform-btn" id="mobileItalicBtn">Italic</button>
-                    <button class="mobile-transform-btn" id="mobileUnderlineBtn">Underline</button>
-                </div>
-            </div>
-            
-            <div id="mobilePanelUpload" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-cloud-upload-alt"></i> Upload Design</div>
-                <div class="mobile-upload-area" id="mobileUploadArea"><i class="fas fa-cloud-upload-alt"></i><p style="margin-top:5px;">Click to upload image</p><input type="file" id="mobileImageUpload" accept="image/*" style="display:none"></div>
-            </div>
-            
-            <div id="mobilePanelDelete" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-trash"></i> Delete Selected</div>
-                <button class="tool-btn" id="mobileDeleteBtn" style="width:100%; justify-content:center;">Delete Selected Element</button>
-            </div>
-            
-            <div id="mobilePanelClear" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div>
-                <button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button>
-            </div>
+            <!-- panels same as original, just placeholders but fully functional -->
+            <div id="mobilePanelText" class="tool-panel"><div class="panel-title"><i class="fas fa-font"></i> Add Text</div><input type="text" id="mobileTextInput" class="mobile-text-input" placeholder="Enter your text..."><button class="tool-btn" id="mobileAddTextBtn" style="width:100%; justify-content:center;">Add Text</button></div>
+            <div id="mobilePanelColor" class="tool-panel"><div class="panel-title"><i class="fas fa-palette"></i> Text Color</div><div class="mobile-color-grid" id="mobileColorPalette"></div></div>
+            <div id="mobilePanelFont" class="tool-panel"><div class="panel-title"><i class="fas fa-text-height"></i> Font Family</div><div class="mobile-font-grid" id="mobileFontGrid"></div></div>
+            <div id="mobilePanelSize" class="tool-panel"><div class="panel-title"><i class="fas fa-arrows-alt-h"></i> Text Size</div><input type="range" id="mobileFontSizeSlider" min="12" max="120" value="36" class="mobile-size-slider"><div style="text-align:center; margin-top:8px;"><span id="mobileFontSizeValue">36px</span></div></div>
+            <div id="mobilePanelEffects" class="tool-panel"><div class="panel-title"><i class="fas fa-star"></i> Text Effects</div><div class="mobile-effect-buttons"><button class="mobile-effect-btn" id="mobileGlowBtn">Glow</button><button class="mobile-effect-btn" id="mobileRoundedBtn">Rounded</button><button class="mobile-effect-btn" id="mobileBorderBtn">Border</button></div><div id="mobileGlowControls" style="display: none; margin-top: 10px;"><div class="slider-row"><span>Glow Size:</span><input type="range" id="mobileGlowSizeSlider" min="0" max="20" value="5"><span id="mobileGlowSizeValue">5px</span></div><div class="slider-row"><span>Glow Color:</span><input type="color" id="mobileGlowColorPicker" value="#D4AF37"></div></div></div>
+            <div id="mobilePanelTransform" class="tool-panel"><div class="panel-title"><i class="fas fa-exchange-alt"></i> Transform</div><div class="mobile-transform-buttons"><button class="mobile-transform-btn" id="mobileFlipHBtn">Flip H</button><button class="mobile-transform-btn" id="mobileFlipVBtn">Flip V</button><button class="mobile-transform-btn" id="mobileBoldBtn">Bold</button><button class="mobile-transform-btn" id="mobileItalicBtn">Italic</button><button class="mobile-transform-btn" id="mobileUnderlineBtn">Underline</button></div></div>
+            <div id="mobilePanelUpload" class="tool-panel"><div class="panel-title"><i class="fas fa-cloud-upload-alt"></i> Upload Design</div><div class="mobile-upload-area" id="mobileUploadArea"><i class="fas fa-cloud-upload-alt"></i><p style="margin-top:5px;">Click to upload image</p><input type="file" id="mobileImageUpload" accept="image/*" style="display:none"></div></div>
+            <div id="mobilePanelDelete" class="tool-panel"><div class="panel-title"><i class="fas fa-trash"></i> Delete Selected</div><button class="tool-btn" id="mobileDeleteBtn" style="width:100%; justify-content:center;">Delete Selected Element</button></div>
+            <div id="mobilePanelClear" class="tool-panel"><div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div><button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button></div>
         </div>
 
         <div class="material-tools-box">
@@ -1148,7 +1111,7 @@
 <div class="modal" id="loginModal"><div class="modal-content"><span class="close-modal" id="closeModalBtn">&times;</span><h3>Login</h3><input type="tel" id="loginPhone" placeholder="+91 9876543210"><button id="sendOtpBtn">Send OTP</button><div id="otpSection" style="display:none;"><input type="text" id="otpInput" placeholder="Enter OTP"><button id="verifyOtpBtn">Verify</button></div></div></div>
 
 <script>
-// FULL ORIGINAL JAVASCRIPT - NO FUNCTIONAL CHANGES
+// FULL ORIGINAL JAVASCRIPT - NO FUNCTIONAL CHANGES (preserved exactly)
 const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(); const storage = firebase.storage(); const storageRef = storage.ref(); const auth = firebase.auth();
@@ -1209,7 +1172,6 @@ if(document.getElementById('mobileGlowColorPicker')) document.getElementById('mo
 if(document.getElementById('mobileFontSizeSlider')) document.getElementById('mobileFontSizeSlider').oninput=e=>{if(document.getElementById('mobileFontSizeValue')) document.getElementById('mobileFontSizeValue').innerText=e.target.value+'px';updateSelectedText();};
 if(document.getElementById('mobileUploadArea')) document.getElementById('mobileUploadArea').onclick=()=>document.getElementById('mobileImageUpload').click();
 if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
-// Font options for mobile
 const fonts=['Space Grotesk','Arial','Poppins','Montserrat','Dancing Script','Pacifico','Oswald','Lobster'];
 const mobileFontGrid=document.getElementById('mobileFontGrid');
 if(mobileFontGrid){fonts.forEach(f=>{const div=document.createElement('div');div.className='mobile-font-option';div.innerText=f;div.style.fontFamily=f;div.onclick=()=>{document.getElementById('fontSelect').value=f;updateSelectedText();document.querySelectorAll('.mobile-font-option').forEach(opt=>opt.classList.remove('active'));div.classList.add('active');showToast(`Font: ${f}`);};mobileFontGrid.appendChild(div);});}
@@ -1217,4 +1179,4 @@ function openLoginModal(){document.getElementById('loginModal').classList.add('s
 initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
 </script>
 </body>
-</html>  
+</html>
