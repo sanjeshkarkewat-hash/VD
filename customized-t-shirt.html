@@ -1220,6 +1220,7 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
     loadImageAsDataURL(path,data=>{ 
         if(data){
             fabric.Image.fromURL(data,img=>{
+                // Calculate scale to fit canvas while maintaining aspect ratio
                 const scaleX = fabricCanvas.width / img.width;
                 const scaleY = fabricCanvas.height / img.height;
                 const scale = Math.min(scaleX, scaleY);
@@ -1227,6 +1228,7 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 const scaledWidth = img.width * scale;
                 const scaledHeight = img.height * scale;
                 
+                // CENTER HORIZONTALLY AND VERTICALLY - FIX APPLIED HERE
                 const left = (fabricCanvas.width - scaledWidth) / 2;
                 const top = (fabricCanvas.height - scaledHeight) / 2;
                 
@@ -1234,7 +1236,6 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
                     
-                    // Force canvas centering after render
                     setTimeout(function() {
                         const canvases = document.querySelectorAll('.canvas-container canvas');
                         canvases.forEach(function(canvas) {
