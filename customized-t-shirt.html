@@ -142,12 +142,13 @@
             width: 100%;
         }
         
-        /* selected t-shirt - full width - GAP REMOVED */
+        /* selected t-shirt area - NO GAP AT BOTTOM */
         .selected-tshirt-area {
             background: rgba(10,10,18,0.6);
             padding: 15px 15px 0 15px;
             text-align: center;
             width: 100%;
+            margin: 0;
         }
         
         .side-switcher {
@@ -175,13 +176,18 @@
             width: 100%;
             display: flex;
             justify-content: center;
+            margin: 0;
+            padding: 0;
         }
         #tshirtCanvas { 
             border-radius: 16px; 
             width: 100%;
             height: auto;
             max-width: 500px;
+            display: block;
         }
+        
+        /* Color selector - directly below canvas with no gap */
         .color-selector-section {
             margin-top: 15px;
             padding: 12px;
@@ -189,6 +195,11 @@
             border-radius: 18px;
             width: 100%;
             margin-bottom: 0;
+        }
+        .color-selector-title {
+            font-size: 13px;
+            margin-bottom: 10px;
+            color: #D4AF37;
         }
         .color-options {
             display: flex;
@@ -218,18 +229,26 @@
         }
         .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
         
-        /* SAVE BUTTON HIDDEN */
+        /* Hide save button */
         .btn-save-image {
             display: none;
         }
         
-        .instruction-text { font-size: 10px; color: #888; margin-top: 10px; margin-bottom: 0; }
+        /* Instruction text directly after color selector */
+        .instruction-text { 
+            font-size: 10px; 
+            color: #888; 
+            margin-top: 10px; 
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
         
-        /* DESIGN TOOLS - FULL WIDTH EDGE TO EDGE */
+        /* DESIGN TOOLS - directly after instruction text */
         .design-tools-box, .material-tools-box {
             background: rgba(15,15,22,0.92);
             padding: 18px;
             width: 100%;
+            margin-top: 0;
         }
         .design-tools-box { margin-top: 0; }
         .material-tools-box { margin-top: 0; }
@@ -507,7 +526,7 @@
         }
 
         /* ============================================ */
-        /* RESPONSIVE MOBILE SCALING - ADDED WITHOUT CHANGING ANY STRUCTURE */
+        /* RESPONSIVE MOBILE SCALING */
         /* ============================================ */
         
         @media (max-width: 768px) {
@@ -583,6 +602,11 @@
             .color-selector-section {
                 margin-top: 12px;
                 padding: 10px;
+            }
+            
+            .color-selector-title {
+                font-size: 12px;
+                margin-bottom: 8px;
             }
             
             .color-options {
