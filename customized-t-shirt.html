@@ -19,7 +19,6 @@
             background: #050508;
             color: #FFFFFF;
             overflow-x: hidden;
-            padding-bottom: 80px;
         }
 
         .header {
@@ -29,123 +28,338 @@
             position: relative;
             background: #050508;
         }
-        .logo { font-size: 32px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .tagline { font-size: 10px; letter-spacing: 3px; color: #D4AF37; margin-top: 4px; }
+        .logo {
+            font-size: 32px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .tagline {
+            font-size: 10px;
+            letter-spacing: 3px;
+            color: #D4AF37;
+            margin-top: 4px;
+        }
         .cart-icon-header {
-            position: absolute; right: 15px; top: 18px; cursor: pointer;
-            background: rgba(212,175,55,0.15); padding: 8px 14px; border-radius: 40px;
-            border: 1px solid rgba(212,175,55,0.4); display: flex; align-items: center; gap: 6px; font-size: 13px;
+            position: absolute;
+            right: 15px;
+            top: 18px;
+            cursor: pointer;
+            background: rgba(212,175,55,0.15);
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(212,175,55,0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
         }
-        .cart-count { background: #D4AF37; color: #050508; border-radius: 30px; padding: 2px 8px; font-size: 12px; font-weight: bold; }
+        .cart-count {
+            background: #D4AF37;
+            color: #050508;
+            border-radius: 30px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
+        }
 
-        .designer-container { width: 100%; margin: 0; padding: 0; }
+        /* FULL WIDTH CONTAINER - NO GAPS */
+        .designer-container {
+            width: 100%;
+            margin: 0;
+            padding: 0;
+        }
 
-        /* PRODUCT COLLECTION - SAME AS ORIGINAL */
-        .style-section { width: 100%; padding: 15px; background: transparent; }
-        .section-title { font-size: 18px; font-weight: 700; margin-bottom: 15px; color: #D4AF37; display: flex; align-items: center; gap: 10px; }
-        .style-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; }
+        /* STYLE SECTION - full width edge to edge */
+        .style-section {
+            width: 100%;
+            padding: 15px;
+            background: transparent;
+        }
+        .section-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: #D4AF37;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding-left: 5px;
+        }
+        .style-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            width: 100%;
+        }
         .style-card {
-            background: rgba(20,20,30,0.75); backdrop-filter: blur(10px); border-radius: 16px;
-            padding: 10px 8px; text-align: center; cursor: pointer; border: 2px solid transparent;
+            background: rgba(20,20,30,0.75);
+            backdrop-filter: blur(10px);
+            border-radius: 16px;
+            padding: 10px 8px;
+            text-align: center;
+            cursor: pointer;
+            border: 2px solid transparent;
+            width: 100%;
         }
-        .style-card.active { border-color: #D4AF37; background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1)); }
-        .style-img { width: 100%; aspect-ratio: 1/1; object-fit: cover; border-radius: 12px; margin-bottom: 8px; }
+        .style-card.active {
+            border-color: #D4AF37;
+            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
+        }
+        .style-img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: cover;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
         .style-name { font-weight: 700; font-size: 13px; }
         .style-price { color: #D4AF37; font-size: 12px; font-weight: 700; }
-
-        /* SELECTED T-SHIRT AREA */
-        .selected-tshirt-area { background: rgba(10,10,18,0.6); padding: 15px; text-align: center; width: 100%; }
-        .side-switcher { display: flex; justify-content: center; gap: 12px; margin-bottom: 15px; }
+        
+        /* EVERYTHING FULL WIDTH - NO BOXES, TOUCH TO TOUCH */
+        .vertical-flow {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+        
+        /* selected t-shirt - full width */
+        .selected-tshirt-area {
+            background: rgba(10,10,18,0.6);
+            padding: 15px;
+            text-align: center;
+            width: 100%;
+        }
+        
+        .side-switcher {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
         .side-btn {
-            background: rgba(20,20,30,0.8); border: none; padding: 8px 20px; border-radius: 40px;
-            font-weight: 600; font-size: 13px; color: #aaa; cursor: pointer;
+            background: rgba(20,20,30,0.8);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 600;
+            font-size: 13px;
+            color: #aaa;
         }
-        .side-btn.active { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; }
-        .canvas-container { background: #1a1a24; border-radius: 20px; width: 100%; display: flex; justify-content: center; }
-        #tshirtCanvas { border-radius: 16px; width: 100%; height: auto; max-width: 500px; }
-        .color-selector-section { margin-top: 15px; padding: 12px; background: rgba(15,15,22,0.6); border-radius: 18px; width: 100%; }
-        .color-options { display: flex; gap: 12px; flex-wrap: wrap; justify-content: center; }
+        .side-btn.active {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            color: #050508;
+        }
+        .canvas-container {
+            background: #1a1a24;
+            border-radius: 20px;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+        #tshirtCanvas { 
+            border-radius: 16px; 
+            width: 100%;
+            height: auto;
+            max-width: 500px;
+        }
+        .color-selector-section {
+            margin-top: 15px;
+            padding: 12px;
+            background: rgba(15,15,22,0.6);
+            border-radius: 18px;
+            width: 100%;
+        }
+        .color-options {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
         .color-option {
-            display: flex; flex-direction: column; align-items: center; gap: 4px; cursor: pointer;
-            padding: 5px 8px; border-radius: 30px; background: rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 5px 8px;
+            border-radius: 30px;
+            background: rgba(0,0,0,0.3);
         }
-        .color-option.active { border: 1px solid #D4AF37; background: rgba(212,175,55,0.15); }
-        .color-swatch-circle { width: 32px; height: 32px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); }
+        .color-option.active {
+            border: 1px solid #D4AF37;
+            background: rgba(212,175,55,0.15);
+        }
+        .color-swatch-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: 2px solid rgba(255,255,255,0.2);
+        }
         .color-option-name { font-size: 10px; font-weight: 600; color: #ccc; }
+        .btn-save-image {
+            background: rgba(100,100,200,0.2);
+            border: 1px solid #8A8AFF;
+            color: #B8B8FF;
+            padding: 10px 18px;
+            border-radius: 35px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 12px;
+            font-size: 12px;
+        }
         .instruction-text { font-size: 10px; color: #888; margin-top: 10px; }
-
-        /* ACCORDION DESIGN TOOLS - DEFAULT BAND */
-        .design-tools-container { width: 100%; background: rgba(15,15,22,0.92); }
-        .accordion-item { border-bottom: 1px solid rgba(255,255,255,0.08); width: 100%; }
-        .accordion-header {
-            padding: 16px 18px; cursor: pointer; display: flex; justify-content: space-between;
-            align-items: center; font-weight: 600; font-size: 14px; color: #D4AF37;
-            background: rgba(10,10,18,0.5);
+        
+        /* DESIGN TOOLS - FULL WIDTH EDGE TO EDGE */
+        .design-tools-box, .material-tools-box {
+            background: rgba(15,15,22,0.92);
+            padding: 18px;
+            width: 100%;
         }
-        .accordion-content {
-            max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out;
-            padding: 0 18px; background: rgba(0,0,0,0.2);
+        .design-tools-box { margin-top: 0; }
+        .material-tools-box { margin-top: 0; }
+        .box-title {
+            color: #D4AF37;
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
-        .accordion-content.open { max-height: 500px; padding: 16px 18px; }
-        .tool-group { margin-bottom: 16px; }
-        .tool-group label { display: block; font-size: 12px; color: #D4AF37; margin-bottom: 6px; font-weight: 600; }
+        .tool-group {
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .tool-group label {
+            display: block;
+            font-size: 12px;
+            color: #D4AF37;
+            margin-bottom: 6px;
+            font-weight: 600;
+        }
         .tool-group input, .tool-group select {
-            width: 100%; padding: 8px 10px; background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; color: white; font-size: 12px;
+            width: 100%;
+            padding: 8px 10px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 12px;
+            color: white;
+            font-size: 12px;
         }
-        .color-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 6px; }
-        .color-swatch { width: 100%; aspect-ratio: 1/1; border-radius: 10px; cursor: pointer; border: 2px solid transparent; }
+        .color-grid {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            gap: 6px;
+            margin-top: 6px;
+        }
+        .color-swatch {
+            width: 100%;
+            aspect-ratio: 1/1;
+            border-radius: 10px;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
         .effect-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
         .effect-btn, .btn-icon {
-            background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.4);
-            padding: 6px 12px; border-radius: 25px; font-size: 11px; cursor: pointer; color: #D4AF37;
+            background: rgba(212,175,55,0.15);
+            border: 1px solid rgba(212,175,55,0.4);
+            padding: 6px 12px;
+            border-radius: 25px;
+            font-size: 11px;
+            cursor: pointer;
+            color: #D4AF37;
         }
-        .upload-area { border: 2px dashed rgba(212,175,55,0.4); border-radius: 14px; padding: 12px; text-align: center; cursor: pointer; }
+        .upload-area {
+            border: 2px dashed rgba(212,175,55,0.4);
+            border-radius: 14px;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+        }
         .slider-row { display: flex; align-items: center; gap: 10px; }
         .slider-row input { flex: 1; }
         .two-col-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-        .font-preview { font-size: 12px; margin-top: 6px; padding: 5px; background: rgba(0,0,0,0.3); border-radius: 8px; text-align: center; }
-
-        /* CONTEXT SENSITIVE - HIDE BY DEFAULT */
-        .context-sensitive { display: none; }
-        .context-sensitive.visible { display: block; }
-
-        /* SIZE & PRINT */
-        .material-tools-box { background: rgba(15,15,22,0.92); padding: 18px; width: 100%; margin-top: 0; }
-        .print-option { display: flex; align-items: center; gap: 10px; margin-top: 8px; padding: 8px 10px; background: rgba(0,0,0,0.3); border-radius: 14px; }
+        .print-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 8px;
+            padding: 8px 10px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 14px;
+        }
         .print-option label { font-size: 11px; margin: 0; }
-
-        /* ORDER SUMMARY */
-        .order-panel { background: rgba(15,15,22,0.92); padding: 18px; width: 100%; }
-        .order-detail { padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.08); display: flex; justify-content: space-between; font-size: 13px; }
-        .order-total { padding: 14px 0; display: flex; justify-content: space-between; font-size: 20px; font-weight: 800; color: #D4AF37; }
-
-        /* STICKY BOTTOM BAR */
-        .sticky-bottom-bar {
-            position: fixed; bottom: 0; left: 0; right: 0;
-            background: rgba(8,8,15,0.95); backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(212,175,55,0.3); padding: 12px 16px;
-            display: flex; gap: 12px; z-index: 1000;
+        .font-preview {
+            font-size: 12px;
+            margin-top: 6px;
+            padding: 5px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 8px;
+            text-align: center;
         }
-        .sticky-bottom-bar .btn-save-image, .sticky-bottom-bar .btn-add, .sticky-bottom-bar .btn-buy {
-            flex: 1; padding: 12px; border-radius: 40px; font-weight: 700; cursor: pointer;
-            text-align: center; font-size: 13px;
+        
+        /* ORDER PANEL - FULL WIDTH */
+        .order-panel {
+            background: rgba(15,15,22,0.92);
+            padding: 18px;
+            width: 100%;
         }
-        .sticky-bottom-bar .btn-save-image {
-            background: rgba(100,100,200,0.2); border: 1px solid #8A8AFF; color: #B8B8FF;
+        .order-detail {
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
         }
-        .sticky-bottom-bar .btn-add {
-            background: rgba(212,175,55,0.15); border: 1.5px solid #D4AF37; color: #D4AF37;
+        .order-total {
+            padding: 14px 0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 20px;
+            font-weight: 800;
+            color: #D4AF37;
         }
-        .sticky-bottom-bar .btn-buy {
-            background: linear-gradient(135deg, #FF4500, #FF8C00); border: none; color: white;
+        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
+        .btn-add, .btn-buy {
+            flex: 1;
+            padding: 12px;
+            border-radius: 40px;
+            font-weight: 700;
+            cursor: pointer;
+            text-align: center;
+            font-size: 13px;
         }
-        /* Hide old buttons */
-        .selected-tshirt-area .btn-save-image { display: none; }
-        .order-panel .action-buttons { display: none; }
-
-        /* Sidebar, Modal, Toast - SAME AS ORIGINAL */
-        .cart-sidebar { position: fixed; top: 0; right: -100%; width: 85%; max-width: 360px; height: 100vh; background: rgba(8,8,15,0.98); backdrop-filter: blur(20px); border-left: 2px solid rgba(212,175,55,0.4); z-index: 15000; transition: 0.3s ease; }
+        .btn-add {
+            background: rgba(212,175,55,0.15);
+            border: 1.5px solid #D4AF37;
+            color: #D4AF37;
+        }
+        .btn-buy {
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
+            border: none;
+            color: white;
+        }
+        
+        /* Sidebar, Modal, Toast */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 360px;
+            height: 100vh;
+            background: rgba(8,8,15,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(212,175,55,0.4);
+            z-index: 15000;
+            transition: 0.3s ease;
+        }
         .cart-sidebar.open { right: 0; }
         .cart-header { padding: 18px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; }
         .cart-items { flex: 1; overflow-y: auto; padding: 15px; max-height: 70vh; }
@@ -153,26 +367,83 @@
         .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .cart-item-details { flex: 1; }
         .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; }
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; }
-        .toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 10px 20px; border-radius: 40px; font-weight: bold; z-index: 10000; display: none; font-size: 13px; white-space: nowrap; }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            z-index: 10000;
+            display: none;
+            font-size: 13px;
+            white-space: nowrap;
+        }
         .toast.show { display: block; animation: fade 2.5s ease; }
         @keyframes fade { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.92); z-index: 30000; display: flex; justify-content: center; align-items: center; flex-direction: column; visibility: hidden; opacity: 0; }
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 30000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            visibility: hidden;
+            opacity: 0;
+        }
         .loading-overlay.active { visibility: visible; opacity: 1; }
-        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(212,175,55,0.2); border-top: 4px solid #D4AF37; border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 15px; }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212,175,55,0.2);
+            border-top: 4px solid #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 15px;
+        }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.96); z-index: 20000; align-items: center; justify-content: center; }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.96);
+            z-index: 20000;
+            align-items: center;
+            justify-content: center;
+        }
         .modal.show { display: flex; }
-        .modal-content { background: rgba(15,15,22,0.98); border-radius: 24px; padding: 25px; max-width: 340px; width: 90%; text-align: center; }
+        .modal-content {
+            background: rgba(15,15,22,0.98);
+            border-radius: 24px;
+            padding: 25px;
+            max-width: 340px;
+            width: 90%;
+            text-align: center;
+        }
         .modal-content input { width: 100%; padding: 10px; margin: 10px 0; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; color: white; }
         .modal-content button { width: 100%; padding: 10px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 14px; font-weight: bold; cursor: pointer; }
         .close-modal { position: absolute; top: 12px; right: 20px; font-size: 24px; cursor: pointer; color: white; }
         .cors-warning { background: rgba(255,100,0,0.2); padding: 8px; margin-bottom: 0; font-size: 10px; text-align: center; width: 100%; }
         
-        @media (min-width: 768px) { .style-grid { grid-template-columns: repeat(3, 1fr); } }
+        @media (min-width: 768px) {
+            .style-grid { grid-template-columns: repeat(3, 1fr); }
+            .designer-container { max-width: 1200px; margin: 0 auto; }
+        }
     </style>
 </head>
 <body>
@@ -180,79 +451,140 @@
 <div class="header">
     <div class="logo">VEDANTA</div>
     <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
-    <div class="cart-icon-header" id="cartIconBtn"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span></div>
+    <div class="cart-icon-header" id="cartIconBtn">
+        <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
+    </div>
 </div>
 
-<div class="loading-overlay" id="globalLoadingOverlay"><div class="loading-spinner"></div><div class="loading-text">SAVING DESIGN...</div></div>
+<div class="loading-overlay" id="globalLoadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">SAVING DESIGN...</div>
+</div>
 
 <div class="designer-container">
     <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein hone chahiye</div>
     
-    <!-- PRODUCT COLLECTION - BILKUL SAME -->
     <div class="style-section">
         <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
         <div class="style-grid" id="styleGrid"></div>
     </div>
 
-    <!-- SELECTED T-SHIRT PREVIEW -->
-    <div class="selected-tshirt-area">
-        <div class="side-switcher">
-            <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
-            <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
+    <div class="vertical-flow">
+        <div class="selected-tshirt-area">
+            <div class="side-switcher">
+                <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
+                <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
+            </div>
+            <div class="canvas-container">
+                <canvas id="tshirtCanvas" width="550" height="600"></canvas>
+            </div>
+            <div class="color-selector-section">
+                <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
+                <div class="color-options" id="colorOptionsContainer"></div>
+            </div>
+            <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> Save Both Sides</button>
+            <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
         </div>
-        <div class="canvas-container"><canvas id="tshirtCanvas" width="550" height="600"></canvas></div>
-        <div class="color-selector-section">
-            <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
-            <div class="color-options" id="colorOptionsContainer"></div>
+
+        <div class="design-tools-box">
+            <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
+            <div class="tool-group">
+                <label>📝 Add Text</label>
+                <input type="text" id="textInput" placeholder="Enter your text...">
+                <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
+            </div>
+            <div class="tool-group">
+                <label>🎨 Text Color</label>
+                <div class="color-grid" id="colorPalette"></div>
+            </div>
+            <div class="tool-group">
+                <label>✨ Text Effects</label>
+                <div class="effect-row">
+                    <button class="effect-btn" id="glowBtn">Glow</button>
+                    <button class="effect-btn" id="roundedBtn">Rounded</button>
+                    <button class="effect-btn" id="borderBtn">Border</button>
+                </div>
+                <div id="glowControls" style="display: none; margin-top: 10px;">
+                    <div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="20" value="5"><span id="glowSizeValue">5px</span></div>
+                    <div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div>
+                </div>
+            </div>
+            <div class="tool-group">
+                <label>🔤 Font Family</label>
+                <select id="fontSelect">
+                    <option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option>
+                    <option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option>
+                    <option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option>
+                    <option value="Oswald">Oswald</option><option value="Lobster">Lobster</option>
+                </select>
+                <div class="font-preview" id="fontPreview">Sample Text</div>
+            </div>
+            <div class="tool-group">
+                <label>📏 Text Size</label>
+                <div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div>
+            </div>
+            <div class="tool-group">
+                <label>🔄 Text Transform</label>
+                <div class="two-col-btns">
+                    <button class="btn-icon" id="flipHorizontalBtn">Flip H</button>
+                    <button class="btn-icon" id="flipVerticalBtn">Flip V</button>
+                    <button class="btn-icon" id="boldBtn">Bold</button>
+                    <button class="btn-icon" id="italicBtn">Italic</button>
+                    <button class="btn-icon" id="underlineBtn">Underline</button>
+                </div>
+            </div>
+            <div class="tool-group">
+                <label>🖼️ Upload Design</label>
+                <div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p><input type="file" id="imageUpload" accept="image/*" style="display:none"></div>
+            </div>
+            <div class="tool-group">
+                <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
+                <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button>
+            </div>
         </div>
-        <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
-    </div>
 
-    <!-- ACCORDION DESIGN TOOLS -->
-    <div class="design-tools-container">
-        <div class="accordion-item"><div class="accordion-header"><span><i class="fas fa-font"></i> Add Text</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><div class="tool-group"><input type="text" id="textInput" placeholder="Enter your text..."><button class="btn-icon" id="addTextBtn" style="margin-top:8px;"><i class="fas fa-plus"></i> Add Text</button></div></div></div>
-        <div class="accordion-item context-sensitive" id="colorToolItem"><div class="accordion-header"><span><i class="fas fa-palette"></i> Text Color</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><div class="color-grid" id="colorPalette"></div></div></div>
-        <div class="accordion-item context-sensitive" id="effectsToolItem"><div class="accordion-header"><span><i class="fas fa-magic"></i> Text Effects</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><div class="effect-row"><button class="effect-btn" id="glowBtn">Glow</button><button class="effect-btn" id="roundedBtn">Rounded</button><button class="effect-btn" id="borderBtn">Border</button></div><div id="glowControls" style="display: none; margin-top: 10px;"><div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="20" value="5"><span id="glowSizeValue">5px</span></div><div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div></div></div></div>
-        <div class="accordion-item"><div class="accordion-header"><span><i class="fas fa-font"></i> Font Family</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><select id="fontSelect"><option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option><option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option><option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option><option value="Oswald">Oswald</option><option value="Lobster">Lobster</option></select><div class="font-preview" id="fontPreview">Sample Text</div></div></div>
-        <div class="accordion-item"><div class="accordion-header"><span><i class="fas fa-text-height"></i> Text Size</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div></div></div>
-        <div class="accordion-item context-sensitive" id="transformToolItem"><div class="accordion-header"><span><i class="fas fa-exchange-alt"></i> Text Transform</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><div class="two-col-btns"><button class="btn-icon" id="flipHorizontalBtn">Flip H</button><button class="btn-icon" id="flipVerticalBtn">Flip V</button><button class="btn-icon" id="boldBtn">Bold</button><button class="btn-icon" id="italicBtn">Italic</button><button class="btn-icon" id="underlineBtn">Underline</button></div></div></div>
-        <div class="accordion-item"><div class="accordion-header"><span><i class="fas fa-cloud-upload-alt"></i> Upload Design</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p><input type="file" id="imageUpload" accept="image/*" style="display:none"></div></div></div>
-        <div class="accordion-item"><div class="accordion-header"><span><i class="fas fa-tools"></i> Manage</span><i class="fas fa-chevron-down"></i></div><div class="accordion-content"><button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete Selected</button><button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button></div></div>
-    </div>
+        <div class="material-tools-box">
+            <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
+            <div class="tool-group">
+                <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
+                <select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select>
+            </div>
+            <div class="tool-group">
+                <label>🖨️ Print Method</label>
+                <div id="printMethodContainer">
+                    <div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div>
+                    <div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div>
+                </div>
+            </div>
+        </div>
 
-    <!-- SIZE & PRINT -->
-    <div class="material-tools-box">
-        <div class="box-title" style="font-size:14px; color:#D4AF37; border-bottom:1px solid rgba(212,175,55,0.3); padding-bottom:8px; margin-bottom:15px;"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
-        <div class="tool-group"><label>📏 Size <span style="color:#ff8888;">(Required)</span></label><select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select></div>
-        <div class="tool-group"><label>🖨️ Print Method</label><div id="printMethodContainer"><div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div><div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div></div></div>
-    </div>
-
-    <!-- ORDER SUMMARY -->
-    <div class="order-panel">
-        <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-        <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
-        <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
-        <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
-        <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
-        <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
-        <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
-        <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+        <div class="order-panel">
+            <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
+            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
+            <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
+            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
+            <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
+            <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
+            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+            <div class="action-buttons">
+                <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
+                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- STICKY BOTTOM BAR -->
-<div class="sticky-bottom-bar">
-    <button class="btn-save-image" id="saveImageBtnSticky"><i class="fas fa-camera"></i> Save</button>
-    <button class="btn-add" id="addToCartBtnSticky"><i class="fas fa-cart-plus"></i> Add to Cart</button>
-    <button class="btn-buy" id="buyNowBtnSticky"><i class="fas fa-bolt"></i> Buy</button>
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Your Cart</h3><i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:20px;"></i></div>
+    <div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:20px;">Cart empty</div></div>
+    <div class="cart-total"><div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div><button id="cartCheckoutBtn" class="checkout-btn">Checkout</button></div>
 </div>
-
-<div id="cartSidebar" class="cart-sidebar"><div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Your Cart</h3><i class="fas fa-times" id="closeCartBtn" style="cursor:pointer;"></i></div><div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:20px;">Cart empty</div></div><div class="cart-total"><div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div><button id="cartCheckoutBtn" class="checkout-btn">Checkout</button></div></div>
 <div class="toast" id="toastMsg"></div>
 <div class="modal" id="loginModal"><div class="modal-content"><span class="close-modal" id="closeModalBtn">&times;</span><h3>Login</h3><input type="tel" id="loginPhone" placeholder="+91 9876543210"><button id="sendOtpBtn">Send OTP</button><div id="otpSection" style="display:none;"><input type="text" id="otpInput" placeholder="Enter OTP"><button id="verifyOtpBtn">Verify</button></div></div></div>
 
 <script>
-// ========== ORIGINAL JAVASCRIPT - NO CHANGES ==========
+// FULL ORIGINAL JAVASCRIPT - NO FUNCTIONAL CHANGES
 const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(); const storage = firebase.storage(); const storageRef = storage.ref(); const auth = firebase.auth();
@@ -292,40 +624,11 @@ function flipHorizontal(){const a=fabricCanvas.getActiveObject();if(a){a.set('fl
 function flipVertical(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipY',!a.flipY);fabricCanvas.renderAll();showToast('Flipped Vertical');}else showToast('Select element',true);}
 function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&a.type==='i-text'){if(st==='bold')a.set('fontWeight',a.fontWeight==='bold'?'normal':'bold');if(st==='italic')a.set('fontStyle',a.fontStyle==='italic'?'normal':'italic');if(st==='underline')a.set('underline',!a.underline);fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
 function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'))return;a.set('fontFamily',document.getElementById('fontSelect').value);a.set('fontSize',parseInt(document.getElementById('fontSizeSlider').value));fabricCanvas.renderAll();}
-// Bind sticky buttons to original functions
-document.getElementById('addToCartBtnSticky').onclick=addCurrentDesignToCart;
-document.getElementById('buyNowBtnSticky').onclick=buyNow;
-document.getElementById('saveImageBtnSticky').onclick=async()=>{showLoading("SAVING...");try{if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor);await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor);showToast('✅ Designs saved!');}catch(e){showToast('Save failed',true);}finally{hideLoading();}};
-// Original button bindings (keep for compatibility)
-document.getElementById('frontSideBtn').onclick=switchToFront; document.getElementById('backSideBtn').onclick=switchToBack;
-document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();};
-document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();});
-document.getElementById('addTextBtn').onclick=addText;
-document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open');
-document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open');
-document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout.html';};
-document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click();
-document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
-document.getElementById('glowBtn').onclick=applyGlow; document.getElementById('roundedBtn').onclick=applyRounded; document.getElementById('borderBtn').onclick=applyBorderToggle;
-document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders; document.getElementById('glowColorPicker').oninput=updateGlowFromSliders;
-document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; document.getElementById('flipVerticalBtn').onclick=flipVertical;
-document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic');
-document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline');
-document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);};
-document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');};
-document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();};
-document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
-function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';}
-document.getElementById('closeModalBtn').onclick=closeLoginModal;
-function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});}
-document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}};
-document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),500);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
-// Accordion toggle
-document.querySelectorAll('.accordion-header').forEach(header=>{header.addEventListener('click',function(){const content=this.nextElementSibling;const icon=this.querySelector('i.fa-chevron-down,i.fa-chevron-up');if(content.classList.contains('open')){content.classList.remove('open');if(icon)icon.className='fas fa-chevron-down';}else{content.classList.add('open');if(icon)icon.className='fas fa-chevron-up';}});});
-function updateContextSensitive(){const act=fabricCanvas.getActiveObject();const isText=act&&(act.type==='i-text'||act.type==='text');document.querySelectorAll('.context-sensitive').forEach(el=>{if(isText)el.classList.add('visible');else el.classList.remove('visible');});}
-fabricCanvas.on('selection:created',updateContextSensitive);fabricCanvas.on('selection:cleared',updateContextSensitive);fabricCanvas.on('selection:updated',updateContextSensitive);
-initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; updateContextSensitive();
-if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
+document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart; document.getElementById('buyNowBtn').onclick=buyNow; document.getElementById('saveImageBtn').onclick=async()=>{showLoading("SAVING...");try{if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor);await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor);showToast('✅ Designs saved!');}catch(e){showToast('Save failed',true);}finally{hideLoading();}};
+document.getElementById('frontSideBtn').onclick=switchToFront; document.getElementById('backSideBtn').onclick=switchToBack; document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();}; document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();}); document.getElementById('addTextBtn').onclick=addText; document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open'); document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout.html';}; document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click(); document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
+document.getElementById('glowBtn').onclick=applyGlow; document.getElementById('roundedBtn').onclick=applyRounded; document.getElementById('borderBtn').onclick=applyBorderToggle; document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders; document.getElementById('glowColorPicker').oninput=updateGlowFromSliders; document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; document.getElementById('flipVerticalBtn').onclick=flipVertical; document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic'); document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline'); document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);}; document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');}; document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
+function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';} document.getElementById('closeModalBtn').onclick=closeLoginModal; function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});} document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}}; document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),500);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
+initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
 </script>
 </body>
 </html>
