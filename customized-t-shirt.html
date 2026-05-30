@@ -173,14 +173,14 @@
             background: transparent;
             border-radius: 20px;
             width: 100%;
-            display: flex !important;
-            justify-content: center !important;
-            align-items: center !important;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             line-height: 0;
             height: auto;
             min-height: 0;
             overflow: visible;
-            text-align: center !important;
+            text-align: center;
             position: relative;
         }
         
@@ -188,39 +188,24 @@
             border-radius: 16px; 
             max-width: 100%;
             max-height: 100%;
-            display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            position: relative !important;
-            left: auto !important;
-            right: auto !important;
-            top: auto !important;
-            transform: none !important;
+            display: block;
+            margin: 0 auto;
+            position: relative;
         }
         
         .canvas-container canvas {
-            display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            position: relative !important;
-            left: auto !important;
-            right: auto !important;
-            top: auto !important;
-            transform: none !important;
+            display: block;
+            margin: 0 auto;
+            position: relative;
         }
         
         .canvas-container .lower-canvas,
         .canvas-container .upper-canvas {
-            display: block !important;
-            margin-left: auto !important;
-            margin-right: auto !important;
-            position: relative !important;
-            left: auto !important;
-            right: auto !important;
-            top: auto !important;
-            transform: none !important;
-            border: none !important;
-            outline: none !important;
+            display: block;
+            margin: 0 auto;
+            position: relative;
+            border: none;
+            outline: none;
         }
         
         .color-selector-section {
@@ -778,46 +763,35 @@
             
             .canvas-container {
                 width: 100%;
-                display: flex !important;
-                justify-content: center !important;
-                align-items: center !important;
+                display: flex;
+                justify-content: center;
+                align-items: center;
                 line-height: 0;
                 height: auto;
                 min-height: 0;
                 overflow: visible;
-                text-align: center !important;
+                text-align: center;
                 position: relative;
             }
             
             #tshirtCanvas {
                 max-width: 100%;
-                display: block !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
-                position: relative !important;
-                left: auto !important;
-                right: auto !important;
+                display: block;
+                margin: 0 auto;
+                position: relative;
             }
             
             .canvas-container canvas {
-                display: block !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
-                position: relative !important;
-                left: auto !important;
-                right: auto !important;
+                display: block;
+                margin: 0 auto;
+                position: relative;
             }
             
             .canvas-container .lower-canvas,
             .canvas-container .upper-canvas {
-                display: block !important;
-                margin-left: auto !important;
-                margin-right: auto !important;
-                position: relative !important;
-                left: auto !important;
-                right: auto !important;
-                top: auto !important;
-                transform: none !important;
+                display: block;
+                margin: 0 auto;
+                position: relative;
             }
             
             .color-selector-section {
@@ -1221,34 +1195,16 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 const scaleY = fabricCanvas.height / img.height;
                 const scale = Math.min(scaleX, scaleY);
                 
-                const scaledWidth = img.width * scale;
-                const scaledHeight = img.height * scale;
-                
-                const left = (fabricCanvas.width - scaledWidth) / 2;
-                const top = (fabricCanvas.height - scaledHeight) / 2;
-                
                 fabricCanvas.setBackgroundImage(img,()=>{
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
-                    
-                    setTimeout(function() {
-                        const canvases = document.querySelectorAll('.canvas-container canvas');
-                        canvases.forEach(function(canvas) {
-                            canvas.style.marginLeft = 'auto';
-                            canvas.style.marginRight = 'auto';
-                            canvas.style.display = 'block';
-                            canvas.style.position = 'relative';
-                            canvas.style.left = 'auto';
-                            canvas.style.right = 'auto';
-                        });
-                    }, 10);
                 },{
                     scaleX: scale,
                     scaleY: scale,
-                    originX: 'left',
-                    originY: 'top',
-                    left: left,
-                    top: top
+                    originX: 'center',
+                    originY: 'center',
+                    left: fabricCanvas.width / 2,
+                    top: fabricCanvas.height / 2
                 });
             });
         } else {
@@ -1259,7 +1215,67 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
         }
     });
 }
-async function saveDesignImageToFirebase(side,designJSON,productName,colorName){ if(!designJSON||!designJSON.objects?.length)return null; try{ const tempCanvas=document.createElement('canvas'); tempCanvas.width=fabricCanvas.width; tempCanvas.height=fabricCanvas.height; const tmp=new fabric.Canvas(tempCanvas); const path=getDynamicImagePath(productName,colorName,side); await new Promise(res=>{ loadImageAsDataURL(path,data=>{ if(data){fabric.Image.fromURL(data,img=>{const scaleX = tmp.width / img.width; const scaleY = tmp.height / img.height; const scale = Math.min(scaleX, scaleY); const scaledWidth = img.width * scale; const scaledHeight = img.height * scale; const left = (tmp.width - scaledWidth) / 2; const top = (tmp.height - scaledHeight) / 2; tmp.setBackgroundImage(img,()=>{tmp.loadFromJSON(designJSON,()=>{tmp.renderAll();setTimeout(res,100);});},{scaleX:scale,scaleY:scale,originX:'left',originY:'top',left:left,top:top});});}else{tmp.setBackgroundColor('#1a1a2e',()=>{tmp.loadFromJSON(designJSON,()=>{tmp.renderAll();setTimeout(res,100);});});}});}); const d=tmp.toDataURL({format:'png',quality:1,multiplier:2}); if(!d||d==='data:,')return null; const blob=(function(b){const a=b.split(','),m=a[0].match(/:(.*?);/)[1],c=atob(a[1]),n=c.length,u=new Uint8Array(n);for(let i=0;i<n;i++)u[i]=c.charCodeAt(i);return new Blob([u],{type:m});})(d); const fileName=`${side}_${productName.replace(/\s/g,'_')}_${colorName}_${Date.now()}.png`; const ref=storageRef.child(`custom-designs/${side}/${fileName}`); await ref.put(blob); const url=await ref.getDownloadURL(); tmp.dispose(); return url; }catch(e){console.error(e);return null;} }
+async function saveDesignImageToFirebase(side,designJSON,productName,colorName){ 
+    if(!designJSON||!designJSON.objects?.length)return null; 
+    try{ 
+        const tempCanvas=document.createElement('canvas'); 
+        tempCanvas.width=fabricCanvas.width; 
+        tempCanvas.height=fabricCanvas.height; 
+        const tmp=new fabric.Canvas(tempCanvas); 
+        const path=getDynamicImagePath(productName,colorName,side); 
+        await new Promise(res=>{ 
+            loadImageAsDataURL(path,data=>{ 
+                if(data){
+                    fabric.Image.fromURL(data,img=>{
+                        const scaleX = tmp.width / img.width; 
+                        const scaleY = tmp.height / img.height; 
+                        const scale = Math.min(scaleX, scaleY); 
+                        tmp.setBackgroundImage(img,()=>{
+                            tmp.loadFromJSON(designJSON,()=>{
+                                tmp.renderAll();
+                                setTimeout(res,100);
+                            });
+                        },{
+                            scaleX: scale,
+                            scaleY: scale,
+                            originX: 'center',
+                            originY: 'center',
+                            left: tmp.width / 2,
+                            top: tmp.height / 2
+                        });
+                    });
+                } else {
+                    tmp.setBackgroundColor('#1a1a2e',()=>{
+                        tmp.loadFromJSON(designJSON,()=>{
+                            tmp.renderAll();
+                            setTimeout(res,100);
+                        });
+                    });
+                }
+            });
+        }); 
+        const d=tmp.toDataURL({format:'png',quality:1,multiplier:2}); 
+        if(!d||d==='data:,')return null; 
+        const blob=(function(b){
+            const a=b.split(','),
+            m=a[0].match(/:(.*?);/)[1],
+            c=atob(a[1]),
+            n=c.length,
+            u=new Uint8Array(n);
+            for(let i=0;i<n;i++)u[i]=c.charCodeAt(i);
+            return new Blob([u],{type:m});
+        })(d); 
+        const fileName=`${side}_${productName.replace(/\s/g,'_')}_${colorName}_${Date.now()}.png`; 
+        const ref=storageRef.child(`custom-designs/${side}/${fileName}`); 
+        await ref.put(blob); 
+        const url=await ref.getDownloadURL(); 
+        tmp.dispose(); 
+        return url; 
+    } catch(e){
+        console.error(e);
+        return null;
+    } 
+}
 async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Designs added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
 async function buyNow(){ const user=auth.currentUser; const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} if(!currentSize){showToast('Please select Size first',true);return;} showLoading("PREPARING ORDER..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return;}} localStorage.setItem('customCheckoutData',JSON.stringify({isCustomized:true,frontDesignImage:frontURL,backDesignImage:backURL,tshirtType:currentStyle.displayName,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,size:currentSize,quantity:1,price:currentStyle.price})); const snap=await db.collection('addresses').where('userId','==',user?.uid||JSON.parse(localStorage.getItem('vedantaUser')).uid).limit(1).get(); if(!snap.empty)window.location.href='secure-checkout2.html'; else window.location.href='secure-checkout.html'; }catch(e){showToast('Error',true);}finally{hideLoading();} }
 function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.innerText=m; t.style.background=err?'#F44336':'#D4AF37'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
@@ -1286,18 +1302,6 @@ function resizeCanvas() {
                 loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true);
             }
             fabricCanvas.renderAll();
-            
-            setTimeout(function() {
-                const canvases = document.querySelectorAll('.canvas-container canvas');
-                canvases.forEach(function(canvas) {
-                    canvas.style.marginLeft = 'auto';
-                    canvas.style.marginRight = 'auto';
-                    canvas.style.display = 'block';
-                    canvas.style.position = 'relative';
-                    canvas.style.left = 'auto';
-                    canvas.style.right = 'auto';
-                });
-            }, 10);
         }
     }
 }
@@ -1312,30 +1316,11 @@ function initCanvas(){
     fabricCanvas.setHeight(maxWidth * aspectRatio);
     fabricCanvas.selection = true;
     
-    const canvasElement = document.getElementById('tshirtCanvas');
-    if (canvasElement) {
-        canvasElement.style.marginLeft = 'auto';
-        canvasElement.style.marginRight = 'auto';
-        canvasElement.style.display = 'block';
-        canvasElement.style.position = 'relative';
-        canvasElement.style.left = 'auto';
-        canvasElement.style.right = 'auto';
-    }
-    
     fabricCanvas.on('after:render', function() { 
         const canvasContainer = document.querySelector('.canvas-container'); 
         if (canvasContainer) { 
             canvasContainer.style.lineHeight = '0'; 
         }
-        const canvases = document.querySelectorAll('.canvas-container canvas');
-        canvases.forEach(function(canvas) {
-            canvas.style.marginLeft = 'auto';
-            canvas.style.marginRight = 'auto';
-            canvas.style.display = 'block';
-            canvas.style.position = 'relative';
-            canvas.style.left = 'auto';
-            canvas.style.right = 'auto';
-        });
     }); 
     loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false);
     frontDesignJSON = fabricCanvas.toJSON();
