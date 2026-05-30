@@ -169,13 +169,14 @@
             color: #050508;
         }
         
+        /* FIXED: Proper centering for canvas container */
         .canvas-container {
             background: transparent;
             border-radius: 20px;
             width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex !important;
+            justify-content: center !important;
+            align-items: center !important;
             line-height: 0;
             height: auto;
             min-height: 0;
@@ -184,27 +185,23 @@
             position: relative;
         }
         
+        /* FIXED: Canvas centering */
         #tshirtCanvas { 
             border-radius: 16px; 
-            width: auto !important;
-            height: auto !important;
             max-width: 100%;
             max-height: 100%;
             display: block;
             margin: 0 auto !important;
-            vertical-align: top;
-            object-fit: contain;
-            position: relative;
-            left: auto;
-            right: auto;
         }
         
+        /* FIXED: Force all canvas elements to center */
         .canvas-container canvas {
-            display: block;
+            display: block !important;
             margin: 0 auto !important;
             position: relative !important;
-            left: auto !important;
-            right: auto !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: 0 !important;
             float: none !important;
         }
         
@@ -213,19 +210,14 @@
             display: block !important;
             margin: 0 auto !important;
             padding: 0 !important;
-            vertical-align: bottom !important;
             border: none !important;
             outline: none !important;
-            width: auto !important;
-            height: auto !important;
-            max-width: 100%;
-            max-height: 100%;
             position: relative !important;
-            left: auto !important;
-            right: auto !important;
-            top: auto !important;
+            left: 0 !important;
+            right: 0 !important;
+            top: 0 !important;
             float: none !important;
-            clear: both !important;
+            background: transparent !important;
         }
         
         .color-selector-section {
@@ -731,6 +723,7 @@
             }
         }
         
+        /* FIXED: Mobile centering */
         @media (max-width: 768px) {
             body {
                 overflow-x: hidden;
@@ -780,11 +773,13 @@
                 padding: 6px 16px;
                 font-size: 12px;
             }
+            
+            /* FIXED: Mobile canvas centering */
             .canvas-container {
                 width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
+                display: flex !important;
+                justify-content: center !important;
+                align-items: center !important;
                 line-height: 0;
                 height: auto;
                 min-height: 0;
@@ -792,37 +787,32 @@
                 text-align: center;
                 position: relative;
             }
+            
             #tshirtCanvas {
-                width: auto !important;
-                height: auto !important;
                 max-width: 100%;
-                margin: 0 auto !important;
                 display: block;
-                position: relative;
-                left: auto;
-                right: auto;
+                margin: 0 auto !important;
             }
+            
             .canvas-container canvas {
-                display: block;
-                margin: 0 auto !important;
-                position: relative !important;
-                left: auto !important;
-                right: auto !important;
-            }
-            .canvas-container .lower-canvas,
-            .canvas-container .upper-canvas {
-                width: auto !important;
-                height: auto !important;
-                max-width: 100%;
-                max-height: 100%;
-                position: relative !important;
                 display: block !important;
                 margin: 0 auto !important;
-                left: auto !important;
-                right: auto !important;
-                top: auto !important;
+                position: relative !important;
+                left: 0 !important;
+                right: 0 !important;
+            }
+            
+            .canvas-container .lower-canvas,
+            .canvas-container .upper-canvas {
+                display: block !important;
+                margin: 0 auto !important;
+                position: relative !important;
+                left: 0 !important;
+                right: 0 !important;
+                top: 0 !important;
                 float: none !important;
             }
+            
             .color-selector-section {
                 margin-top: 0px;
                 padding: 10px;
@@ -1220,7 +1210,6 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
     loadImageAsDataURL(path,data=>{ 
         if(data){
             fabric.Image.fromURL(data,img=>{
-                // Calculate scale to fit canvas while maintaining aspect ratio
                 const scaleX = fabricCanvas.width / img.width;
                 const scaleY = fabricCanvas.height / img.height;
                 const scale = Math.min(scaleX, scaleY);
@@ -1228,24 +1217,12 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 const scaledWidth = img.width * scale;
                 const scaledHeight = img.height * scale;
                 
-                // CENTER HORIZONTALLY AND VERTICALLY - FIX APPLIED HERE
                 const left = (fabricCanvas.width - scaledWidth) / 2;
                 const top = (fabricCanvas.height - scaledHeight) / 2;
                 
                 fabricCanvas.setBackgroundImage(img,()=>{
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
-                    
-                    setTimeout(function() {
-                        const canvases = document.querySelectorAll('.canvas-container canvas');
-                        canvases.forEach(function(canvas) {
-                            canvas.style.margin = '0 auto';
-                            canvas.style.display = 'block';
-                            canvas.style.position = 'relative';
-                            canvas.style.left = 'auto';
-                            canvas.style.right = 'auto';
-                        });
-                    }, 10);
                 },{
                     scaleX: scale,
                     scaleY: scale,
@@ -1290,17 +1267,6 @@ function resizeCanvas() {
                 loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true);
             }
             fabricCanvas.renderAll();
-            
-            setTimeout(function() {
-                const canvases = document.querySelectorAll('.canvas-container canvas');
-                canvases.forEach(function(canvas) {
-                    canvas.style.margin = '0 auto';
-                    canvas.style.display = 'block';
-                    canvas.style.position = 'relative';
-                    canvas.style.left = 'auto';
-                    canvas.style.right = 'auto';
-                });
-            }, 10);
         }
     }
 }
@@ -1318,15 +1284,7 @@ function initCanvas(){
         const canvasContainer = document.querySelector('.canvas-container'); 
         if (canvasContainer) { 
             canvasContainer.style.lineHeight = '0'; 
-        }
-        const canvases = document.querySelectorAll('.canvas-container canvas');
-        canvases.forEach(function(canvas) {
-            canvas.style.margin = '0 auto';
-            canvas.style.display = 'block';
-            canvas.style.position = 'relative';
-            canvas.style.left = 'auto';
-            canvas.style.right = 'auto';
-        });
+        } 
     }); 
     loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false);
     frontDesignJSON = fabricCanvas.toJSON();
