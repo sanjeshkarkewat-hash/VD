@@ -140,7 +140,7 @@
             width: 100%;
         }
         
-        /* NO GAP AT ALL - TIGHT COMPACT */
+        /* SELECTED TSHIRT AREA - NO GAP AT BOTTOM */
         .selected-tshirt-area {
             background: rgba(10,10,18,0.6);
             padding: 15px;
@@ -169,30 +169,35 @@
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
             color: #050508;
         }
+        
+        /* CANVAS CONTAINER - REMOVE EXTRA SPACE */
         .canvas-container {
             background: #1a1a24;
             border-radius: 20px;
             width: 100%;
             display: flex;
             justify-content: center;
-            margin: 0;
-            padding: 0;
+            line-height: 0;
         }
+        
+        /* CANVAS ELEMENT - NO EXTRA MARGIN/SPACE */
         #tshirtCanvas { 
             border-radius: 16px; 
             width: 100%;
             height: auto;
             max-width: 500px;
             display: block;
+            margin: 0;
+            vertical-align: top;
         }
         
-        /* COLOR SELECTOR - DIRECTLY BELOW CANVAS, NO MARGIN TOP GAP */
+        /* COLOR SELECTOR - DIRECTLY BELOW CANVAS */
         .color-selector-section {
+            margin-top: 12px;
             padding: 12px;
             background: rgba(15,15,22,0.6);
             border-radius: 18px;
             width: 100%;
-            margin-top: 12px;
             margin-bottom: 0;
         }
         .color-selector-title {
@@ -241,7 +246,7 @@
             padding-bottom: 0;
         }
         
-        /* DESIGN TOOLS - DIRECTLY AFTER */
+        /* DESIGN TOOLS - DIRECTLY AFTER COLOR SELECTOR */
         .design-tools-box, .material-tools-box {
             background: rgba(15,15,22,0.92);
             padding: 18px;
@@ -557,6 +562,7 @@
             }
             .selected-tshirt-area {
                 padding: 12px;
+                padding-bottom: 0;
             }
             .side-switcher {
                 gap: 10px;
@@ -570,15 +576,17 @@
                 width: 100%;
                 display: flex;
                 justify-content: center;
+                line-height: 0;
             }
             #tshirtCanvas {
                 width: 100%;
                 height: auto;
                 max-width: 450px;
+                margin: 0;
             }
             .color-selector-section {
+                margin-top: 12px;
                 padding: 10px;
-                margin-top: 10px;
             }
             .color-selector-title {
                 font-size: 12px;
