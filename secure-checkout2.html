@@ -1,21 +1,788 @@
-function buyNowCustom() {
-  const productData = {
-    items: [{
-      name: "Custom T-Shirt",
-      price: 1299,
-      quantity: 1,
-      size: "L",
-      selectedColor: "White",
-      isCustomized: true,
-      frontDesignImage: frontImageUrl,
-      backDesignImage: backImageUrl,
-      printMethod: "transparent"
-    }],
-    isCustomized: true,
-    frontDesignImage: frontImageUrl,
-    backDesignImage: backImageUrl
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>Secure Checkout - Vedanta</title>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; overflow-x: hidden; min-height: 100vh; }
+    body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%); pointer-events: none; z-index: -1; }
+    .checkout-container { max-width: 1200px; margin: 0 auto; padding: 16px; }
+    .checkout-header { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(212,175,55,0.3); margin-bottom: 20px; flex-wrap: wrap; gap: 12px; }
+    .logo h1 { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+    .logo p { font-size: 10px; color: #888; }
+    .secure-badge { background: rgba(212,175,55,0.15); padding: 6px 14px; border-radius: 40px; font-size: 12px; font-weight: 600; }
+    .checkout-main { display: grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 768px) { .checkout-main { grid-template-columns: 1fr 1fr; gap: 30px; } .checkout-container { padding: 20px; } }
+    .checkout-form { background: rgba(15,15,22,0.7); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; border: 1px solid rgba(212,175,55,0.2); }
+    @media (min-width: 768px) { .checkout-form { padding: 28px; } }
+    .form-section { margin-bottom: 24px; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .form-section h3 { font-size: 18px; margin-bottom: 16px; color: #D4AF37; display: flex; align-items: center; gap: 8px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 500; color: #CCCCCC; }
+    .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 12px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; color: white; font-size: 14px; font-family: inherit; transition: 0.2s; }
+    .form-group input:focus { outline: none; border-color: #D4AF37; }
+    .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .saved-address-card, .selected-address-card { background: rgba(20,20,30,0.6); border: 2px solid rgba(212,175,55,0.3); border-radius: 16px; padding: 16px; margin-bottom: 10px; cursor: pointer; transition: 0.2s; }
+    .selected-address-card { border-color: #4CAF50; background: rgba(76,175,80,0.15); cursor: default; }
+    .saved-address-card:hover { border-color: #D4AF37; background: rgba(212,175,55,0.15); }
+    .address-name { font-weight: 800; color: #D4AF37; margin-bottom: 8px; font-size: 14px; }
+    .address-detail { font-size: 12px; color: #ccc; line-height: 1.5; }
+    .address-phone { font-size: 11px; color: #888; margin-top: 8px; }
+    .address-label { display: inline-block; background: rgba(212,175,55,0.2); padding: 2px 10px; border-radius: 20px; font-size: 10px; margin-top: 8px; }
+    .option-divider { text-align: center; margin: 15px 0; position: relative; }
+    .option-divider span { background: #0a0a12; padding: 0 15px; color: #888; font-size: 12px; }
+    .option-divider::before { content: ''; position: absolute; top: 50%; left: 0; right: 0; height: 1px; background: rgba(255,255,255,0.1); z-index: -1; }
+    .add-new-address-btn { width: 100%; background: rgba(212,175,55,0.15); border: 1px dashed rgba(212,175,55,0.5); padding: 14px; border-radius: 14px; color: #D4AF37; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
+    .new-address-form { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 16px; }
+    .new-address-form.show { display: block; }
+    .location-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; padding: 14px; border-radius: 14px; width: 100%; color: #050508; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+    .map-pin-btn { background: linear-gradient(135deg, #2196F3, #0b5e7e); color: white; }
+    .action-buttons-row { display: flex; gap: 12px; margin-top: 15px; }
+    .save-address-btn { background: #4CAF50 !important; color: white !important; margin-top: 0 !important; }
+    .cancel-address-btn { background: #F44336 !important; color: white !important; margin-top: 0 !important; }
+    .payment-options { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+    .payment-option { background: rgba(0,0,0,0.4); border: 1px solid rgba(212,175,55,0.3); border-radius: 14px; padding: 12px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: 0.2s; }
+    .payment-option.selected { border-color: #4CAF50; background: rgba(76,175,80,0.1); }
+    .payment-option .payment-icon i { font-size: 24px; }
+    .payment-option .radio-circle { width: 18px; height: 18px; border: 2px solid #888; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .payment-option.selected .radio-circle { border-color: #4CAF50; }
+    .payment-option.selected .radio-circle::after { content: ''; width: 10px; height: 10px; background: #4CAF50; border-radius: 50%; }
+    .cod-details, .razorpay-section { display: none; margin-top: 12px; padding: 12px; background: rgba(76,175,80,0.1); border-radius: 14px; text-align: center; }
+    .cod-details.show, .razorpay-section.show { display: block; }
+    .place-order-cod, .pay-razorpay-btn { width: 100%; background: linear-gradient(135deg, #4CAF50, #45a049); border: none; padding: 14px; border-radius: 50px; font-weight: 700; color: white; cursor: pointer; margin-top: 10px; }
+    .pay-razorpay-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; }
+    .order-summary { background: linear-gradient(135deg, rgba(15,15,22,0.7), rgba(10,10,18,0.8)); backdrop-filter: blur(10px); border-radius: 24px; padding: 20px; border: 1px solid rgba(212,175,55,0.2); position: sticky; top: 10px; }
+    .order-summary h3 { font-size: 18px; margin-bottom: 16px; color: #D4AF37; }
+    .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+    .order-item-img { width: 80px; height: 80px; background: #0E0E14; border-radius: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+    .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+    .order-item-img i { font-size: 32px; color: #D4AF37; }
+    .order-item-info { flex: 1; }
+    .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
+    .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
+    .order-item-price { font-weight: 700; color: #D4AF37; text-align: right; font-size: 13px; min-width: 70px; }
+    .custom-design-preview-section { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: center; border: 1px solid rgba(212,175,55,0.2); }
+    .custom-badge { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
+    .custom-preview-row { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
+    .custom-preview-item { flex: 1; min-width: 130px; text-align: center; }
+    .custom-preview-item img { width: 100%; max-height: 130px; object-fit: contain; border-radius: 12px; background: #1a1a2e; }
+    .custom-preview-item p { font-size: 10px; color: #D4AF37; margin-top: 6px; }
+    .delivery-benefits { background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(76,175,80,0.05)); border-radius: 16px; padding: 12px; margin: 12px 0; }
+    .benefit-row { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #aaa; }
+    .free-shipping-badge { background: rgba(76,175,80,0.15); padding: 8px; border-radius: 12px; text-align: center; margin: 12px 0; color: #4CAF50; font-size: 11px; }
+    .order-total { padding: 16px 0; border-top: 2px solid rgba(212,175,55,0.3); }
+    .total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 13px; }
+    .total-row.grand-total { font-size: 20px; font-weight: 800; color: #D4AF37; margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(212,175,55,0.3); }
+    .rewards-points { background: rgba(212,175,55,0.1); border-radius: 12px; padding: 10px; margin-top: 12px; text-align: center; font-size: 11px; }
+    .back-to-shop { display: block; text-align: center; margin-top: 16px; color: #888; text-decoration: none; font-size: 12px; }
+    .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 12px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; font-size: 12px; display: none; }
+    .toast.show { display: block; animation: fadeInOut 2s ease; }
+    @keyframes fadeInOut { 0% { opacity: 0; } 15% { opacity: 1; } 85% { opacity: 1; } 100% { opacity: 0; } }
+    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; display: none; align-items: center; justify-content: center; flex-direction: column; gap: 16px; }
+    .loading-overlay.show { display: flex; }
+    .loading-spinner { width: 50px; height: 50px; border: 3px solid rgba(212,175,55,0.3); border-top-color: #D4AF37; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .location-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 20000; align-items: center; justify-content: center; }
+    .location-modal.show { display: flex; }
+    .location-modal-content { background: rgba(15,15,22,0.98); border-radius: 32px; padding: 28px; max-width: 350px; width: 90%; text-align: center; }
+    .discount-badge { background: linear-gradient(135deg, #FF9800, #F44336); padding: 4px 10px; border-radius: 30px; font-size: 10px; margin-left: 8px; }
+    .map-picker-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 30000; align-items: center; justify-content: center; }
+    .map-picker-modal.active { display: flex; }
+    .map-picker-container { width: 95%; max-width: 700px; background: #0a0a12; border-radius: 28px; overflow: hidden; }
+    .map-picker-header { padding: 16px 20px; background: rgba(212,175,55,0.1); border-bottom: 1px solid rgba(212,175,55,0.2); display: flex; justify-content: space-between; }
+    .map-picker-body { height: 400px; width: 100%; }
+    .map-picker-footer { padding: 16px 20px; display: flex; gap: 12px; }
+    .confirm-location-btn { flex: 2; background: linear-gradient(135deg, #4CAF50, #45a049); border: none; padding: 14px; border-radius: 40px; font-weight: 700; color: white; cursor: pointer; }
+    .close-map-btn { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 14px; border-radius: 40px; font-weight: 700; color: #ccc; cursor: pointer; }
+    .user-info-bar { background: rgba(212,175,55,0.1); border-radius: 14px; padding: 12px; margin-bottom: 16px; font-size: 12px; color: #D4AF37; }
+    .design-preview-badge { display: inline-block; background: rgba(212,175,55,0.2); border-radius: 6px; padding: 2px 8px; font-size: 9px; margin-top: 5px; }
+    .debug-console { display: none; }
+  </style>
+</head>
+<body>
+
+<div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Processing your order...</div></div>
+<div class="location-modal" id="locationModal"><div class="location-modal-content"><i class="fas fa-location-dot" style="font-size:50px; color:#FF9800;"></i><h3>Location Access Required</h3><p>Please enable location services to auto-fill your address</p><button class="location-btn" id="openSettingsBtn">Enable Location</button><button class="location-cancel-btn" id="closeLocationModalBtn" style="background:transparent; border:1px solid #D4AF37; margin-top:10px; padding:10px; border-radius:30px;">Cancel</button></div></div>
+<div class="map-picker-modal" id="mapPickerModal"><div class="map-picker-container"><div class="map-picker-header"><div><h3><i class="fas fa-map-pin"></i> Select Location</h3></div><i class="fas fa-times" id="closeMapModalBtn" style="font-size:22px; cursor:pointer;"></i></div><div class="map-picker-body" id="mapContainer"></div><div class="map-picker-footer"><button class="confirm-location-btn" id="confirmMapBtn">Confirm My Location</button><button class="close-map-btn" id="cancelMapBtn">Cancel</button></div></div></div>
+
+<div class="checkout-container">
+  <div class="checkout-header"><div class="logo"><h1>VEDANTA</h1><p>secure checkout</p></div><div class="secure-badge"><i class="fas fa-lock"></i> 100% Secure</div></div>
+  <div class="checkout-main">
+    <div class="checkout-form">
+      <div class="user-info-bar"><i class="fas fa-user-check"></i> Welcome, <span id="displayPhone">Loading...</span></div>
+      <div class="form-section" id="addressSection"><h3><i class="fas fa-map-marker-alt"></i> Shipping Address</h3><div id="addressSelectionArea"></div></div>
+      <div class="form-section"><h3><i class="fas fa-credit-card"></i> Payment Method</h3>
+        <div class="payment-options">
+          <div class="payment-option" id="codOption"><div class="payment-icon"><i class="fas fa-money-bill-wave" style="color:#4CAF50;"></i></div><div class="payment-info"><h4>Cash on Delivery</h4><p>Pay when you receive</p></div><div class="radio-circle"></div></div>
+          <div class="payment-option" id="razorpayOption"><div class="payment-icon"><i class="fas fa-credit-card" style="color:#D4AF37;"></i></div><div class="payment-info"><h4>Card / UPI / NetBanking <span class="discount-badge">5% OFF</span></h4><p>Secure online payment</p></div><div class="radio-circle"></div></div>
+          <div class="cod-details" id="codDetails"><p><i class="fas fa-truck"></i> Pay cash on delivery</p><button class="place-order-cod" id="placeOrderCodBtn">Confirm Order (COD)</button></div>
+          <div class="razorpay-section" id="razorpaySection"><div class="online-discount-info" style="background:rgba(255,152,0,0.15); padding:10px; border-radius:12px;"><i class="fas fa-gift"></i> 5% Instant Discount on online payment</div><button class="pay-razorpay-btn" id="payRazorpayBtn">Pay Now with 5% OFF</button></div>
+        </div>
+      </div>
+    </div>
+    <div class="order-summary">
+      <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+      <div id="customDesignPreviewContainer" style="display:none;" class="custom-design-preview-section">
+        <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
+        <div class="custom-preview-row"><div class="custom-preview-item"><p>Front Design</p><img id="frontDesignPreview" style="max-height:120px;"></div><div class="custom-preview-item"><p>Back Design</p><img id="backDesignPreview" style="max-height:120px;"></div></div>
+      </div>
+      <div id="orderItemsList"></div>
+      <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 Free Express Shipping (3-5 days)</span></div></div>
+      <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | 0% TAX</div>
+      <div class="order-total"><div class="total-row"><span>Subtotal</span><span id="subtotal">₹0</span></div><div class="total-row" id="discountRow" style="display:none;"><span>Online Discount (5%)</span><span style="color:#4CAF50;" id="discountAmount">-₹0</span></div><div class="total-row grand-total"><span>Total Amount</span><span id="grandTotal">₹0</span></div></div>
+      <div class="rewards-points"><i class="fas fa-coins"></i> You'll earn <strong id="rewardPoints">0</strong> Vedanta Coins</div>
+      <a href="#" class="back-to-shop" id="backToShopBtn"><i class="fas fa-arrow-left"></i> Back to Shopping</a>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+  // ========== FIREBASE CONFIG ==========
+  const firebaseConfig = { 
+    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", 
+    authDomain: "nexi-53897.firebaseapp.com", 
+    projectId: "nexi-53897", 
+    storageBucket: "nexi-53897.firebasestorage.app", 
+    messagingSenderId: "337349382612", 
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" 
   };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+  const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
   
-  const encodedData = encodeURIComponent(JSON.stringify(productData));
-  window.location.href = `checkout.html?productData=${encodedData}`;
-}
+  // ========== GLOBAL STATE ==========
+  let cart = [];
+  let cartTotal = 0;
+  let discountedTotal = 0;
+  let discountAmount = 0;
+  let isProcessing = false;
+  let selectedPaymentMethod = 'cod';
+  let currentUser = null;
+  let selectedAddress = null;
+  let isCustomizedOrder = false;
+  let frontDesignImageURL = null;
+  let backDesignImageURL = null;
+  let productImagesCache = {};
+  let mapInstance = null;
+  let mapMarker = null;
+  let currentSelectedLatLng = null;
+  
+  // ========== DEBUG LOGGING FUNCTION ==========
+  function debugLog(message, data = null) {
+    const timestamp = new Date().toISOString().substring(11, 23);
+    const logMessage = `[${timestamp}] ${message}`;
+    console.log(logMessage, data || '');
+    
+    // Also store in sessionStorage for debugging
+    const debugHistory = sessionStorage.getItem('checkout_debug_logs') || '[]';
+    const logs = JSON.parse(debugHistory);
+    logs.push({ time: timestamp, message, data: data ? JSON.stringify(data) : null });
+    if (logs.length > 50) logs.shift();
+    sessionStorage.setItem('checkout_debug_logs', JSON.stringify(logs));
+  }
+  
+  // ========== CRITICAL FIX #1: COMPLETE DATA PURGE ==========
+  // This function runs at page load and ensures NO stale data persists
+  function purgeAllStaleData() {
+    debugLog("🔄 [PURGE] Starting complete data purge...");
+    
+    // Clear ALL localStorage keys that might contain product data
+    const keysToCheck = [
+      'vedantaCart',
+      'customCheckoutData',
+      'checkoutProduct',
+      'selectedProduct',
+      'currentProduct',
+      'productData',
+      'customProduct',
+      'orderData',
+      'pendingOrder',
+      'buyNowProduct',
+      'selectedItem'
+    ];
+    
+    keysToCheck.forEach(key => {
+      if (localStorage.getItem(key)) {
+        debugLog(`🗑️ [PURGE] Removing localStorage key: ${key}`);
+        localStorage.removeItem(key);
+      }
+    });
+    
+    // Clear sessionStorage keys
+    const sessionKeys = [
+      'vedanta_buy_now',
+      'checkout_session',
+      'pendingCustomOrder',
+      'temp_checkout_data',
+      'checkout_product_cache'
+    ];
+    
+    sessionKeys.forEach(key => {
+      if (sessionStorage.getItem(key)) {
+        debugLog(`🗑️ [PURGE] Removing sessionStorage key: ${key}`);
+        sessionStorage.removeItem(key);
+      }
+    });
+    
+    // Reset all global state
+    cart = [];
+    isCustomizedOrder = false;
+    frontDesignImageURL = null;
+    backDesignImageURL = null;
+    cartTotal = 0;
+    
+    debugLog("✅ [PURGE] Complete data purge finished");
+  }
+  
+  // ========== CRITICAL FIX #2: LOAD FRESH PRODUCT DATA ==========
+  // This reads from sessionStorage (set by product pages) and IMMEDIATELY consumes it
+  function loadFreshProductData() {
+    debugLog("📦 [LOAD] Loading fresh product data...");
+    
+    // Check for buyNow data in sessionStorage (set by product/custom pages)
+    const buyNowData = sessionStorage.getItem('vedanta_buy_now');
+    
+    if (buyNowData) {
+      try {
+        const parsedData = JSON.parse(buyNowData);
+        debugLog("✅ [LOAD] Found buyNow data:", parsedData);
+        
+        if (parsedData && parsedData.items && parsedData.items.length > 0) {
+          cart = parsedData.items;
+          debugLog("✅ [LOAD] Cart loaded with", cart.length, "item(s)");
+          debugLog("📊 [LOAD] Product details:", {
+            name: cart[0]?.name,
+            price: cart[0]?.price,
+            size: cart[0]?.size,
+            color: cart[0]?.selectedColor,
+            isCustom: parsedData.isCustomized
+          });
+          
+          // Load custom design data if present
+          if (parsedData.isCustomized) {
+            isCustomizedOrder = true;
+            frontDesignImageURL = parsedData.frontDesignImage || null;
+            backDesignImageURL = parsedData.backDesignImage || null;
+            debugLog("🎨 [LOAD] Custom design loaded - Front:", !!frontDesignImageURL, "Back:", !!backDesignImageURL);
+          }
+          
+          // CRITICAL: Remove the buyNow data immediately after reading
+          // This prevents stale data on back navigation
+          sessionStorage.removeItem('vedanta_buy_now');
+          debugLog("🗑️ [LOAD] BuyNow data consumed and removed from sessionStorage");
+          
+          return true;
+        } else {
+          debugLog("⚠️ [LOAD] buyNow data exists but has no items");
+        }
+      } catch (e) {
+        console.error("❌ [LOAD] Failed to parse buyNow data:", e);
+        sessionStorage.removeItem('vedanta_buy_now');
+      }
+    } else {
+      debugLog("ℹ️ [LOAD] No buyNow data found in sessionStorage");
+    }
+    
+    // Fallback: Load from localStorage cart (for normal cart flow)
+    const savedCart = localStorage.getItem('vedantaCart');
+    if (savedCart && cart.length === 0) {
+      try {
+        cart = JSON.parse(savedCart);
+        debugLog("📦 [LOAD] Loaded from localStorage cart:", cart);
+        
+        // Sanitize: remove custom flags from regular products
+        cart.forEach(item => {
+          if (!item.isCustomized) {
+            item.printMethod = null;
+            delete item.frontDesignImage;
+            delete item.backDesignImage;
+          }
+        });
+        return true;
+      } catch(e) {
+        console.error("❌ [LOAD] Failed to parse cart:", e);
+        cart = [];
+      }
+    }
+    
+    if (cart.length === 0) {
+      debugLog("⚠️ [LOAD] No product found in checkout. Cart is empty.");
+    }
+    
+    return cart.length > 0;
+  }
+  
+  // ========== UI HELPER FUNCTIONS ==========
+  function showToast(msg, isError = false) { 
+    const t = document.getElementById('toast'); 
+    t.innerText = msg; 
+    t.style.background = isError ? '#F44336' : '#D4AF37'; 
+    t.style.color = isError ? 'white' : '#050508'; 
+    t.classList.add('show'); 
+    setTimeout(() => t.classList.remove('show'), 3000); 
+    debugLog(`🔔 Toast: ${msg}`, { isError });
+  }
+  
+  function showLoading(show) { 
+    document.getElementById('loadingOverlay').classList.toggle('show', show); 
+    debugLog(`⏳ Loading: ${show ? 'started' : 'stopped'}`);
+  }
+  
+  function escapeHtml(str) { 
+    if (!str) return ''; 
+    return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); 
+  }
+  
+  // ========== PRODUCT IMAGE CACHE ==========
+  async function fetchAllProductsImages() {
+    try {
+      const snapshot = await db.collection('products').get();
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        if (p.name) productImagesCache[p.name.toLowerCase()] = p.images?.[0] || p.image || null;
+        productImagesCache[doc.id] = p.images?.[0] || p.image || null;
+        if (p.displayName) productImagesCache[p.displayName.toLowerCase()] = p.images?.[0] || p.image || null;
+      });
+      debugLog(`📸 Fetched ${productImagesCache ? Object.keys(productImagesCache).length : 0} product images`);
+    } catch(e) { 
+      console.warn("Could not fetch products:", e); 
+      debugLog("❌ Failed to fetch product images", e);
+    }
+  }
+  
+  function getProductImageUrl(productName, productId, selectedColor) {
+    if (productName && productImagesCache[productName]) return productImagesCache[productName];
+    if (productName && productImagesCache[productName.toLowerCase()]) return productImagesCache[productName.toLowerCase()];
+    if (productId && productImagesCache[productId]) return productImagesCache[productId];
+    const lowerName = (productName || '').toLowerCase();
+    if (lowerName.includes('sweatshirt')) return productImagesCache['sweatshirt'] || null;
+    if (lowerName.includes('regular fit')) return productImagesCache['regular fit'] || null;
+    if (lowerName.includes('polo')) return productImagesCache['polo'] || null;
+    if (lowerName.includes('oversized')) return productImagesCache['oversized'] || null;
+    if (lowerName.includes('acid wash')) return productImagesCache['acid wash'] || null;
+    if (lowerName.includes('hoodie')) return productImagesCache['hoodie'] || null;
+    return null;
+  }
+  
+  // ========== RENDER ORDER ITEMS ==========
+  async function renderOrderItems() {
+    const container = document.getElementById('orderItemsList');
+    if (!container) return;
+    container.innerHTML = '';
+    
+    if (cart.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px;">No items in cart</div>';
+      debugLog("⚠️ No items to render - cart empty");
+      return;
+    }
+    
+    // Recalculate totals based on current cart
+    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    debugLog(`📊 Cart total calculated: ₹${cartTotal}`);
+    
+    for (const item of cart) {
+      const div = document.createElement('div'); 
+      div.className = 'order-item';
+      const imgDiv = document.createElement('div'); 
+      imgDiv.className = 'order-item-img';
+      const infoDiv = document.createElement('div'); 
+      infoDiv.className = 'order-item-info';
+      const priceDiv = document.createElement('div'); 
+      priceDiv.className = 'order-item-price';
+      priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
+      
+      let imageUrl = null;
+      let designBadge = '';
+      const isCustom = item.isCustomized === true || (frontDesignImageURL && isCustomizedOrder);
+      
+      if (isCustom) {
+        imageUrl = item.frontDesignImage || frontDesignImageURL || item.backDesignImage || backDesignImageURL;
+        designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
+        debugLog(`🎨 Rendering custom product: ${item.name}`);
+      } else {
+        imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
+        if (!imageUrl && item.productImage) imageUrl = item.productImage;
+        if (!imageUrl && item.image) imageUrl = item.image;
+        debugLog(`👕 Rendering regular product: ${item.name}`);
+      }
+      
+      if (imageUrl) {
+        const img = document.createElement('img');
+        img.src = imageUrl; 
+        img.style.width = '100%'; 
+        img.style.height = '100%'; 
+        img.style.objectFit = 'cover';
+        img.onerror = () => { imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>'; };
+        imgDiv.appendChild(img);
+      } else {
+        imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
+      }
+      
+      let printMethodText = '';
+      if (isCustom && item.printMethod) {
+        printMethodText = ` | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}`;
+      }
+      
+      infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4>
+        <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
+        <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}${printMethodText}</p>
+        ${designBadge}`;
+      
+      div.appendChild(imgDiv); 
+      div.appendChild(infoDiv); 
+      div.appendChild(priceDiv);
+      container.appendChild(div);
+    }
+    
+    updateTotalsDisplay();
+    debugLog("✅ Order items rendered successfully");
+  }
+  
+  function updateTotalsDisplay() {
+    document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
+    if (selectedPaymentMethod === 'razorpay') {
+      discountAmount = Math.round(cartTotal * 5 / 100);
+      discountedTotal = cartTotal - discountAmount;
+      document.getElementById('discountRow').style.display = 'flex';
+      document.getElementById('discountAmount').innerHTML = `-₹${discountAmount.toLocaleString('en-IN')}`;
+      document.getElementById('grandTotal').innerHTML = `₹${discountedTotal.toLocaleString('en-IN')}`;
+    } else {
+      document.getElementById('discountRow').style.display = 'none';
+      document.getElementById('grandTotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
+    }
+    document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100);
+  }
+  
+  // ========== ADDRESS FUNCTIONS ==========
+  async function fetchSavedAddress() {
+    if (!currentUser || !currentUser.phone) return null;
+    try {
+      const snap = await db.collection('orders').where('customerPhone', '==', currentUser.phone).orderBy('orderDate', 'desc').limit(1).get();
+      if (!snap.empty) {
+        const last = snap.docs[0].data();
+        if (last.shippingAddress) return { fullName: last.customerName, street: last.shippingAddress.address, city: last.shippingAddress.city, state: last.shippingAddress.state, pincode: last.shippingAddress.pincode, landmark: last.shippingAddress.landmark || '', phone: last.customerPhone };
+      }
+      const addrSnap = await db.collection('addresses').where('userId', '==', currentUser.uid).limit(1).get();
+      if (!addrSnap.empty) { const a = addrSnap.docs[0].data(); return { fullName: a.name, street: a.street, city: a.city, state: a.state, pincode: a.pincode, landmark: a.landmark || '', phone: a.phone || currentUser.phone }; }
+    } catch(e) { }
+    return null;
+  }
+  
+  async function displayAddressSelection() {
+    const container = document.getElementById('addressSelectionArea');
+    const addr = await fetchSavedAddress();
+    if (addr && !selectedAddress) {
+      container.innerHTML = `<div class="saved-address-card" id="useSavedAddrBtn"><div class="address-name">📦 Saved Address</div><div class="address-detail">${escapeHtml(addr.fullName)}</div><div class="address-detail">${escapeHtml(addr.street)}</div><div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div><div class="address-phone">📞 ${escapeHtml(addr.phone)}</div><div class="address-label">Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddrBtn"><i class="fas fa-plus"></i> Add New Address</button>`;
+      document.getElementById('useSavedAddrBtn')?.addEventListener('click', () => { selectedAddress = { fullName: addr.fullName, phone: addr.phone, address: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' }; displaySelectedAddressCard(); });
+      document.getElementById('showNewAddrBtn')?.addEventListener('click', showNewAddressForm);
+    } else if (!selectedAddress) {
+      showNewAddressForm();
+    } else {
+      displaySelectedAddressCard();
+    }
+  }
+  
+  function displaySelectedAddressCard() {
+    const container = document.getElementById('addressSelectionArea');
+    if (!selectedAddress) return;
+    container.innerHTML = `<div class="selected-address-card"><div class="address-name">✅ Selected Address</div><div class="address-detail">${escapeHtml(selectedAddress.fullName)}</div><div class="address-detail">${escapeHtml(selectedAddress.address)}</div><div class="address-detail">${escapeHtml(selectedAddress.city)}, ${escapeHtml(selectedAddress.state)} - ${escapeHtml(selectedAddress.pincode)}</div><div class="address-phone">📞 ${escapeHtml(selectedAddress.phone)}</div><div class="address-label">Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="changeAddrBtn"><i class="fas fa-edit"></i> Change Address</button>`;
+    document.getElementById('changeAddrBtn')?.addEventListener('click', () => { selectedAddress = null; displayAddressSelection(); });
+  }
+  
+  function showNewAddressForm() {
+    const container = document.getElementById('addressSelectionArea');
+    container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
+    document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { const fullName=document.getElementById('newFullName').value; const street=document.getElementById('newStreet').value; const city=document.getElementById('newCity').value; const state=document.getElementById('newState').value; const pincode=document.getElementById('newPincode').value; const landmark=document.getElementById('newLandmark').value; if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; displaySelectedAddressCard(); showToast('Address saved'); });
+    document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { selectedAddress=null; displayAddressSelection(); });
+    document.getElementById('useLocationBtn')?.addEventListener('click', () => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(async (pos)=>{ const geocoder=new google.maps.Geocoder(); geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{ if(res[0]){ const comps=res[0].address_components; let st='', ct='', stt='', pin=''; comps.forEach(c=>{ if(c.types.includes('route')) st=c.long_name; if(c.types.includes('locality')) ct=c.long_name; if(c.types.includes('administrative_area_level_1')) stt=c.long_name; if(c.types.includes('postal_code')) pin=c.long_name; }); document.getElementById('newStreet').value=st; document.getElementById('newCity').value=ct; document.getElementById('newState').value=stt; document.getElementById('newPincode').value=pin; showToast('Location filled'); } }); }, ()=>showToast('Location failed',true)); else showToast('Enable GPS',true); });
+    document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
+  }
+  
+  function openMapPicker() {
+    const modal = document.getElementById('mapPickerModal');
+    modal.classList.add('active');
+    const mapDiv = document.getElementById('mapContainer');
+    mapDiv.innerHTML = '<div style="padding:20px;text-align:center;">Loading map...</div>';
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition((pos) => {
+        const center = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        currentSelectedLatLng = center;
+        initMap(center);
+      }, () => { initMap({ lat: 28.6139, lng: 77.2090 }); });
+    } else { initMap({ lat: 28.6139, lng: 77.2090 }); }
+    function initMap(center) {
+      mapDiv.innerHTML = '';
+      const map = new google.maps.Map(mapDiv, { center, zoom: 16 });
+      const marker = new google.maps.Marker({ map, position: center, draggable: true, animation: google.maps.Animation.DROP });
+      map.addListener('click', (e) => { marker.setPosition(e.latLng); currentSelectedLatLng = e.latLng; });
+      marker.addListener('dragend', () => { currentSelectedLatLng = marker.getPosition(); });
+      mapInstance = map; mapMarker = marker;
+    }
+  }
+  
+  async function confirmLocationAndFill() {
+    if (!currentSelectedLatLng) { showToast('Select location first', true); return; }
+    showLoading(true);
+    const geocoder = new google.maps.Geocoder();
+    geocoder.geocode({ location: currentSelectedLatLng }, (res) => {
+      if (res && res[0]) {
+        let street='', city='', state='', pincode='';
+        res[0].address_components.forEach(c=>{
+          if(c.types.includes('route')) street=c.long_name;
+          if(c.types.includes('locality')) city=c.long_name;
+          if(c.types.includes('administrative_area_level_1')) state=c.long_name;
+          if(c.types.includes('postal_code')) pincode=c.long_name;
+        });
+        document.getElementById('newStreet').value = street;
+        document.getElementById('newCity').value = city;
+        document.getElementById('newState').value = state;
+        document.getElementById('newPincode').value = pincode;
+        showToast('Address filled from map');
+      } else showToast('Could not get address', true);
+      showLoading(false);
+      document.getElementById('mapPickerModal').classList.remove('active');
+    });
+  }
+  
+  function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
+  
+  // ========== ORDER SAVE FUNCTIONS ==========
+  async function saveOrder(paymentMethod, txnId = null) {
+    if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
+    const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
+    const orderPrintMethod = isCustomOrder ? (cart[0]?.printMethod || 'transparent') : null;
+    const itemsForDb = cart.map(i => ({ 
+      name: i.name, price: i.price, quantity: i.quantity, size: i.size || 'M', selectedColor: i.selectedColor || 'Black',
+      ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
+      frontDesignImage: i.frontDesignImage || frontDesignImageURL, backDesignImage: i.backDesignImage || backDesignImageURL, 
+      isCustomized: i.isCustomized === true || isCustomizedOrder,
+      productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
+    }));
+    const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
+    const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*1000);
+    const orderData = {
+      orderId, customerName: selectedAddress.fullName, customerPhone: selectedAddress.phone,
+      shippingAddress: { address: selectedAddress.address, city: selectedAddress.city, state: selectedAddress.state, pincode: selectedAddress.pincode, landmark: selectedAddress.landmark || '' },
+      items: itemsForDb, paymentMethod, paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
+      transactionId: txnId, subtotal: cartTotal, discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, total: finalTotal,
+      orderDate: new Date().toISOString(), userId: currentUser?.uid, isCustomized: isCustomOrder,
+      frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
+    };
+    if (isCustomOrder && orderPrintMethod) orderData.printMethod = orderPrintMethod;
+    try { 
+      await db.collection('orders').doc(orderId).set(orderData); 
+      debugLog(`✅ Order saved successfully: ${orderId}`);
+      return { success: true, orderId }; 
+    } catch(e) { 
+      console.error("Order save error:", e); 
+      debugLog(`❌ Order save failed: ${e.message}`);
+      return { success: false }; 
+    }
+  }
+  
+  async function placeCOD() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    debugLog("💰 Placing COD order...");
+    const res = await saveOrder('Cash on Delivery'); 
+    showLoading(false); 
+    if(res.success) { 
+      showToast(`Order placed! ${res.orderId}`); 
+      localStorage.removeItem('vedantaCart'); 
+      localStorage.removeItem('customCheckoutData'); 
+      sessionStorage.removeItem('vedanta_buy_now');
+      // Clear all product data from session
+      purgeAllStaleData();
+      setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+    } else { 
+      showToast('Order failed', true); 
+      isProcessing=false; 
+    } 
+  }
+  
+  async function razorpayPayment() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const amt = discountedTotal; 
+    if(amt<=0){ showLoading(false); isProcessing=false; return; } 
+    debugLog(`💳 Initiating Razorpay payment: ₹${amt}`);
+    const options = { 
+      key: RAZORPAY_KEY_ID, 
+      amount: Math.round(amt)*100, 
+      currency: 'INR', 
+      name: 'VEDANTA', 
+      description: 'T-Shirt Order', 
+      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
+      theme: { color: '#D4AF37' }, 
+      handler: async (resp) => { 
+        debugLog(`✅ Razorpay success: ${resp.razorpay_payment_id}`);
+        const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
+        showLoading(false); 
+        if(res.success) { 
+          showToast(`Payment success! ${res.orderId}`); 
+          localStorage.clear(); 
+          sessionStorage.removeItem('vedanta_buy_now');
+          purgeAllStaleData();
+          setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+        } else { 
+          showToast('Order save issue', true); 
+          isProcessing=false; 
+        } 
+      }, 
+      modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); debugLog("❌ Payment cancelled by user"); } } 
+    }; 
+    const razor = new Razorpay(options); 
+    razor.open(); 
+  }
+  
+  // ========== MAIN INITIALIZATION ==========
+  async function init() {
+    debugLog("🚀 ========== CHECKOUT PAGE INITIALIZED ==========");
+    debugLog("📱 User Agent:", navigator.userAgent);
+    debugLog("🔗 Current URL:", window.location.href);
+    debugLog("📦 Query Params:", window.location.search);
+    
+    // STEP 1: Purge all stale data - CRITICAL for preventing old product persistence
+    purgeAllStaleData();
+    
+    // STEP 2: Get user info
+    const stored = JSON.parse(localStorage.getItem('vedantaUser'));
+    if (stored) {
+      currentUser = stored;
+      debugLog("👤 User loaded from localStorage:", { uid: currentUser.uid, phone: currentUser.phone });
+    } else { 
+      const phone = localStorage.getItem('userPhone');
+      if(phone) {
+        currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' };
+        debugLog("👤 Guest user created:", currentUser);
+      } else { 
+        debugLog("❌ No user found, redirecting to login");
+        showToast('Please login', true); 
+        setTimeout(()=> window.location.href='profile.html',1500); 
+        return; 
+      }
+    }
+    document.getElementById('displayPhone').innerText = currentUser.phone || '';
+    
+    // STEP 3: Load fresh product data (this will consume buyNow data from sessionStorage)
+    const productLoaded = loadFreshProductData();
+    
+    if (!productLoaded || cart.length === 0) {
+      debugLog("⚠️ WARNING: No product found in checkout!");
+      showToast("No product selected. Please add items to cart.", true);
+    } else {
+      debugLog("✅ SUCCESS: Product loaded successfully!");
+      debugLog("📊 Product Summary:", {
+        name: cart[0]?.name,
+        price: cart[0]?.price,
+        quantity: cart[0]?.quantity,
+        size: cart[0]?.size,
+        color: cart[0]?.selectedColor,
+        isCustom: isCustomizedOrder,
+        hasFrontImage: !!frontDesignImageURL,
+        hasBackImage: !!backDesignImageURL
+      });
+    }
+    
+    // STEP 4: Fetch product images and render UI
+    await fetchAllProductsImages();
+    await renderOrderItems();
+    
+    // STEP 5: Show/hide custom preview based on actual cart data
+    const isCustomNow = isCustomizedOrder || (cart.length > 0 && cart[0]?.isCustomized === true);
+    if (isCustomNow && (frontDesignImageURL || backDesignImageURL || cart[0]?.frontDesignImage)) {
+      const frontImg = frontDesignImageURL || cart[0]?.frontDesignImage;
+      const backImg = backDesignImageURL || cart[0]?.backDesignImage;
+      document.getElementById('customDesignPreviewContainer').style.display = 'block';
+      if (frontImg) document.getElementById('frontDesignPreview').src = frontImg;
+      if (backImg) document.getElementById('backDesignPreview').src = backImg;
+      debugLog("🎨 Custom design preview displayed");
+    } else {
+      document.getElementById('customDesignPreviewContainer').style.display = 'none';
+      debugLog("👕 Regular product (no custom design)");
+    }
+    
+    // STEP 6: Address selection and payment listeners
+    await displayAddressSelection();
+    
+    document.getElementById('codOption')?.addEventListener('click', () => { 
+      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
+      document.getElementById('codOption').classList.add('selected'); 
+      selectedPaymentMethod='cod'; 
+      document.getElementById('codDetails').classList.add('show'); 
+      document.getElementById('razorpaySection').classList.remove('show'); 
+      updateTotalsDisplay();
+      debugLog("💵 Payment method changed to COD");
+    });
+    
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { 
+      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
+      document.getElementById('razorpayOption').classList.add('selected'); 
+      selectedPaymentMethod='razorpay'; 
+      document.getElementById('codDetails').classList.remove('show'); 
+      document.getElementById('razorpaySection').classList.add('show'); 
+      updateTotalsDisplay();
+      debugLog("💳 Payment method changed to Razorpay (5% discount applied)");
+    });
+    
+    document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
+    document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
+    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { 
+      e.preventDefault(); 
+      debugLog("🔙 User clicked back to shop");
+      window.location.href='index.html'; 
+    });
+    document.getElementById('confirmMapBtn')?.addEventListener('click', confirmLocationAndFill);
+    document.getElementById('closeMapModalBtn')?.addEventListener('click', closeMapModal);
+    document.getElementById('cancelMapBtn')?.addEventListener('click', closeMapModal);
+    document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
+    document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
+    document.getElementById('codOption').click();
+    
+    debugLog("✅ ========== CHECKOUT INITIALIZATION COMPLETE ==========");
+    debugLog("📋 Final checkout state:", {
+      cartItems: cart.length,
+      totalAmount: cartTotal,
+      selectedPayment: selectedPaymentMethod,
+      hasAddress: !!selectedAddress,
+      isCustom: isCustomizedOrder
+    });
+  }
+  
+  // CRITICAL FIX #3: Prevent bfcache (back/forward cache) from restoring stale state
+  // This ensures the page always reloads fresh when navigated via back/forward buttons
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      debugLog("🔄 Page restored from bfcache - forcing full reload to prevent stale data");
+      window.location.reload();
+    }
+  });
+  
+  // Also clear any remaining buyNow data on page unload to prevent ghost data
+  window.addEventListener('beforeunload', function() {
+    // Don't clear if we're placing an order (to avoid race conditions)
+    if (!isProcessing) {
+      sessionStorage.removeItem('vedanta_buy_now');
+    }
+  });
+  
+  // Start the application
+  init();
+</script>
+</body>
+</html>
