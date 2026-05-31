@@ -1687,7 +1687,51 @@ async function saveDesignImageToFirebase(side,designJSON,productName,colorName){
     } 
 }
 async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Designs added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
-async function buyNow(){ const user=auth.currentUser; const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} if(!currentSize){showToast('Please select Size first',true);return;} if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return;} showLoading("PREPARING ORDER..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return;}} localStorage.setItem('customCheckoutData',JSON.stringify({isCustomized:true,frontDesignImage:frontURL,backDesignImage:backURL,tshirtType:currentStyle.displayName,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,size:currentSize,quantity:1,price:currentStyle.price,printMethod:currentPrintMethod})); window.location.href='secure-checkout2.html'; }catch(e){showToast('Error',true);}finally{hideLoading();} }
+
+// FIXED: buyNow function with timestamps to ensure custom product overwrites old checkout data
+async function buyNow(){ 
+    const user=auth.currentUser; 
+    const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); 
+    if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} 
+    if(!currentSize){showToast('Please select Size first',true);return;} 
+    if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return;} 
+    showLoading("PREPARING ORDER..."); 
+    try{ 
+        if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); 
+        else backDesignJSON=fabricCanvas.toJSON(); 
+        let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); 
+        let frontURL=null,backURL=null; 
+        if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); 
+        if(!frontURL){showToast('Failed to save front design',true);return;}} 
+        if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); 
+        if(!backURL){showToast('Failed to save back design',true);return;}} 
+        
+        // FIX: Save custom product data with timestamps to ensure it overwrites old checkout data
+        const customData = {
+            isCustomized: true,
+            frontDesignImage: frontURL,
+            backDesignImage: backURL,
+            tshirtType: currentStyle.displayName,
+            selectedColor: selectedColorDisplay,
+            selectedColorKey: selectedColor,
+            size: currentSize,
+            quantity: 1,
+            price: currentStyle.price,
+            printMethod: currentPrintMethod
+        };
+        
+        // Save with timestamps for checkout page to detect most recent selection
+        localStorage.setItem('customCheckoutData', JSON.stringify(customData));
+        localStorage.setItem('customCheckoutDataTimestamp', Date.now().toString());
+        localStorage.setItem('lastProductSelectionTime', Date.now().toString());
+        
+        // Clear any stale regular cart data to ensure custom product takes priority
+        localStorage.removeItem('vedantaCart');
+        
+        window.location.href='secure-checkout2.html'; 
+    } catch(e){showToast('Error',true);} finally{hideLoading();} 
+}
+
 function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.innerText=m; t.style.background=err?'#F44336':'#D4AF37'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function saveCart(){localStorage.setItem('vedanta_custom_cart',JSON.stringify(cart)); updateCartCount(); updateCartUI();}
 function loadCart(){const s=localStorage.getItem('vedanta_custom_cart'); if(s){try{cart=JSON.parse(s);updateCartUI();updateCartCount();}catch(e){cart=[];}}}
