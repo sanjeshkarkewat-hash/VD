@@ -105,6 +105,7 @@
     .close-map-btn { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 14px; border-radius: 40px; font-weight: 700; color: #ccc; cursor: pointer; }
     .user-info-bar { background: rgba(212,175,55,0.1); border-radius: 14px; padding: 12px; margin-bottom: 16px; font-size: 12px; color: #D4AF37; }
     .design-preview-badge { display: inline-block; background: rgba(212,175,55,0.2); border-radius: 6px; padding: 2px 8px; font-size: 9px; margin-top: 5px; }
+    .clear-cart-btn { background: rgba(244,67,54,0.2); border: 1px solid #F44336; padding: 8px 16px; border-radius: 20px; font-size: 11px; cursor: pointer; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -114,7 +115,10 @@
 <div class="map-picker-modal" id="mapPickerModal"><div class="map-picker-container"><div class="map-picker-header"><div><h3><i class="fas fa-map-pin"></i> Select Location</h3></div><i class="fas fa-times" id="closeMapModalBtn" style="font-size:22px; cursor:pointer;"></i></div><div class="map-picker-body" id="mapContainer"></div><div class="map-picker-footer"><button class="confirm-location-btn" id="confirmMapBtn">Confirm My Location</button><button class="close-map-btn" id="cancelMapBtn">Cancel</button></div></div></div>
 
 <div class="checkout-container">
-  <div class="checkout-header"><div class="logo"><h1>VEDANTA</h1><p>secure checkout</p></div><div class="secure-badge"><i class="fas fa-lock"></i> 100% Secure</div></div>
+  <div class="checkout-header">
+    <div class="logo"><h1>VEDANTA</h1><p>secure checkout</p></div>
+    <div class="secure-badge"><i class="fas fa-lock"></i> 100% Secure</div>
+  </div>
   <div class="checkout-main">
     <div class="checkout-form">
       <div class="user-info-bar"><i class="fas fa-user-check"></i> Welcome, <span id="displayPhone">Loading...</span></div>
@@ -132,7 +136,10 @@
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
       <div id="customDesignPreviewContainer" style="display:none;" class="custom-design-preview-section">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
-        <div class="custom-preview-row"><div class="custom-preview-item"><p>Front Design</p><img id="frontDesignPreview" style="max-height:120px;"></div><div class="custom-preview-item"><p>Back Design</p><img id="backDesignPreview" style="max-height:120px;"></div></div>
+        <div class="custom-preview-row">
+          <div class="custom-preview-item"><p>Front Design</p><img id="frontDesignPreview" style="max-height:120px;"></div>
+          <div class="custom-preview-item"><p>Back Design</p><img id="backDesignPreview" style="max-height:120px;"></div>
+        </div>
       </div>
       <div id="orderItemsList"></div>
       <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 Free Express Shipping (3-5 days)</span></div></div>
@@ -187,36 +194,47 @@
     return null;
   }
 
-  // CRITICAL FIX: Clear custom data when cart is from regular products
+  // FIXED: Clear old cart data before loading custom design
   function loadCartFromSource() {
-    // First check for regular cart (non-custom)
-    const savedCart = localStorage.getItem('vedantaCart');
+    // Check for custom design data first - this should ALWAYS take priority
     const customDataRaw = localStorage.getItem('customCheckoutData');
-    
-    // Determine priority: If custom data exists but cart is empty OR we force check flag?
-    // The bug: custom data persists and overrides regular cart. 
-    // Solution: Always prefer regular cart if it contains non-custom items, unless we are explicitly coming from custom flow.
-    // We read a flag 'fromCustomDesign' set on customizer page.
     const fromCustomDesign = sessionStorage.getItem('fromCustomDesign') === 'true';
     
-    if (fromCustomDesign && customDataRaw) {
-      // Coming from custom design: use custom data
+    // ALSO check URL parameter for custom design (more reliable)
+    const urlParams = new URLSearchParams(window.location.search);
+    const customParam = urlParams.get('custom') === 'true';
+    
+    const isCustomFlow = fromCustomDesign || customParam;
+    
+    console.log("Loading cart - isCustomFlow:", isCustomFlow, "customDataRaw exists:", !!customDataRaw);
+    
+    if (isCustomFlow && customDataRaw) {
       try {
         const data = JSON.parse(customDataRaw);
+        console.log("Custom data loaded:", data);
+        
         if (data && data.isCustomized === true) {
+          // Clear any existing cart data from localStorage to avoid mixing
+          // But don't delete permanently, just for this session we'll override
           isCustomizedOrder = true;
           frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
           backDesignImageURL = data.backDesignImage || null;
+          
           if (frontDesignImageURL || backDesignImageURL) {
             document.getElementById('customDesignPreviewContainer').style.display = 'block';
             if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
             if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
           }
+          
+          // Build custom cart item with CORRECT data from customizer
+          const customPrice = data.price || 1699;
+          const customQuantity = data.quantity || 1;
+          
           cart = [{
             id: 'custom_' + Date.now(),
-            name: data.tshirtType || 'Custom T-Shirt',
-            price: data.price || 1699,
-            quantity: data.quantity || 1,
+            name: data.tshirtType || 'Custom Design T-Shirt',
+            price: customPrice,
+            quantity: customQuantity,
             size: data.size || 'M',
             selectedColor: data.selectedColor || 'Black',
             printMethod: data.printMethod || 'transparent',
@@ -224,43 +242,68 @@
             backDesignImage: backDesignImageURL,
             isCustomized: true
           }];
-          // Clear the flag after loading
+          
+          cartTotal = customPrice * customQuantity;
+          console.log("Custom cart created:", cart, "Total:", cartTotal);
+          
+          // Clear the flag after loading to prevent re-loading on refresh
           sessionStorage.removeItem('fromCustomDesign');
-          // Clear custom data to avoid reuse for regular products
-          // But keep for this session? We will clear after order or after exit. For now we keep but flag prevents reuse.
-        } else { fallbackToRegularCart(); }
-      } catch(e) { fallbackToRegularCart(); }
-    } else {
-      fallbackToRegularCart();
+          
+          // Don't clear customCheckoutData immediately - keep for this session
+          // but mark that we've loaded it
+          sessionStorage.setItem('customDataLoaded', 'true');
+          
+          return; // Exit early - custom order loaded
+        } else {
+          console.log("Custom data missing isCustomized flag");
+        }
+      } catch(e) { 
+        console.error("Error parsing custom data:", e);
+      }
     }
     
-    function fallbackToRegularCart() {
-      // Reset custom flags
-      isCustomizedOrder = false;
-      frontDesignImageURL = null;
-      backDesignImageURL = null;
-      document.getElementById('customDesignPreviewContainer').style.display = 'none';
-      if (savedCart) {
-        try { 
-          cart = JSON.parse(savedCart);
-          // Ensure no custom properties leak
-          cart.forEach(item => { 
-            item.isCustomized = false; 
-            item.printMethod = null; 
-            item.frontDesignImage = null; 
-            item.backDesignImage = null;
-          });
-        } catch(e) { cart = []; }
-      } else { cart = []; }
-    }
+    // If not custom flow or no valid custom data, load regular cart
+    console.log("Loading regular cart");
+    isCustomizedOrder = false;
+    frontDesignImageURL = null;
+    backDesignImageURL = null;
+    document.getElementById('customDesignPreviewContainer').style.display = 'none';
     
-    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    const savedCart = localStorage.getItem('vedantaCart');
+    if (savedCart) {
+      try { 
+        cart = JSON.parse(savedCart);
+        // Ensure no custom properties leak
+        cart.forEach(item => { 
+          item.isCustomized = false; 
+          item.printMethod = null; 
+          item.frontDesignImage = null; 
+          item.backDesignImage = null;
+        });
+        cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+        console.log("Regular cart loaded:", cart, "Total:", cartTotal);
+      } catch(e) { 
+        console.error("Error parsing regular cart:", e);
+        cart = []; 
+        cartTotal = 0;
+      }
+    } else { 
+      cart = []; 
+      cartTotal = 0;
+      console.log("No cart data found");
+    }
   }
 
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
+    
+    if (cart.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-shopping-cart" style="font-size:48px;color:#D4AF37;"></i><p style="margin-top:16px;">Your cart is empty</p><button onclick="window.location.href=\'index.html\'" style="margin-top:16px;padding:10px 20px;background:#D4AF37;border:none;border-radius:30px;cursor:pointer;">Continue Shopping</button></div>';
+      return;
+    }
+    
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
@@ -270,9 +313,13 @@
       let imageUrl = null, designBadge = '';
       const isCustom = item.isCustomized === true;
       
+      console.log("Rendering item:", item.name, "isCustom:", isCustom);
+      
       if (isCustom) {
+        // For custom items, show the actual design image
         imageUrl = item.frontDesignImage || frontDesignImageURL || item.backDesignImage || backDesignImageURL;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
+        console.log("Custom item image URL:", imageUrl);
       } else {
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
@@ -281,8 +328,14 @@
       
       if (imageUrl) {
         const img = document.createElement('img');
-        img.src = imageUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
-        img.onerror = () => { imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>'; };
+        img.src = imageUrl; 
+        img.style.width = '100%'; 
+        img.style.height = '100%'; 
+        img.style.objectFit = 'cover';
+        img.onerror = () => { 
+          console.log("Image load failed:", imageUrl);
+          imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>'; 
+        };
         imgDiv.appendChild(img);
       } else {
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
@@ -434,21 +487,100 @@
     try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error(e); return { success: false }; }
   }
   
-  async function placeCOD() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const res = await saveOrder('Cash on Delivery'); showLoading(false); if(res.success) { showToast(`Order placed! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); sessionStorage.removeItem('fromCustomDesign'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order failed', true); isProcessing=false; } }
+  async function placeCOD() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const res = await saveOrder('Cash on Delivery'); 
+    showLoading(false); 
+    if(res.success) { 
+      showToast(`Order placed! ${res.orderId}`); 
+      // Clear all cart data after successful order
+      localStorage.removeItem('vedantaCart'); 
+      localStorage.removeItem('customCheckoutData'); 
+      sessionStorage.removeItem('fromCustomDesign');
+      sessionStorage.removeItem('customDataLoaded');
+      setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+    } else { 
+      showToast('Order failed', true); 
+      isProcessing=false; 
+    } 
+  }
   
-  async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); sessionStorage.removeItem('fromCustomDesign'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
+  async function razorpayPayment() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const amt = discountedTotal; 
+    if(amt<=0){ showLoading(false); isProcessing=false; return; } 
+    const options = { 
+      key: RAZORPAY_KEY_ID, 
+      amount: Math.round(amt)*100, 
+      currency: 'INR', 
+      name: 'VEDANTA', 
+      description: 'T-Shirt Order', 
+      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
+      theme: { color: '#D4AF37' }, 
+      handler: async (resp) => { 
+        const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
+        showLoading(false); 
+        if(res.success) { 
+          showToast(`Payment success! ${res.orderId}`); 
+          localStorage.removeItem('vedantaCart'); 
+          localStorage.removeItem('customCheckoutData'); 
+          sessionStorage.removeItem('fromCustomDesign');
+          sessionStorage.removeItem('customDataLoaded');
+          setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+        } else { 
+          showToast('Order save issue', true); 
+          isProcessing=false; 
+        } 
+      }, 
+      modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } 
+    }; 
+    const razor = new Razorpay(options); 
+    razor.open(); 
+  }
 
   async function init() {
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
     if (stored) currentUser = stored;
-    else { const phone = localStorage.getItem('userPhone'); if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' }; else { showToast('Please login', true); setTimeout(()=> window.location.href='profile.html',1500); return; } }
+    else { 
+      const phone = localStorage.getItem('userPhone'); 
+      if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' }; 
+      else { 
+        showToast('Please login', true); 
+        setTimeout(()=> window.location.href='profile.html',1500); 
+        return; 
+      } 
+    }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     await fetchAllProductsImages();
     loadCartFromSource();
     await renderOrderItems();
     await displayAddressSelection();
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); });
+    
+    // Set up event listeners
+    document.getElementById('codOption')?.addEventListener('click', () => { 
+      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
+      document.getElementById('codOption').classList.add('selected'); 
+      selectedPaymentMethod='cod'; 
+      document.getElementById('codDetails').classList.add('show'); 
+      document.getElementById('razorpaySection').classList.remove('show'); 
+      updateTotalsDisplay(); 
+    });
+    
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { 
+      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
+      document.getElementById('razorpayOption').classList.add('selected'); 
+      selectedPaymentMethod='razorpay'; 
+      document.getElementById('codDetails').classList.remove('show'); 
+      document.getElementById('razorpaySection').classList.add('show'); 
+      updateTotalsDisplay(); 
+    });
+    
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
@@ -457,9 +589,11 @@
     document.getElementById('cancelMapBtn')?.addEventListener('click', closeMapModal);
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
+    
+    // Default select COD
     document.getElementById('codOption').click();
-    function calculateDiscount() { updateTotalsDisplay(); }
   }
+  
   init();
 </script>
 </body>
