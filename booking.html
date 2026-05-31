@@ -178,7 +178,6 @@
         return productsCache;
     }
     
-    // 🔥 FIXED: Get product image - supports BOTH regular and custom orders
     function getProductImageForOrder(item, order) {
         // For CUSTOM orders: show custom design image
         if (order && order.isCustomized === true) {
@@ -195,62 +194,36 @@
         
         // For REGULAR orders: get product image from products collection
         let productName = item?.name || (order?.items?.[0]?.name) || '';
-        let productId = item?.id || (order?.items?.[0]?.id) || '';
-        let selectedColor = item?.selectedColor || (order?.items?.[0]?.selectedColor) || '';
         
-        // Try to find by product name
         if (productName) {
             const lowerName = productName.toLowerCase();
-            // Common product types
             if (lowerName.includes('sweatshirt')) {
                 const prod = productsCache.get('sweatshirt');
                 if (prod?.imageUrl) return prod.imageUrl;
-                if (prod?.images?.[0]) return prod.images[0];
             }
             if (lowerName.includes('regular fit')) {
                 const prod = productsCache.get('regular fit');
                 if (prod?.imageUrl) return prod.imageUrl;
-                if (prod?.images?.[0]) return prod.images[0];
             }
             if (lowerName.includes('polo')) {
                 const prod = productsCache.get('polo');
                 if (prod?.imageUrl) return prod.imageUrl;
-                if (prod?.images?.[0]) return prod.images[0];
             }
             if (lowerName.includes('oversized')) {
                 const prod = productsCache.get('oversized');
                 if (prod?.imageUrl) return prod.imageUrl;
-                if (prod?.images?.[0]) return prod.images[0];
-            }
-            if (lowerName.includes('acid wash')) {
-                const prod = productsCache.get('acid wash');
-                if (prod?.imageUrl) return prod.imageUrl;
-                if (prod?.images?.[0]) return prod.images[0];
             }
             if (lowerName.includes('hoodie')) {
                 const prod = productsCache.get('hoodie');
                 if (prod?.imageUrl) return prod.imageUrl;
-                if (prod?.images?.[0]) return prod.images[0];
             }
             
-            // Try exact match from cache
             const cached = productsCache.get(productName);
             if (cached?.imageUrl) return cached.imageUrl;
-            if (cached?.images?.[0]) return cached.images[0];
-            
             const cachedLower = productsCache.get(productName.toLowerCase());
             if (cachedLower?.imageUrl) return cachedLower.imageUrl;
-            if (cachedLower?.images?.[0]) return cachedLower.images[0];
         }
         
-        // Try by product ID
-        if (productId) {
-            const cached = productsCache.get(productId);
-            if (cached?.imageUrl) return cached.imageUrl;
-            if (cached?.images?.[0]) return cached.images[0];
-        }
-        
-        // Check if item has direct image URL
         if (item?.productImage) return item.productImage;
         if (item?.image) return item.image;
         
@@ -258,15 +231,6 @@
     }
     
     function getProductIconForOrder(item) {
-        let productName = item?.name || '';
-        if (productName) {
-            const lowerName = productName.toLowerCase();
-            if (lowerName.includes('sweatshirt')) return 'fa-tshirt';
-            if (lowerName.includes('regular fit')) return 'fa-tshirt';
-            if (lowerName.includes('polo')) return 'fa-tshirt';
-            if (lowerName.includes('oversized')) return 'fa-tshirt';
-            if (lowerName.includes('hoodie')) return 'fa-tshirt';
-        }
         return 'fa-tshirt';
     }
     
@@ -329,7 +293,6 @@
         filtered.forEach((order, index) => {
             const mainItem = order.items && order.items[0] ? order.items[0] : { id: null, name: order.tshirtType || 'Product', price: order.total || 0, quantity: 1 };
             
-            // 🔥 Get image using our fixed function
             const productImgUrl = getProductImageForOrder(mainItem, order);
             const isCustom = isCustomizedOrder(order, mainItem);
             const iconClass = getProductIconForOrder(mainItem);
@@ -345,7 +308,6 @@
             else if (order.status === 'confirmed') statusIcon = 'fa-check';
             else if (order.status === 'shipped') statusIcon = 'fa-truck';
             
-            // Build image HTML
             let imageHtml = '';
             if (productImgUrl) {
                 imageHtml = `<img src="${productImgUrl}" alt="${escapeHtml(mainItem.name)}" loading="lazy" style="width:100%;height:100%;object-fit:cover;border-radius:20px;" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fas ${iconClass}\' style=\'font-size:44px;color:#D4AF37;\'></i>';">`;
@@ -355,9 +317,13 @@
             
             const customBadgeHtml = isCustom ? `<div class="custom-badge"><i class="fas fa-palette"></i> Custom Designed</div>` : '';
             
-            // Get print method display
-            const printMethod = order.printMethod || mainItem?.printMethod || 'transparent';
-            const printMethodDisplay = printMethod === 'transparent' ? 'Transparent Print' : 'Full BG Print';
+            // 🔥 FIXED: Print method ONLY for custom orders
+            let printMethodHtml = '';
+            if (isCustom) {
+                const printMethod = order.printMethod || mainItem?.printMethod || 'transparent';
+                const printMethodDisplay = printMethod === 'transparent' ? 'Transparent Print' : 'Full BG Print';
+                printMethodHtml = `<div class="info-item"><span class="info-label">PRINT METHOD</span><span class="info-value">${printMethodDisplay}</span></div>`;
+            }
             
             container.innerHTML += `
                 <div class="booking-card" style="animation-delay: ${index * 0.05}s">
@@ -376,7 +342,7 @@
                     <div class="info-grid">
                         <div class="info-item"><span class="info-label">TOTAL AMOUNT</span><span class="info-value price-highlight">₹${priceAmount.toLocaleString('en-IN')}</span></div>
                         <div class="info-item"><span class="info-label">PAYMENT</span><span class="info-value">${order.paymentMethod || 'Cash on Delivery'}</span></div>
-                        <div class="info-item"><span class="info-label">PRINT METHOD</span><span class="info-value">${printMethodDisplay}</span></div>
+                        ${printMethodHtml}
                         <div class="info-item"><span class="info-label">ITEMS</span><span class="info-value">${order.items?.length || 1} item(s)</span></div>
                     </div>
                     <div class="card-actions">
@@ -415,7 +381,6 @@
         initFilters();
         console.log(`✅ Loaded ${orders.length} total orders`);
         
-        // Real-time listener
         if (currentUser.phone) {
             db.collection('orders').where('customerPhone', '==', currentUser.phone).onSnapshot(() => {
                 fetchOrdersForUser().then(newOrders => { allOrders = newOrders; renderOrders(); });
