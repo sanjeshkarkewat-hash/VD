@@ -157,70 +157,89 @@
   let productImagesCache = {};
   let mapInstance = null, mapMarker = null, currentSelectedLatLng = null;
 
-  // === CRITICAL FIX: Clear stale checkout data on every load ===
-  function clearStaleCheckoutData() {
-    // Remove any custom checkout data that might be lingering from previous sessions
+  // ========== CRITICAL FIX #1: COMPLETE CHECKOUT DATA RESET ==========
+  // This function ensures NO stale product data persists when loading checkout
+  function resetAndLoadFreshCheckoutData() {
+    console.log("🔄 [CHECKOUT] Resetting all stale checkout data...");
+    
+    // 1. Remove any lingering custom checkout data from previous sessions
     localStorage.removeItem('customCheckoutData');
-    // Also remove any temporary custom flags (backup)
-    sessionStorage.removeItem('pendingCustomOrder');
-    // Reset global custom variables
+    
+    // 2. Clear sessionStorage buy-now flag that might be stale (will be re-set by product pages)
+    //    We don't remove it completely here because product page might have just set it.
+    //    Instead, we will read it and then consume it.
+    
+    // 3. Reset global state variables to default
     isCustomizedOrder = false;
     frontDesignImageURL = null;
     backDesignImageURL = null;
-    // Do NOT clear regular cart here - that would break normal flow. Cart will be loaded from localStorage vedantaCart in loadFreshCartData()
+    cart = [];
+    cartTotal = 0;
+    
+    console.log("✅ [CHECKOUT] Global state reset complete. Ready to load fresh product.");
   }
-
-  // Load cart based on source: URL params (Buy Now) OR localStorage (normal cart) OR empty
-  function loadFreshCartData() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const buyNowParam = urlParams.get('buyNow');
-    let newCart = [];
-
-    // PRIORITY 1: If buyNow data exists in sessionStorage (passed from product/custom page)
-    const pendingBuyNow = sessionStorage.getItem('vedanta_buy_now');
-    if (pendingBuyNow) {
+  
+  // ========== CRITICAL FIX #2: LOAD PRODUCT WITH CONSUMPTION ==========
+  // This reads the buyNow data from sessionStorage (set by product/custom page)
+  // and then IMMEDIATELY removes it to prevent reuse on back navigation
+  function loadProductFromBuyNow() {
+    const buyNowData = sessionStorage.getItem('vedanta_buy_now');
+    
+    if (buyNowData) {
       try {
-        const buyData = JSON.parse(pendingBuyNow);
-        if (buyData && buyData.items && buyData.items.length > 0) {
-          newCart = buyData.items;
-          // Also if custom flag present
-          if (buyData.isCustomized) {
+        const data = JSON.parse(buyNowData);
+        console.log("📦 [CHECKOUT] Selected Product from Buy Now:", data);
+        
+        if (data && data.items && data.items.length > 0) {
+          cart = data.items;
+          console.log("✅ [CHECKOUT] Checkout Product Loaded:", cart[0]);
+          
+          // Load custom design data if present
+          if (data.isCustomized) {
             isCustomizedOrder = true;
-            frontDesignImageURL = buyData.frontDesignImage || null;
-            backDesignImageURL = buyData.backDesignImage || null;
+            frontDesignImageURL = data.frontDesignImage || null;
+            backDesignImageURL = data.backDesignImage || null;
+            console.log("🎨 [CHECKOUT] Custom design loaded - Front:", !!frontDesignImageURL, "Back:", !!backDesignImageURL);
           }
-          sessionStorage.removeItem('vedanta_buy_now'); // consume once
+          
+          // IMPORTANT: Consume the buyNow data immediately to prevent reuse on back navigation
+          sessionStorage.removeItem('vedanta_buy_now');
+          console.log("🗑️ [CHECKOUT] BuyNow data consumed and removed from sessionStorage");
+          
+          return true;
         }
-      } catch(e) { console.warn("Invalid buyNow data"); }
-    }
-    // PRIORITY 2: If no buyNow, load from regular cart
-    if (newCart.length === 0) {
-      const savedCart = localStorage.getItem('vedantaCart');
-      if (savedCart) {
-        try { 
-          newCart = JSON.parse(savedCart);
-          // Ensure no custom leftovers are attached to regular products
-          newCart.forEach(item => {
-            if (!item.isCustomized) {
-              item.printMethod = null;
-              delete item.frontDesignImage;
-              delete item.backDesignImage;
-            }
-          });
-        } catch(e) { newCart = []; }
+      } catch(e) {
+        console.error("❌ [CHECKOUT] Failed to parse buyNow data:", e);
+        sessionStorage.removeItem('vedanta_buy_now');
       }
     }
-
-    // If still empty and no custom flag from buyNow, but custom data might be forced? No, we cleared customCheckoutData.
-    // However if custom flag from url param? handle edge: custom product but not via session?
-    // Additional: direct custom query param
-    if (newCart.length === 0 && urlParams.get('custom') === 'true') {
-      // fallback not needed because product page should have pushed; but safety
+    
+    // Fallback: load from regular cart (for normal navigation)
+    const savedCart = localStorage.getItem('vedantaCart');
+    if (savedCart && cart.length === 0) {
+      try {
+        cart = JSON.parse(savedCart);
+        console.log("📦 [CHECKOUT] Loaded from regular cart:", cart);
+        // Ensure no custom flags on regular products
+        cart.forEach(item => {
+          if (!item.isCustomized) {
+            item.printMethod = null;
+            delete item.frontDesignImage;
+            delete item.backDesignImage;
+          }
+        });
+        return true;
+      } catch(e) {
+        console.error("❌ [CHECKOUT] Failed to parse cart:", e);
+        cart = [];
+      }
     }
     
-    cart = newCart;
-    // After loading, recompute totals
-    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    if (cart.length === 0) {
+      console.warn("⚠️ [CHECKOUT] No product found in checkout. Cart is empty.");
+    }
+    
+    return cart.length > 0;
   }
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
@@ -261,6 +280,10 @@
       container.innerHTML = '<div style="text-align:center; padding:20px;">No items in cart</div>';
       return;
     }
+    
+    // Recalculate totals based on current cart
+    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
@@ -268,7 +291,7 @@
       const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
       let imageUrl = null, designBadge = '';
-      const isCustom = item.isCustomized === true || (frontDesignImageURL && !item.productImage && isCustomizedOrder);
+      const isCustom = item.isCustomized === true || (frontDesignImageURL && isCustomizedOrder);
       
       if (isCustom) {
         imageUrl = item.frontDesignImage || frontDesignImageURL || item.backDesignImage || backDesignImageURL;
@@ -440,10 +463,14 @@
   
   async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.clear(); sessionStorage.removeItem('vedanta_buy_now'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
 
+  // ========== MAIN INITIALIZATION WITH FIXES ==========
   async function init() {
-    // STEP 1: Clear any stale customization data (fixes persistence bug)
-    clearStaleCheckoutData();
+    console.log("🚀 [CHECKOUT] Page loaded - Starting fresh checkout session");
     
+    // STEP 1: Reset all stale data (prevents old product from showing)
+    resetAndLoadFreshCheckoutData();
+    
+    // STEP 2: Get user info
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
     if (stored) currentUser = stored;
     else { 
@@ -453,25 +480,39 @@
     }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     
-    // STEP 2: Load fresh cart data (either buyNow or regular cart) - no old custom order remains
-    loadFreshCartData();
+    // STEP 3: Load the product that was selected (either from buyNow or regular cart)
+    const productLoaded = loadProductFromBuyNow();
     
-    await fetchAllProductsImages();
-    await renderOrderItems();
-    // Show/hide custom preview based on actual current cart state
-    const isCustomNow = isCustomizedOrder || (cart.length > 0 && cart[0]?.isCustomized === true);
-    if (isCustomNow && (frontDesignImageURL || backDesignImageURL)) {
-      document.getElementById('customDesignPreviewContainer').style.display = 'block';
-      if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
-      if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
+    if (!productLoaded || cart.length === 0) {
+      console.warn("⚠️ [CHECKOUT] No product found. Cart is empty.");
+      showToast("No product selected. Please add items to cart.", true);
     } else {
-      document.getElementById('customDesignPreviewContainer').style.display = 'none';
+      console.log("✅ [CHECKOUT] Successfully loaded product:", cart[0]?.name);
     }
     
+    // STEP 4: Fetch product images and render UI
+    await fetchAllProductsImages();
+    await renderOrderItems();
+    
+    // STEP 5: Show/hide custom preview based on actual cart data
+    const isCustomNow = isCustomizedOrder || (cart.length > 0 && cart[0]?.isCustomized === true);
+    if (isCustomNow && (frontDesignImageURL || backDesignImageURL || cart[0]?.frontDesignImage)) {
+      const frontImg = frontDesignImageURL || cart[0]?.frontDesignImage;
+      const backImg = backDesignImageURL || cart[0]?.backDesignImage;
+      document.getElementById('customDesignPreviewContainer').style.display = 'block';
+      if (frontImg) document.getElementById('frontDesignPreview').src = frontImg;
+      if (backImg) document.getElementById('backDesignPreview').src = backImg;
+      console.log("🎨 [CHECKOUT] Custom preview displayed");
+    } else {
+      document.getElementById('customDesignPreviewContainer').style.display = 'none';
+      console.log("📦 [CHECKOUT] Regular product preview (no custom design)");
+    }
+    
+    // STEP 6: Address selection and payment listeners
     await displayAddressSelection();
     
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); });
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); updateTotalsDisplay(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); updateTotalsDisplay(); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
@@ -481,7 +522,18 @@
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('codOption').click();
+    
+    console.log("✅ [CHECKOUT] Initialization complete. Ready for order.");
   }
+  
+  // Prevent back/forward cache from restoring stale state
+  window.addEventListener('pageshow', function(event) {
+    if (event.persisted) {
+      console.log("🔄 [CHECKOUT] Page restored from bfcache - reloading fresh data");
+      location.reload();
+    }
+  });
+  
   init();
 </script>
 </body>
