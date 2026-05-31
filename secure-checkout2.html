@@ -105,7 +105,6 @@
     .close-map-btn { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 14px; border-radius: 40px; font-weight: 700; color: #ccc; cursor: pointer; }
     .user-info-bar { background: rgba(212,175,55,0.1); border-radius: 14px; padding: 12px; margin-bottom: 16px; font-size: 12px; color: #D4AF37; }
     .design-preview-badge { display: inline-block; background: rgba(212,175,55,0.2); border-radius: 6px; padding: 2px 8px; font-size: 9px; margin-top: 5px; }
-    .debug-panel { position: fixed; bottom: 10px; right: 10px; background: #000; color: #0f0; font-size: 10px; padding: 5px; border-radius: 4px; z-index: 99999; max-width: 300px; opacity: 0.8; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -145,23 +144,8 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
-<div class="debug-panel" id="debugPanel">Debug: Ready</div>
 
 <script>
-  // ========== DEBUG HELPER ==========
-  function DEBUG(tag, data) {
-    const timestamp = new Date().toISOString().substring(11, 23);
-    const message = `[${timestamp}] ${tag}`;
-    console.log(message, data !== undefined ? data : '');
-    const panel = document.getElementById('debugPanel');
-    if (panel) {
-      panel.innerHTML = `${tag.substring(0, 50)}${data ? ': ' + JSON.stringify(data).substring(0, 100) : ''}`;
-      setTimeout(() => { if(panel.innerHTML === message) panel.innerHTML = 'Debug: Ready'; }, 3000);
-    }
-  }
-  
-  DEBUG("🚀 CHECKOUT PAGE LOADED", { url: window.location.href });
-  
   const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -178,7 +162,6 @@
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
   async function fetchAllProductsImages() {
-    DEBUG("📸 fetchAllProductsImages - START");
     try {
       const snapshot = await db.collection('products').get();
       snapshot.forEach(doc => {
@@ -187,7 +170,6 @@
         productImagesCache[doc.id] = p.images?.[0] || p.image || null;
         if (p.displayName) productImagesCache[p.displayName.toLowerCase()] = p.images?.[0] || p.image || null;
       });
-      DEBUG("📸 fetchAllProductsImages - COMPLETE", { cacheSize: Object.keys(productImagesCache).length });
     } catch(e) { console.warn("Could not fetch products:", e); }
   }
 
@@ -205,20 +187,15 @@
     return null;
   }
 
-  // ========== CRITICAL: loadCustomData - THIS IS WHERE DATA LOADS ==========
   function loadCustomData() {
-    DEBUG("📂 loadCustomData - START");
     try {
       const saved = localStorage.getItem('customCheckoutData');
-      DEBUG("📂 localStorage.getItem('customCheckoutData')", saved);
       if (saved) {
         const data = JSON.parse(saved);
-        DEBUG("📂 Parsed customCheckoutData", data);
         if (data && data.isCustomized === true) {
           isCustomizedOrder = true;
           frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
           backDesignImageURL = data.backDesignImage || null;
-          DEBUG("🎨 Custom design loaded", { front: !!frontDesignImageURL, back: !!backDesignImageURL });
           if (frontDesignImageURL || backDesignImageURL) {
             document.getElementById('customDesignPreviewContainer').style.display = 'block';
             if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
@@ -237,37 +214,32 @@
               backDesignImage: backDesignImageURL,
               isCustomized: true
             }];
-            DEBUG("📦 Created cart from custom data", cart);
           }
         }
       }
       if (cart.length === 0) {
         const savedCart = localStorage.getItem('vedantaCart');
-        DEBUG("📂 localStorage.getItem('vedantaCart')", savedCart);
         if (savedCart) {
           try { 
             cart = JSON.parse(savedCart);
-            DEBUG("📦 Cart loaded from vedantaCart", cart);
+            // Regular collection items - ensure no printMethod
             cart.forEach(item => {
               if (!item.isCustomized) {
                 item.printMethod = null;
               }
             });
-          } catch(e) { cart = []; DEBUG("❌ Failed to parse vedantaCart", e); }
+          } catch(e) { cart = []; }
         }
       }
       cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-      DEBUG("📊 loadCustomData - FINAL", { cartLength: cart.length, cartTotal });
-    } catch(e) { console.error("Error loading custom data:", e); DEBUG("❌ loadCustomData error", e); }
+    } catch(e) { console.error("Error loading custom data:", e); }
   }
 
   async function renderOrderItems() {
-    DEBUG("🎨 renderOrderItems - START", { cartLength: cart.length });
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
     for (const item of cart) {
-      DEBUG("🎨 Rendering item", { name: item.name, price: item.price, isCustom: item.isCustomized });
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
       const infoDiv = document.createElement('div'); infoDiv.className = 'order-item-info';
@@ -294,6 +266,7 @@
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
       }
       
+      // Only show print method for custom orders
       let printMethodText = '';
       if (isCustom && item.printMethod) {
         printMethodText = ` | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}`;
@@ -307,7 +280,6 @@
       container.appendChild(div);
     }
     updateTotalsDisplay();
-    DEBUG("🎨 renderOrderItems - COMPLETE");
   }
 
   function updateTotalsDisplay() {
@@ -419,62 +391,140 @@
 
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
 
+  // 🔥 FIXED: saveOrder - print method ONLY for custom orders
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
+    
+    // Check if this is a custom order
     const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
+    
+    // Get printMethod ONLY for custom orders
     const orderPrintMethod = isCustomOrder ? (cart[0]?.printMethod || 'transparent') : null;
+    
     const itemsForDb = cart.map(i => ({ 
-      name: i.name, price: i.price, quantity: i.quantity, size: i.size || 'M', selectedColor: i.selectedColor || 'Black',
+      name: i.name, 
+      price: i.price, 
+      quantity: i.quantity, 
+      size: i.size || 'M', 
+      selectedColor: i.selectedColor || 'Black',
+      // Only add printMethod if item is customized
       ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
-      frontDesignImage: i.frontDesignImage || frontDesignImageURL, backDesignImage: i.backDesignImage || backDesignImageURL, 
+      frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
+      backDesignImage: i.backDesignImage || backDesignImageURL, 
       isCustomized: i.isCustomized === true || isCustomizedOrder,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
     }));
+    
     const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*1000);
+    
+    // Build order data - only include printMethod for custom orders
     const orderData = {
-      orderId, customerName: selectedAddress.fullName, customerPhone: selectedAddress.phone,
-      shippingAddress: { address: selectedAddress.address, city: selectedAddress.city, state: selectedAddress.state, pincode: selectedAddress.pincode, landmark: selectedAddress.landmark || '' },
-      items: itemsForDb, paymentMethod, paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
-      transactionId: txnId, subtotal: cartTotal, discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, total: finalTotal,
-      orderDate: new Date().toISOString(), userId: currentUser?.uid, isCustomized: isCustomOrder,
-      frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
+      orderId, 
+      customerName: selectedAddress.fullName, 
+      customerPhone: selectedAddress.phone,
+      shippingAddress: { 
+        address: selectedAddress.address, 
+        city: selectedAddress.city, 
+        state: selectedAddress.state, 
+        pincode: selectedAddress.pincode, 
+        landmark: selectedAddress.landmark || '' 
+      },
+      items: itemsForDb,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', 
+      status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
+      transactionId: txnId, 
+      subtotal: cartTotal, 
+      discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, 
+      total: finalTotal,
+      orderDate: new Date().toISOString(), 
+      userId: currentUser?.uid, 
+      isCustomized: isCustomOrder,
+      frontDesignImage: frontDesignImageURL, 
+      backDesignImage: backDesignImageURL
     };
-    if (isCustomOrder && orderPrintMethod) orderData.printMethod = orderPrintMethod;
-    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error("Order save error:", e); return { success: false }; }
+    
+    // Only add printMethod to root if it's a custom order
+    if (isCustomOrder && orderPrintMethod) {
+      orderData.printMethod = orderPrintMethod;
+    }
+    
+    try {
+      await db.collection('orders').doc(orderId).set(orderData);
+      return { success: true, orderId };
+    } catch(e) { 
+      console.error("Order save error:", e); 
+      return { success: false }; 
+    }
   }
   
-  async function placeCOD() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const res = await saveOrder('Cash on Delivery'); showLoading(false); if(res.success) { showToast(`Order placed! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order failed', true); isProcessing=false; } }
+  async function placeCOD() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const res = await saveOrder('Cash on Delivery'); 
+    showLoading(false); 
+    if(res.success) { 
+      showToast(`Order placed! ${res.orderId}`); 
+      localStorage.removeItem('vedantaCart'); 
+      localStorage.removeItem('customCheckoutData'); 
+      setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+    } else { 
+      showToast('Order failed', true); 
+      isProcessing=false; 
+    } 
+  }
   
-  async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.clear(); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
+  async function razorpayPayment() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const amt = discountedTotal; 
+    if(amt<=0){ showLoading(false); isProcessing=false; return; } 
+    const options = { 
+      key: RAZORPAY_KEY_ID, 
+      amount: Math.round(amt)*100, 
+      currency: 'INR', 
+      name: 'VEDANTA', 
+      description: 'T-Shirt Order', 
+      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
+      theme: { color: '#D4AF37' }, 
+      handler: async (resp) => { 
+        const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
+        showLoading(false); 
+        if(res.success) { 
+          showToast(`Payment success! ${res.orderId}`); 
+          localStorage.clear(); 
+          setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+        } else { 
+          showToast('Order save issue', true); 
+          isProcessing=false; 
+        } 
+      }, 
+      modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } 
+    }; 
+    const razor = new Razorpay(options); 
+    razor.open(); 
+  }
 
   async function init() {
-    DEBUG("🚀 init() - START");
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
-    DEBUG("👤 localStorage.getItem('vedantaUser')", stored);
     if (stored) currentUser = stored;
     else { 
       const phone = localStorage.getItem('userPhone');
-      DEBUG("📱 localStorage.getItem('userPhone')", phone);
       if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' };
       else { showToast('Please login', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
     }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     await fetchAllProductsImages();
-    
-    // ========== STEP 1: Load custom data ==========
     loadCustomData();
-    DEBUG("📊 After loadCustomData - cart", cart);
-    DEBUG("📊 After loadCustomData - cartTotal", cartTotal);
-    DEBUG("📊 After loadCustomData - isCustomizedOrder", isCustomizedOrder);
-    
-    // ========== STEP 2: Render ==========
     await renderOrderItems();
     await displayAddressSelection();
-    
-    DEBUG("🎯 Setting up event listeners");
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); DEBUG("💵 Payment: COD selected"); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); DEBUG("💳 Payment: Razorpay selected"); });
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
@@ -484,10 +534,7 @@
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('codOption').click();
-    
-    DEBUG("✅ init() - COMPLETE", { finalCartLength: cart.length, finalCartTotal: cartTotal });
   }
-  
   init();
 </script>
 </body>
