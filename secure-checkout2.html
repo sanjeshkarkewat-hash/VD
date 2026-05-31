@@ -187,84 +187,90 @@
     return null;
   }
 
-  // CRITICAL FIX: Clear custom data if no custom design present, and only load from URL flag
+  // CRITICAL FIX: Clear custom data properly when loading cart from regular selection
   function loadCartData() {
-    // Check if we came from custom design flow via sessionStorage flag
-    const isCustomFlow = sessionStorage.getItem('vedanta_custom_checkout') === 'true';
-    const savedCustom = localStorage.getItem('customCheckoutData');
-    
-    // Reset states
-    isCustomizedOrder = false;
-    frontDesignImageURL = null;
-    backDesignImageURL = null;
-    
-    // Check URL param for custom flag (more reliable)
-    const urlParams = new URLSearchParams(window.location.search);
-    const fromCustom = urlParams.get('custom') === 'true';
-    
-    if ((isCustomFlow || fromCustom) && savedCustom) {
-      try {
-        const data = JSON.parse(savedCustom);
-        if (data && data.isCustomized === true && (data.frontDesignImage || data.backDesignImage)) {
-          isCustomizedOrder = true;
-          frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
-          backDesignImageURL = data.backDesignImage || null;
-          if (frontDesignImageURL || backDesignImageURL) {
-            document.getElementById('customDesignPreviewContainer').style.display = 'block';
-            if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
-            if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
-          }
-          // Build custom cart item
-          cart = [{
-            id: 'custom_' + Date.now(),
-            name: data.tshirtType || 'Custom T-Shirt',
-            price: data.price || 1699,
-            quantity: data.quantity || 1,
-            size: data.size || 'M',
-            selectedColor: data.selectedColor || 'Black',
-            printMethod: data.printMethod || 'transparent',
-            frontDesignImage: frontDesignImageURL,
-            backDesignImage: backDesignImageURL,
-            isCustomized: true
-          }];
-          // Clear the flag so next time regular cart loads
-          sessionStorage.removeItem('vedanta_custom_checkout');
-          // Keep savedCustom for this session only, but we will not override regular cart later
-        }
-      } catch(e) { console.error("Error loading custom data:", e); }
-    }
-    
-    // If not custom order (or custom load failed), load regular cart
-    if (!isCustomizedOrder || cart.length === 0) {
+    try {
+      // First check if there's fresh custom data (just came from designer)
+      const customDataStr = localStorage.getItem('customCheckoutData');
+      const customData = customDataStr ? JSON.parse(customDataStr) : null;
+      
+      // Get regular cart
       const savedCart = localStorage.getItem('vedantaCart');
-      if (savedCart) {
-        try { 
-          cart = JSON.parse(savedCart);
-          // Ensure regular items have no custom flags
-          cart.forEach(item => {
-            if (!item.isCustomized) {
-              item.printMethod = null;
-              item.frontDesignImage = null;
-              item.backDesignImage = null;
-            }
-          });
-        } catch(e) { cart = []; }
+      let regularCart = savedCart ? JSON.parse(savedCart) : [];
+      
+      // IMPORTANT: If we have fresh custom design that was created in this session (timestamp within last 10 seconds)
+      // Then prioritize custom order. Otherwise, use regular cart.
+      const isFreshCustom = customData && customData.isCustomized === true && 
+                           (customData.timestamp && (Date.now() - customData.timestamp < 10000));
+      
+      if (isFreshCustom && customData && (customData.frontDesignImage || customData.backDesignImage)) {
+        // Custom order was just created
+        isCustomizedOrder = true;
+        frontDesignImageURL = customData.frontDesignImage || null;
+        backDesignImageURL = customData.backDesignImage || null;
+        
+        cart = [{
+          id: 'custom_' + Date.now(),
+          name: customData.tshirtType || 'Custom T-Shirt',
+          price: customData.price || 1699,
+          quantity: customData.quantity || 1,
+          size: customData.size || 'M',
+          selectedColor: customData.selectedColor || 'Black',
+          printMethod: customData.printMethod || 'transparent',
+          frontDesignImage: frontDesignImageURL,
+          backDesignImage: backDesignImageURL,
+          isCustomized: true
+        }];
+        
+        // Show custom preview
+        if (frontDesignImageURL || backDesignImageURL) {
+          const previewDiv = document.getElementById('customDesignPreviewContainer');
+          if (previewDiv) previewDiv.style.display = 'block';
+          if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
+          if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
+        }
+        
+        // Clear the custom data after loading to prevent reuse
+        // But keep a flag to indicate we loaded it
+        localStorage.removeItem('customCheckoutData');
+      } else if (regularCart && regularCart.length > 0) {
+        // Regular product from collection - NO custom stuff
+        isCustomizedOrder = false;
+        frontDesignImageURL = null;
+        backDesignImageURL = null;
+        cart = regularCart;
+        // Ensure no custom flags on regular items
+        cart.forEach(item => {
+          item.isCustomized = false;
+          item.printMethod = null;
+          item.frontDesignImage = null;
+          item.backDesignImage = null;
+        });
+        const previewDiv = document.getElementById('customDesignPreviewContainer');
+        if (previewDiv) previewDiv.style.display = 'none';
+      } else {
+        // Empty cart fallback
+        cart = [];
+        isCustomizedOrder = false;
+        frontDesignImageURL = null;
+        backDesignImageURL = null;
       }
+      
+      cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    } catch(e) { 
+      console.error("Error loading cart data:", e);
+      cart = [];
+      cartTotal = 0;
+      isCustomizedOrder = false;
+      frontDesignImageURL = null;
+      backDesignImageURL = null;
     }
-    
-    // Double-check: if cart is empty, create empty array
-    if (!cart || !Array.isArray(cart)) cart = [];
-    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
   }
 
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
-    if (cart.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:20px;">Your cart is empty</div>';
-      return;
-    }
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
@@ -418,29 +424,63 @@
 
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
-    const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
+    
+    const isCustomOrder = isCustomizedOrder === true;
     const orderPrintMethod = isCustomOrder ? (cart[0]?.printMethod || 'transparent') : null;
+    
     const itemsForDb = cart.map(i => ({ 
-      name: i.name, price: i.price, quantity: i.quantity, size: i.size || 'M', selectedColor: i.selectedColor || 'Black',
+      name: i.name, 
+      price: i.price, 
+      quantity: i.quantity, 
+      size: i.size || 'M', 
+      selectedColor: i.selectedColor || 'Black',
       ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
-      frontDesignImage: i.frontDesignImage || frontDesignImageURL, backDesignImage: i.backDesignImage || backDesignImageURL, isCustomized: i.isCustomized === true || isCustomOrder,
+      frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
+      backDesignImage: i.backDesignImage || backDesignImageURL, 
+      isCustomized: i.isCustomized === true,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
     }));
+    
     const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*1000);
+    
     const orderData = {
-      orderId, customerName: selectedAddress.fullName, customerPhone: selectedAddress.phone,
-      shippingAddress: { address: selectedAddress.address, city: selectedAddress.city, state: selectedAddress.state, pincode: selectedAddress.pincode, landmark: selectedAddress.landmark || '' },
-      items: itemsForDb, paymentMethod, paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
-      transactionId: txnId, subtotal: cartTotal, discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, total: finalTotal,
-      orderDate: new Date().toISOString(), userId: currentUser?.uid, isCustomized: isCustomOrder,
-      frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
+      orderId, 
+      customerName: selectedAddress.fullName, 
+      customerPhone: selectedAddress.phone,
+      shippingAddress: { 
+        address: selectedAddress.address, 
+        city: selectedAddress.city, 
+        state: selectedAddress.state, 
+        pincode: selectedAddress.pincode, 
+        landmark: selectedAddress.landmark || '' 
+      },
+      items: itemsForDb,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', 
+      status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
+      transactionId: txnId, 
+      subtotal: cartTotal, 
+      discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, 
+      total: finalTotal,
+      orderDate: new Date().toISOString(), 
+      userId: currentUser?.uid, 
+      isCustomized: isCustomOrder,
+      frontDesignImage: frontDesignImageURL, 
+      backDesignImage: backDesignImageURL
     };
-    if (isCustomOrder && orderPrintMethod) orderData.printMethod = orderPrintMethod;
+    
+    if (isCustomOrder && orderPrintMethod) {
+      orderData.printMethod = orderPrintMethod;
+    }
+    
     try {
       await db.collection('orders').doc(orderId).set(orderData);
       return { success: true, orderId };
-    } catch(e) { console.error("Order save error:", e); return { success: false }; }
+    } catch(e) { 
+      console.error("Order save error:", e); 
+      return { success: false }; 
+    }
   }
   
   async function placeCOD() { 
@@ -454,7 +494,7 @@
       showToast(`Order placed! ${res.orderId}`); 
       localStorage.removeItem('vedantaCart'); 
       localStorage.removeItem('customCheckoutData');
-      sessionStorage.removeItem('vedanta_custom_checkout');
+      sessionStorage.removeItem('pendingCustomOrder');
       setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
     } else { 
       showToast('Order failed', true); 
@@ -470,17 +510,26 @@
     const amt = discountedTotal; 
     if(amt<=0){ showLoading(false); isProcessing=false; return; } 
     const options = { 
-      key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', 
-      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, 
+      key: RAZORPAY_KEY_ID, 
+      amount: Math.round(amt)*100, 
+      currency: 'INR', 
+      name: 'VEDANTA', 
+      description: 'T-Shirt Order', 
+      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
+      theme: { color: '#D4AF37' }, 
       handler: async (resp) => { 
         const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
         showLoading(false); 
         if(res.success) { 
           showToast(`Payment success! ${res.orderId}`); 
-          localStorage.clear(); 
-          sessionStorage.removeItem('vedanta_custom_checkout');
+          localStorage.removeItem('vedantaCart');
+          localStorage.removeItem('customCheckoutData');
+          sessionStorage.removeItem('pendingCustomOrder');
           setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
-        } else { showToast('Order save issue', true); isProcessing=false; } 
+        } else { 
+          showToast('Order save issue', true); 
+          isProcessing=false; 
+        } 
       }, 
       modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } 
     }; 
