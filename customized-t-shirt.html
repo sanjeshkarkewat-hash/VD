@@ -363,76 +363,119 @@
             text-align: center;
         }
         
-        /* Curved Text Panel Styles */
-        .curve-panel {
+        .glow-control-panel {
             background: rgba(0,0,0,0.5);
-            border-radius: 12px;
             padding: 10px;
+            border-radius: 12px;
             margin-top: 10px;
         }
-        .curve-options {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 10px;
-            flex-wrap: wrap;
-        }
-        .curve-option-btn {
-            background: rgba(212,175,55,0.15);
-            border: 1px solid rgba(212,175,55,0.3);
-            padding: 6px 12px;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 11px;
-            color: #D4AF37;
-            transition: all 0.2s;
-        }
-        .curve-option-btn.active {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            color: #050508;
-            border-color: transparent;
-        }
         
-        .order-panel {
-            background: rgba(15,15,22,0.92);
-            padding: 18px;
-            width: 100%;
+        @media (min-width: 768px) {
+            .style-section {
+                overflow-x: visible;
+                overflow-y: visible;
+            }
+            .style-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                width: 100%;
+            }
+            .style-card {
+                width: 100%;
+            }
+            .style-img {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1/1;
+            }
+            .designer-container { max-width: 1200px; margin: 0 auto; }
         }
-        .order-detail {
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-            display: flex;
-            justify-content: space-between;
-            font-size: 13px;
+
+        @media (max-width: 767px) {
+            .style-section {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+            }
+            .style-grid {
+                display: flex;
+                flex-direction: row;
+                gap: 10px;
+                width: max-content;
+            }
+            .style-card {
+                width: 100px;
+                flex-shrink: 0;
+                padding: 6px 4px;
+            }
+            .style-img {
+                width: 80px;
+                height: 80px;
+            }
+            .design-tools-box {
+                display: none;
+            }
+            .mobile-toolbar {
+                display: block;
+                background: rgba(15,15,22,0.92);
+                margin-top: 12px;
+                width: 100%;
+            }
+            .toolbar-scroll {
+                overflow-x: auto;
+                overflow-y: hidden;
+                -webkit-overflow-scrolling: touch;
+                white-space: nowrap;
+                padding: 12px;
+            }
+            .toolbar-items {
+                display: inline-flex;
+                gap: 8px;
+            }
+            .tool-btn {
+                background: rgba(212,175,55,0.15);
+                border: 1px solid rgba(212,175,55,0.3);
+                padding: 10px 16px;
+                border-radius: 40px;
+                font-size: 12px;
+                font-weight: 600;
+                cursor: pointer;
+                color: #D4AF37;
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+            }
+            .tool-panel {
+                display: none;
+                background: rgba(15,15,22,0.96);
+                padding: 15px;
+                margin: 0 12px 12px 12px;
+                border-radius: 16px;
+            }
+            .tool-panel.open { display: block; }
+            .panel-title { font-size: 13px; color: #D4AF37; margin-bottom: 12px; font-weight: 600; }
+            .mobile-text-input { width: 100%; padding: 10px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.3); border-radius: 12px; color: white; margin-bottom: 10px; }
+            .mobile-color-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; }
+            .mobile-color-swatch { aspect-ratio: 1/1; border-radius: 50%; cursor: pointer; border: 2px solid rgba(255,255,255,0.2); }
+            .mobile-font-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+            .mobile-font-option { background: rgba(0,0,0,0.3); padding: 8px; border-radius: 12px; cursor: pointer; text-align: center; font-size: 12px; border: 1px solid transparent; }
+            .mobile-font-option.active { border-color: #D4AF37; background: rgba(212,175,55,0.15); }
+            .mobile-size-slider { width: 100%; margin: 10px 0; }
+            .mobile-effect-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+            .mobile-effect-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 8px 16px; border-radius: 30px; cursor: pointer; font-size: 12px; }
+            .mobile-transform-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
+            .mobile-transform-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 8px 16px; border-radius: 30px; cursor: pointer; font-size: 12px; }
+            .mobile-upload-area { border: 2px dashed rgba(212,175,55,0.4); border-radius: 14px; padding: 20px; text-align: center; cursor: pointer; }
         }
-        .order-total {
-            padding: 14px 0;
-            display: flex;
-            justify-content: space-between;
-            font-size: 20px;
-            font-weight: 800;
-            color: #D4AF37;
+        @media (max-width: 768px) {
+            .color-options { gap: 6px; }
+            .color-swatch-circle { width: 28px; height: 28px; }
+            .btn-add, .btn-buy { padding: 10px; font-size: 12px; }
+            .cart-sidebar { width: 90%; max-width: 320px; }
+            .toast { padding: 8px 16px; font-size: 12px; white-space: normal; text-align: center; max-width: 90%; }
         }
-        .action-buttons { display: flex; gap: 10px; margin-top: 15px; }
-        .btn-add, .btn-buy {
-            flex: 1;
-            padding: 12px;
-            border-radius: 40px;
-            font-weight: 700;
-            cursor: pointer;
-            text-align: center;
-            font-size: 13px;
-        }
-        .btn-add {
-            background: rgba(212,175,55,0.15);
-            border: 1.5px solid #D4AF37;
-            color: #D4AF37;
-        }
-        .btn-buy {
-            background: linear-gradient(135deg, #FF4500, #FF8C00);
-            border: none;
-            color: white;
-        }
-        
         .cart-sidebar {
             position: fixed;
             top: 0;
@@ -490,15 +533,7 @@
             opacity: 0;
         }
         .loading-overlay.active { visibility: visible; opacity: 1; }
-        .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(212,175,55,0.2);
-            border-top: 4px solid #D4AF37;
-            border-radius: 50%;
-            animation: spin 0.9s linear infinite;
-            margin-bottom: 15px;
-        }
+        .loading-spinner { width: 50px; height: 50px; border: 4px solid rgba(212,175,55,0.2); border-top: 4px solid #D4AF37; border-radius: 50%; animation: spin 0.9s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
         .modal {
             display: none;
@@ -525,779 +560,52 @@
         .modal-content button { width: 100%; padding: 10px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 14px; font-weight: bold; cursor: pointer; }
         .close-modal { position: absolute; top: 12px; right: 20px; font-size: 24px; cursor: pointer; color: white; }
         .cors-warning { background: rgba(255,100,0,0.2); padding: 8px; margin-bottom: 0; font-size: 10px; text-align: center; width: 100%; }
-        
-        /* Glow effect styles */
-        .glow-control-panel {
-            background: rgba(0,0,0,0.5);
-            padding: 10px;
-            border-radius: 12px;
-            margin-top: 10px;
-        }
-        
-        @media (min-width: 768px) {
-            .style-section {
-                overflow-x: visible;
-                overflow-y: visible;
-            }
-            .style-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
-                width: 100%;
-            }
-            .style-card {
-                width: 100%;
-            }
-            .style-img {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 1/1;
-            }
-            .designer-container { max-width: 1200px; margin: 0 auto; }
-        }
-
-        @media (max-width: 767px) {
-            .style-section {
-                overflow-x: auto;
-                -webkit-overflow-scrolling: touch;
-                white-space: nowrap;
-            }
-            .style-grid {
-                display: flex;
-                flex-direction: row;
-                gap: 10px;
-                width: max-content;
-            }
-            .style-card {
-                width: 100px;
-                flex-shrink: 0;
-                padding: 6px 4px;
-            }
-            .style-img {
-                width: 80px;
-                height: 80px;
-            }
-            .style-name {
-                font-size: 10px;
-            }
-            .style-price {
-                font-size: 9px;
-            }
-            
-            .design-tools-box {
-                display: none;
-            }
-            
-            .mobile-toolbar {
-                display: block;
-                background: rgba(15,15,22,0.92);
-                margin-top: 12px;
-                width: 100%;
-            }
-            
-            .toolbar-scroll {
-                overflow-x: auto;
-                overflow-y: hidden;
-                -webkit-overflow-scrolling: touch;
-                scrollbar-width: thin;
-                white-space: nowrap;
-                padding: 12px;
-            }
-            
-            .toolbar-scroll::-webkit-scrollbar {
-                height: 3px;
-            }
-            
-            .toolbar-scroll::-webkit-scrollbar-track {
-                background: rgba(212,175,55,0.1);
-                border-radius: 10px;
-            }
-            
-            .toolbar-scroll::-webkit-scrollbar-thumb {
-                background: #D4AF37;
-                border-radius: 10px;
-            }
-            
-            .toolbar-items {
-                display: inline-flex;
-                gap: 8px;
-            }
-            
-            .tool-btn {
-                background: rgba(212,175,55,0.15);
-                border: 1px solid rgba(212,175,55,0.3);
-                padding: 10px 16px;
-                border-radius: 40px;
-                font-size: 12px;
-                font-weight: 600;
-                cursor: pointer;
-                color: #D4AF37;
-                display: inline-flex;
-                align-items: center;
-                gap: 6px;
-                white-space: nowrap;
-            }
-            
-            .tool-btn i {
-                font-size: 14px;
-            }
-            
-            .tool-btn.active {
-                background: linear-gradient(135deg, #D4AF37, #FF8C00);
-                color: #050508;
-                border-color: transparent;
-            }
-            
-            .tool-panel {
-                display: none;
-                background: rgba(15,15,22,0.96);
-                padding: 15px;
-                margin: 0 12px 12px 12px;
-                border-radius: 16px;
-            }
-            
-            .tool-panel.open {
-                display: block;
-            }
-            
-            .panel-title {
-                font-size: 13px;
-                color: #D4AF37;
-                margin-bottom: 12px;
-                font-weight: 600;
-            }
-            
-            .mobile-text-input {
-                width: 100%;
-                padding: 10px;
-                background: rgba(0,0,0,0.5);
-                border: 1px solid rgba(212,175,55,0.3);
-                border-radius: 12px;
-                color: white;
-                margin-bottom: 10px;
-            }
-            
-            .mobile-color-grid {
-                display: grid;
-                grid-template-columns: repeat(5, 1fr);
-                gap: 10px;
-            }
-            
-            .mobile-color-swatch {
-                aspect-ratio: 1/1;
-                border-radius: 50%;
-                cursor: pointer;
-                border: 2px solid rgba(255,255,255,0.2);
-            }
-            
-            .mobile-font-grid {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-            
-            .mobile-font-option {
-                background: rgba(0,0,0,0.3);
-                padding: 8px;
-                border-radius: 12px;
-                cursor: pointer;
-                text-align: center;
-                font-size: 12px;
-                border: 1px solid transparent;
-            }
-            
-            .mobile-font-option.active {
-                border-color: #D4AF37;
-                background: rgba(212,175,55,0.15);
-            }
-            
-            .mobile-size-slider {
-                width: 100%;
-                margin: 10px 0;
-            }
-            
-            .mobile-effect-buttons {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            
-            .mobile-effect-btn {
-                background: rgba(212,175,55,0.15);
-                border: 1px solid rgba(212,175,55,0.3);
-                padding: 8px 16px;
-                border-radius: 30px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-            
-            .mobile-transform-buttons {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-            }
-            
-            .mobile-transform-btn {
-                background: rgba(212,175,55,0.15);
-                border: 1px solid rgba(212,175,55,0.3);
-                padding: 8px 16px;
-                border-radius: 30px;
-                cursor: pointer;
-                font-size: 12px;
-            }
-            
-            .mobile-upload-area {
-                border: 2px dashed rgba(212,175,55,0.4);
-                border-radius: 14px;
-                padding: 20px;
-                text-align: center;
-                cursor: pointer;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
-                width: 100%;
-                position: relative;
-            }
-            .designer-container {
-                overflow-x: hidden;
-                width: 100%;
-                padding: 0;
-                margin: 0;
-            }
-            .header {
-                padding: 15px 12px;
-            }
-            .logo {
-                font-size: 24px;
-            }
-            .tagline {
-                font-size: 8px;
-                letter-spacing: 2px;
-            }
-            .cart-icon-header {
-                padding: 6px 10px;
-                font-size: 11px;
-                top: 14px;
-                right: 12px;
-            }
-            .cart-count {
-                font-size: 10px;
-                padding: 1px 6px;
-            }
-            .section-title {
-                font-size: 16px;
-                margin-bottom: 12px;
-            }
-            .selected-tshirt-area {
-                padding: 0 12px 0 12px;
-                padding-bottom: 0;
-            }
-            .side-switcher {
-                gap: 10px;
-                margin-bottom: 12px;
-                margin-top: 12px;
-            }
-            .side-btn {
-                padding: 6px 16px;
-                font-size: 12px;
-            }
-            
-            .canvas-container {
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                line-height: 0;
-                height: auto;
-                min-height: 0;
-                overflow: visible;
-                text-align: center;
-                position: relative;
-            }
-            
-            #tshirtCanvas {
-                max-width: 100%;
-                display: block;
-                margin: 0 auto;
-                position: relative;
-            }
-            
-            .canvas-container canvas {
-                display: block;
-                margin: 0 auto;
-                position: relative;
-            }
-            
-            .canvas-container .lower-canvas,
-            .canvas-container .upper-canvas {
-                display: block;
-                margin: 0 auto;
-                position: relative;
-            }
-            
-            .color-selector-section {
-                margin-top: 0px;
-                padding: 10px;
-            }
-            .color-selector-title {
-                font-size: 12px;
-                margin-bottom: 8px;
-            }
-            .color-options {
-                gap: 8px;
-            }
-            .color-option {
-                padding: 4px 6px;
-            }
-            .color-swatch-circle {
-                width: 28px;
-                height: 28px;
-            }
-            .color-option-name {
-                font-size: 9px;
-            }
-            .instruction-text {
-                font-size: 9px;
-                margin-top: 10px;
-            }
-            .material-tools-box, .order-panel {
-                padding: 14px;
-            }
-            .box-title {
-                font-size: 14px;
-                margin-bottom: 12px;
-                padding-bottom: 6px;
-            }
-            .tool-group {
-                margin-bottom: 14px;
-                padding-bottom: 10px;
-            }
-            .tool-group label {
-                font-size: 11px;
-                margin-bottom: 5px;
-            }
-            .tool-group input, .tool-group select {
-                padding: 7px 9px;
-                font-size: 11px;
-            }
-            .order-panel h3 {
-                font-size: 14px;
-            }
-            .order-detail {
-                padding: 8px 0;
-                font-size: 12px;
-            }
-            .order-total {
-                padding: 12px 0;
-                font-size: 18px;
-            }
-            .action-buttons {
-                gap: 8px;
-                margin-top: 12px;
-            }
-            .btn-add, .btn-buy {
-                padding: 10px;
-                font-size: 12px;
-            }
-            .cart-sidebar {
-                width: 90%;
-                max-width: 320px;
-            }
-            .cart-header {
-                padding: 14px;
-            }
-            .cart-header h3 {
-                font-size: 16px;
-            }
-            .cart-items {
-                padding: 12px;
-                max-height: 65vh;
-            }
-            .cart-item {
-                padding: 10px;
-                gap: 8px;
-            }
-            .cart-item-img {
-                width: 45px;
-                height: 45px;
-            }
-            .cart-item-details {
-                font-size: 11px;
-            }
-            .cart-qty-control button {
-                width: 22px;
-                height: 22px;
-                font-size: 12px;
-            }
-            .cart-total {
-                padding: 12px;
-            }
-            .checkout-btn {
-                padding: 10px;
-                font-size: 13px;
-            }
-            .modal-content {
-                padding: 20px;
-                max-width: 300px;
-            }
-            .modal-content h3 {
-                font-size: 18px;
-            }
-            .modal-content input {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .toast {
-                padding: 8px 16px;
-                font-size: 12px;
-                white-space: normal;
-                text-align: center;
-                max-width: 90%;
-            }
-            .loading-spinner {
-                width: 40px;
-                height: 40px;
-            }
-            .loading-text {
-                font-size: 13px;
-            }
-            .cors-warning {
-                font-size: 9px;
-                padding: 6px;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .style-card {
-                width: 90px;
-            }
-            .style-img {
-                width: 70px;
-                height: 70px;
-            }
-            .style-name {
-                font-size: 9px;
-            }
-            .style-price {
-                font-size: 8px;
-            }
-            .color-options {
-                gap: 6px;
-            }
-            .color-swatch-circle {
-                width: 24px;
-                height: 24px;
-            }
-            .btn-add, .btn-buy {
-                padding: 9px;
-                font-size: 11px;
-            }
-            .tool-btn {
-                padding: 8px 14px;
-                font-size: 11px;
-            }
-        }
     </style>
 </head>
 <body>
-
 <div class="header">
     <div class="logo">VEDANTA</div>
     <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
-    <div class="cart-icon-header" id="cartIconBtn">
-        <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
-    </div>
+    <div class="cart-icon-header" id="cartIconBtn"><i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span></div>
 </div>
-
-<div class="loading-overlay" id="globalLoadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">SAVING DESIGN...</div>
-</div>
-
+<div class="loading-overlay" id="globalLoadingOverlay"><div class="loading-spinner"></div><div class="loading-text">PROCESSING...</div></div>
 <div class="designer-container">
     <div class="cors-warning" id="corsWarning">⚠️ Images same folder mein hone chahiye</div>
-    
-    <div class="style-section">
-        <div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div>
-        <div class="style-grid" id="styleGrid"></div>
-    </div>
-
+    <div class="style-section"><div class="section-title"><i class="fas fa-tshirt"></i> Choose Your Style</div><div class="style-grid" id="styleGrid"></div></div>
     <div class="vertical-flow">
         <div class="selected-tshirt-area">
-            <div class="side-switcher">
-                <button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button>
-                <button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button>
-            </div>
-            <div class="canvas-container">
-                <canvas id="tshirtCanvas"></canvas>
-            </div>
-            <div class="color-selector-section">
-                <div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div>
-                <div class="color-options" id="colorOptionsContainer"></div>
-            </div>
-            <button class="btn-save-image" id="saveImageBtn"><i class="fas fa-camera"></i> Save Both Sides</button>
+            <div class="side-switcher"><button class="side-btn active" id="frontSideBtn"><i class="fas fa-tshirt"></i> Front</button><button class="side-btn" id="backSideBtn"><i class="fas fa-undo-alt"></i> Back</button></div>
+            <div class="canvas-container"><canvas id="tshirtCanvas"></canvas></div>
+            <div class="color-selector-section"><div class="color-selector-title"><i class="fas fa-palette"></i> Choose T-Shirt Color</div><div class="color-options" id="colorOptionsContainer"></div></div>
             <p class="instruction-text"><i class="fas fa-arrows-alt"></i> Click to select | Drag to move | Double-click text to edit</p>
         </div>
-
         <div class="design-tools-box">
             <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
-            
-            <!-- IMAGE UPLOAD -->
-            <div class="tool-group">
-                <label>🖼️ Upload Image</label>
-                <div class="upload-area" id="uploadArea">
-                    <i class="fas fa-cloud-upload-alt" style="font-size: 24px;"></i>
-                    <p>Click to upload image</p>
-                    <input type="file" id="imageUpload" accept="image/*" style="display:none">
-                </div>
-            </div>
-            
-            <!-- TEXT ADD -->
-            <div class="tool-group">
-                <label>📝 Add Text</label>
-                <input type="text" id="textInput" placeholder="Enter your text...">
-                <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
-            </div>
-            
-            <!-- CURVED TEXT TOOL -->
-            <div class="tool-group">
-                <label>⭕ Curved Text</label>
-                <button class="btn-icon" id="curveTextBtn" style="width:100%; margin-bottom:8px;">
-                    <i class="fas fa-arrow-circle-up"></i> Apply Curve to Selected Text
-                </button>
-                <div id="curvePanel" style="display: none;" class="curve-panel">
-                    <div class="curve-options">
-                        <button class="curve-option-btn" data-shape="straight">Straight</button>
-                        <button class="curve-option-btn" data-shape="arcUp">Arc Up</button>
-                        <button class="curve-option-btn" data-shape="arcDown">Arc Down</button>
-                        <button class="curve-option-btn" data-shape="circle">Circle</button>
-                    </div>
-                    <div class="slider-row">
-                        <span>Curve Amount:</span>
-                        <input type="range" id="curveAmountSlider" min="-100" max="100" value="0">
-                        <span id="curveAmountValue">0</span>
-                    </div>
-                    <div class="slider-row">
-                        <span>Radius:</span>
-                        <input type="range" id="curveRadiusSlider" min="50" max="300" value="150">
-                        <span id="curveRadiusValue">150px</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="tool-group">
-                <label>🎨 Text Color</label>
-                <div class="color-grid" id="colorPalette"></div>
-            </div>
-            
-            <div class="tool-group">
-                <label>✨ Photoshop Style Glow Effect</label>
-                <div class="effect-row">
-                    <button class="effect-btn" id="glowBtn">✨ Toggle Glow</button>
-                    <button class="effect-btn" id="roundedBtn">Rounded Corners</button>
-                    <button class="effect-btn" id="borderBtn">Outline Border</button>
-                </div>
-                <div id="glowControls" style="display: none; margin-top: 10px;" class="glow-control-panel">
-                    <div class="slider-row">
-                        <span>Glow Size:</span>
-                        <input type="range" id="glowSizeSlider" min="0" max="30" value="8">
-                        <span id="glowSizeValue">8px</span>
-                    </div>
-                    <div class="slider-row">
-                        <span>Glow Blur:</span>
-                        <input type="range" id="glowBlurSlider" min="0" max="20" value="5">
-                        <span id="glowBlurValue">5px</span>
-                    </div>
-                    <div class="slider-row">
-                        <span>Glow Color:</span>
-                        <input type="color" id="glowColorPicker" value="#D4AF37">
-                    </div>
-                    <div class="slider-row">
-                        <span>Glow Intensity:</span>
-                        <input type="range" id="glowIntensitySlider" min="0" max="1" step="0.1" value="0.8">
-                        <span id="glowIntensityValue">0.8</span>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="tool-group">
-                <label>🔤 Font Family</label>
-                <select id="fontSelect">
-                    <option value="Space Grotesk">Space Grotesk</option>
-                    <option value="Arial">Arial</option>
-                    <option value="Poppins">Poppins</option>
-                    <option value="Montserrat">Montserrat</option>
-                    <option value="Dancing Script">Dancing Script</option>
-                    <option value="Pacifico">Pacifico</option>
-                    <option value="Oswald">Oswald</option>
-                    <option value="Lobster">Lobster</option>
-                </select>
-                <div class="font-preview" id="fontPreview">Sample Text</div>
-            </div>
-            
-            <div class="tool-group">
-                <label>📏 Text Size</label>
-                <div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div>
-            </div>
-            
-            <div class="tool-group">
-                <label>🔄 Text Transform</label>
-                <div class="two-col-btns">
-                    <button class="btn-icon" id="flipHorizontalBtn">Flip H</button>
-                    <button class="btn-icon" id="flipVerticalBtn">Flip V</button>
-                    <button class="btn-icon" id="boldBtn">Bold</button>
-                    <button class="btn-icon" id="italicBtn">Italic</button>
-                    <button class="btn-icon" id="underlineBtn">Underline</button>
-                </div>
-            </div>
-            
-            <div class="tool-group">
-                <button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button>
-                <button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button>
-            </div>
+            <div class="tool-group"><label>🖼️ Upload Image</label><div class="upload-area" id="uploadArea"><i class="fas fa-cloud-upload-alt" style="font-size: 24px;"></i><p>Click to upload image</p><input type="file" id="imageUpload" accept="image/*" style="display:none"></div></div>
+            <div class="tool-group"><label>📝 Add Text</label><input type="text" id="textInput" placeholder="Enter your text..."><button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button></div>
+            <div class="tool-group"><label>🎨 Text Color</label><div class="color-grid" id="colorPalette"></div></div>
+            <div class="tool-group"><label>✨ Glow Effect</label><div class="effect-row"><button class="effect-btn" id="glowBtn">✨ Toggle Glow</button></div><div id="glowControls" style="display: none;" class="glow-control-panel"><div class="slider-row"><span>Glow Size:</span><input type="range" id="glowSizeSlider" min="0" max="30" value="8"><span id="glowSizeValue">8px</span></div><div class="slider-row"><span>Glow Blur:</span><input type="range" id="glowBlurSlider" min="0" max="20" value="5"><span id="glowBlurValue">5px</span></div><div class="slider-row"><span>Glow Color:</span><input type="color" id="glowColorPicker" value="#D4AF37"></div><div class="slider-row"><span>Intensity:</span><input type="range" id="glowIntensitySlider" min="0" max="1" step="0.1" value="0.8"><span id="glowIntensityValue">0.8</span></div></div></div>
+            <div class="tool-group"><label>🔤 Font Family</label><select id="fontSelect"><option value="Space Grotesk">Space Grotesk</option><option value="Arial">Arial</option><option value="Poppins">Poppins</option><option value="Montserrat">Montserrat</option><option value="Dancing Script">Dancing Script</option><option value="Pacifico">Pacifico</option><option value="Oswald">Oswald</option><option value="Lobster">Lobster</option></select><div class="font-preview" id="fontPreview">Sample Text</div></div>
+            <div class="tool-group"><label>📏 Text Size</label><div class="slider-row"><input type="range" id="fontSizeSlider" min="12" max="120" value="36"><span id="fontSizeValue">36px</span></div></div>
+            <div class="tool-group"><label>🔄 Text Transform</label><div class="two-col-btns"><button class="btn-icon" id="flipHorizontalBtn">Flip H</button><button class="btn-icon" id="flipVerticalBtn">Flip V</button><button class="btn-icon" id="boldBtn">Bold</button><button class="btn-icon" id="italicBtn">Italic</button><button class="btn-icon" id="underlineBtn">Underline</button></div></div>
+            <div class="tool-group"><button class="btn-icon" id="deleteBtn"><i class="fas fa-trash"></i> Delete</button><button class="btn-icon" id="clearBtn"><i class="fas fa-eraser"></i> Clear Side</button></div>
         </div>
-
-        <div class="mobile-toolbar">
-            <div class="toolbar-scroll">
-                <div class="toolbar-items">
-                    <button class="tool-btn" data-tool="upload"><i class="fas fa-cloud-upload-alt"></i> Upload</button>
-                    <button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button>
-                    <button class="tool-btn" data-tool="curve"><i class="fas fa-arrow-circle-up"></i> Curve</button>
-                    <button class="tool-btn" data-tool="color"><i class="fas fa-palette"></i> Color</button>
-                    <button class="tool-btn" data-tool="font"><i class="fas fa-text-height"></i> Font</button>
-                    <button class="tool-btn" data-tool="size"><i class="fas fa-arrows-alt-h"></i> Size</button>
-                    <button class="tool-btn" data-tool="effects"><i class="fas fa-star"></i> Effects</button>
-                    <button class="tool-btn" data-tool="transform"><i class="fas fa-exchange-alt"></i> Transform</button>
-                    <button class="tool-btn" data-tool="delete"><i class="fas fa-trash"></i> Delete</button>
-                    <button class="tool-btn" data-tool="clear"><i class="fas fa-eraser"></i> Clear</button>
-                </div>
-            </div>
-            
-            <div id="mobilePanelUpload" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-cloud-upload-alt"></i> Upload Image</div>
-                <div class="mobile-upload-area" id="mobileUploadArea"><i class="fas fa-cloud-upload-alt"></i><p style="margin-top:5px;">Click to upload image</p><input type="file" id="mobileImageUpload" accept="image/*" style="display:none"></div>
-            </div>
-            
-            <div id="mobilePanelText" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-font"></i> Add Text</div>
-                <input type="text" id="mobileTextInput" class="mobile-text-input" placeholder="Enter your text...">
-                <button class="tool-btn" id="mobileAddTextBtn" style="width:100%; justify-content:center;">Add Text</button>
-            </div>
-            
-            <div id="mobilePanelCurve" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-arrow-circle-up"></i> Curved Text</div>
-                <div class="curve-options">
-                    <button class="curve-option-btn" data-shape="straight">Straight</button>
-                    <button class="curve-option-btn" data-shape="arcUp">Arc Up</button>
-                    <button class="curve-option-btn" data-shape="arcDown">Arc Down</button>
-                    <button class="curve-option-btn" data-shape="circle">Circle</button>
-                </div>
-                <div class="slider-row">
-                    <span>Curve Amount:</span>
-                    <input type="range" id="mobileCurveAmountSlider" min="-100" max="100" value="0">
-                    <span id="mobileCurveAmountValue">0</span>
-                </div>
-                <div class="slider-row">
-                    <span>Radius:</span>
-                    <input type="range" id="mobileCurveRadiusSlider" min="50" max="300" value="150">
-                    <span id="mobileCurveRadiusValue">150px</span>
-                </div>
-                <button class="tool-btn" id="mobileApplyCurveBtn" style="width:100%; margin-top:8px;">Apply Curve</button>
-            </div>
-            
-            <div id="mobilePanelColor" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-palette"></i> Text Color</div>
-                <div class="mobile-color-grid" id="mobileColorPalette"></div>
-            </div>
-            
-            <div id="mobilePanelFont" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-text-height"></i> Font Family</div>
-                <div class="mobile-font-grid" id="mobileFontGrid"></div>
-            </div>
-            
-            <div id="mobilePanelSize" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-arrows-alt-h"></i> Text Size</div>
-                <input type="range" id="mobileFontSizeSlider" min="12" max="120" value="36" class="mobile-size-slider">
-                <div style="text-align:center; margin-top:8px;"><span id="mobileFontSizeValue">36px</span></div>
-            </div>
-            
-            <div id="mobilePanelEffects" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-star"></i> Text Effects</div>
-                <div class="mobile-effect-buttons">
-                    <button class="mobile-effect-btn" id="mobileGlowBtn">✨ Glow</button>
-                    <button class="mobile-effect-btn" id="mobileRoundedBtn">Rounded</button>
-                    <button class="mobile-effect-btn" id="mobileBorderBtn">Border</button>
-                </div>
-                <div id="mobileGlowControls" style="display: none; margin-top: 10px;" class="glow-control-panel">
-                    <div class="slider-row"><span>Glow Size:</span><input type="range" id="mobileGlowSizeSlider" min="0" max="30" value="8"><span id="mobileGlowSizeValue">8px</span></div>
-                    <div class="slider-row"><span>Glow Blur:</span><input type="range" id="mobileGlowBlurSlider" min="0" max="20" value="5"><span id="mobileGlowBlurValue">5px</span></div>
-                    <div class="slider-row"><span>Glow Color:</span><input type="color" id="mobileGlowColorPicker" value="#D4AF37"></div>
-                    <div class="slider-row"><span>Intensity:</span><input type="range" id="mobileGlowIntensitySlider" min="0" max="1" step="0.1" value="0.8"><span id="mobileGlowIntensityValue">0.8</span></div>
-                </div>
-            </div>
-            
-            <div id="mobilePanelTransform" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-exchange-alt"></i> Transform</div>
-                <div class="mobile-transform-buttons">
-                    <button class="mobile-transform-btn" id="mobileFlipHBtn">Flip H</button>
-                    <button class="mobile-transform-btn" id="mobileFlipVBtn">Flip V</button>
-                    <button class="mobile-transform-btn" id="mobileBoldBtn">Bold</button>
-                    <button class="mobile-transform-btn" id="mobileItalicBtn">Italic</button>
-                    <button class="mobile-transform-btn" id="mobileUnderlineBtn">Underline</button>
-                </div>
-            </div>
-            
-            <div id="mobilePanelDelete" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-trash"></i> Delete Selected</div>
-                <button class="tool-btn" id="mobileDeleteBtn" style="width:100%; justify-content:center;">Delete Selected Element</button>
-            </div>
-            
-            <div id="mobilePanelClear" class="tool-panel">
-                <div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div>
-                <button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button>
-            </div>
+        <div class="mobile-toolbar"><div class="toolbar-scroll"><div class="toolbar-items"><button class="tool-btn" data-tool="upload"><i class="fas fa-cloud-upload-alt"></i> Upload</button><button class="tool-btn" data-tool="text"><i class="fas fa-font"></i> Text</button><button class="tool-btn" data-tool="color"><i class="fas fa-palette"></i> Color</button><button class="tool-btn" data-tool="font"><i class="fas fa-text-height"></i> Font</button><button class="tool-btn" data-tool="size"><i class="fas fa-arrows-alt-h"></i> Size</button><button class="tool-btn" data-tool="effects"><i class="fas fa-star"></i> Effects</button><button class="tool-btn" data-tool="transform"><i class="fas fa-exchange-alt"></i> Transform</button><button class="tool-btn" data-tool="delete"><i class="fas fa-trash"></i> Delete</button><button class="tool-btn" data-tool="clear"><i class="fas fa-eraser"></i> Clear</button></div></div>
+            <div id="mobilePanelUpload" class="tool-panel"><div class="panel-title"><i class="fas fa-cloud-upload-alt"></i> Upload Image</div><div class="mobile-upload-area" id="mobileUploadArea"><i class="fas fa-cloud-upload-alt"></i><p>Click to upload</p><input type="file" id="mobileImageUpload" accept="image/*" style="display:none"></div></div>
+            <div id="mobilePanelText" class="tool-panel"><div class="panel-title"><i class="fas fa-font"></i> Add Text</div><input type="text" id="mobileTextInput" class="mobile-text-input" placeholder="Enter text..."><button class="tool-btn" id="mobileAddTextBtn" style="width:100%; justify-content:center;">Add Text</button></div>
+            <div id="mobilePanelColor" class="tool-panel"><div class="panel-title"><i class="fas fa-palette"></i> Text Color</div><div class="mobile-color-grid" id="mobileColorPalette"></div></div>
+            <div id="mobilePanelFont" class="tool-panel"><div class="panel-title"><i class="fas fa-text-height"></i> Font Family</div><div class="mobile-font-grid" id="mobileFontGrid"></div></div>
+            <div id="mobilePanelSize" class="tool-panel"><div class="panel-title"><i class="fas fa-arrows-alt-h"></i> Text Size</div><input type="range" id="mobileFontSizeSlider" min="12" max="120" value="36" class="mobile-size-slider"><div style="text-align:center; margin-top:8px;"><span id="mobileFontSizeValue">36px</span></div></div>
+            <div id="mobilePanelEffects" class="tool-panel"><div class="panel-title"><i class="fas fa-star"></i> Effects</div><div class="mobile-effect-buttons"><button class="mobile-effect-btn" id="mobileGlowBtn">✨ Glow</button></div><div id="mobileGlowControls" style="display: none;" class="glow-control-panel"><div class="slider-row"><span>Size:</span><input type="range" id="mobileGlowSizeSlider" min="0" max="30" value="8"><span id="mobileGlowSizeValue">8px</span></div><div class="slider-row"><span>Blur:</span><input type="range" id="mobileGlowBlurSlider" min="0" max="20" value="5"><span id="mobileGlowBlurValue">5px</span></div><div class="slider-row"><span>Color:</span><input type="color" id="mobileGlowColorPicker" value="#D4AF37"></div><div class="slider-row"><span>Intensity:</span><input type="range" id="mobileGlowIntensitySlider" min="0" max="1" step="0.1" value="0.8"><span id="mobileGlowIntensityValue">0.8</span></div></div></div>
+            <div id="mobilePanelTransform" class="tool-panel"><div class="panel-title"><i class="fas fa-exchange-alt"></i> Transform</div><div class="mobile-transform-buttons"><button class="mobile-transform-btn" id="mobileFlipHBtn">Flip H</button><button class="mobile-transform-btn" id="mobileFlipVBtn">Flip V</button><button class="mobile-transform-btn" id="mobileBoldBtn">Bold</button><button class="mobile-transform-btn" id="mobileItalicBtn">Italic</button><button class="mobile-transform-btn" id="mobileUnderlineBtn">Underline</button></div></div>
+            <div id="mobilePanelDelete" class="tool-panel"><div class="panel-title"><i class="fas fa-trash"></i> Delete</div><button class="tool-btn" id="mobileDeleteBtn" style="width:100%; justify-content:center;">Delete Selected</button></div>
+            <div id="mobilePanelClear" class="tool-panel"><div class="panel-title"><i class="fas fa-eraser"></i> Clear Side</div><button class="tool-btn" id="mobileClearBtn" style="width:100%; justify-content:center;">Clear Current Side</button></div>
         </div>
-
-        <div class="material-tools-box">
-            <div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div>
-            <div class="tool-group">
-                <label>📏 Size <span style="color:#ff8888;">(Required)</span></label>
-                <select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select>
-            </div>
-            <div class="tool-group">
-                <label>🖨️ Print Method <span style="color:#ff8888;">(Required)</span></label>
-                <div id="printMethodContainer">
-                    <div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div>
-                    <div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div>
-                </div>
-            </div>
-        </div>
-
-        <div class="order-panel">
-            <h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3>
-            <div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div>
-            <div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div>
-            <div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div>
-            <div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div>
-            <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
-            <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
-            <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
-            <div class="action-buttons">
-                <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
-                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
-            </div>
-        </div>
+        <div class="material-tools-box"><div class="box-title"><i class="fas fa-tshirt"></i> T-SHIRT SIZE</div><div class="tool-group"><label>📏 Size <span style="color:#ff8888;">(Required)</span></label><select id="sizeSelect"><option value="" disabled selected>-- Select Size --</option><option>S</option><option>M</option><option>L</option><option>XL</option><option>XXL</option><option>3XL</option></select></div><div class="tool-group"><label>🖨️ Print Method <span style="color:#ff8888;">(Required)</span></label><div id="printMethodContainer"><div class="print-option"><input type="radio" name="printMethod" id="printTransparent" value="transparent"><label for="printTransparent">✨ Transparent Print</label></div><div class="print-option"><input type="radio" name="printMethod" id="printFullBg" value="fullbg"><label for="printFullBg">🖼️ Print with Background</label></div></div></div></div>
+        <div class="order-panel"><h3 style="font-size:16px;"><i class="fas fa-shopping-bag"></i> Order Summary</h3><div class="order-detail"><span>Style:</span><span id="summaryStyle">Sweatshirt</span></div><div class="order-detail"><span>Color:</span><span id="summaryColor">White</span></div><div class="order-detail"><span>Size:</span><span id="summarySize">--</span></div><div class="order-detail"><span>Print Method:</span><span id="summaryPrintMethod">Not selected</span></div><div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div><div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div><div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div><div class="action-buttons"><button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button><button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button></div></div>
     </div>
 </div>
-
-<div id="cartSidebar" class="cart-sidebar">
-    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Your Cart</h3><i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:20px;"></i></div>
-    <div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:20px;">Cart empty</div></div>
-    <div class="cart-total"><div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div><button id="cartCheckoutBtn" class="checkout-btn">Checkout</button></div>
-</div>
+<div id="cartSidebar" class="cart-sidebar"><div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Your Cart</h3><i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:20px;"></i></div><div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:20px;">Cart empty</div></div><div class="cart-total"><div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div><button id="cartCheckoutBtn" class="checkout-btn">Checkout</button></div></div>
 <div class="toast" id="toastMsg"></div>
 <div class="modal" id="loginModal"><div class="modal-content"><span class="close-modal" id="closeModalBtn">&times;</span><h3>Login</h3><input type="tel" id="loginPhone" placeholder="+91 9876543210"><button id="sendOtpBtn">Send OTP</button><div id="otpSection" style="display:none;"><input type="text" id="otpInput" placeholder="Enter OTP"><button id="verifyOtpBtn">Verify</button></div></div></div>
 
@@ -1307,111 +615,25 @@ firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore(); const storage = firebase.storage(); const storageRef = storage.ref(); const auth = firebase.auth();
 auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = "";
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
-let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
-let curvedTextData = {};
-
+let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 const loadingOverlay = document.getElementById('globalLoadingOverlay');
-function showLoading(m="SAVING DESIGN..."){ const t=loadingOverlay.querySelector('.loading-text'); if(t)t.innerText=m; loadingOverlay.classList.add('active'); }
+function showLoading(m="PROCESSING..."){ const t=loadingOverlay.querySelector('.loading-text'); if(t)t.innerText=m; loadingOverlay.classList.add('active'); }
 function hideLoading(){ loadingOverlay.classList.remove('active'); }
 function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
 function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
-
-async function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) {
-    if (!text || text.length === 0) return null;
-    const canvas = document.createElement('canvas');
-    const ctx = canvas.getContext('2d');
-    let fontWeight = isBold ? 'bold' : 'normal';
-    let fontStyle = isItalic ? 'italic' : 'normal';
-    ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
-    const chars = text.split('');
-    const charWidths = chars.map(char => ctx.measureText(char).width);
-    const totalWidth = charWidths.reduce((sum, w) => sum + w, 0);
-    let radiusValue = radius;
-    let startAngle, endAngle, clockwise;
-    if (shape === 'circle') { radiusValue = radius; startAngle = -Math.PI / 2; endAngle = startAngle + Math.PI * 2; clockwise = true; }
-    else if (shape === 'arcUp') { const curveNormalized = curveAmount / 100; const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8); startAngle = -angleRange / 2; endAngle = angleRange / 2; clockwise = true; radiusValue = Math.max(radius, totalWidth / angleRange); }
-    else if (shape === 'arcDown') { const curveNormalized = curveAmount / 100; const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8); startAngle = Math.PI + angleRange / 2; endAngle = Math.PI - angleRange / 2; clockwise = false; radiusValue = Math.max(radius, totalWidth / angleRange); }
-    else { const textObj = new fabric.Text(text, { fontSize, fontFamily, fill: fillColor, fontWeight: isBold ? 'bold' : 'normal', fontStyle: isItalic ? 'italic' : 'normal', underline: isUnderline }); return textObj; }
-    const positions = []; const totalAngle = Math.abs(endAngle - startAngle); const anglePerChar = totalAngle / chars.length;
-    for (let i = 0; i < chars.length; i++) { const angle = startAngle + (i * anglePerChar) + (anglePerChar / 2); const x = Math.cos(angle) * radiusValue; const y = Math.sin(angle) * radiusValue; const rotation = angle + (shape === 'arcDown' ? Math.PI : 0); positions.push({ char: chars[i], x, y, rotation, angle }); }
-    let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
-    positions.forEach(pos => { minX = Math.min(minX, pos.x); minY = Math.min(minY, pos.y); maxX = Math.max(maxX, pos.x); maxY = Math.max(maxY, pos.y); });
-    const padding = fontSize; const canvasWidth = maxX - minX + padding * 2; const canvasHeight = maxY - minY + padding * 2; const offsetX = (canvasWidth / 2) - ((minX + maxX) / 2); const offsetY = (canvasHeight / 2) - ((minY + maxY) / 2);
-    const tempCanvas = document.createElement('canvas'); tempCanvas.width = canvasWidth; tempCanvas.height = canvasHeight; const tempCtx = tempCanvas.getContext('2d');
-    tempCtx.fillStyle = 'transparent'; tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
-    positions.forEach(pos => { tempCtx.save(); tempCtx.translate(pos.x + offsetX, pos.y + offsetY); tempCtx.rotate(pos.rotation); tempCtx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`; tempCtx.fillStyle = fillColor; tempCtx.textBaseline = 'middle'; tempCtx.textAlign = 'center'; tempCtx.fillText(pos.char, 0, 0); if (isUnderline) { const metrics = tempCtx.measureText(pos.char); tempCtx.beginPath(); tempCtx.moveTo(-metrics.width / 2, fontSize / 2 + 2); tempCtx.lineTo(metrics.width / 2, fontSize / 2 + 2); tempCtx.stroke(); } tempCtx.restore(); });
-    const dataURL = tempCanvas.toDataURL(); const imgElement = document.createElement('img'); imgElement.src = dataURL;
-    return new Promise((resolve) => { imgElement.onload = () => { const fabricImage = new fabric.Image(imgElement, { left: fabricCanvas.width / 2, top: fabricCanvas.height / 2, originX: 'center', originY: 'center', scaleX: 1, scaleY: 1, hasControls: true, hasBorders: true, lockScalingX: false, lockScalingY: false }); fabricImage.curveData = { text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline, type: 'curved' }; resolve(fabricImage); }; });
-}
-
-async function applyCurveToSelected() {
-    const activeObj = fabricCanvas.getActiveObject();
-    if (!activeObj) { showToast('Please select a text element first', true); return; }
-    let text, fontFamily, fontSize, fillColor, isBold, isItalic, isUnderline;
-    if (activeObj.type === 'i-text' || activeObj.type === 'text') { text = activeObj.text; fontFamily = activeObj.fontFamily; fontSize = activeObj.fontSize; fillColor = activeObj.fill; isBold = activeObj.fontWeight === 'bold'; isItalic = activeObj.fontStyle === 'italic'; isUnderline = activeObj.underline || false; }
-    else if (activeObj.curveData) { text = activeObj.curveData.text; fontFamily = activeObj.curveData.fontFamily; fontSize = activeObj.curveData.fontSize; fillColor = activeObj.curveData.fillColor; isBold = activeObj.curveData.isBold; isItalic = activeObj.curveData.isItalic; isUnderline = activeObj.curveData.isUnderline; }
-    else { showToast('Please select a text element', true); return; }
-    const shape = document.querySelector('.curve-option-btn.active')?.dataset.shape || 'straight';
-    const curveAmount = parseInt(document.getElementById('curveAmountSlider')?.value || document.getElementById('mobileCurveAmountSlider')?.value || 0);
-    const radius = parseInt(document.getElementById('curveRadiusSlider')?.value || document.getElementById('mobileCurveRadiusSlider')?.value || 150);
-    if (shape === 'straight') {
-        const newText = new fabric.IText(text, { left: activeObj.left, top: activeObj.top, fontFamily, fontSize, fill: fillColor, fontWeight: isBold ? 'bold' : 'normal', fontStyle: isItalic ? 'italic' : 'normal', underline: isUnderline, originX: 'center', originY: 'center' });
-        fabricCanvas.remove(activeObj); fabricCanvas.add(newText); fabricCanvas.setActiveObject(newText); fabricCanvas.renderAll(); showToast('Text converted to straight');
-    } else {
-        showLoading('Creating curved text...');
-        try { const curvedObj = await createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline); if (curvedObj) { curvedObj.set({ left: activeObj.left, top: activeObj.top, scaleX: activeObj.scaleX || 1, scaleY: activeObj.scaleY || 1 }); fabricCanvas.remove(activeObj); fabricCanvas.add(curvedObj); fabricCanvas.setActiveObject(curvedObj); fabricCanvas.renderAll(); showToast('✓ Curved text applied!'); } } catch (error) { console.error(error); showToast('Error creating curved text', true); } finally { hideLoading(); }
-    }
-}
-
 function loadTshirtImageDynamic(p,c,s,preserve=true){ if(!fabricCanvas)return; const path=getDynamicImagePath(p,c,s); let objs=preserve?fabricCanvas.getObjects():[]; loadImageAsDataURL(path,data=>{ if(data){ fabric.Image.fromURL(data,img=>{ const scaleX = fabricCanvas.width / img.width; const scaleY = fabricCanvas.height / img.height; const scale = Math.min(scaleX, scaleY); fabricCanvas.setBackgroundImage(img,()=>{ if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); fabricCanvas.renderAll(); },{ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: fabricCanvas.width / 2, top: fabricCanvas.height / 2 }); }); } else { fabricCanvas.setBackgroundColor('#1a1a2e',()=>{ if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); fabricCanvas.renderAll(); }); } }); }
-
-function updateGlowFromSliders(){
-    const a=fabricCanvas.getActiveObject();
-    if(!glowActive||!a) return;
-    if(a.type !== 'i-text' && a.type !== 'text' && !a.curveData) return;
-    const size = parseInt(document.getElementById('glowSizeSlider')?.value || 8);
-    const blur = parseInt(document.getElementById('glowBlurSlider')?.value || 5);
-    const color = document.getElementById('glowColorPicker')?.value || '#D4AF37';
-    const intensity = parseFloat(document.getElementById('glowIntensitySlider')?.value || 0.8);
-    const adjustedBlur = Math.floor(blur * intensity);
-    a.set('shadow', `${color} 0px 0px ${size}px ${adjustedBlur}px`);
-    fabricCanvas.renderAll();
-    if(document.getElementById('glowSizeValue')) document.getElementById('glowSizeValue').innerText = size + 'px';
-    if(document.getElementById('glowBlurValue')) document.getElementById('glowBlurValue').innerText = blur + 'px';
-    if(document.getElementById('glowIntensityValue')) document.getElementById('glowIntensityValue').innerText = intensity;
-}
-
-function applyGlow(){
-    const a=fabricCanvas.getActiveObject();
-    if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){
-        showToast('Please select a text element first',true);
-        return;
-    }
-    glowActive=!glowActive;
-    if(glowActive){
-        updateGlowFromSliders();
-    } else {
-        a.set('shadow', null);
-        fabricCanvas.renderAll();
-    }
-    if(document.getElementById('glowControls')) document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none';
-    if(document.getElementById('mobileGlowControls')) document.getElementById('mobileGlowControls').style.display = glowActive ? 'block' : 'none';
-    showToast(glowActive ? '✨ Glow effect enabled' : 'Glow effect disabled');
-}
-
+function updateGlowFromSliders(){ const a=fabricCanvas.getActiveObject(); if(!glowActive||!a) return; const size = parseInt(document.getElementById('glowSizeSlider')?.value || document.getElementById('mobileGlowSizeSlider')?.value || 8); const blur = parseInt(document.getElementById('glowBlurSlider')?.value || document.getElementById('mobileGlowBlurSlider')?.value || 5); const color = document.getElementById('glowColorPicker')?.value || document.getElementById('mobileGlowColorPicker')?.value || '#D4AF37'; const intensity = parseFloat(document.getElementById('glowIntensitySlider')?.value || document.getElementById('mobileGlowIntensitySlider')?.value || 0.8); const adjBlur = Math.floor(blur * intensity); a.set('shadow', `${color} 0px 0px ${size}px ${adjBlur}px`); fabricCanvas.renderAll(); if(document.getElementById('glowSizeValue')) document.getElementById('glowSizeValue').innerText = size+'px'; if(document.getElementById('glowBlurValue')) document.getElementById('glowBlurValue').innerText = blur+'px'; if(document.getElementById('glowIntensityValue')) document.getElementById('glowIntensityValue').innerText = intensity; if(document.getElementById('mobileGlowSizeValue')) document.getElementById('mobileGlowSizeValue').innerText = size+'px'; if(document.getElementById('mobileGlowBlurValue')) document.getElementById('mobileGlowBlurValue').innerText = blur+'px'; if(document.getElementById('mobileGlowIntensityValue')) document.getElementById('mobileGlowIntensityValue').innerText = intensity; }
+function applyGlow(){ const a=fabricCanvas.getActiveObject(); if(!a||(a.type!=='i-text'&&a.type!=='text')){ showToast('Please select a text element first',true); return; } glowActive=!glowActive; if(glowActive){ updateGlowFromSliders(); } else { a.set('shadow', null); fabricCanvas.renderAll(); } if(document.getElementById('glowControls')) document.getElementById('glowControls').style.display = glowActive ? 'block' : 'none'; if(document.getElementById('mobileGlowControls')) document.getElementById('mobileGlowControls').style.display = glowActive ? 'block' : 'none'; showToast(glowActive ? '✨ Glow effect enabled' : 'Glow effect disabled'); }
 async function saveDesignImageToFirebase(side,designJSON,productName,colorName){ if(!designJSON||!designJSON.objects?.length)return null; try{ const tempCanvas=document.createElement('canvas'); tempCanvas.width=fabricCanvas.width; tempCanvas.height=fabricCanvas.height; const tmp=new fabric.Canvas(tempCanvas); const path=getDynamicImagePath(productName,colorName,side); await new Promise(res=>{ loadImageAsDataURL(path,data=>{ if(data){ fabric.Image.fromURL(data,img=>{ const scaleX = tmp.width / img.width; const scaleY = tmp.height / img.height; const scale = Math.min(scaleX, scaleY); tmp.setBackgroundImage(img,()=>{ tmp.loadFromJSON(designJSON,()=>{ tmp.renderAll(); setTimeout(res,100); }); },{ scaleX: scale, scaleY: scale, originX: 'center', originY: 'center', left: tmp.width / 2, top: tmp.height / 2 }); }); } else { tmp.setBackgroundColor('#1a1a2e',()=>{ tmp.loadFromJSON(designJSON,()=>{ tmp.renderAll(); setTimeout(res,100); }); }); } }); }); const d=tmp.toDataURL({format:'png',quality:1,multiplier:2}); if(!d||d==='data:,')return null; const blob=(function(b){ const a=b.split(','), m=a[0].match(/:(.*?);/)[1], c=atob(a[1]), n=c.length, u=new Uint8Array(n); for(let i=0;i<n;i++)u[i]=c.charCodeAt(i); return new Blob([u],{type:m}); })(d); const fileName=`${side}_${productName.replace(/\s/g,'_')}_${colorName}_${Date.now()}.png`; const ref=storageRef.child(`custom-designs/${side}/${fileName}`); await ref.put(blob); const url=await ref.getDownloadURL(); tmp.dispose(); return url; } catch(e){ console.error(e); return null; } }
-
-async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Designs added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
-
-async function buyNow(){ const user=auth.currentUser; const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} if(!currentSize){showToast('Please select Size first',true);return;} if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return;} showLoading("PREPARING ORDER..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return;}} localStorage.setItem('customCheckoutData',JSON.stringify({isCustomized:true,frontDesignImage:frontURL,backDesignImage:backURL,tshirtType:currentStyle.displayName,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,size:currentSize,quantity:1,price:currentStyle.price,printMethod:currentPrintMethod})); window.location.href='secure-checkout2.html'; }catch(e){showToast('Error',true);}finally{hideLoading();} }
-
+async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} if(!currentPrintMethod){showToast('Please select Print Method',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
+async function buyNow(){ const user=auth.currentUser; const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} if(!currentSize){showToast('Please select Size first',true);return;} if(!currentPrintMethod){showToast('Please select Print Method',true);return;} showLoading("PREPARING ORDER..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return;}} localStorage.setItem('customCheckoutData',JSON.stringify({isCustomized:true,frontDesignImage:frontURL,backDesignImage:backURL,tshirtType:currentStyle.displayName,selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,size:currentSize,quantity:1,price:currentStyle.price,printMethod:currentPrintMethod})); window.location.href='secure-checkout2.html'; }catch(e){showToast('Error',true);}finally{hideLoading();} }
 function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.innerText=m; t.style.background=err?'#F44336':'#D4AF37'; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function saveCart(){localStorage.setItem('vedanta_custom_cart',JSON.stringify(cart)); updateCartCount(); updateCartUI();}
 function loadCart(){const s=localStorage.getItem('vedanta_custom_cart'); if(s){try{cart=JSON.parse(s);updateCartUI();updateCartCount();}catch(e){cart=[];}}}
 function updateCartCount(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.quantity,0);}
-function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ✨ Custom</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
-function resizeCanvas() { if (!fabricCanvas) return; const container = document.querySelector('.canvas-container'); if (container) { const containerWidth = container.clientWidth; const maxWidth = Math.min(containerWidth, 500); const aspectRatio = 1.2; if (fabricCanvas.width !== maxWidth) { fabricCanvas.setWidth(maxWidth); fabricCanvas.setHeight(maxWidth * aspectRatio); loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true); fabricCanvas.renderAll(); } } }
-function initCanvas(){ const container = document.querySelector('.canvas-container'); const containerWidth = container ? container.clientWidth : 500; const maxWidth = Math.min(containerWidth, 500); fabricCanvas = new fabric.Canvas('tshirtCanvas'); fabricCanvas.setWidth(maxWidth); fabricCanvas.setHeight(maxWidth * 1.2); fabricCanvas.selection = true; fabricCanvas.on('after:render', function() { const canvasContainer = document.querySelector('.canvas-container'); if (canvasContainer) { canvasContainer.style.lineHeight = '0'; } }); loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false); frontDesignJSON = fabricCanvas.toJSON(); backDesignJSON = null; window.addEventListener('resize', function() { setTimeout(resizeCanvas, 100); }); }
+function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}" style="width:100%;height:100%;object-fit:cover;">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ✨ Custom</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
+function resizeCanvas() { if (!fabricCanvas) return; const container = document.querySelector('.canvas-container'); if (container) { const containerWidth = container.clientWidth; const maxWidth = Math.min(containerWidth, 500); const aspectRatio = 1.2; const newWidth = maxWidth; const newHeight = newWidth * aspectRatio; if (fabricCanvas.width !== newWidth || fabricCanvas.height !== newHeight) { fabricCanvas.setWidth(newWidth); fabricCanvas.setHeight(newHeight); const currentBg = fabricCanvas.backgroundImage; if (currentBg && currentBg._element) { loadTshirtImageDynamic(currentStyle.name, selectedColor, currentSide, true); } fabricCanvas.renderAll(); } } }
+function initCanvas(){ const container = document.querySelector('.canvas-container'); const containerWidth = container ? container.clientWidth : 500; const maxWidth = Math.min(containerWidth, 500); fabricCanvas = new fabric.Canvas('tshirtCanvas'); fabricCanvas.setWidth(maxWidth); fabricCanvas.setHeight(maxWidth * 1.2); fabricCanvas.selection = true; loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false); frontDesignJSON = fabricCanvas.toJSON(); backDesignJSON = null; window.addEventListener('resize',()=>setTimeout(resizeCanvas,100)); }
 function switchToFront(){if(currentSide==='front')return;backDesignJSON=fabricCanvas.toJSON();currentSide='front';document.getElementById('frontSideBtn').classList.add('active');document.getElementById('backSideBtn').classList.remove('active');if(frontDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(frontDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false);}updateSummaryElements();}
 function switchToBack(){if(currentSide==='back')return;frontDesignJSON=fabricCanvas.toJSON();currentSide='back';document.getElementById('backSideBtn').classList.add('active');document.getElementById('frontSideBtn').classList.remove('active');if(backDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(backDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false);}updateSummaryElements();}
 function updateSummaryElements(){const hf=!!(frontDesignJSON?.objects?.length),hb=!!(backDesignJSON?.objects?.length);document.getElementById('summaryFront').innerHTML=hf?'✓ Custom':'None';document.getElementById('summaryBack').innerHTML=hb?'✓ Custom':'None';}
@@ -1421,62 +643,17 @@ function changeTShirtColor(c){selectedColor=c;const map={'white':'White','warm g
 function renderColorSelectorFull(){const cont=document.getElementById('colorOptionsContainer');const cols=currentStyle.colors;const dmap={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};const cmap={'white':'#f5f5f5','warm grey':'#a9a9a9','cream':'#fffdd0','black':'#1a1a1a','grey':'#808080','blue':'#1e3a5f','green':'#4a5d23','olive green':'#556b2f','dark brown':'#5c4033'};cont.innerHTML=cols.map(c=>`<div class="color-option ${selectedColor===c?'active':''}" data-color="${c}"><div class="color-swatch-circle" style="background:${cmap[c]||'#808080'};"></div><span class="color-option-name">${dmap[c]||c}</span></div>`).join('');document.querySelectorAll('.color-option').forEach(o=>o.addEventListener('click',()=>changeTShirtColor(o.dataset.color)));}
 function addText(){const val=document.getElementById('textInput').value.trim() || document.getElementById('mobileTextInput')?.value.trim(); if(!val){showToast('Enter text first',true);return;}const t=new fabric.IText(val,{left:fabricCanvas.width/2,top:fabricCanvas.height/2,fontFamily:document.getElementById('fontSelect').value,fill:'#D4AF37',fontSize:36,originX:'center',originY:'center'});fabricCanvas.add(t);fabricCanvas.setActiveObject(t);fabricCanvas.renderAll();showToast('✓ Text added!');updateSummaryElements();if(document.getElementById('mobileTextInput')) document.getElementById('mobileTextInput').value='';}
 function generateColorPalette(){return ['#FF6633','#FFB399','#FF33FF','#FFFF99','#00B3E6','#E6B333','#3366E6','#999966','#99FF99','#B34D4D'];}
-function renderColorPalette(){const pal=generateColorPalette();const c=document.getElementById('colorPalette');c.innerHTML='';const mobileC=document.getElementById('mobileColorPalette');if(mobileC) mobileC.innerHTML='';pal.forEach(clr=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=clr;sw.onclick=()=>{const act=fabricCanvas.getActiveObject();if(act&&(act.type==='i-text'||act.type==='text'||act.curveData)){act.set('fill',clr);if(act.curveData) act.curveData.fillColor = clr;fabricCanvas.renderAll();showToast('✓ Color applied!');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}else showToast('Select text first', true);};c.appendChild(sw);if(mobileC){const sw2=document.createElement('div');sw2.className='mobile-color-swatch';sw2.style.backgroundColor=clr;sw2.onclick=sw.onclick;mobileC.appendChild(sw2);}});}
-function applyRounded(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}roundedActive=!roundedActive;if(roundedActive){a.set('radius',50);a.set('rx',50);a.set('ry',50);}else{a.set('radius',0);a.set('rx',0);a.set('ry',0);}fabricCanvas.renderAll();showToast(roundedActive?'Rounded applied':'Rounded removed');}
-function applyBorderToggle(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}borderActive=!borderActive;if(borderActive){a.set('stroke','#D4AF37');a.set('strokeWidth',2);}else{a.set('stroke',null);a.set('strokeWidth',0);}fabricCanvas.renderAll();showToast(borderActive?'Border enabled':'Border disabled');}
+function renderColorPalette(){const pal=generateColorPalette();const c=document.getElementById('colorPalette');c.innerHTML='';const mobileC=document.getElementById('mobileColorPalette');if(mobileC) mobileC.innerHTML='';pal.forEach(clr=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=clr;sw.onclick=()=>{const act=fabricCanvas.getActiveObject();if(act&&(act.type==='i-text'||act.type==='text')){act.set('fill',clr);fabricCanvas.renderAll();showToast('✓ Color applied!');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}else showToast('Select text first', true);};c.appendChild(sw);if(mobileC){const sw2=document.createElement('div');sw2.className='mobile-color-swatch';sw2.style.backgroundColor=clr;sw2.onclick=sw.onclick;mobileC.appendChild(sw2);}});}
 function flipHorizontal(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipX',!a.flipX);fabricCanvas.renderAll();showToast('Flipped Horizontal');}else showToast('Select element',true);}
 function flipVertical(){const a=fabricCanvas.getActiveObject();if(a){a.set('flipY',!a.flipY);fabricCanvas.renderAll();showToast('Flipped Vertical');}else showToast('Select element',true);}
-function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&(a.type==='i-text'||a.type==='text'||a.curveData)){if(st==='bold'){const isBold = a.fontWeight === 'bold' || a.curveData?.isBold;if(a.curveData) a.curveData.isBold = !isBold;else a.set('fontWeight', isBold ? 'normal' : 'bold');}if(st==='italic'){const isItalic = a.fontStyle === 'italic' || a.curveData?.isItalic;if(a.curveData) a.curveData.isItalic = !isItalic;else a.set('fontStyle', isItalic ? 'normal' : 'italic');}if(st==='underline'){if(a.curveData) a.curveData.isUnderline = !a.curveData.isUnderline;else a.set('underline', !a.underline);}fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
-function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData))return;const fontVal=document.getElementById('fontSelect')?.value || 'Space Grotesk';const sizeVal=parseInt(document.getElementById('fontSizeSlider')?.value || 36);if(a.curveData){a.curveData.fontFamily = fontVal;a.curveData.fontSize = sizeVal;}else{a.set('fontFamily',fontVal);a.set('fontSize',sizeVal);}fabricCanvas.renderAll();}
-function setupCurvePanel() {
-    const curvePanel = document.getElementById('curvePanel'); const curveBtn = document.getElementById('curveTextBtn');
-    const curveAmountSlider = document.getElementById('curveAmountSlider'); const curveRadiusSlider = document.getElementById('curveRadiusSlider');
-    const curveAmountValue = document.getElementById('curveAmountValue'); const curveRadiusValue = document.getElementById('curveRadiusValue');
-    const mobileCurveAmountSlider = document.getElementById('mobileCurveAmountSlider'); const mobileCurveRadiusSlider = document.getElementById('mobileCurveRadiusSlider');
-    const mobileCurveAmountValue = document.getElementById('mobileCurveAmountValue'); const mobileCurveRadiusValue = document.getElementById('mobileCurveRadiusValue');
-    const mobileApplyCurveBtn = document.getElementById('mobileApplyCurveBtn');
-    curveBtn.onclick = () => { if (curvePanel.style.display === 'none') curvePanel.style.display = 'block'; else curvePanel.style.display = 'none'; };
-    document.querySelectorAll('.curve-option-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyCurveToSelected(); }; });
-    if (curveAmountSlider) curveAmountSlider.oninput = () => { curveAmountValue.innerText = curveAmountSlider.value; if (mobileCurveAmountSlider) mobileCurveAmountSlider.value = curveAmountSlider.value; if (mobileCurveAmountValue) mobileCurveAmountValue.innerText = curveAmountSlider.value; const activeShape = document.querySelector('.curve-option-btn.active')?.dataset.shape; if (activeShape && activeShape !== 'straight') applyCurveToSelected(); };
-    if (curveRadiusSlider) curveRadiusSlider.oninput = () => { curveRadiusValue.innerText = curveRadiusSlider.value + 'px'; if (mobileCurveRadiusSlider) mobileCurveRadiusSlider.value = curveRadiusSlider.value; if (mobileCurveRadiusValue) mobileCurveRadiusValue.innerText = curveRadiusSlider.value + 'px'; const activeShape = document.querySelector('.curve-option-btn.active')?.dataset.shape; if (activeShape && activeShape !== 'straight') applyCurveToSelected(); };
-    if (mobileCurveAmountSlider) mobileCurveAmountSlider.oninput = () => { mobileCurveAmountValue.innerText = mobileCurveAmountSlider.value; if (curveAmountSlider) curveAmountSlider.value = mobileCurveAmountSlider.value; if (curveAmountValue) curveAmountValue.innerText = mobileCurveAmountSlider.value; };
-    if (mobileCurveRadiusSlider) mobileCurveRadiusSlider.oninput = () => { mobileCurveRadiusValue.innerText = mobileCurveRadiusSlider.value + 'px'; if (curveRadiusSlider) curveRadiusSlider.value = mobileCurveRadiusSlider.value; if (curveRadiusValue) curveRadiusValue.innerText = mobileCurveRadiusSlider.value + 'px'; };
-    if (mobileApplyCurveBtn) mobileApplyCurveBtn.onclick = applyCurveToSelected;
-    document.querySelectorAll('.mobile-toolbar .curve-option-btn').forEach(btn => { btn.onclick = () => { document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active')); btn.classList.add('active'); applyCurveToSelected(); }; });
-}
-document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart; document.getElementById('buyNowBtn').onclick=buyNow; document.getElementById('saveImageBtn').onclick=async()=>{showLoading("SAVING...");try{if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor);await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor);showToast('✅ Designs saved!');}catch(e){showToast('Save failed',true);}finally{hideLoading();}};
-document.getElementById('frontSideBtn').onclick=switchToFront; document.getElementById('backSideBtn').onclick=switchToBack; document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();}; document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();}); document.getElementById('addTextBtn').onclick=addText; document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open'); document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout2.html';}; 
-document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click(); 
-document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
-document.getElementById('glowBtn').onclick=applyGlow; document.getElementById('roundedBtn').onclick=applyRounded; document.getElementById('borderBtn').onclick=applyBorderToggle; 
-document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders; document.getElementById('glowColorPicker').oninput=updateGlowFromSliders;
-document.getElementById('glowBlurSlider').oninput=updateGlowFromSliders; document.getElementById('glowIntensitySlider').oninput=updateGlowFromSliders;
-document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; document.getElementById('flipVerticalBtn').onclick=flipVertical; document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic'); document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline'); document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);}; document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');}; document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
+function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&(a.type==='i-text'||a.type==='text')){if(st==='bold'){a.set('fontWeight', a.fontWeight === 'bold' ? 'normal' : 'bold');}if(st==='italic'){a.set('fontStyle', a.fontStyle === 'italic' ? 'normal' : 'italic');}if(st==='underline'){a.set('underline', !a.underline);}fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
+function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'))return;const fontVal=document.getElementById('fontSelect')?.value || 'Space Grotesk';const sizeVal=parseInt(document.getElementById('fontSizeSlider')?.value || document.getElementById('mobileFontSizeSlider')?.value || 36);a.set('fontFamily',fontVal);a.set('fontSize',sizeVal);fabricCanvas.renderAll();}
+document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart; document.getElementById('buyNowBtn').onclick=buyNow; document.getElementById('frontSideBtn').onclick=switchToFront; document.getElementById('backSideBtn').onclick=switchToBack; document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();}; document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();}); document.getElementById('addTextBtn').onclick=addText; document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open'); document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout2.html';}; document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click(); document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
+document.getElementById('glowBtn').onclick=applyGlow; document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders; document.getElementById('glowColorPicker').oninput=updateGlowFromSliders; document.getElementById('glowBlurSlider').oninput=updateGlowFromSliders; document.getElementById('glowIntensitySlider').oninput=updateGlowFromSliders; document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; document.getElementById('flipVerticalBtn').onclick=flipVertical; document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic'); document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline'); document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);}; document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');}; document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
 if(document.querySelectorAll('.tool-btn[data-tool]')){document.querySelectorAll('.tool-btn[data-tool]').forEach(btn=>{btn.onclick=()=>{const tool=btn.dataset.tool;document.querySelectorAll('.tool-panel').forEach(panel=>panel.classList.remove('open'));const targetPanel=document.getElementById(`mobilePanel${tool.charAt(0).toUpperCase()+tool.slice(1)}`);if(targetPanel)targetPanel.classList.add('open');}});}
-if(document.getElementById('mobileAddTextBtn')) document.getElementById('mobileAddTextBtn').onclick=addText;
-if(document.getElementById('mobileDeleteBtn')) document.getElementById('mobileDeleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);};
-if(document.getElementById('mobileClearBtn')) document.getElementById('mobileClearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');};
-if(document.getElementById('mobileGlowBtn')) document.getElementById('mobileGlowBtn').onclick=applyGlow;
-if(document.getElementById('mobileRoundedBtn')) document.getElementById('mobileRoundedBtn').onclick=applyRounded;
-if(document.getElementById('mobileBorderBtn')) document.getElementById('mobileBorderBtn').onclick=applyBorderToggle;
-if(document.getElementById('mobileFlipHBtn')) document.getElementById('mobileFlipHBtn').onclick=flipHorizontal;
-if(document.getElementById('mobileFlipVBtn')) document.getElementById('mobileFlipVBtn').onclick=flipVertical;
-if(document.getElementById('mobileBoldBtn')) document.getElementById('mobileBoldBtn').onclick=()=>applyTextStyle('bold');
-if(document.getElementById('mobileItalicBtn')) document.getElementById('mobileItalicBtn').onclick=()=>applyTextStyle('italic');
-if(document.getElementById('mobileUnderlineBtn')) document.getElementById('mobileUnderlineBtn').onclick=()=>applyTextStyle('underline');
-if(document.getElementById('mobileGlowSizeSlider')) document.getElementById('mobileGlowSizeSlider').oninput=updateGlowFromSliders;
-if(document.getElementById('mobileGlowColorPicker')) document.getElementById('mobileGlowColorPicker').oninput=updateGlowFromSliders;
-if(document.getElementById('mobileGlowBlurSlider')) document.getElementById('mobileGlowBlurSlider').oninput=updateGlowFromSliders;
-if(document.getElementById('mobileGlowIntensitySlider')) document.getElementById('mobileGlowIntensitySlider').oninput=updateGlowFromSliders;
-if(document.getElementById('mobileFontSizeSlider')) document.getElementById('mobileFontSizeSlider').oninput=e=>{if(document.getElementById('mobileFontSizeValue')) document.getElementById('mobileFontSizeValue').innerText=e.target.value+'px';updateSelectedText();};
-if(document.getElementById('mobileUploadArea')) document.getElementById('mobileUploadArea').onclick=()=>document.getElementById('mobileImageUpload').click();
-if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
-const fonts=['Space Grotesk','Arial','Poppins','Montserrat','Dancing Script','Pacifico','Oswald','Lobster'];
-const mobileFontGrid=document.getElementById('mobileFontGrid');
-if(mobileFontGrid){fonts.forEach(f=>{const div=document.createElement('div');div.className='mobile-font-option';div.innerText=f;div.style.fontFamily=f;div.onclick=()=>{document.getElementById('fontSelect').value=f;updateSelectedText();document.querySelectorAll('.mobile-font-option').forEach(opt=>opt.classList.remove('active'));div.classList.add('active');showToast(`Font: ${f}`);};mobileFontGrid.appendChild(div);});}
-function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';} document.getElementById('closeModalBtn').onclick=closeLoginModal; function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});} document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}}; document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),500);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
+if(document.getElementById('mobileAddTextBtn')) document.getElementById('mobileAddTextBtn').onclick=addText; if(document.getElementById('mobileDeleteBtn')) document.getElementById('mobileDeleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);}; if(document.getElementById('mobileClearBtn')) document.getElementById('mobileClearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');}; if(document.getElementById('mobileGlowBtn')) document.getElementById('mobileGlowBtn').onclick=applyGlow; if(document.getElementById('mobileFlipHBtn')) document.getElementById('mobileFlipHBtn').onclick=flipHorizontal; if(document.getElementById('mobileFlipVBtn')) document.getElementById('mobileFlipVBtn').onclick=flipVertical; if(document.getElementById('mobileBoldBtn')) document.getElementById('mobileBoldBtn').onclick=()=>applyTextStyle('bold'); if(document.getElementById('mobileItalicBtn')) document.getElementById('mobileItalicBtn').onclick=()=>applyTextStyle('italic'); if(document.getElementById('mobileUnderlineBtn')) document.getElementById('mobileUnderlineBtn').onclick=()=>applyTextStyle('underline'); if(document.getElementById('mobileGlowSizeSlider')) document.getElementById('mobileGlowSizeSlider').oninput=updateGlowFromSliders; if(document.getElementById('mobileGlowColorPicker')) document.getElementById('mobileGlowColorPicker').oninput=updateGlowFromSliders; if(document.getElementById('mobileGlowBlurSlider')) document.getElementById('mobileGlowBlurSlider').oninput=updateGlowFromSliders; if(document.getElementById('mobileGlowIntensitySlider')) document.getElementById('mobileGlowIntensitySlider').oninput=updateGlowFromSliders; if(document.getElementById('mobileFontSizeSlider')) document.getElementById('mobileFontSizeSlider').oninput=e=>{if(document.getElementById('mobileFontSizeValue')) document.getElementById('mobileFontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; if(document.getElementById('mobileUploadArea')) document.getElementById('mobileUploadArea').onclick=()=>document.getElementById('mobileImageUpload').click(); if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}}; const fonts=['Space Grotesk','Arial','Poppins','Montserrat','Dancing Script','Pacifico','Oswald','Lobster']; const mobileFontGrid=document.getElementById('mobileFontGrid'); if(mobileFontGrid){fonts.forEach(f=>{const div=document.createElement('div');div.className='mobile-font-option';div.innerText=f;div.style.fontFamily=f;div.onclick=()=>{document.getElementById('fontSelect').value=f;updateSelectedText();document.querySelectorAll('.mobile-font-option').forEach(opt=>opt.classList.remove('active'));div.classList.add('active');showToast(`Font: ${f}`);};mobileFontGrid.appendChild(div);});}
+function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';} document.getElementById('closeModalBtn').onclick=closeLoginModal; function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});} document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}}; document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),200);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
 initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
-setupCurvePanel();
 </script>
 </body>
 </html>
