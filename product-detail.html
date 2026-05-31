@@ -1285,7 +1285,6 @@
       opacity: 0;
     }
 
-    /* Error and redirect styles */
     .error-message {
       text-align: center;
       padding: 80px 20px;
@@ -1391,22 +1390,19 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // Firebase Configuration
   const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
     authDomain: "nexi-53897.firebaseapp.com",
     projectId: "nexi-53897",
     storageBucket: "nexi-53897.firebasestorage.app",
     messagingSenderId: "337349382612",
-    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
-    measurementId: "G-W6N519LBPH"
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
   };
   
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
   
-  // Global variables
   let allProducts = [];
   let currentProductId = null;
   let currentProduct = null;
@@ -1420,13 +1416,11 @@
   const MAX_RETRY = 3;
   let redirectTimer = null;
   
-  // Load cart from localStorage
   try {
     const savedCart = localStorage.getItem('vedantaCart');
     if (savedCart) cart = JSON.parse(savedCart);
   } catch(e) { cart = []; }
   
-  // Mock reviews for now
   let productReviews = [
     { id: 1, userName: "Priya Sharma", userAvatar: "P", rating: 5, date: "15 Mar 2025", reviewText: "Absolutely stunning product! The quality is exceptional and the packaging was luxurious.", helpful: 124 },
     { id: 2, userName: "Amit Kumar", userAvatar: "A", rating: 5, date: "10 Mar 2025", reviewText: "Worth every penny! Premium finish and very comfortable.", helpful: 89 },
@@ -1442,7 +1436,6 @@
   let modalConfirmationResult = null;
   let modalCountdownTimer = null;
   
-  // Helper Functions
   function showToast(msg, isError = false) { 
     const toast = document.getElementById('toast'); 
     toast.innerText = msg; 
@@ -1533,56 +1526,39 @@
   function openCart() { document.getElementById('cartSidebar').classList.add('open'); document.getElementById('cartOverlay').classList.add('show'); }
   function closeCart() { document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartOverlay').classList.remove('show'); }
   
-  // ========== FIXED: CLEAN URL GENERATION ==========
   function updateBrowserURL(productId) {
-    // Generate clean URL without any special characters
     const cleanId = encodeURIComponent(productId);
     const newUrl = `${window.location.pathname}?id=${cleanId}`;
     window.history.replaceState({ productId: productId }, '', newUrl);
     console.log("✅ URL updated to:", newUrl);
   }
   
-  // ========== FIXED: Get Product ID from URL (Multiple sources) ==========
   function getProductIdFromUrl() {
-    // Method 1: Get from URL query params
     const urlParams = new URLSearchParams(window.location.search);
     let id = urlParams.get('id');
-    
-    // Method 2: If no id in URL params, check hash fragment
     if (!id && window.location.hash) {
       const hashParams = new URLSearchParams(window.location.hash.substring(1));
       id = hashParams.get('id');
     }
-    
-    // Method 3: Check localStorage
     if (!id) {
       id = localStorage.getItem('vedanta_selected_product_id');
     }
-    
-    // Clean the ID - remove any special characters, quotes, spaces
     if (id) {
       id = id.trim();
       id = id.replace(/['"`]/g, '');
       id = decodeURIComponent(id);
-      console.log("🔍 Extracted Product ID:", id);
     }
-    
     return id;
   }
   
-  // Validate product ID format
   function isValidProductId(id) {
     if (!id) return false;
-    // Firebase document IDs are typically 20+ characters alphanumeric
-    // Also accept shorter IDs if they exist in your DB
     return id.length >= 5 && /^[a-zA-Z0-9_-]+$/.test(id);
   }
   
-  // Display error and redirect to home
   function showErrorAndRedirect(message) {
     const appDiv = document.getElementById('app');
     let countdown = 5;
-    
     appDiv.innerHTML = `
       <div class="error-message">
         <i class="fas fa-exclamation-triangle"></i>
@@ -1594,7 +1570,6 @@
         </button>
       </div>
     `;
-    
     if (redirectTimer) clearInterval(redirectTimer);
     redirectTimer = setInterval(() => {
       countdown--;
@@ -1607,29 +1582,19 @@
     }, 1000);
   }
   
-  // ========== FIXED: Fetch product with retry and fallback ==========
   async function fetchProductById(productId, retryAttempt = 0) {
-    if (!productId) {
-      console.error("No product ID provided");
-      return null;
-    }
-    
+    if (!productId) return null;
     console.log(`Fetching product: ${productId} (Attempt ${retryAttempt + 1})`);
-    
     try {
       const docRef = db.collection('products').doc(productId);
       const docSnap = await docRef.get();
-      
       if (docSnap.exists) {
         const productData = docSnap.data();
         console.log("✅ Product found:", productData.name);
         return { id: docSnap.id, ...productData };
       } else {
-        console.log("❌ Product not found in Firestore:", productId);
-        
-        // Fallback: Search by name or slug
+        console.log("❌ Product not found:", productId);
         if (retryAttempt < MAX_RETRY) {
-          console.log("Attempting fallback search...");
           const allProductsSnapshot = await db.collection('products').where('status', '==', 'active').limit(50).get();
           let foundProduct = null;
           allProductsSnapshot.forEach(doc => {
@@ -1645,7 +1610,6 @@
             return foundProduct;
           }
         }
-        
         return null;
       }
     } catch (error) {
@@ -1681,10 +1645,7 @@
       const snapshot = await db.collection('products').where('status', '==', 'active').limit(50).get();
       const products = [];
       snapshot.forEach(doc => products.push({ id: doc.id, ...doc.data() }));
-      if (products.length > 0) {
-        allProducts = products;
-        renderRelatedProducts();
-      }
+      if (products.length > 0) allProducts = products;
     } catch(e) { console.log("Error loading related products:", e); }
   }
   
@@ -1808,7 +1769,6 @@
     return html;
   }
   
-  // ========== FIXED: Related Products generate CLEAN URLs ==========
   function renderRelatedProducts() {
     const container = document.getElementById('relatedProducts');
     if (!container) return;
@@ -1816,7 +1776,6 @@
     if (related.length === 0) { container.innerHTML = '<p style="color:#888; text-align:center;">No related products</p>'; return; }
     container.innerHTML = related.map(p => {
       const hasImage = p.images && p.images.length > 0;
-      // Generate clean URL with proper encoding
       const productUrl = `product-detail.html?id=${encodeURIComponent(p.id)}`;
       return `<div class="related-card" data-product-id="${p.id}" data-url="${productUrl}">
         <div class="related-img">${hasImage ? `<img src="${p.images[0]}" loading="lazy" onerror="this.onerror=null; this.src='';">` : `<i class="fas fa-gem"></i>`}</div>
@@ -1829,9 +1788,7 @@
         e.stopPropagation();
         const productId = card.getAttribute('data-product-id');
         const url = card.getAttribute('data-url');
-        // Save to localStorage for persistence
         localStorage.setItem('vedanta_selected_product_id', productId);
-        // Navigate with clean URL
         window.location.href = url;
       });
     });
@@ -1993,17 +1950,7 @@
     }
   }
   
-  async function checkUserHasSavedAddress() {
-    const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-    if (!currentUser || !currentUser.uid) return false;
-    try {
-      const addrSnapshot = await db.collection('addresses').where('userId', '==', currentUser.uid).limit(1).get();
-      if (!addrSnapshot.empty) return true;
-      const orderSnapshot = await db.collection('orders').where('customerPhone', '==', currentUser.phone).limit(1).get();
-      return !orderSnapshot.empty;
-    } catch(e) { return false; }
-  }
-  
+  // ========== FIXED: Always redirect to secure-checkout2.html ==========
   async function performBuyNow(product, qty, size, color, combo) {
     let finalPrice = product.price, finalQty = qty, comboInfo = null, comboMultiplier = 1;
     if (combo) {
@@ -2014,16 +1961,11 @@
     }
     const tempCart = [{ id: product.id, name: product.name, price: finalPrice, quantity: finalQty, size: size || 'Default', color: color || '', combo: comboInfo, isCombo: !!combo, comboMultiplier: comboMultiplier }];
     localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+    
     const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
     if (currentUser && currentUser.uid) {
-      const hasSavedAddress = await checkUserHasSavedAddress();
-      if (hasSavedAddress) {
-        showToast(`💳 Redirecting to checkout`);
-        setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 300);
-      } else {
-        showToast(`💳 Proceeding to checkout`);
-        setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 300);
-      }
+      showToast(`💳 Redirecting to checkout...`);
+      setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 300);
     } else {
       openLoginModal();
     }
@@ -2113,11 +2055,10 @@
       const userData = { uid: user.uid, phone: user.phoneNumber, name: `User${user.phoneNumber.slice(-4)}`, email: `${user.uid}@vedanta.com`, joinDate: new Date().toISOString() };
       localStorage.setItem('vedantaUser', JSON.stringify(userData));
       await db.collection('users').doc(user.uid).set(userData, { merge: true });
-      showToast(`✅ Welcome! Redirecting...`);
+      showToast(`✅ Welcome! Redirecting to checkout...`);
       closeLoginModal();
-      const hasSavedAddress = await checkUserHasSavedAddress();
-      if (hasSavedAddress) { setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 500); }
-      else { setTimeout(() => { window.location.href = 'secure-checkout.html'; }, 500); }
+      // ✅ DIRECT REDIRECT to secure-checkout2.html
+      setTimeout(() => { window.location.href = 'secure-checkout2.html'; }, 500);
     } catch(error) {
       showToast('Invalid OTP. Please try again.', true);
     } finally {
@@ -2264,7 +2205,7 @@
         headers.forEach(h => { sizeGuideHtml += `<td>${escapeHtml(row[h])}</td>`; });
         sizeGuideHtml += `</tr>`;
       });
-      sizeGuideHtml += `</tbody></td>`;
+      sizeGuideHtml += `</tbody></table>`;
       document.getElementById('sizeGuideTableContent').innerHTML = sizeGuideHtml;
       showSizeGuideBtn.addEventListener('click', () => sizeGuideModal.classList.add('show'));
       closeSizeModalBtn?.addEventListener('click', () => sizeGuideModal.classList.remove('show'));
@@ -2351,11 +2292,8 @@
     }, 50);
   }
   
-  // ========== FIXED: Main initialization with URL generation ==========
   async function initialize() {
-    // Get product ID from URL
     currentProductId = getProductIdFromUrl();
-    
     console.log("Product ID from URL:", currentProductId);
     
     if (!currentProductId) {
@@ -2368,13 +2306,9 @@
       return;
     }
     
-    // Save the product ID to localStorage for persistence
     localStorage.setItem('vedanta_selected_product_id', currentProductId);
-    
-    // Update browser URL with clean ID (important for sharing/ads)
     updateBrowserURL(currentProductId);
     
-    // Fetch product from Firestore
     const productData = await fetchProductById(currentProductId);
     
     if (!productData) {
@@ -2391,11 +2325,9 @@
     currentProduct = ensureProductFields(productData);
     console.log("✅ Product loaded successfully:", currentProduct.name);
     
-    // Load related products and render page
     await loadAllProductsForRelated();
     renderPageContent();
     
-    // Clear any redirect timer if product loaded
     if (redirectTimer) {
       clearInterval(redirectTimer);
       redirectTimer = null;
@@ -2406,23 +2338,16 @@
     document.getElementById('floatingCart')?.addEventListener('click', openCart);
     document.getElementById('closeCartBtn')?.addEventListener('click', closeCart);
     document.getElementById('cartOverlay')?.addEventListener('click', closeCart);
+    // ========== FIXED: Always redirect to secure-checkout2.html ==========
     document.getElementById('checkoutBtn')?.addEventListener('click', () => { 
-      if (cart.length === 0) showToast('Cart is empty!');
-      else {
-        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (currentUser && currentUser.uid) {
-          checkUserHasSavedAddress().then(hasSavedAddress => {
-            if (hasSavedAddress) window.location.href = 'secure-checkout2.html';
-            else window.location.href = 'secure-checkout.html';
-          });
-        } else {
-          openLoginModal();
-        }
+      if (cart.length === 0) {
+        showToast('Cart is empty!');
+      } else {
+        window.location.href = 'secure-checkout2.html';
       }
     });
   }
   
-  // Event listeners for modals
   document.getElementById('modalSendOtpBtn')?.addEventListener('click', modalSendOTP);
   document.getElementById('modalVerifyBtn')?.addEventListener('click', modalVerifyOTP);
   document.getElementById('modalResendBtn')?.addEventListener('click', modalResendOTP);
@@ -2433,7 +2358,6 @@
   document.getElementById('loginModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('loginModal')) closeLoginModal(); });
   document.getElementById('reviewsModal')?.addEventListener('click', (e) => { if (e.target === document.getElementById('reviewsModal')) closeReviewsModal(); });
   
-  // Start the app
   initialize();
   updateCartUI();
   attachCartEvents();
