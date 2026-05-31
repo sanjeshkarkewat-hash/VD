@@ -154,39 +154,29 @@
   let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
   let selectedPaymentMethod = 'cod', currentUser = null, selectedAddress = null, savedAddressFromDb = null;
   let isCustomizedOrder = false, frontDesignImageURL = null, backDesignImageURL = null;
-  let productImagesCache = {}; // Cache for regular products
+  let productImagesCache = {};
   let mapInstance = null, mapMarker = null, currentSelectedLatLng = null;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
-  // Fetch all products from Firestore to get image URLs for regular items
   async function fetchAllProductsImages() {
     try {
       const snapshot = await db.collection('products').get();
       snapshot.forEach(doc => {
         const p = doc.data();
-        // Store by product name (case insensitive)
-        if (p.name) {
-          productImagesCache[p.name.toLowerCase()] = p.images?.[0] || p.image || null;
-        }
-        // Store by ID
+        if (p.name) productImagesCache[p.name.toLowerCase()] = p.images?.[0] || p.image || null;
         productImagesCache[doc.id] = p.images?.[0] || p.image || null;
-        // Also store by display name variations
         if (p.displayName) productImagesCache[p.displayName.toLowerCase()] = p.images?.[0] || p.image || null;
       });
-      console.log("Product images loaded:", Object.keys(productImagesCache));
     } catch(e) { console.warn("Could not fetch products:", e); }
   }
 
   function getProductImageUrl(productName, productId, selectedColor) {
-    // Try exact match
     if (productName && productImagesCache[productName]) return productImagesCache[productName];
     if (productName && productImagesCache[productName.toLowerCase()]) return productImagesCache[productName.toLowerCase()];
-    // Try by ID
     if (productId && productImagesCache[productId]) return productImagesCache[productId];
-    // Try partial match for common styles
     const lowerName = (productName || '').toLowerCase();
     if (lowerName.includes('sweatshirt')) return productImagesCache['sweatshirt'] || null;
     if (lowerName.includes('regular fit')) return productImagesCache['regular fit'] || null;
@@ -197,7 +187,6 @@
     return null;
   }
 
-  // Load custom design data from localStorage
   function loadCustomData() {
     try {
       const saved = localStorage.getItem('customCheckoutData');
@@ -212,7 +201,6 @@
             if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
             if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
           }
-          // Create cart item for custom order if not already
           if (cart.length === 0 && (frontDesignImageURL || backDesignImageURL)) {
             cart = [{
               id: 'custom_' + Date.now(),
@@ -221,6 +209,7 @@
               quantity: data.quantity || 1,
               size: data.size || 'M',
               selectedColor: data.selectedColor || 'Black',
+              printMethod: data.printMethod || 'transparent',
               frontDesignImage: frontDesignImageURL,
               backDesignImage: backDesignImageURL,
               isCustomized: true
@@ -228,77 +217,50 @@
           }
         }
       }
-      
-      // Load regular cart items
       if (cart.length === 0) {
         const savedCart = localStorage.getItem('vedantaCart');
         if (savedCart) {
-          try { 
-            cart = JSON.parse(savedCart);
-            console.log("Cart loaded:", cart);
-          } catch(e) { cart = []; }
+          try { cart = JSON.parse(savedCart); } catch(e) { cart = []; }
         }
       }
-      
       cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
     } catch(e) { console.error("Error loading custom data:", e); }
   }
 
-  // Render order items with proper images (Regular + Custom)
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
-    
     for (const item of cart) {
-      const div = document.createElement('div');
-      div.className = 'order-item';
-      const imgDiv = document.createElement('div');
-      imgDiv.className = 'order-item-img';
-      const infoDiv = document.createElement('div');
-      infoDiv.className = 'order-item-info';
-      const priceDiv = document.createElement('div');
-      priceDiv.className = 'order-item-price';
+      const div = document.createElement('div'); div.className = 'order-item';
+      const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
+      const infoDiv = document.createElement('div'); infoDiv.className = 'order-item-info';
+      const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
-      
-      let imageUrl = null;
-      let designBadge = '';
-      
-      // Priority: Custom design images
+      let imageUrl = null, designBadge = '';
       if (item.isCustomized === true || (frontDesignImageURL && !item.productImage)) {
         imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
       } else {
-        // Regular product - try to get image from cache
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
-        // Also check if item has direct image URL
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
         if (!imageUrl && item.image) imageUrl = item.image;
       }
-      
       if (imageUrl) {
         const img = document.createElement('img');
-        img.src = imageUrl;
-        img.style.width = '100%';
-        img.style.height = '100%';
-        img.style.objectFit = 'cover';
+        img.src = imageUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
         img.onerror = () => { imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>'; };
         imgDiv.appendChild(img);
       } else {
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
       }
-      
       infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4>
         <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
-        <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}</p>
+        <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'} | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}</p>
         ${designBadge}`;
-      
-      div.appendChild(imgDiv);
-      div.appendChild(infoDiv);
-      div.appendChild(priceDiv);
+      div.appendChild(imgDiv); div.appendChild(infoDiv); div.appendChild(priceDiv);
       container.appendChild(div);
     }
-    
     updateTotalsDisplay();
   }
 
@@ -319,7 +281,6 @@
 
   function calculateDiscount() { updateTotalsDisplay(); }
 
-  // Address Logic
   async function fetchSavedAddress() {
     if (!currentUser || !currentUser.phone) return null;
     try {
@@ -364,7 +325,6 @@
     document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
   }
 
-  // Google Maps picker
   function openMapPicker() {
     const modal = document.getElementById('mapPickerModal');
     modal.classList.add('active');
@@ -386,6 +346,7 @@
       mapInstance = map; mapMarker = marker;
     }
   }
+
   async function confirmLocationAndFill() {
     if (!currentSelectedLatLng) { showToast('Select location first', true); return; }
     showLoading(true);
@@ -409,40 +370,116 @@
       document.getElementById('mapPickerModal').classList.remove('active');
     });
   }
+
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
 
-  // Order placement
+  // 🔥 IMPORTANT: saveOrder function with printMethod properly saved 🔥
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
+    
+    // Get printMethod from cart (custom order or regular)
+    const orderPrintMethod = cart[0]?.printMethod || 'transparent';
+    
     const itemsForDb = cart.map(i => ({ 
       name: i.name, 
       price: i.price, 
       quantity: i.quantity, 
       size: i.size || 'M', 
-      selectedColor: i.selectedColor || 'Black', 
+      selectedColor: i.selectedColor || 'Black',
+      printMethod: i.printMethod || orderPrintMethod,  // ← PRINT METHOD ADDED
       frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
       backDesignImage: i.backDesignImage || backDesignImageURL, 
       isCustomized: i.isCustomized || isCustomizedOrder,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
     }));
+    
     const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*1000);
+    
     try {
       await db.collection('orders').doc(orderId).set({
-        orderId, customerName: selectedAddress.fullName, customerPhone: selectedAddress.phone,
-        shippingAddress: { address: selectedAddress.address, city: selectedAddress.city, state: selectedAddress.state, pincode: selectedAddress.pincode, landmark: selectedAddress.landmark || '' },
-        items: itemsForDb, paymentMethod, paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
-        transactionId: txnId, subtotal: cartTotal, discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, total: finalTotal,
-        orderDate: new Date().toISOString(), userId: currentUser?.uid, isCustomized: isCustomizedOrder,
-        frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
+        orderId, 
+        customerName: selectedAddress.fullName, 
+        customerPhone: selectedAddress.phone,
+        shippingAddress: { 
+          address: selectedAddress.address, 
+          city: selectedAddress.city, 
+          state: selectedAddress.state, 
+          pincode: selectedAddress.pincode, 
+          landmark: selectedAddress.landmark || '' 
+        },
+        items: itemsForDb,
+        paymentMethod,
+        printMethod: orderPrintMethod,  // ← PRINT METHOD ADDED (order level)
+        paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', 
+        status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
+        transactionId: txnId, 
+        subtotal: cartTotal, 
+        discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, 
+        total: finalTotal,
+        orderDate: new Date().toISOString(), 
+        userId: currentUser?.uid, 
+        isCustomized: isCustomizedOrder,
+        frontDesignImage: frontDesignImageURL, 
+        backDesignImage: backDesignImageURL
       });
       return { success: true, orderId };
-    } catch(e) { console.error(e); return { success: false }; }
+    } catch(e) { 
+      console.error("Order save error:", e); 
+      return { success: false }; 
+    }
   }
   
-  async function placeCOD() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const res = await saveOrder('Cash on Delivery'); showLoading(false); if(res.success) { showToast(`Order placed! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order failed', true); isProcessing=false; } }
+  async function placeCOD() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const res = await saveOrder('Cash on Delivery'); 
+    showLoading(false); 
+    if(res.success) { 
+      showToast(`Order placed! ${res.orderId}`); 
+      localStorage.removeItem('vedantaCart'); 
+      localStorage.removeItem('customCheckoutData'); 
+      setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+    } else { 
+      showToast('Order failed', true); 
+      isProcessing=false; 
+    } 
+  }
   
-  async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.clear(); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
+  async function razorpayPayment() { 
+    if (!selectedAddress) { showToast('Add address first', true); return; } 
+    if(isProcessing) return; 
+    isProcessing=true; 
+    showLoading(true); 
+    const amt = discountedTotal; 
+    if(amt<=0){ showLoading(false); isProcessing=false; return; } 
+    const options = { 
+      key: RAZORPAY_KEY_ID, 
+      amount: Math.round(amt)*100, 
+      currency: 'INR', 
+      name: 'VEDANTA', 
+      description: 'T-Shirt Order', 
+      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
+      theme: { color: '#D4AF37' }, 
+      handler: async (resp) => { 
+        const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
+        showLoading(false); 
+        if(res.success) { 
+          showToast(`Payment success! ${res.orderId}`); 
+          localStorage.clear(); 
+          setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
+        } else { 
+          showToast('Order save issue', true); 
+          isProcessing=false; 
+        } 
+      }, 
+      modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } 
+    }; 
+    const razor = new Razorpay(options); 
+    razor.open(); 
+  }
 
   async function init() {
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
