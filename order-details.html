@@ -6,435 +6,63 @@
     <title>Order Details - Vedanta</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-        body {
-            font-family: 'Space Grotesk', sans-serif;
-            background: #050508;
-            color: #FFFFFF;
-            overflow-x: hidden;
-            min-height: 100vh;
-            padding-bottom: 20px;
-        }
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%);
-            pointer-events: none;
-            z-index: -1;
-        }
-        
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 16px;
-            background: rgba(10,10,18,0.98);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(212,175,55,0.2);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .logo h1 {
-            font-size: 20px;
-            font-weight: 800;
-            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00);
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-        }
-        .back-btn {
-            background: rgba(212,175,55,0.15);
-            border: 1px solid rgba(212,175,55,0.3);
-            padding: 6px 14px;
-            border-radius: 40px;
-            color: #D4AF37;
-            text-decoration: none;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .back-btn i { font-size: 12px; }
-        
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 12px;
-        }
-        
-        .skeleton-card {
-            background: rgba(15,15,22,0.6);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(212,175,55,0.1);
-        }
-        .skeleton-title {
-            height: 20px;
-            width: 40%;
-            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-        .skeleton-line {
-            height: 12px;
-            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 6px;
-            margin: 10px 0;
-        }
-        .skeleton-steps {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            margin: 16px 0;
-        }
-        .skeleton-step {
-            flex: 1;
-            text-align: center;
-        }
-        .skeleton-step-icon {
-            width: 36px;
-            height: 36px;
-            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 50%;
-            margin: 0 auto 8px;
-        }
-        .skeleton-step-label {
-            height: 8px;
-            width: 40px;
-            margin: 0 auto;
-            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 4px;
-        }
-        .skeleton-item {
-            display: flex;
-            gap: 12px;
-            padding: 12px 0;
-        }
-        .skeleton-img {
-            width: 65px;
-            height: 65px;
-            background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%);
-            background-size: 200% 100%;
-            animation: shimmer 1.5s infinite;
-            border-radius: 14px;
-            flex-shrink: 0;
-        }
-        @keyframes shimmer {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
-        }
-        
-        .status-bar {
-            background: rgba(15,15,22,0.6);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(212,175,55,0.2);
-        }
-        .status-steps {
-            display: flex;
-            justify-content: space-between;
-            gap: 4px;
-            margin: 16px 0;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-        .step {
-            text-align: center;
-            flex: 1;
-            min-width: 55px;
-        }
-        .step-icon {
-            width: 36px;
-            height: 36px;
-            background: #1A1A1A;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 6px;
-            border: 2px solid rgba(212,175,55,0.3);
-            transition: all 0.3s ease;
-        }
-        .step.completed .step-icon {
-            background: #4CAF50;
-            border-color: #4CAF50;
-        }
-        .step.active .step-icon {
-            background: #D4AF37;
-            border-color: #D4AF37;
-            animation: pulse 1s infinite;
-        }
-        @keyframes pulse {
-            0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); }
-            70% { box-shadow: 0 0 0 8px rgba(212,175,55,0); }
-            100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); }
-        }
+        body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; overflow-x: hidden; min-height: 100vh; padding-bottom: 20px; }
+        body::before { content: ''; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: radial-gradient(circle at 20% 40%, rgba(212,175,55,0.08), transparent 70%); pointer-events: none; z-index: -1; }
+        .header { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px; background: rgba(10,10,18,0.98); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(212,175,55,0.2); position: sticky; top: 0; z-index: 100; }
+        .logo h1 { font-size: 20px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FF8C00); -webkit-background-clip: text; background-clip: text; color: transparent; }
+        .back-btn { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.3); padding: 6px 14px; border-radius: 40px; color: #D4AF37; text-decoration: none; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+        .container { max-width: 600px; margin: 0 auto; padding: 12px; }
+        .skeleton-card { background: rgba(15,15,22,0.6); border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(212,175,55,0.1); }
+        .skeleton-title { height: 20px; width: 40%; background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 8px; margin-bottom: 16px; }
+        .skeleton-line { height: 12px; background: linear-gradient(90deg, #1a1a24 25%, #2a2a35 50%, #1a1a24 75%); background-size: 200% 100%; animation: shimmer 1.5s infinite; border-radius: 6px; margin: 10px 0; }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+        .status-bar { background: rgba(15,15,22,0.6); border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(212,175,55,0.2); }
+        .status-steps { display: flex; justify-content: space-between; gap: 4px; margin: 16px 0; overflow-x: auto; }
+        .step { text-align: center; flex: 1; min-width: 55px; }
+        .step-icon { width: 36px; height: 36px; background: #1A1A1A; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 6px; border: 2px solid rgba(212,175,55,0.3); transition: all 0.3s ease; }
+        .step.completed .step-icon { background: #4CAF50; border-color: #4CAF50; }
+        .step.active .step-icon { background: #D4AF37; border-color: #D4AF37; animation: pulse 1s infinite; }
+        @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(212,175,55,0.4); } 70% { box-shadow: 0 0 0 8px rgba(212,175,55,0); } 100% { box-shadow: 0 0 0 0 rgba(212,175,55,0); } }
         .step-icon i { font-size: 14px; color: #050508; }
         .step-label { font-size: 9px; color: #888; white-space: nowrap; }
         .step.completed .step-label { color: #4CAF50; }
         .step.active .step-label { color: #D4AF37; font-weight: 600; }
-        
-        .info-card {
-            background: rgba(15,15,22,0.6);
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(212,175,55,0.2);
-        }
-        .card-title {
-            font-size: 15px;
-            font-weight: 700;
-            color: #D4AF37;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding-bottom: 10px;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .card-title i { font-size: 14px; }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-        }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            color: #888;
-            font-size: 12px;
-        }
-        .info-value {
-            color: #FFFFFF;
-            font-weight: 500;
-            font-size: 12px;
-            text-align: right;
-            word-break: break-word;
-            max-width: 60%;
-        }
-        .price-highlight {
-            color: #D4AF37;
-            font-weight: 700;
-        }
-        
-        .order-item {
-            display: flex;
-            gap: 12px;
-            padding: 12px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.08);
-        }
-        .order-item:active {
-            background: rgba(212,175,55,0.05);
-        }
-        .order-item-img {
-            width: 70px;
-            height: 70px;
-            background: #0E0E14;
-            border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            flex-shrink: 0;
-        }
-        .order-item-img img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .order-item-img i {
-            font-size: 28px;
-            color: #D4AF37;
-        }
-        .order-item-info {
-            flex: 1;
-        }
-        .order-item-name {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        .item-attributes {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            margin: 6px 0;
-        }
-        .size-badge, .color-badge {
-            background: rgba(212,175,55,0.15);
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 10px;
-            color: #D4AF37;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
-        .color-dot-small {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            display: inline-block;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .custom-badge-order {
-            background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1));
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 9px;
-            color: #D4AF37;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            margin-top: 4px;
-        }
-        .combo-badge-order {
-            background: #4CAF50;
-            color: white;
-            font-size: 9px;
-            padding: 2px 8px;
-            border-radius: 20px;
-            display: inline-block;
-            margin-top: 4px;
-        }
-        .order-item-price {
-            text-align: right;
-            min-width: 85px;
-        }
-        .final-price {
-            font-weight: 700;
-            color: #D4AF37;
-            font-size: 14px;
-        }
-        .order-item-qty {
-            font-size: 10px;
-            color: #888;
-            margin-top: 4px;
-        }
-        
-        .total-section {
-            margin-top: 12px;
-            padding-top: 12px;
-            border-top: 2px solid rgba(212,175,55,0.3);
-        }
-        .total-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            font-size: 13px;
-        }
-        .grand-total {
-            font-size: 16px;
-            font-weight: 800;
-            color: #D4AF37;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 16px;
-            flex-direction: column;
-            position: sticky;
-            bottom: 10px;
-            background: rgba(5,5,8,0.95);
-            backdrop-filter: blur(10px);
-            padding: 12px;
-            border-radius: 20px;
-            border: 1px solid rgba(212,175,55,0.2);
-        }
-        .btn-primary, .btn-secondary {
-            width: 100%;
-            padding: 12px;
-            border-radius: 50px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: transform 0.2s;
-            border: none;
-        }
-        .btn-primary {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            color: #050508;
-        }
-        .btn-secondary {
-            background: rgba(212,175,55,0.15);
-            border: 1px solid rgba(212,175,55,0.5);
-            color: #D4AF37;
-        }
-        .btn-cancel {
-            background: rgba(244,67,54,0.15);
-            border: 1px solid rgba(244,67,54,0.5);
-            color: #F44336;
-        }
-        .btn-return {
-            background: rgba(255,152,0,0.15);
-            border: 1px solid rgba(255,152,0,0.5);
-            color: #FF9800;
-        }
-        .btn-return-again {
-            background: rgba(76,175,80,0.15);
-            border: 1px solid rgba(76,175,80,0.5);
-            color: #4CAF50;
-        }
-        .btn-primary:active, .btn-secondary:active {
-            transform: scale(0.97);
-        }
-        
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.85);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
+        .info-card { background: rgba(15,15,22,0.6); border-radius: 20px; padding: 16px; margin-bottom: 12px; border: 1px solid rgba(212,175,55,0.2); }
+        .card-title { font-size: 15px; font-weight: 700; color: #D4AF37; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; padding-bottom: 10px; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: #888; font-size: 12px; }
+        .info-value { color: #FFFFFF; font-weight: 500; font-size: 12px; text-align: right; word-break: break-word; max-width: 60%; }
+        .price-highlight { color: #D4AF37; font-weight: 700; }
+        .order-item { display: flex; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.08); }
+        .order-item-img { width: 70px; height: 70px; background: #0E0E14; border-radius: 14px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .order-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .order-item-img i { font-size: 28px; color: #D4AF37; }
+        .order-item-info { flex: 1; }
+        .order-item-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; }
+        .item-attributes { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+        .size-badge, .color-badge { background: rgba(212,175,55,0.15); padding: 2px 8px; border-radius: 20px; font-size: 10px; color: #D4AF37; display: inline-flex; align-items: center; gap: 4px; }
+        .color-dot-small { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+        .custom-badge-order { background: linear-gradient(135deg, rgba(212,175,55,0.2), rgba(255,140,0,0.1)); padding: 3px 10px; border-radius: 20px; font-size: 9px; color: #D4AF37; display: inline-flex; align-items: center; gap: 4px; margin-top: 4px; }
+        .order-item-price { text-align: right; min-width: 85px; }
+        .final-price { font-weight: 700; color: #D4AF37; font-size: 14px; }
+        .order-item-qty { font-size: 10px; color: #888; margin-top: 4px; }
+        .total-section { margin-top: 12px; padding-top: 12px; border-top: 2px solid rgba(212,175,55,0.3); }
+        .total-row { display: flex; justify-content: space-between; padding: 6px 0; font-size: 13px; }
+        .grand-total { font-size: 16px; font-weight: 800; color: #D4AF37; margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1); }
+        .action-buttons { display: flex; gap: 10px; margin-top: 16px; flex-direction: column; position: sticky; bottom: 10px; background: rgba(5,5,8,0.95); backdrop-filter: blur(10px); padding: 12px; border-radius: 20px; border: 1px solid rgba(212,175,55,0.2); }
+        .btn-primary, .btn-secondary { width: 100%; padding: 12px; border-radius: 50px; font-weight: 700; font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.2s; border: none; }
+        .btn-primary { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; }
+        .btn-secondary { background: rgba(212,175,55,0.15); border: 1px solid rgba(212,175,55,0.5); color: #D4AF37; }
+        .btn-cancel { background: rgba(244,67,54,0.15); border: 1px solid rgba(244,67,54,0.5); color: #F44336; }
+        .btn-return { background: rgba(255,152,0,0.15); border: 1px solid rgba(255,152,0,0.5); color: #FF9800; }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 10000; align-items: center; justify-content: center; padding: 20px; }
         .modal.show { display: flex; }
-        .modal-content {
-            background: rgba(15,15,22,0.98);
-            backdrop-filter: blur(15px);
-            border-radius: 24px;
-            padding: 24px;
-            max-width: 320px;
-            width: 100%;
-            text-align: center;
-            border: 1px solid rgba(212,175,55,0.3);
-        }
+        .modal-content { background: rgba(15,15,22,0.98); backdrop-filter: blur(15px); border-radius: 24px; padding: 24px; max-width: 320px; width: 100%; text-align: center; border: 1px solid rgba(212,175,55,0.3); }
         .modal-content i { font-size: 48px; color: #F44336; margin-bottom: 16px; }
         .modal-content h3 { font-size: 20px; margin-bottom: 8px; }
         .modal-content p { color: #888; font-size: 13px; margin-bottom: 20px; }
@@ -442,92 +70,13 @@
         .modal-btn { flex: 1; padding: 10px; border-radius: 30px; font-weight: 700; cursor: pointer; border: none; font-size: 13px; }
         .modal-confirm { background: #F44336; color: white; }
         .modal-cancel { background: rgba(255,255,255,0.1); color: white; }
-        
-        .toast {
-            position: fixed;
-            bottom: 80px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #D4AF37;
-            color: #050508;
-            padding: 10px 20px;
-            border-radius: 50px;
-            font-weight: bold;
-            z-index: 10000;
-            display: none;
-            font-size: 12px;
-            white-space: nowrap;
-            max-width: 90%;
-            white-space: normal;
-            text-align: center;
-        }
+        .toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 10px 20px; border-radius: 50px; font-weight: bold; z-index: 10000; display: none; font-size: 12px; text-align: center; max-width: 90%; }
         .toast.show { display: block; animation: fadeInOut 2s ease; }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: translateX(-50%) translateY(10px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
-        }
-        
+        @keyframes fadeInOut { 0% { opacity: 0; transform: translateX(-50%) translateY(10px); } 15% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(-10px); } }
         .error-state { text-align: center; padding: 60px 20px; }
-        .error-state i { font-size: 50px; color: #F44336; margin-bottom: 16px; }
-        .error-state h3 { font-size: 18px; margin-bottom: 8px; }
-        
-        .cancelled-banner {
-            text-align: center;
-            padding: 12px;
-            background: rgba(244,67,54,0.1);
-            border-radius: 14px;
-            margin: 12px 0;
-        }
-        
-        .return-info {
-            background: rgba(255,152,0,0.1);
-            border: 1px solid rgba(255,152,0,0.3);
-            border-radius: 14px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 11px;
-            color: #FF9800;
-        }
-        .return-approved-info {
-            background: rgba(76,175,80,0.1);
-            border: 1px solid rgba(76,175,80,0.3);
-            border-radius: 14px;
-            padding: 12px;
-            margin-top: 10px;
-        }
-        .return-rejected-info {
-            background: rgba(244,67,54,0.1);
-            border: 1px solid rgba(244,67,54,0.3);
-            border-radius: 14px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 11px;
-            color: #F44336;
-        }
-        .return-expired-info {
-            background: rgba(128,128,128,0.1);
-            border: 1px solid rgba(128,128,128,0.3);
-            border-radius: 14px;
-            padding: 10px;
-            margin-top: 10px;
-            font-size: 11px;
-            color: #888;
-        }
-        .days-left-badge {
-            background: #4CAF50;
-            color: white;
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 10px;
-            margin-left: 8px;
-        }
-        .pickup-datetime {
-            font-size: 14px;
-            font-weight: bold;
-            color: #FFD700;
-            margin: 5px 0;
-        }
+        .cancelled-banner { text-align: center; padding: 12px; background: rgba(244,67,54,0.1); border-radius: 14px; margin: 12px 0; }
+        .return-info { background: rgba(255,152,0,0.1); border: 1px solid rgba(255,152,0,0.3); border-radius: 14px; padding: 10px; margin-top: 10px; font-size: 11px; color: #FF9800; }
+        .days-left-badge { background: #4CAF50; color: white; padding: 2px 8px; border-radius: 20px; font-size: 10px; margin-left: 8px; }
     </style>
 </head>
 <body>
@@ -538,34 +87,8 @@
 </div>
 
 <div class="container" id="app">
-    <!-- Skeleton Loaders -->
-    <div class="skeleton-card">
-        <div class="skeleton-title"></div>
-        <div class="skeleton-steps">
-            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
-            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
-            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
-            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
-            <div class="skeleton-step"><div class="skeleton-step-icon"></div><div class="skeleton-step-label"></div></div>
-        </div>
-    </div>
-    <div class="skeleton-card">
-        <div class="skeleton-title" style="width: 35%;"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line" style="width: 70%;"></div>
-    </div>
-    <div class="skeleton-card">
-        <div class="skeleton-title" style="width: 40%;"></div>
-        <div class="skeleton-item">
-            <div class="skeleton-img"></div>
-            <div style="flex:1"><div class="skeleton-line" style="width: 80%;"></div><div class="skeleton-line" style="width: 60%;"></div></div>
-        </div>
-        <div class="skeleton-item">
-            <div class="skeleton-img"></div>
-            <div style="flex:1"><div class="skeleton-line" style="width: 80%;"></div><div class="skeleton-line" style="width: 60%;"></div></div>
-        </div>
-    </div>
+    <div class="skeleton-card"><div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>
+    <div class="skeleton-card"><div class="skeleton-title"></div><div class="skeleton-line"></div><div class="skeleton-line"></div></div>
 </div>
 
 <div class="modal" id="cancelModal">
@@ -583,21 +106,17 @@
 <div class="toast" id="toast"></div>
 
 <script>
-    // ========== FIREBASE CONFIGURATION ==========
     const firebaseConfig = {
         apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
         authDomain: "nexi-53897.firebaseapp.com",
         projectId: "nexi-53897",
         storageBucket: "nexi-53897.firebasestorage.app",
         messagingSenderId: "337349382612",
-        appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641",
-        measurementId: "G-W6N519LBPH"
+        appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
     };
     
     firebase.initializeApp(firebaseConfig);
     const db = firebase.firestore();
-    
-    db.enablePersistence({ synchronizeTabs: true }).catch(err => console.log("Persistence:", err));
     
     let currentOrder = null;
     let productsCache = new Map();
@@ -635,31 +154,59 @@
         return urlParams.get('orderId');
     }
     
-    // ========== FIXED: Get product image for custom designs ==========
+    // 🔥 FIXED: Get product image - supports BOTH regular and custom orders
     function getProductImageForItem(item, order) {
-        // Priority 1: Check item level custom images
-        if (item) {
-            if (item.frontDesignImage) return item.frontDesignImage;
-            if (item.backDesignImage) return item.backDesignImage;
-            if (item.designImage) return item.designImage;
-            if (item.isCustomized === true && item.designImage) return item.designImage;
-        }
-        
-        // Priority 2: Check order level design images
-        if (order) {
+        // For CUSTOM orders: show custom design image
+        if (order && order.isCustomized === true) {
             if (order.frontDesignImage) return order.frontDesignImage;
-            if (order.backDesignImage) return order.backDesignImage;
             if (order.customDesignImage) return order.customDesignImage;
-            if (order.isCustomized === true && order.customDesignImage) return order.customDesignImage;
+        }
+        if (item && item.isCustomized === true) {
+            if (item.frontDesignImage) return item.frontDesignImage;
+            if (item.designImage) return item.designImage;
+        }
+        if (order && (order.frontDesignImage || order.backDesignImage)) {
+            return order.frontDesignImage || order.backDesignImage;
         }
         
-        // Priority 3: Check from products cache
-        if (item && item.id) {
-            const prod = productsCache.get(item.id);
-            if (prod && prod.images && prod.images.length > 0) {
-                return prod.images[0];
+        // For REGULAR orders: get product image from products cache
+        let productName = item?.name || '';
+        
+        if (productName) {
+            const lowerName = productName.toLowerCase();
+            // Common product types
+            if (lowerName.includes('sweatshirt')) {
+                const prod = productsCache.get('sweatshirt');
+                if (prod && prod.images && prod.images[0]) return prod.images[0];
             }
+            if (lowerName.includes('regular fit')) {
+                const prod = productsCache.get('regular fit');
+                if (prod && prod.images && prod.images[0]) return prod.images[0];
+            }
+            if (lowerName.includes('polo')) {
+                const prod = productsCache.get('polo');
+                if (prod && prod.images && prod.images[0]) return prod.images[0];
+            }
+            if (lowerName.includes('oversized')) {
+                const prod = productsCache.get('oversized');
+                if (prod && prod.images && prod.images[0]) return prod.images[0];
+            }
+            if (lowerName.includes('hoodie')) {
+                const prod = productsCache.get('hoodie');
+                if (prod && prod.images && prod.images[0]) return prod.images[0];
+            }
+            
+            // Try exact match from cache
+            const cached = productsCache.get(productName);
+            if (cached && cached.images && cached.images[0]) return cached.images[0];
+            
+            const cachedLower = productsCache.get(productName.toLowerCase());
+            if (cachedLower && cachedLower.images && cachedLower.images[0]) return cachedLower.images[0];
         }
+        
+        // Check item for direct image URL
+        if (item?.productImage) return item.productImage;
+        if (item?.image) return item.image;
         
         return null;
     }
@@ -672,82 +219,31 @@
         return false;
     }
     
-    function getDeliveryDate() {
-        if (currentOrder.deliveredDate) {
-            return new Date(currentOrder.deliveredDate);
-        }
-        const orderDate = new Date(currentOrder.orderDate);
-        const estimatedDelivery = new Date(orderDate);
-        estimatedDelivery.setDate(orderDate.getDate() + 7);
-        return estimatedDelivery;
-    }
-    
-    function isWithinReturnPeriod() {
-        if (!currentOrder || currentOrder.status !== 'delivered') return false;
-        const deliveryDate = getDeliveryDate();
-        const today = new Date();
-        const daysDiff = Math.floor((today - deliveryDate) / (1000 * 3600 * 24));
-        return daysDiff <= 7;
-    }
-    
-    function getDaysLeftForReturn() {
-        if (!currentOrder || currentOrder.status !== 'delivered') return 0;
-        const deliveryDate = getDeliveryDate();
-        const today = new Date();
-        const daysDiff = Math.floor((today - deliveryDate) / (1000 * 3600 * 24));
-        const daysLeft = 7 - daysDiff;
-        return daysLeft > 0 ? daysLeft : 0;
-    }
-    
-    function getPickupSchedule() {
-        if (!currentOrder.returnProcessedDate) return null;
-        const approvalDate = new Date(currentOrder.returnProcessedDate);
-        const pickupDate = new Date(approvalDate);
-        pickupDate.setDate(approvalDate.getDate() + 5);
-        const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-        const formattedDate = pickupDate.toLocaleDateString('en-IN', options);
-        const hours = Math.floor(Math.random() * 8) + 10;
-        const minutes = Math.random() > 0.5 ? '00' : '30';
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const displayHours = hours > 12 ? hours - 12 : hours;
-        const formattedTime = `${displayHours}:${minutes} ${ampm}`;
-        return { date: formattedDate, time: formattedTime };
-    }
-    
-    async function loadProductsFast() {
-        const cached = sessionStorage.getItem('vedanta_products_cache');
-        if (cached) {
-            try {
-                const parsed = JSON.parse(cached);
-                if (parsed && Date.now() - parsed.timestamp < 3600000) {
-                    productsCache = new Map(parsed.data);
-                    return;
-                }
-            } catch(e) {}
-        }
-        
+    async function loadProductsCache() {
         try {
             const snapshot = await db.collection('products').get();
-            const productsArray = [];
             snapshot.forEach(doc => {
                 const p = doc.data();
                 productsCache.set(p.id, {
-                    name: p.name, images: p.images || [], icon: p.icon || 'fa-gem',
-                    sizes: p.sizes || [], colors: p.colors || []
+                    name: p.name,
+                    images: p.images || [],
+                    icon: p.icon || 'fa-tshirt'
                 });
-                productsArray.push([p.id, {
-                    name: p.name, images: p.images || [], icon: p.icon || 'fa-gem',
-                    sizes: p.sizes || [], colors: p.colors || []
-                }]);
+                if (p.name) {
+                    productsCache.set(p.name.toLowerCase(), {
+                        name: p.name,
+                        images: p.images || [],
+                        icon: p.icon || 'fa-tshirt'
+                    });
+                }
             });
-            sessionStorage.setItem('vedanta_products_cache', JSON.stringify({ timestamp: Date.now(), data: productsArray }));
-        } catch(e) { console.log("Products error:", e); }
+            console.log("✅ Products loaded:", productsCache.size);
+        } catch(e) { console.warn("Products fetch error:", e); }
     }
     
-    async function loadOrderFast() {
+    async function loadOrder() {
         const orderId = getOrderIdFromUrl();
         if (!orderId) return false;
-        
         try {
             const doc = await db.collection('orders').doc(orderId).get();
             if (doc.exists) {
@@ -758,40 +254,30 @@
         return false;
     }
     
-    async function updateOrderBackground() {
-        const orderId = getOrderIdFromUrl();
-        if (!orderId || !currentOrder) return;
-        try {
-            const doc = await db.collection('orders').doc(orderId).get();
-            if (doc.exists) {
-                const fresh = { id: doc.id, ...doc.data() };
-                if (JSON.stringify(currentOrder) !== JSON.stringify(fresh)) {
-                    currentOrder = fresh;
-                    renderOrderDetails();
-                }
-            }
-        } catch(e) {}
-    }
-    
-    function setupRealtime() {
-        const orderId = getOrderIdFromUrl();
-        if (!orderId) return;
-        db.collection('orders').doc(orderId).onSnapshot((doc) => {
-            if (doc.exists) {
-                const updated = { id: doc.id, ...doc.data() };
-                if (JSON.stringify(currentOrder) !== JSON.stringify(updated)) {
-                    currentOrder = updated;
-                    renderOrderDetails();
-                    if (updated.status === 'shipped') showToast("🎉 Your order has been shipped!");
-                    else if (updated.status === 'delivered') showToast("✅ Order delivered! Thank you!");
-                    else if (updated.status === 'cancelled') showToast("Order cancelled");
-                }
-            }
-        });
+    function getStatusLabel(status) {
+        const map = { pending:'Pending', confirmed:'Confirmed', processing:'Processing', shipped:'Shipped', delivered:'Delivered', cancelled:'Cancelled' };
+        return map[status] || 'Pending';
     }
     
     function canCancel() {
         return currentOrder && ['pending', 'confirmed'].includes(currentOrder.status);
+    }
+    
+    function isWithinReturnPeriod() {
+        if (!currentOrder || currentOrder.status !== 'delivered') return false;
+        const orderDate = new Date(currentOrder.orderDate);
+        const today = new Date();
+        const daysDiff = Math.floor((today - orderDate) / (1000 * 3600 * 24));
+        return daysDiff <= 7;
+    }
+    
+    function getDaysLeftForReturn() {
+        if (!currentOrder || currentOrder.status !== 'delivered') return 0;
+        const orderDate = new Date(currentOrder.orderDate);
+        const today = new Date();
+        const daysDiff = Math.floor((today - orderDate) / (1000 * 3600 * 24));
+        const daysLeft = 7 - daysDiff;
+        return daysLeft > 0 ? daysLeft : 0;
     }
     
     function canReturn() {
@@ -803,20 +289,11 @@
         return true;
     }
     
-    function isReturnApproved() {
-        return currentOrder && currentOrder.returnStatus === 'approved';
-    }
-    
-    function isReturnRejected() {
-        return currentOrder && currentOrder.returnStatus === 'rejected';
-    }
-    
     async function cancelOrder() {
         if (!canCancel()) { showToast("Cannot cancel this order now", true); return; }
         try {
             await db.collection('orders').doc(currentOrder.id).update({
-                status: 'cancelled', 
-                cancelledAt: new Date().toISOString()
+                status: 'cancelled', cancelledAt: new Date().toISOString()
             });
             currentOrder.status = 'cancelled';
             showToast("✅ Order cancelled");
@@ -826,16 +303,8 @@
     
     function goToReturn() {
         const orderId = currentOrder?.orderId || currentOrder?.id;
-        if (orderId) {
-            window.location.href = `return.html?orderId=${orderId}`;
-        } else {
-            showToast("Order ID not found", true);
-        }
-    }
-    
-    function getStatusLabel(status) {
-        const map = { pending:'Pending', confirmed:'Confirmed', processing:'Processing', shipped:'Shipped', delivered:'Delivered', cancelled:'Cancelled' };
-        return map[status] || 'Pending';
+        if (orderId) window.location.href = `return.html?orderId=${orderId}`;
+        else showToast("Order ID not found", true);
     }
     
     function renderOrderDetails() {
@@ -845,7 +314,6 @@
         const isCancelled = currentOrder.status === 'cancelled';
         const canCancelOrder = canCancel();
         const canReturnOrder = canReturn();
-        const isReturnWindowExpired = currentOrder.status === 'delivered' && !isWithinReturnPeriod() && !currentOrder.returnStatus;
         const daysLeft = getDaysLeftForReturn();
         const orderDate = currentOrder.orderDate ? new Date(currentOrder.orderDate).toLocaleString() : 'N/A';
         
@@ -866,21 +334,13 @@
             }).join('')}</div>`;
         }
         
-        // ========== FIXED: Render items with custom design images ==========
+        // 🔥 FIXED: Render items with proper images for both custom and regular orders
         const itemsHtml = (currentOrder.items || []).map(item => {
             const productImg = getProductImageForItem(item, currentOrder);
             const isCustom = isCustomizedItem(item, currentOrder);
             const selectedSize = item.size || item.selectedSize || '';
             const selectedColor = item.color || item.selectedColor || '';
             const colorCode = getColorCode(selectedColor);
-            const comboInfo = item.combo || '';
-            
-            let comboHtml = '';
-            if (comboInfo) {
-                comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> ${escapeHtml(comboInfo)}</div>`;
-            } else if (item.isCombo && item.comboMultiplier) {
-                comboHtml = `<div class="combo-badge-order"><i class="fas fa-gift"></i> Combo Pack (${item.comboMultiplier} items per pack)</div>`;
-            }
             
             let customBadgeHtml = '';
             if (isCustom) {
@@ -889,9 +349,9 @@
             
             let imageHtml = '';
             if (productImg) {
-                imageHtml = `<img src="${productImg}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fas fa-gem\'></i>';">`;
+                imageHtml = `<img src="${productImg}" alt="${escapeHtml(item.name)}" loading="lazy" onerror="this.onerror=null;this.parentElement.innerHTML='<i class=\'fas fa-tshirt\'></i>';">`;
             } else {
-                imageHtml = `<i class="fas fa-gem"></i>`;
+                imageHtml = `<i class="fas fa-tshirt"></i>`;
             }
             
             return `<div class="order-item">
@@ -903,7 +363,6 @@
                         ${selectedColor ? `<span class="color-badge"><span class="color-dot-small" style="background: ${colorCode};"></span> ${escapeHtml(selectedColor)}</span>` : ''}
                     </div>
                     ${customBadgeHtml}
-                    ${comboHtml}
                     <div class="order-item-qty">Qty: ${item.quantity}</div>
                 </div>
                 <div class="order-item-price">
@@ -913,60 +372,18 @@
         }).join('');
         
         let actionButtonsHtml = '';
-        
         if (canCancelOrder) {
             actionButtonsHtml += `<button class="btn-secondary btn-cancel" id="cancelOrderBtn"><i class="fas fa-times-circle"></i> Cancel Order</button>`;
         }
-        
         if (canReturnOrder) {
             actionButtonsHtml += `<button class="btn-secondary btn-return" id="returnOrderBtn"><i class="fas fa-undo-alt"></i> Return Order <span class="days-left-badge">${daysLeft} days left</span></button>`;
             actionButtonsHtml += `<div class="return-info"><i class="fas fa-info-circle"></i> You can return this order within ${daysLeft} days (7 days return policy).</div>`;
-        } else if (isReturnWindowExpired && !currentOrder.returnStatus) {
-            actionButtonsHtml += `<div class="return-expired-info"><i class="fas fa-hourglass-end"></i> Return window expired (7 days policy). Cannot return this order now.</div>`;
-        }
-        
-        let returnStatusHtml = '';
-        
-        if (currentOrder.returnStatus === 'pending') {
-            returnStatusHtml = `<div class="return-info" style="background:rgba(255,152,0,0.15);"><i class="fas fa-clock"></i> Return Request Pending - We will contact you within 24 hours.</div>`;
-        } 
-        else if (currentOrder.returnStatus === 'approved') {
-            const pickup = getPickupSchedule();
-            returnStatusHtml = `
-                <div class="return-approved-info">
-                    <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 10px;">
-                        <i class="fas fa-check-circle" style="color: #4CAF50; font-size: 18px;"></i>
-                        <strong style="color: #4CAF50;">Return Request Approved! ✅</strong>
-                    </div>
-                    <div class="pickup-datetime">
-                        <i class="fas fa-truck"></i> Pickup Schedule:
-                    </div>
-                    <div style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 12px; margin-top: 8px;">
-                        <div><i class="fas fa-calendar-alt"></i> Date: <strong>${pickup.date}</strong></div>
-                        <div style="margin-top: 5px;"><i class="fas fa-clock"></i> Time: <strong>${pickup.time}</strong></div>
-                        <div style="margin-top: 8px; font-size: 10px; color: #ccc;"><i class="fas fa-info-circle"></i> Our delivery partner will visit your address for pickup.</div>
-                    </div>
-                </div>`;
-        } 
-        else if (currentOrder.returnStatus === 'rejected') {
-            const rejectReason = currentOrder.adminNotes || currentOrder.returnRejectReason || 'Not specified';
-            returnStatusHtml = `
-                <div class="return-rejected-info">
-                    <div><i class="fas fa-times-circle"></i> Return Request Rejected</div>
-                    <div style="font-size: 10px; margin-top: 5px; color: #FF8888;">Reason: ${escapeHtml(rejectReason)}</div>
-                    <div style="margin-top: 10px;">
-                        <button class="btn-return-again" id="returnAgainBtn" style="width: 100%; padding: 8px; font-size: 12px;">
-                            <i class="fas fa-redo-alt"></i> Request Return Again
-                        </button>
-                    </div>
-                </div>`;
         }
         
         container.innerHTML = `
             <div class="status-bar">
                 <div class="card-title"><i class="fas fa-chart-line"></i> Order Status</div>
                 ${statusHtml}
-                ${returnStatusHtml}
             </div>
             
             <div class="info-card">
@@ -980,7 +397,6 @@
             <div class="info-card">
                 <div class="card-title"><i class="fas fa-user"></i> Customer</div>
                 <div class="info-row"><span class="info-label">Name</span><span class="info-value">${escapeHtml(currentOrder.customerName || 'Guest')}</span></div>
-                <div class="info-row"><span class="info-label">Email</span><span class="info-value">${escapeHtml(currentOrder.customerEmail || 'N/A')}</span></div>
                 <div class="info-row"><span class="info-label">Phone</span><span class="info-value">${escapeHtml(currentOrder.customerPhone || 'N/A')}</span></div>
             </div>
             
@@ -996,8 +412,6 @@
                 ${itemsHtml || '<div class="info-row">No items</div>'}
                 <div class="total-section">
                     <div class="total-row"><span>Subtotal</span><span>₹${(currentOrder.subtotal || currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
-                    ${currentOrder.discount ? `<div class="total-row"><span>Discount</span><span style="color:#4CAF50;">-₹${currentOrder.discount.toLocaleString('en-IN')}</span></div>` : ''}
-                    <div class="total-row"><span>Shipping</span><span>${currentOrder.shippingCharge ? '₹'+currentOrder.shippingCharge : 'FREE'}</span></div>
                     <div class="total-row grand-total"><span>Total</span><span>₹${(currentOrder.total || 0).toLocaleString('en-IN')}</span></div>
                 </div>
             </div>
@@ -1009,14 +423,8 @@
             </div>
         `;
         
-        const cancelBtn = document.getElementById('cancelOrderBtn');
-        if (cancelBtn) cancelBtn.addEventListener('click', () => document.getElementById('cancelModal').classList.add('show'));
-        
-        const returnBtn = document.getElementById('returnOrderBtn');
-        if (returnBtn) returnBtn.addEventListener('click', goToReturn);
-        
-        const returnAgainBtn = document.getElementById('returnAgainBtn');
-        if (returnAgainBtn) returnAgainBtn.addEventListener('click', goToReturn);
+        document.getElementById('cancelOrderBtn')?.addEventListener('click', () => document.getElementById('cancelModal').classList.add('show'));
+        document.getElementById('returnOrderBtn')?.addEventListener('click', goToReturn);
     }
     
     function escapeHtml(str) {
@@ -1029,17 +437,15 @@
         document.getElementById('cancelModal').classList.remove('show');
         await cancelOrder();
     });
-    window.addEventListener('click', (e) => { if (e.target === document.getElementById('cancelModal')) document.getElementById('cancelModal').classList.remove('show'); });
     
     (async function init() {
-        await Promise.all([loadProductsFast(), loadOrderFast()]);
-        if (!currentOrder) {
+        await loadProductsCache();
+        const loaded = await loadOrder();
+        if (!loaded) {
             document.getElementById('app').innerHTML = `<div class="error-state"><i class="fas fa-exclamation-triangle"></i><h3>Order Not Found</h3><button class="btn-primary" onclick="location.href='booking.html'">Back to Bookings</button></div>`;
             return;
         }
         renderOrderDetails();
-        await updateOrderBackground();
-        setupRealtime();
     })();
 </script>
 </body>
