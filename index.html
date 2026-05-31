@@ -977,55 +977,17 @@
     let selectedSize = null;
     let pendingActionProduct = null;
     
-    // ===== INTELLIGENT CHECKOUT ROUTING =====
-    // Function to check if user has saved address in Firestore
-    async function checkUserHasSavedAddress(phoneNumber) {
-        if (!phoneNumber) return false;
-        try {
-            // Query Firestore to check if any address exists for this phone number
-            const addressesQuery = await db.collection('addresses')
-                .where('phone', '==', phoneNumber)
-                .limit(1)
-                .get();
-            return !addressesQuery.empty;
-        } catch (error) {
-            console.error("Error checking address:", error);
-            return false;
-        }
-    }
+    // ========== FIXED: ALWAYS REDIRECT TO secure-checkout2.html ==========
+    // No address check needed - always go to secure-checkout2.html
     
-    // Function to redirect to appropriate checkout page
-    async function redirectToCheckout() {
-        const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (currentUser && currentUser.phone) {
-            const hasAddress = await checkUserHasSavedAddress(currentUser.phone);
-            if (hasAddress) {
-                window.location.href = 'secure-checkout2.html';
-            } else {
-                window.location.href = 'secure-checkout.html';
-            }
-        } else {
-            // User not logged in, will redirect after login
-            pendingCartCheckout = true;
-            openLoginModal();
-        }
-    }
-    
-    // Modified buyNowWithSize to check address before redirect
     async function buyNowWithSize(product, size) {
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
         if (currentUser && currentUser.phone) {
             // Save cart with selected product and size
             const tempCart = [{ id: product.id, name: product.name, price: product.price, quantity: 1, selectedSize: size }];
             localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-            
-            // Check if user has saved address
-            const hasAddress = await checkUserHasSavedAddress(currentUser.phone);
-            if (hasAddress) {
-                window.location.href = 'secure-checkout2.html';
-            } else {
-                window.location.href = 'secure-checkout.html';
-            }
+            // ✅ DIRECT REDIRECT - Always go to secure-checkout2.html
+            window.location.href = 'secure-checkout2.html';
         } else {
             // Store product and size for after login
             pendingBuyProduct = { ...product, selectedSize: size };
@@ -1033,8 +995,7 @@
         }
     }
     
-    // Modified checkout function for cart
-    let pendingCartCheckout = false;
+    // Modified checkout function for cart - ALWAYS go to secure-checkout2.html
     async function checkoutWithSmartRedirect() {
         const currentCart = JSON.parse(localStorage.getItem('vedantaCart')) || [];
         if (currentCart.length === 0) {
@@ -1043,19 +1004,15 @@
         }
         const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
         if (currentUser && currentUser.phone) {
-            const hasAddress = await checkUserHasSavedAddress(currentUser.phone);
-            if (hasAddress) {
-                window.location.href = 'secure-checkout2.html';
-            } else {
-                window.location.href = 'secure-checkout.html';
-            }
+            // ✅ DIRECT REDIRECT - No address check
+            window.location.href = 'secure-checkout2.html';
         } else {
             pendingCartCheckout = true;
             openLoginModal();
         }
     }
     
-    // Modified login success handler to redirect to appropriate checkout
+    // Modified login success handler - ALWAYS go to secure-checkout2.html
     async function handleLoginSuccess(user) {
         localStorage.setItem('vedantaUser', JSON.stringify({ phone: user.phoneNumber, email: user.email || '' }));
         showToastMessage('✅ Login Successful!');
@@ -1064,20 +1021,12 @@
         if (pendingBuyProduct) {
             const tempCart = [{ id: pendingBuyProduct.id, name: pendingBuyProduct.name, price: pendingBuyProduct.price, quantity: 1, selectedSize: pendingBuyProduct.selectedSize }];
             localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
-            const hasAddress = await checkUserHasSavedAddress(user.phoneNumber);
-            if (hasAddress) {
-                window.location.href = 'secure-checkout2.html';
-            } else {
-                window.location.href = 'secure-checkout.html';
-            }
+            // ✅ DIRECT REDIRECT
+            window.location.href = 'secure-checkout2.html';
             pendingBuyProduct = null;
         } else if (pendingCartCheckout) {
-            const hasAddress = await checkUserHasSavedAddress(user.phoneNumber);
-            if (hasAddress) {
-                window.location.href = 'secure-checkout2.html';
-            } else {
-                window.location.href = 'secure-checkout.html';
-            }
+            // ✅ DIRECT REDIRECT
+            window.location.href = 'secure-checkout2.html';
             pendingCartCheckout = false;
         }
     }
@@ -1192,6 +1141,8 @@
         document.getElementById('modalPhoneInput').value = '';
         if (modalCountdownTimer) clearInterval(modalCountdownTimer);
     }
+    
+    let pendingCartCheckout = false;
     
     // Render products with size selection
     function renderProducts() {
