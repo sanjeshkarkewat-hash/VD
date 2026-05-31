@@ -187,20 +187,24 @@
     return null;
   }
 
+  // FIX: Load custom data ONLY if there is valid design and it's an actual custom order
   function loadCustomData() {
     try {
-      const saved = localStorage.getItem('customCheckoutData');
-      if (saved) {
-        const data = JSON.parse(saved);
-        if (data && data.isCustomized === true) {
+      const savedCustom = localStorage.getItem('customCheckoutData');
+      // Reset custom flags initially
+      isCustomizedOrder = false;
+      frontDesignImageURL = null;
+      backDesignImageURL = null;
+      
+      if (savedCustom) {
+        const data = JSON.parse(savedCustom);
+        // Crucial: only treat as custom order if both custom flag is true AND at least one design image exists
+        if (data && data.isCustomized === true && (data.frontDesignImage || data.backDesignImage || data.customDesignImage)) {
           isCustomizedOrder = true;
           frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
           backDesignImageURL = data.backDesignImage || null;
-          if (frontDesignImageURL || backDesignImageURL) {
-            document.getElementById('customDesignPreviewContainer').style.display = 'block';
-            if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
-            if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
-          }
+          
+          // Build custom cart item if not already present
           if (cart.length === 0 && (frontDesignImageURL || backDesignImageURL)) {
             cart = [{
               id: 'custom_' + Date.now(),
@@ -214,25 +218,38 @@
               backDesignImage: backDesignImageURL,
               isCustomized: true
             }];
+          } else if (cart.length > 0 && cart[0].isCustomized === true) {
+            // Merge design images
+            cart[0].frontDesignImage = frontDesignImageURL;
+            cart[0].backDesignImage = backDesignImageURL;
           }
+        } else {
+          // No valid custom data, ensure we clear any leftover
+          localStorage.removeItem('customCheckoutData');
         }
       }
+      
+      // Load regular cart only if no custom order active and cart empty
       if (cart.length === 0) {
         const savedCart = localStorage.getItem('vedantaCart');
         if (savedCart) {
           try { 
             cart = JSON.parse(savedCart);
-            // Regular collection items - ensure no printMethod
+            // Ensure regular items have no custom flags or print methods
             cart.forEach(item => {
               if (!item.isCustomized) {
+                item.isCustomized = false;
                 item.printMethod = null;
+                item.frontDesignImage = null;
+                item.backDesignImage = null;
               }
             });
           } catch(e) { cart = []; }
         }
       }
+      
       cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    } catch(e) { console.error("Error loading custom data:", e); }
+    } catch(e) { console.error("Error loading cart data:", e); }
   }
 
   async function renderOrderItems() {
@@ -246,7 +263,7 @@
       const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
       let imageUrl = null, designBadge = '';
-      const isCustom = item.isCustomized === true || (frontDesignImageURL && !item.productImage);
+      const isCustom = item.isCustomized === true;
       
       if (isCustom) {
         imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
@@ -266,7 +283,6 @@
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
       }
       
-      // Only show print method for custom orders
       let printMethodText = '';
       if (isCustom && item.printMethod) {
         printMethodText = ` | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}`;
@@ -280,6 +296,15 @@
       container.appendChild(div);
     }
     updateTotalsDisplay();
+    // Show or hide custom preview section based on isCustomizedOrder
+    const customPreviewDiv = document.getElementById('customDesignPreviewContainer');
+    if (isCustomizedOrder && (frontDesignImageURL || backDesignImageURL)) {
+      customPreviewDiv.style.display = 'block';
+      if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
+      if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
+    } else {
+      customPreviewDiv.style.display = 'none';
+    }
   }
 
   function updateTotalsDisplay() {
@@ -391,72 +416,37 @@
 
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
 
-  // 🔥 FIXED: saveOrder - print method ONLY for custom orders
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
     
-    // Check if this is a custom order
     const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
-    
-    // Get printMethod ONLY for custom orders
     const orderPrintMethod = isCustomOrder ? (cart[0]?.printMethod || 'transparent') : null;
     
     const itemsForDb = cart.map(i => ({ 
-      name: i.name, 
-      price: i.price, 
-      quantity: i.quantity, 
-      size: i.size || 'M', 
-      selectedColor: i.selectedColor || 'Black',
-      // Only add printMethod if item is customized
+      name: i.name, price: i.price, quantity: i.quantity, size: i.size || 'M', selectedColor: i.selectedColor || 'Black',
       ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
-      frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
-      backDesignImage: i.backDesignImage || backDesignImageURL, 
-      isCustomized: i.isCustomized === true || isCustomizedOrder,
+      frontDesignImage: i.frontDesignImage || frontDesignImageURL, backDesignImage: i.backDesignImage || backDesignImageURL, 
+      isCustomized: i.isCustomized === true || isCustomOrder,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
     }));
     
     const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*1000);
     
-    // Build order data - only include printMethod for custom orders
     const orderData = {
-      orderId, 
-      customerName: selectedAddress.fullName, 
-      customerPhone: selectedAddress.phone,
-      shippingAddress: { 
-        address: selectedAddress.address, 
-        city: selectedAddress.city, 
-        state: selectedAddress.state, 
-        pincode: selectedAddress.pincode, 
-        landmark: selectedAddress.landmark || '' 
-      },
-      items: itemsForDb,
-      paymentMethod,
-      paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', 
-      status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
-      transactionId: txnId, 
-      subtotal: cartTotal, 
-      discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, 
-      total: finalTotal,
-      orderDate: new Date().toISOString(), 
-      userId: currentUser?.uid, 
-      isCustomized: isCustomOrder,
-      frontDesignImage: frontDesignImageURL, 
-      backDesignImage: backDesignImageURL
+      orderId, customerName: selectedAddress.fullName, customerPhone: selectedAddress.phone,
+      shippingAddress: { address: selectedAddress.address, city: selectedAddress.city, state: selectedAddress.state, pincode: selectedAddress.pincode, landmark: selectedAddress.landmark || '' },
+      items: itemsForDb, paymentMethod, paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
+      transactionId: txnId, subtotal: cartTotal, discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, total: finalTotal,
+      orderDate: new Date().toISOString(), userId: currentUser?.uid, isCustomized: isCustomOrder,
+      frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
     };
-    
-    // Only add printMethod to root if it's a custom order
-    if (isCustomOrder && orderPrintMethod) {
-      orderData.printMethod = orderPrintMethod;
-    }
+    if (isCustomOrder && orderPrintMethod) orderData.printMethod = orderPrintMethod;
     
     try {
       await db.collection('orders').doc(orderId).set(orderData);
       return { success: true, orderId };
-    } catch(e) { 
-      console.error("Order save error:", e); 
-      return { success: false }; 
-    }
+    } catch(e) { console.error("Order save error:", e); return { success: false }; }
   }
   
   async function placeCOD() { 
@@ -485,13 +475,8 @@
     const amt = discountedTotal; 
     if(amt<=0){ showLoading(false); isProcessing=false; return; } 
     const options = { 
-      key: RAZORPAY_KEY_ID, 
-      amount: Math.round(amt)*100, 
-      currency: 'INR', 
-      name: 'VEDANTA', 
-      description: 'T-Shirt Order', 
-      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
-      theme: { color: '#D4AF37' }, 
+      key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order',
+      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, 
       handler: async (resp) => { 
         const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
         showLoading(false); 
@@ -499,10 +484,7 @@
           showToast(`Payment success! ${res.orderId}`); 
           localStorage.clear(); 
           setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
-        } else { 
-          showToast('Order save issue', true); 
-          isProcessing=false; 
-        } 
+        } else { showToast('Order save issue', true); isProcessing=false; } 
       }, 
       modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } 
     }; 
