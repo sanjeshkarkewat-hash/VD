@@ -220,7 +220,15 @@
       if (cart.length === 0) {
         const savedCart = localStorage.getItem('vedantaCart');
         if (savedCart) {
-          try { cart = JSON.parse(savedCart); } catch(e) { cart = []; }
+          try { 
+            cart = JSON.parse(savedCart);
+            // Regular collection items - ensure no printMethod
+            cart.forEach(item => {
+              if (!item.isCustomized) {
+                item.printMethod = null;
+              }
+            });
+          } catch(e) { cart = []; }
         }
       }
       cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
@@ -238,7 +246,9 @@
       const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
       let imageUrl = null, designBadge = '';
-      if (item.isCustomized === true || (frontDesignImageURL && !item.productImage)) {
+      const isCustom = item.isCustomized === true || (frontDesignImageURL && !item.productImage);
+      
+      if (isCustom) {
         imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
       } else {
@@ -246,6 +256,7 @@
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
         if (!imageUrl && item.image) imageUrl = item.image;
       }
+      
       if (imageUrl) {
         const img = document.createElement('img');
         img.src = imageUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
@@ -254,9 +265,16 @@
       } else {
         imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>';
       }
+      
+      // Only show print method for custom orders
+      let printMethodText = '';
+      if (isCustom && item.printMethod) {
+        printMethodText = ` | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}`;
+      }
+      
       infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4>
         <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
-        <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'} | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}</p>
+        <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}${printMethodText}</p>
         ${designBadge}`;
       div.appendChild(imgDiv); div.appendChild(infoDiv); div.appendChild(priceDiv);
       container.appendChild(div);
@@ -373,12 +391,15 @@
 
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
 
-  // 🔥 IMPORTANT: saveOrder function with printMethod properly saved 🔥
+  // 🔥 FIXED: saveOrder - print method ONLY for custom orders
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
     
-    // Get printMethod from cart (custom order or regular)
-    const orderPrintMethod = cart[0]?.printMethod || 'transparent';
+    // Check if this is a custom order
+    const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
+    
+    // Get printMethod ONLY for custom orders
+    const orderPrintMethod = isCustomOrder ? (cart[0]?.printMethod || 'transparent') : null;
     
     const itemsForDb = cart.map(i => ({ 
       name: i.name, 
@@ -386,43 +407,51 @@
       quantity: i.quantity, 
       size: i.size || 'M', 
       selectedColor: i.selectedColor || 'Black',
-      printMethod: i.printMethod || orderPrintMethod,  // ← PRINT METHOD ADDED
+      // Only add printMethod if item is customized
+      ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
       frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
       backDesignImage: i.backDesignImage || backDesignImageURL, 
-      isCustomized: i.isCustomized || isCustomizedOrder,
+      isCustomized: i.isCustomized === true || isCustomizedOrder,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
     }));
     
     const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
     const orderId = 'ORD' + Date.now() + Math.floor(Math.random()*1000);
     
+    // Build order data - only include printMethod for custom orders
+    const orderData = {
+      orderId, 
+      customerName: selectedAddress.fullName, 
+      customerPhone: selectedAddress.phone,
+      shippingAddress: { 
+        address: selectedAddress.address, 
+        city: selectedAddress.city, 
+        state: selectedAddress.state, 
+        pincode: selectedAddress.pincode, 
+        landmark: selectedAddress.landmark || '' 
+      },
+      items: itemsForDb,
+      paymentMethod,
+      paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', 
+      status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
+      transactionId: txnId, 
+      subtotal: cartTotal, 
+      discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, 
+      total: finalTotal,
+      orderDate: new Date().toISOString(), 
+      userId: currentUser?.uid, 
+      isCustomized: isCustomOrder,
+      frontDesignImage: frontDesignImageURL, 
+      backDesignImage: backDesignImageURL
+    };
+    
+    // Only add printMethod to root if it's a custom order
+    if (isCustomOrder && orderPrintMethod) {
+      orderData.printMethod = orderPrintMethod;
+    }
+    
     try {
-      await db.collection('orders').doc(orderId).set({
-        orderId, 
-        customerName: selectedAddress.fullName, 
-        customerPhone: selectedAddress.phone,
-        shippingAddress: { 
-          address: selectedAddress.address, 
-          city: selectedAddress.city, 
-          state: selectedAddress.state, 
-          pincode: selectedAddress.pincode, 
-          landmark: selectedAddress.landmark || '' 
-        },
-        items: itemsForDb,
-        paymentMethod,
-        printMethod: orderPrintMethod,  // ← PRINT METHOD ADDED (order level)
-        paymentStatus: paymentMethod === 'razorpay' ? 'paid' : 'pending', 
-        status: paymentMethod === 'razorpay' ? 'confirmed' : 'pending',
-        transactionId: txnId, 
-        subtotal: cartTotal, 
-        discountApplied: paymentMethod === 'razorpay' ? discountAmount : 0, 
-        total: finalTotal,
-        orderDate: new Date().toISOString(), 
-        userId: currentUser?.uid, 
-        isCustomized: isCustomizedOrder,
-        frontDesignImage: frontDesignImageURL, 
-        backDesignImage: backDesignImageURL
-      });
+      await db.collection('orders').doc(orderId).set(orderData);
       return { success: true, orderId };
     } catch(e) { 
       console.error("Order save error:", e); 
