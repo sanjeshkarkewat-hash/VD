@@ -105,7 +105,7 @@
     .close-map-btn { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 14px; border-radius: 40px; font-weight: 700; color: #ccc; cursor: pointer; }
     .user-info-bar { background: rgba(212,175,55,0.1); border-radius: 14px; padding: 12px; margin-bottom: 16px; font-size: 12px; color: #D4AF37; }
     .design-preview-badge { display: inline-block; background: rgba(212,175,55,0.2); border-radius: 6px; padding: 2px 8px; font-size: 9px; margin-top: 5px; }
-    .debug-console { display: none; }
+    .debug-panel { position: fixed; bottom: 10px; right: 10px; background: #000; color: #0f0; font-size: 10px; padding: 5px; border-radius: 4px; z-index: 99999; max-width: 300px; opacity: 0.8; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -145,207 +145,40 @@
   </div>
 </div>
 <div class="toast" id="toast"></div>
+<div class="debug-panel" id="debugPanel">Debug: Ready</div>
 
 <script>
-  // ========== FIREBASE CONFIG ==========
-  const firebaseConfig = { 
-    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", 
-    authDomain: "nexi-53897.firebaseapp.com", 
-    projectId: "nexi-53897", 
-    storageBucket: "nexi-53897.firebasestorage.app", 
-    messagingSenderId: "337349382612", 
-    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" 
-  };
+  // ========== DEBUG HELPER ==========
+  function DEBUG(tag, data) {
+    const timestamp = new Date().toISOString().substring(11, 23);
+    const message = `[${timestamp}] ${tag}`;
+    console.log(message, data !== undefined ? data : '');
+    const panel = document.getElementById('debugPanel');
+    if (panel) {
+      panel.innerHTML = `${tag.substring(0, 50)}${data ? ': ' + JSON.stringify(data).substring(0, 100) : ''}`;
+      setTimeout(() => { if(panel.innerHTML === message) panel.innerHTML = 'Debug: Ready'; }, 3000);
+    }
+  }
+  
+  DEBUG("🚀 CHECKOUT PAGE LOADED", { url: window.location.href });
+  
+  const firebaseConfig = { apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI", authDomain: "nexi-53897.firebaseapp.com", projectId: "nexi-53897", storageBucket: "nexi-53897.firebasestorage.app", messagingSenderId: "337349382612", appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641" };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
   const auth = firebase.auth();
   const RAZORPAY_KEY_ID = "rzp_live_Sdj7MbKcJRZhnI";
-  
-  // ========== GLOBAL STATE ==========
-  let cart = [];
-  let cartTotal = 0;
-  let discountedTotal = 0;
-  let discountAmount = 0;
-  let isProcessing = false;
-  let selectedPaymentMethod = 'cod';
-  let currentUser = null;
-  let selectedAddress = null;
-  let isCustomizedOrder = false;
-  let frontDesignImageURL = null;
-  let backDesignImageURL = null;
+  let cart = [], cartTotal = 0, discountedTotal = 0, discountAmount = 0, isProcessing = false;
+  let selectedPaymentMethod = 'cod', currentUser = null, selectedAddress = null, savedAddressFromDb = null;
+  let isCustomizedOrder = false, frontDesignImageURL = null, backDesignImageURL = null;
   let productImagesCache = {};
-  let mapInstance = null;
-  let mapMarker = null;
-  let currentSelectedLatLng = null;
-  
-  // ========== DEBUG LOGGING FUNCTION ==========
-  function debugLog(message, data = null) {
-    const timestamp = new Date().toISOString().substring(11, 23);
-    const logMessage = `[${timestamp}] ${message}`;
-    console.log(logMessage, data || '');
-    
-    // Also store in sessionStorage for debugging
-    const debugHistory = sessionStorage.getItem('checkout_debug_logs') || '[]';
-    const logs = JSON.parse(debugHistory);
-    logs.push({ time: timestamp, message, data: data ? JSON.stringify(data) : null });
-    if (logs.length > 50) logs.shift();
-    sessionStorage.setItem('checkout_debug_logs', JSON.stringify(logs));
-  }
-  
-  // ========== CRITICAL FIX #1: COMPLETE DATA PURGE ==========
-  // This function runs at page load and ensures NO stale data persists
-  function purgeAllStaleData() {
-    debugLog("🔄 [PURGE] Starting complete data purge...");
-    
-    // Clear ALL localStorage keys that might contain product data
-    const keysToCheck = [
-      'vedantaCart',
-      'customCheckoutData',
-      'checkoutProduct',
-      'selectedProduct',
-      'currentProduct',
-      'productData',
-      'customProduct',
-      'orderData',
-      'pendingOrder',
-      'buyNowProduct',
-      'selectedItem'
-    ];
-    
-    keysToCheck.forEach(key => {
-      if (localStorage.getItem(key)) {
-        debugLog(`🗑️ [PURGE] Removing localStorage key: ${key}`);
-        localStorage.removeItem(key);
-      }
-    });
-    
-    // Clear sessionStorage keys
-    const sessionKeys = [
-      'vedanta_buy_now',
-      'checkout_session',
-      'pendingCustomOrder',
-      'temp_checkout_data',
-      'checkout_product_cache'
-    ];
-    
-    sessionKeys.forEach(key => {
-      if (sessionStorage.getItem(key)) {
-        debugLog(`🗑️ [PURGE] Removing sessionStorage key: ${key}`);
-        sessionStorage.removeItem(key);
-      }
-    });
-    
-    // Reset all global state
-    cart = [];
-    isCustomizedOrder = false;
-    frontDesignImageURL = null;
-    backDesignImageURL = null;
-    cartTotal = 0;
-    
-    debugLog("✅ [PURGE] Complete data purge finished");
-  }
-  
-  // ========== CRITICAL FIX #2: LOAD FRESH PRODUCT DATA ==========
-  // This reads from sessionStorage (set by product pages) and IMMEDIATELY consumes it
-  function loadFreshProductData() {
-    debugLog("📦 [LOAD] Loading fresh product data...");
-    
-    // Check for buyNow data in sessionStorage (set by product/custom pages)
-    const buyNowData = sessionStorage.getItem('vedanta_buy_now');
-    
-    if (buyNowData) {
-      try {
-        const parsedData = JSON.parse(buyNowData);
-        debugLog("✅ [LOAD] Found buyNow data:", parsedData);
-        
-        if (parsedData && parsedData.items && parsedData.items.length > 0) {
-          cart = parsedData.items;
-          debugLog("✅ [LOAD] Cart loaded with", cart.length, "item(s)");
-          debugLog("📊 [LOAD] Product details:", {
-            name: cart[0]?.name,
-            price: cart[0]?.price,
-            size: cart[0]?.size,
-            color: cart[0]?.selectedColor,
-            isCustom: parsedData.isCustomized
-          });
-          
-          // Load custom design data if present
-          if (parsedData.isCustomized) {
-            isCustomizedOrder = true;
-            frontDesignImageURL = parsedData.frontDesignImage || null;
-            backDesignImageURL = parsedData.backDesignImage || null;
-            debugLog("🎨 [LOAD] Custom design loaded - Front:", !!frontDesignImageURL, "Back:", !!backDesignImageURL);
-          }
-          
-          // CRITICAL: Remove the buyNow data immediately after reading
-          // This prevents stale data on back navigation
-          sessionStorage.removeItem('vedanta_buy_now');
-          debugLog("🗑️ [LOAD] BuyNow data consumed and removed from sessionStorage");
-          
-          return true;
-        } else {
-          debugLog("⚠️ [LOAD] buyNow data exists but has no items");
-        }
-      } catch (e) {
-        console.error("❌ [LOAD] Failed to parse buyNow data:", e);
-        sessionStorage.removeItem('vedanta_buy_now');
-      }
-    } else {
-      debugLog("ℹ️ [LOAD] No buyNow data found in sessionStorage");
-    }
-    
-    // Fallback: Load from localStorage cart (for normal cart flow)
-    const savedCart = localStorage.getItem('vedantaCart');
-    if (savedCart && cart.length === 0) {
-      try {
-        cart = JSON.parse(savedCart);
-        debugLog("📦 [LOAD] Loaded from localStorage cart:", cart);
-        
-        // Sanitize: remove custom flags from regular products
-        cart.forEach(item => {
-          if (!item.isCustomized) {
-            item.printMethod = null;
-            delete item.frontDesignImage;
-            delete item.backDesignImage;
-          }
-        });
-        return true;
-      } catch(e) {
-        console.error("❌ [LOAD] Failed to parse cart:", e);
-        cart = [];
-      }
-    }
-    
-    if (cart.length === 0) {
-      debugLog("⚠️ [LOAD] No product found in checkout. Cart is empty.");
-    }
-    
-    return cart.length > 0;
-  }
-  
-  // ========== UI HELPER FUNCTIONS ==========
-  function showToast(msg, isError = false) { 
-    const t = document.getElementById('toast'); 
-    t.innerText = msg; 
-    t.style.background = isError ? '#F44336' : '#D4AF37'; 
-    t.style.color = isError ? 'white' : '#050508'; 
-    t.classList.add('show'); 
-    setTimeout(() => t.classList.remove('show'), 3000); 
-    debugLog(`🔔 Toast: ${msg}`, { isError });
-  }
-  
-  function showLoading(show) { 
-    document.getElementById('loadingOverlay').classList.toggle('show', show); 
-    debugLog(`⏳ Loading: ${show ? 'started' : 'stopped'}`);
-  }
-  
-  function escapeHtml(str) { 
-    if (!str) return ''; 
-    return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); 
-  }
-  
-  // ========== PRODUCT IMAGE CACHE ==========
+  let mapInstance = null, mapMarker = null, currentSelectedLatLng = null;
+
+  function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
+  function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
+  function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
+
   async function fetchAllProductsImages() {
+    DEBUG("📸 fetchAllProductsImages - START");
     try {
       const snapshot = await db.collection('products').get();
       snapshot.forEach(doc => {
@@ -354,13 +187,10 @@
         productImagesCache[doc.id] = p.images?.[0] || p.image || null;
         if (p.displayName) productImagesCache[p.displayName.toLowerCase()] = p.images?.[0] || p.image || null;
       });
-      debugLog(`📸 Fetched ${productImagesCache ? Object.keys(productImagesCache).length : 0} product images`);
-    } catch(e) { 
-      console.warn("Could not fetch products:", e); 
-      debugLog("❌ Failed to fetch product images", e);
-    }
+      DEBUG("📸 fetchAllProductsImages - COMPLETE", { cacheSize: Object.keys(productImagesCache).length });
+    } catch(e) { console.warn("Could not fetch products:", e); }
   }
-  
+
   function getProductImageUrl(productName, productId, selectedColor) {
     if (productName && productImagesCache[productName]) return productImagesCache[productName];
     if (productName && productImagesCache[productName.toLowerCase()]) return productImagesCache[productName.toLowerCase()];
@@ -374,55 +204,90 @@
     if (lowerName.includes('hoodie')) return productImagesCache['hoodie'] || null;
     return null;
   }
-  
-  // ========== RENDER ORDER ITEMS ==========
+
+  // ========== CRITICAL: loadCustomData - THIS IS WHERE DATA LOADS ==========
+  function loadCustomData() {
+    DEBUG("📂 loadCustomData - START");
+    try {
+      const saved = localStorage.getItem('customCheckoutData');
+      DEBUG("📂 localStorage.getItem('customCheckoutData')", saved);
+      if (saved) {
+        const data = JSON.parse(saved);
+        DEBUG("📂 Parsed customCheckoutData", data);
+        if (data && data.isCustomized === true) {
+          isCustomizedOrder = true;
+          frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
+          backDesignImageURL = data.backDesignImage || null;
+          DEBUG("🎨 Custom design loaded", { front: !!frontDesignImageURL, back: !!backDesignImageURL });
+          if (frontDesignImageURL || backDesignImageURL) {
+            document.getElementById('customDesignPreviewContainer').style.display = 'block';
+            if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
+            if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
+          }
+          if (cart.length === 0 && (frontDesignImageURL || backDesignImageURL)) {
+            cart = [{
+              id: 'custom_' + Date.now(),
+              name: data.tshirtType || 'Custom T-Shirt',
+              price: data.price || 1699,
+              quantity: data.quantity || 1,
+              size: data.size || 'M',
+              selectedColor: data.selectedColor || 'Black',
+              printMethod: data.printMethod || 'transparent',
+              frontDesignImage: frontDesignImageURL,
+              backDesignImage: backDesignImageURL,
+              isCustomized: true
+            }];
+            DEBUG("📦 Created cart from custom data", cart);
+          }
+        }
+      }
+      if (cart.length === 0) {
+        const savedCart = localStorage.getItem('vedantaCart');
+        DEBUG("📂 localStorage.getItem('vedantaCart')", savedCart);
+        if (savedCart) {
+          try { 
+            cart = JSON.parse(savedCart);
+            DEBUG("📦 Cart loaded from vedantaCart", cart);
+            cart.forEach(item => {
+              if (!item.isCustomized) {
+                item.printMethod = null;
+              }
+            });
+          } catch(e) { cart = []; DEBUG("❌ Failed to parse vedantaCart", e); }
+        }
+      }
+      cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      DEBUG("📊 loadCustomData - FINAL", { cartLength: cart.length, cartTotal });
+    } catch(e) { console.error("Error loading custom data:", e); DEBUG("❌ loadCustomData error", e); }
+  }
+
   async function renderOrderItems() {
+    DEBUG("🎨 renderOrderItems - START", { cartLength: cart.length });
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
-    
-    if (cart.length === 0) {
-      container.innerHTML = '<div style="text-align:center; padding:20px;">No items in cart</div>';
-      debugLog("⚠️ No items to render - cart empty");
-      return;
-    }
-    
-    // Recalculate totals based on current cart
-    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    debugLog(`📊 Cart total calculated: ₹${cartTotal}`);
-    
     for (const item of cart) {
-      const div = document.createElement('div'); 
-      div.className = 'order-item';
-      const imgDiv = document.createElement('div'); 
-      imgDiv.className = 'order-item-img';
-      const infoDiv = document.createElement('div'); 
-      infoDiv.className = 'order-item-info';
-      const priceDiv = document.createElement('div'); 
-      priceDiv.className = 'order-item-price';
+      DEBUG("🎨 Rendering item", { name: item.name, price: item.price, isCustom: item.isCustomized });
+      const div = document.createElement('div'); div.className = 'order-item';
+      const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
+      const infoDiv = document.createElement('div'); infoDiv.className = 'order-item-info';
+      const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
-      
-      let imageUrl = null;
-      let designBadge = '';
-      const isCustom = item.isCustomized === true || (frontDesignImageURL && isCustomizedOrder);
+      let imageUrl = null, designBadge = '';
+      const isCustom = item.isCustomized === true || (frontDesignImageURL && !item.productImage);
       
       if (isCustom) {
-        imageUrl = item.frontDesignImage || frontDesignImageURL || item.backDesignImage || backDesignImageURL;
+        imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
-        debugLog(`🎨 Rendering custom product: ${item.name}`);
       } else {
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
         if (!imageUrl && item.image) imageUrl = item.image;
-        debugLog(`👕 Rendering regular product: ${item.name}`);
       }
       
       if (imageUrl) {
         const img = document.createElement('img');
-        img.src = imageUrl; 
-        img.style.width = '100%'; 
-        img.style.height = '100%'; 
-        img.style.objectFit = 'cover';
+        img.src = imageUrl; img.style.width = '100%'; img.style.height = '100%'; img.style.objectFit = 'cover';
         img.onerror = () => { imgDiv.innerHTML = '<i class="fas fa-tshirt"></i>'; };
         imgDiv.appendChild(img);
       } else {
@@ -438,17 +303,13 @@
         <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
         <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}${printMethodText}</p>
         ${designBadge}`;
-      
-      div.appendChild(imgDiv); 
-      div.appendChild(infoDiv); 
-      div.appendChild(priceDiv);
+      div.appendChild(imgDiv); div.appendChild(infoDiv); div.appendChild(priceDiv);
       container.appendChild(div);
     }
-    
     updateTotalsDisplay();
-    debugLog("✅ Order items rendered successfully");
+    DEBUG("🎨 renderOrderItems - COMPLETE");
   }
-  
+
   function updateTotalsDisplay() {
     document.getElementById('subtotal').innerHTML = `₹${cartTotal.toLocaleString('en-IN')}`;
     if (selectedPaymentMethod === 'razorpay') {
@@ -463,8 +324,9 @@
     }
     document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100);
   }
-  
-  // ========== ADDRESS FUNCTIONS ==========
+
+  function calculateDiscount() { updateTotalsDisplay(); }
+
   async function fetchSavedAddress() {
     if (!currentUser || !currentUser.phone) return null;
     try {
@@ -478,7 +340,7 @@
     } catch(e) { }
     return null;
   }
-  
+
   async function displayAddressSelection() {
     const container = document.getElementById('addressSelectionArea');
     const addr = await fetchSavedAddress();
@@ -492,14 +354,14 @@
       displaySelectedAddressCard();
     }
   }
-  
+
   function displaySelectedAddressCard() {
     const container = document.getElementById('addressSelectionArea');
     if (!selectedAddress) return;
     container.innerHTML = `<div class="selected-address-card"><div class="address-name">✅ Selected Address</div><div class="address-detail">${escapeHtml(selectedAddress.fullName)}</div><div class="address-detail">${escapeHtml(selectedAddress.address)}</div><div class="address-detail">${escapeHtml(selectedAddress.city)}, ${escapeHtml(selectedAddress.state)} - ${escapeHtml(selectedAddress.pincode)}</div><div class="address-phone">📞 ${escapeHtml(selectedAddress.phone)}</div><div class="address-label">Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="changeAddrBtn"><i class="fas fa-edit"></i> Change Address</button>`;
     document.getElementById('changeAddrBtn')?.addEventListener('click', () => { selectedAddress = null; displayAddressSelection(); });
   }
-  
+
   function showNewAddressForm() {
     const container = document.getElementById('addressSelectionArea');
     container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
@@ -508,7 +370,7 @@
     document.getElementById('useLocationBtn')?.addEventListener('click', () => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(async (pos)=>{ const geocoder=new google.maps.Geocoder(); geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{ if(res[0]){ const comps=res[0].address_components; let st='', ct='', stt='', pin=''; comps.forEach(c=>{ if(c.types.includes('route')) st=c.long_name; if(c.types.includes('locality')) ct=c.long_name; if(c.types.includes('administrative_area_level_1')) stt=c.long_name; if(c.types.includes('postal_code')) pin=c.long_name; }); document.getElementById('newStreet').value=st; document.getElementById('newCity').value=ct; document.getElementById('newState').value=stt; document.getElementById('newPincode').value=pin; showToast('Location filled'); } }); }, ()=>showToast('Location failed',true)); else showToast('Enable GPS',true); });
     document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
   }
-  
+
   function openMapPicker() {
     const modal = document.getElementById('mapPickerModal');
     modal.classList.add('active');
@@ -530,7 +392,7 @@
       mapInstance = map; mapMarker = marker;
     }
   }
-  
+
   async function confirmLocationAndFill() {
     if (!currentSelectedLatLng) { showToast('Select location first', true); return; }
     showLoading(true);
@@ -554,10 +416,9 @@
       document.getElementById('mapPickerModal').classList.remove('active');
     });
   }
-  
+
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
-  
-  // ========== ORDER SAVE FUNCTIONS ==========
+
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
     const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
@@ -580,173 +441,43 @@
       frontDesignImage: frontDesignImageURL, backDesignImage: backDesignImageURL
     };
     if (isCustomOrder && orderPrintMethod) orderData.printMethod = orderPrintMethod;
-    try { 
-      await db.collection('orders').doc(orderId).set(orderData); 
-      debugLog(`✅ Order saved successfully: ${orderId}`);
-      return { success: true, orderId }; 
-    } catch(e) { 
-      console.error("Order save error:", e); 
-      debugLog(`❌ Order save failed: ${e.message}`);
-      return { success: false }; 
-    }
+    try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error("Order save error:", e); return { success: false }; }
   }
   
-  async function placeCOD() { 
-    if (!selectedAddress) { showToast('Add address first', true); return; } 
-    if(isProcessing) return; 
-    isProcessing=true; 
-    showLoading(true); 
-    debugLog("💰 Placing COD order...");
-    const res = await saveOrder('Cash on Delivery'); 
-    showLoading(false); 
-    if(res.success) { 
-      showToast(`Order placed! ${res.orderId}`); 
-      localStorage.removeItem('vedantaCart'); 
-      localStorage.removeItem('customCheckoutData'); 
-      sessionStorage.removeItem('vedanta_buy_now');
-      // Clear all product data from session
-      purgeAllStaleData();
-      setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
-    } else { 
-      showToast('Order failed', true); 
-      isProcessing=false; 
-    } 
-  }
+  async function placeCOD() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const res = await saveOrder('Cash on Delivery'); showLoading(false); if(res.success) { showToast(`Order placed! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order failed', true); isProcessing=false; } }
   
-  async function razorpayPayment() { 
-    if (!selectedAddress) { showToast('Add address first', true); return; } 
-    if(isProcessing) return; 
-    isProcessing=true; 
-    showLoading(true); 
-    const amt = discountedTotal; 
-    if(amt<=0){ showLoading(false); isProcessing=false; return; } 
-    debugLog(`💳 Initiating Razorpay payment: ₹${amt}`);
-    const options = { 
-      key: RAZORPAY_KEY_ID, 
-      amount: Math.round(amt)*100, 
-      currency: 'INR', 
-      name: 'VEDANTA', 
-      description: 'T-Shirt Order', 
-      prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, 
-      theme: { color: '#D4AF37' }, 
-      handler: async (resp) => { 
-        debugLog(`✅ Razorpay success: ${resp.razorpay_payment_id}`);
-        const res = await saveOrder('Razorpay', resp.razorpay_payment_id); 
-        showLoading(false); 
-        if(res.success) { 
-          showToast(`Payment success! ${res.orderId}`); 
-          localStorage.clear(); 
-          sessionStorage.removeItem('vedanta_buy_now');
-          purgeAllStaleData();
-          setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
-        } else { 
-          showToast('Order save issue', true); 
-          isProcessing=false; 
-        } 
-      }, 
-      modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); debugLog("❌ Payment cancelled by user"); } } 
-    }; 
-    const razor = new Razorpay(options); 
-    razor.open(); 
-  }
-  
-  // ========== MAIN INITIALIZATION ==========
+  async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.clear(); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
+
   async function init() {
-    debugLog("🚀 ========== CHECKOUT PAGE INITIALIZED ==========");
-    debugLog("📱 User Agent:", navigator.userAgent);
-    debugLog("🔗 Current URL:", window.location.href);
-    debugLog("📦 Query Params:", window.location.search);
-    
-    // STEP 1: Purge all stale data - CRITICAL for preventing old product persistence
-    purgeAllStaleData();
-    
-    // STEP 2: Get user info
+    DEBUG("🚀 init() - START");
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
-    if (stored) {
-      currentUser = stored;
-      debugLog("👤 User loaded from localStorage:", { uid: currentUser.uid, phone: currentUser.phone });
-    } else { 
+    DEBUG("👤 localStorage.getItem('vedantaUser')", stored);
+    if (stored) currentUser = stored;
+    else { 
       const phone = localStorage.getItem('userPhone');
-      if(phone) {
-        currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' };
-        debugLog("👤 Guest user created:", currentUser);
-      } else { 
-        debugLog("❌ No user found, redirecting to login");
-        showToast('Please login', true); 
-        setTimeout(()=> window.location.href='profile.html',1500); 
-        return; 
-      }
+      DEBUG("📱 localStorage.getItem('userPhone')", phone);
+      if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' };
+      else { showToast('Please login', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
     }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
-    
-    // STEP 3: Load fresh product data (this will consume buyNow data from sessionStorage)
-    const productLoaded = loadFreshProductData();
-    
-    if (!productLoaded || cart.length === 0) {
-      debugLog("⚠️ WARNING: No product found in checkout!");
-      showToast("No product selected. Please add items to cart.", true);
-    } else {
-      debugLog("✅ SUCCESS: Product loaded successfully!");
-      debugLog("📊 Product Summary:", {
-        name: cart[0]?.name,
-        price: cart[0]?.price,
-        quantity: cart[0]?.quantity,
-        size: cart[0]?.size,
-        color: cart[0]?.selectedColor,
-        isCustom: isCustomizedOrder,
-        hasFrontImage: !!frontDesignImageURL,
-        hasBackImage: !!backDesignImageURL
-      });
-    }
-    
-    // STEP 4: Fetch product images and render UI
     await fetchAllProductsImages();
+    
+    // ========== STEP 1: Load custom data ==========
+    loadCustomData();
+    DEBUG("📊 After loadCustomData - cart", cart);
+    DEBUG("📊 After loadCustomData - cartTotal", cartTotal);
+    DEBUG("📊 After loadCustomData - isCustomizedOrder", isCustomizedOrder);
+    
+    // ========== STEP 2: Render ==========
     await renderOrderItems();
-    
-    // STEP 5: Show/hide custom preview based on actual cart data
-    const isCustomNow = isCustomizedOrder || (cart.length > 0 && cart[0]?.isCustomized === true);
-    if (isCustomNow && (frontDesignImageURL || backDesignImageURL || cart[0]?.frontDesignImage)) {
-      const frontImg = frontDesignImageURL || cart[0]?.frontDesignImage;
-      const backImg = backDesignImageURL || cart[0]?.backDesignImage;
-      document.getElementById('customDesignPreviewContainer').style.display = 'block';
-      if (frontImg) document.getElementById('frontDesignPreview').src = frontImg;
-      if (backImg) document.getElementById('backDesignPreview').src = backImg;
-      debugLog("🎨 Custom design preview displayed");
-    } else {
-      document.getElementById('customDesignPreviewContainer').style.display = 'none';
-      debugLog("👕 Regular product (no custom design)");
-    }
-    
-    // STEP 6: Address selection and payment listeners
     await displayAddressSelection();
     
-    document.getElementById('codOption')?.addEventListener('click', () => { 
-      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
-      document.getElementById('codOption').classList.add('selected'); 
-      selectedPaymentMethod='cod'; 
-      document.getElementById('codDetails').classList.add('show'); 
-      document.getElementById('razorpaySection').classList.remove('show'); 
-      updateTotalsDisplay();
-      debugLog("💵 Payment method changed to COD");
-    });
-    
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { 
-      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
-      document.getElementById('razorpayOption').classList.add('selected'); 
-      selectedPaymentMethod='razorpay'; 
-      document.getElementById('codDetails').classList.remove('show'); 
-      document.getElementById('razorpaySection').classList.add('show'); 
-      updateTotalsDisplay();
-      debugLog("💳 Payment method changed to Razorpay (5% discount applied)");
-    });
-    
+    DEBUG("🎯 Setting up event listeners");
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); DEBUG("💵 Payment: COD selected"); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); DEBUG("💳 Payment: Razorpay selected"); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
-    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { 
-      e.preventDefault(); 
-      debugLog("🔙 User clicked back to shop");
-      window.location.href='index.html'; 
-    });
+    document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
     document.getElementById('confirmMapBtn')?.addEventListener('click', confirmLocationAndFill);
     document.getElementById('closeMapModalBtn')?.addEventListener('click', closeMapModal);
     document.getElementById('cancelMapBtn')?.addEventListener('click', closeMapModal);
@@ -754,34 +485,9 @@
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('codOption').click();
     
-    debugLog("✅ ========== CHECKOUT INITIALIZATION COMPLETE ==========");
-    debugLog("📋 Final checkout state:", {
-      cartItems: cart.length,
-      totalAmount: cartTotal,
-      selectedPayment: selectedPaymentMethod,
-      hasAddress: !!selectedAddress,
-      isCustom: isCustomizedOrder
-    });
+    DEBUG("✅ init() - COMPLETE", { finalCartLength: cart.length, finalCartTotal: cartTotal });
   }
   
-  // CRITICAL FIX #3: Prevent bfcache (back/forward cache) from restoring stale state
-  // This ensures the page always reloads fresh when navigated via back/forward buttons
-  window.addEventListener('pageshow', function(event) {
-    if (event.persisted) {
-      debugLog("🔄 Page restored from bfcache - forcing full reload to prevent stale data");
-      window.location.reload();
-    }
-  });
-  
-  // Also clear any remaining buyNow data on page unload to prevent ghost data
-  window.addEventListener('beforeunload', function() {
-    // Don't clear if we're placing an order (to avoid race conditions)
-    if (!isProcessing) {
-      sessionStorage.removeItem('vedanta_buy_now');
-    }
-  });
-  
-  // Start the application
   init();
 </script>
 </body>
