@@ -187,11 +187,39 @@
     return null;
   }
 
+  // FIXED: Clear ALL checkout data before loading new products
+  function clearAllCheckoutData() {
+    console.log("Clearing all checkout data...");
+    // Reset all global variables
+    cart = [];
+    cartTotal = 0;
+    isCustomizedOrder = false;
+    frontDesignImageURL = null;
+    backDesignImageURL = null;
+    
+    // Clear localStorage keys that might contain stale product data
+    localStorage.removeItem('customCheckoutData');
+    localStorage.removeItem('vedantaCart');
+    localStorage.removeItem('checkoutProduct');
+    localStorage.removeItem('selectedProduct');
+    localStorage.removeItem('buyNowProduct');
+    localStorage.removeItem('currentProduct');
+    
+    console.log("All checkout data cleared");
+  }
+
   function loadCustomData() {
+    console.log("LOAD CUSTOM DATA - Starting fresh load");
+    
+    // FIXED: Clear existing data first to prevent stale data mixing
+    clearAllCheckoutData();
+    
     try {
+      // Check for custom design data first (priority given to most recent)
       const saved = localStorage.getItem('customCheckoutData');
       if (saved) {
         const data = JSON.parse(saved);
+        console.log("Found custom design data:", data);
         if (data && data.isCustomized === true) {
           isCustomizedOrder = true;
           frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
@@ -201,6 +229,8 @@
             if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
             if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
           }
+          
+          // Build cart from custom data
           if (cart.length === 0 && (frontDesignImageURL || backDesignImageURL)) {
             cart = [{
               id: 'custom_' + Date.now(),
@@ -214,31 +244,55 @@
               backDesignImage: backDesignImageURL,
               isCustomized: true
             }];
+            console.log("Custom cart loaded:", cart);
           }
         }
       }
+      
+      // If no custom data, check for regular cart data
       if (cart.length === 0) {
         const savedCart = localStorage.getItem('vedantaCart');
         if (savedCart) {
           try { 
             cart = JSON.parse(savedCart);
+            console.log("Regular cart loaded:", cart);
             // Regular collection items - ensure no printMethod
             cart.forEach(item => {
               if (!item.isCustomized) {
                 item.printMethod = null;
               }
             });
-          } catch(e) { cart = []; }
+          } catch(e) { 
+            console.error("Error parsing cart:", e);
+            cart = []; 
+          }
         }
       }
+      
+      // Calculate total
       cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
-    } catch(e) { console.error("Error loading custom data:", e); }
+      console.log("Final cart loaded - Items:", cart.length, "Total:", cartTotal);
+      
+    } catch(e) { 
+      console.error("Error loading custom data:", e);
+      // Ensure cart is empty if error occurs
+      cart = [];
+      cartTotal = 0;
+    }
   }
 
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
+    
+    console.log("Rendering order items. Cart length:", cart.length);
+    
+    if (cart.length === 0) {
+      container.innerHTML = '<div style="text-align:center; padding:20px;">No items in cart</div>';
+      return;
+    }
+    
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
@@ -391,7 +445,7 @@
 
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
 
-  // 🔥 FIXED: saveOrder - print method ONLY for custom orders
+  // saveOrder function remains unchanged
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
     
@@ -468,8 +522,8 @@
     showLoading(false); 
     if(res.success) { 
       showToast(`Order placed! ${res.orderId}`); 
-      localStorage.removeItem('vedantaCart'); 
-      localStorage.removeItem('customCheckoutData'); 
+      // Clear all checkout data after successful order
+      clearAllCheckoutData();
       setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
     } else { 
       showToast('Order failed', true); 
@@ -497,6 +551,8 @@
         showLoading(false); 
         if(res.success) { 
           showToast(`Payment success! ${res.orderId}`); 
+          // Clear all checkout data after successful order
+          clearAllCheckoutData();
           localStorage.clear(); 
           setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
         } else { 
@@ -520,7 +576,7 @@
     }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     await fetchAllProductsImages();
-    loadCustomData();
+    loadCustomData(); // This now clears stale data first
     await renderOrderItems();
     await displayAddressSelection();
     document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
