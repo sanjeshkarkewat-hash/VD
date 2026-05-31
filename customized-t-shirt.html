@@ -534,6 +534,18 @@
             margin-top: 10px;
         }
         
+        /* Design validation warning */
+        .design-warning {
+            background: rgba(255,100,0,0.2);
+            border: 1px solid #FF9800;
+            border-radius: 12px;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 12px;
+            color: #FF9800;
+            text-align: center;
+        }
+        
         @media (min-width: 768px) {
             .style-section {
                 overflow-x: visible;
@@ -968,6 +980,10 @@
                 font-size: 9px;
                 padding: 6px;
             }
+            .design-warning {
+                font-size: 10px;
+                padding: 8px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1285,6 +1301,9 @@
             <div class="order-detail"><span>Front Design:</span><span id="summaryFront">None</span></div>
             <div class="order-detail"><span>Back Design:</span><span id="summaryBack">None</span></div>
             <div class="order-total"><span>Total:</span><span id="totalPrice">₹1,999</span></div>
+            <div id="designWarning" class="design-warning" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i> Please add text or image to at least one side before proceeding!
+            </div>
             <div class="action-buttons">
                 <button class="btn-add" id="addToCartBtn"><i class="fas fa-cart-plus"></i> ADD</button>
                 <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> BUY</button>
@@ -1309,6 +1328,56 @@ auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = ""
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 1999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 1699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 1599, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 1499, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 1799, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 2499, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 
+// FIXED: Check if current side has design (text or image)
+function hasDesignOnSide() {
+    if (!fabricCanvas) return false;
+    const objects = fabricCanvas.getObjects();
+    return objects.length > 0;
+}
+
+// FIXED: Check if at least one side (front or back) has design
+function hasAtLeastOneDesign() {
+    const hasFrontDesign = (frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0) || 
+                           (currentSide === 'front' && fabricCanvas && fabricCanvas.getObjects().length > 0);
+    const hasBackDesign = (backDesignJSON && backDesignJSON.objects && backDesignJSON.objects.length > 0) || 
+                          (currentSide === 'back' && fabricCanvas && fabricCanvas.getObjects().length > 0);
+    return hasFrontDesign || hasBackDesign;
+}
+
+// FIXED: Update design warning visibility
+function updateDesignWarning() {
+    const warningEl = document.getElementById('designWarning');
+    if (warningEl) {
+        if (!hasAtLeastOneDesign()) {
+            warningEl.style.display = 'flex';
+        } else {
+            warningEl.style.display = 'none';
+        }
+    }
+    // Update summary elements
+    const hf = (frontDesignJSON?.objects?.length > 0) || (currentSide === 'front' && fabricCanvas && fabricCanvas.getObjects().length > 0);
+    const hb = (backDesignJSON?.objects?.length > 0) || (currentSide === 'back' && fabricCanvas && fabricCanvas.getObjects().length > 0);
+    document.getElementById('summaryFront').innerHTML = hf ? '✓ Custom' : 'None';
+    document.getElementById('summaryBack').innerHTML = hb ? '✓ Custom' : 'None';
+}
+
+// FIXED: Validate all requirements before add/buy
+function validateDesignRequirements() {
+    if (!currentSize) {
+        showToast('❌ Please select T-Shirt Size first!', true);
+        return false;
+    }
+    if (!currentPrintMethod) {
+        showToast('❌ Please select Print Method first!', true);
+        return false;
+    }
+    if (!hasAtLeastOneDesign()) {
+        showToast('❌ Please add text or image to at least one side (Front or Back) before proceeding!', true);
+        return false;
+    }
+    return true;
+}
+
 // Curved text storage
 let curvedTextData = {};
 
@@ -1325,12 +1394,10 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
     const canvas = document.createElement('canvas');
     const ctx = canvas.getContext('2d');
     
-    // Set font for measurement
     let fontWeight = isBold ? 'bold' : 'normal';
     let fontStyle = isItalic ? 'italic' : 'normal';
     ctx.font = `${fontStyle} ${fontWeight} ${fontSize}px ${fontFamily}`;
     
-    // Measure each character
     const chars = text.split('');
     const charWidths = chars.map(char => ctx.measureText(char).width);
     const totalWidth = charWidths.reduce((sum, w) => sum + w, 0);
@@ -1339,13 +1406,11 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
     let startAngle, endAngle, clockwise;
     
     if (shape === 'circle') {
-        // Full circle
         radiusValue = radius;
         startAngle = -Math.PI / 2;
         endAngle = startAngle + Math.PI * 2;
         clockwise = true;
     } else if (shape === 'arcUp') {
-        // Arc upward
         const curveNormalized = curveAmount / 100;
         const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8);
         startAngle = -angleRange / 2;
@@ -1353,7 +1418,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         clockwise = true;
         radiusValue = Math.max(radius, totalWidth / angleRange);
     } else if (shape === 'arcDown') {
-        // Arc downward
         const curveNormalized = curveAmount / 100;
         const angleRange = Math.PI * (0.5 + Math.abs(curveNormalized) * 0.8);
         startAngle = Math.PI + angleRange / 2;
@@ -1361,7 +1425,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         clockwise = false;
         radiusValue = Math.max(radius, totalWidth / angleRange);
     } else {
-        // Straight text - return normal Fabric text
         const textObj = new fabric.Text(text, {
             fontSize: fontSize,
             fontFamily: fontFamily,
@@ -1373,7 +1436,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         return textObj;
     }
     
-    // Calculate positions for each character on the arc
     const positions = [];
     let currentAngle = startAngle;
     const totalAngle = Math.abs(endAngle - startAngle);
@@ -1387,7 +1449,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         positions.push({ char: chars[i], x, y, rotation, angle });
     }
     
-    // Calculate canvas dimensions
     let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
     positions.forEach(pos => {
         minX = Math.min(minX, pos.x);
@@ -1402,7 +1463,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
     const offsetX = (canvasWidth / 2) - ((minX + maxX) / 2);
     const offsetY = (canvasHeight / 2) - ((minY + maxY) / 2);
     
-    // Create temporary canvas to draw curved text
     const tempCanvas = document.createElement('canvas');
     tempCanvas.width = canvasWidth;
     tempCanvas.height = canvasHeight;
@@ -1411,7 +1471,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
     tempCtx.fillStyle = 'transparent';
     tempCtx.fillRect(0, 0, canvasWidth, canvasHeight);
     
-    // Draw each character
     positions.forEach(pos => {
         tempCtx.save();
         tempCtx.translate(pos.x + offsetX, pos.y + offsetY);
@@ -1431,7 +1490,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
         tempCtx.restore();
     });
     
-    // Create Fabric image from canvas
     const dataURL = tempCanvas.toDataURL();
     const imgElement = document.createElement('img');
     imgElement.src = dataURL;
@@ -1451,7 +1509,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
                 lockScalingY: false
             });
             
-            // Store curve data for future updates
             fabricImage.curveData = {
                 text: text,
                 fontFamily: fontFamily,
@@ -1471,7 +1528,6 @@ function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmo
     });
 }
 
-// Apply curve to selected text
 async function applyCurveToSelected() {
     const activeObj = fabricCanvas.getActiveObject();
     if (!activeObj) {
@@ -1479,7 +1535,6 @@ async function applyCurveToSelected() {
         return;
     }
     
-    // Get text from either Fabric text or custom curved object
     let text, fontFamily, fontSize, fillColor, isBold, isItalic, isUnderline;
     
     if (activeObj.type === 'i-text' || activeObj.type === 'text') {
@@ -1508,7 +1563,6 @@ async function applyCurveToSelected() {
     const radius = parseInt(document.getElementById('curveRadiusSlider')?.value || document.getElementById('mobileCurveRadiusSlider')?.value || 150);
     
     if (shape === 'straight') {
-        // Convert to normal text
         const newText = new fabric.IText(text, {
             left: activeObj.left,
             top: activeObj.top,
@@ -1528,7 +1582,6 @@ async function applyCurveToSelected() {
         fabricCanvas.renderAll();
         showToast('Text converted to straight');
     } else {
-        // Create curved text
         showLoading('Creating curved text...');
         try {
             const curvedObj = await createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline);
@@ -1568,6 +1621,7 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
                 fabricCanvas.setBackgroundImage(img,()=>{
                     if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                     fabricCanvas.renderAll();
+                    updateDesignWarning();
                 },{
                     scaleX: scale,
                     scaleY: scale,
@@ -1581,6 +1635,7 @@ function loadTshirtImageDynamic(p,c,s,preserve=true){
             fabricCanvas.setBackgroundColor('#1a1a2e',()=>{
                 if(preserve&&objs.length)objs.forEach(o=>fabricCanvas.add(o)); 
                 fabricCanvas.renderAll();
+                updateDesignWarning();
             });
         }
     });
@@ -1686,18 +1741,37 @@ async function saveDesignImageToFirebase(side,designJSON,productName,colorName){
         return null;
     } 
 }
-async function addCurrentDesignToCart(){ if(!currentSize){showToast('Please select Size first',true);return false;} if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return false;} showLoading("ADDING TO CART..."); try{ if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); else backDesignJSON=fabricCanvas.toJSON(); let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); let frontURL=null,backURL=null; if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); if(!frontURL){showToast('Failed to save front design',true);return false;}} if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); if(!backURL){showToast('Failed to save back design',true);return false;}} cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); saveCart(); showToast('✓ Designs added to cart!'); return true; }catch(e){showToast('Error',true);return false;}finally{hideLoading();} }
 
-// FIXED: buyNow function with timestamps to ensure custom product overwrites old checkout data
+// FIXED: addCurrentDesignToCart with design validation
+async function addCurrentDesignToCart(){ 
+    if(!validateDesignRequirements()) return false;
+    showLoading("ADDING TO CART..."); 
+    try{ 
+        if(currentSide==='front') frontDesignJSON=fabricCanvas.toJSON(); 
+        else backDesignJSON=fabricCanvas.toJSON(); 
+        let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); 
+        let frontURL=null,backURL=null; 
+        if(hasFront){frontURL=await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor); 
+        if(!frontURL){showToast('Failed to save front design',true);return false;}} 
+        if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); 
+        if(!backURL){showToast('Failed to save back design',true);return false;}} 
+        cart.push({id:Date.now(),styleId:currentStyle.id,styleName:currentStyle.displayName,price:currentStyle.price,frontDesignImage:frontURL,backDesignImage:backURL,frontDesignJSON,backDesignJSON,isCustomized:true,size:currentSize,printMethod:currentPrintMethod||'transparent',selectedColor:selectedColorDisplay,selectedColorKey:selectedColor,quantity:1}); 
+        saveCart(); 
+        showToast('✓ Designs added to cart!'); 
+        return true; 
+    } catch(e){showToast('Error',true);return false;} finally{hideLoading();} 
+}
+
+// FIXED: buyNow function with design validation and timestamps
 async function buyNow(){ 
     const user=auth.currentUser; 
     const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); 
     if(!user&&!storedUser){pendingBuyAfterLogin=true;openLoginModal();showToast('Please login first',false);return;} 
-    if(!currentSize){showToast('Please select Size first',true);return;} 
-    if(!currentPrintMethod){showToast('Please select Print Method (Required)',true);return;} 
+    if(!validateDesignRequirements()) return;
+    
     showLoading("PREPARING ORDER..."); 
     try{ 
-        if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON(); 
+        if(currentSide==='front') frontDesignJSON=fabricCanvas.toJSON(); 
         else backDesignJSON=fabricCanvas.toJSON(); 
         let hasFront=!!(frontDesignJSON?.objects?.length),hasBack=!!(backDesignJSON?.objects?.length); 
         let frontURL=null,backURL=null; 
@@ -1706,7 +1780,6 @@ async function buyNow(){
         if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); 
         if(!backURL){showToast('Failed to save back design',true);return;}} 
         
-        // FIX: Save custom product data with timestamps to ensure it overwrites old checkout data
         const customData = {
             isCustomized: true,
             frontDesignImage: frontURL,
@@ -1720,12 +1793,9 @@ async function buyNow(){
             printMethod: currentPrintMethod
         };
         
-        // Save with timestamps for checkout page to detect most recent selection
         localStorage.setItem('customCheckoutData', JSON.stringify(customData));
-        localStorage.setItem('customCheckoutDataTimestamp', Date.now().toString());
+        localStorage.setItem('customCheckoutTimestamp', Date.now().toString());
         localStorage.setItem('lastProductSelectionTime', Date.now().toString());
-        
-        // Clear any stale regular cart data to ensure custom product takes priority
         localStorage.removeItem('vedantaCart');
         
         window.location.href='secure-checkout2.html'; 
@@ -1775,7 +1845,12 @@ function initCanvas(){
         if (canvasContainer) { 
             canvasContainer.style.lineHeight = '0'; 
         }
-    }); 
+        updateDesignWarning();
+    });
+    
+    fabricCanvas.on('object:added', function() { updateDesignWarning(); });
+    fabricCanvas.on('object:removed', function() { updateDesignWarning(); });
+    
     loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,false);
     frontDesignJSON = fabricCanvas.toJSON();
     backDesignJSON = null;
@@ -1784,14 +1859,45 @@ function initCanvas(){
         setTimeout(resizeCanvas, 100);
     });
 }
-function switchToFront(){if(currentSide==='front')return;backDesignJSON=fabricCanvas.toJSON();currentSide='front';document.getElementById('frontSideBtn').classList.add('active');document.getElementById('backSideBtn').classList.remove('active');if(frontDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(frontDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false);}updateSummaryElements();}
-function switchToBack(){if(currentSide==='back')return;frontDesignJSON=fabricCanvas.toJSON();currentSide='back';document.getElementById('backSideBtn').classList.add('active');document.getElementById('frontSideBtn').classList.remove('active');if(backDesignJSON?.objects?.length)fabricCanvas.loadFromJSON(backDesignJSON,()=>loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false));else{fabricCanvas.clear();loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false);}updateSummaryElements();}
-function updateSummaryElements(){const hf=!!(frontDesignJSON?.objects?.length),hb=!!(backDesignJSON?.objects?.length);document.getElementById('summaryFront').innerHTML=hf?'✓ Custom':'None';document.getElementById('summaryBack').innerHTML=hb?'✓ Custom':'None';}
+function switchToFront(){
+    if(currentSide==='front')return;
+    backDesignJSON=fabricCanvas.toJSON();
+    currentSide='front';
+    document.getElementById('frontSideBtn').classList.add('active');
+    document.getElementById('backSideBtn').classList.remove('active');
+    if(frontDesignJSON?.objects?.length){
+        fabricCanvas.loadFromJSON(frontDesignJSON,()=>{
+            loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',true);
+            updateDesignWarning();
+        });
+    } else {
+        fabricCanvas.clear();
+        loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',false);
+    }
+    updateDesignWarning();
+}
+function switchToBack(){
+    if(currentSide==='back')return;
+    frontDesignJSON=fabricCanvas.toJSON();
+    currentSide='back';
+    document.getElementById('backSideBtn').classList.add('active');
+    document.getElementById('frontSideBtn').classList.remove('active');
+    if(backDesignJSON?.objects?.length){
+        fabricCanvas.loadFromJSON(backDesignJSON,()=>{
+            loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',true);
+            updateDesignWarning();
+        });
+    } else {
+        fabricCanvas.clear();
+        loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',false);
+    }
+    updateDesignWarning();
+}
 function renderStyles(){const g=document.getElementById('styleGrid');g.innerHTML=tshirtStyles.map(s=>`<div class="style-card ${s.id===currentStyle.id?'active':''}" data-id="${s.id}"><img class="style-img" src="${IMAGE_PATH}${s.previewImg}" onerror="this.src='https://placehold.co/300x300/1a1a2e/D4AF37?text=${encodeURIComponent(s.displayName)}'"><div class="style-name">${s.displayName}</div><div class="style-price">₹${s.price}</div></div>`).join('');document.querySelectorAll('.style-card').forEach(c=>c.addEventListener('click',()=>{const id=c.dataset.id;const sel=tshirtStyles.find(t=>t.id===id);if(sel){currentStyle=sel;selectedColor=currentStyle.colors[0];const map={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};selectedColorDisplay=map[selectedColor]||selectedColor;renderStyles();renderColorSelectorFull();resizeCanvas();loadTshirtImageDynamic(currentStyle.name,selectedColor,currentSide,true);updateSummary();showToast(`✓ ${sel.displayName} selected!`);}}));}
 function updateSummary(){document.getElementById('summaryStyle').innerText=currentStyle.displayName;document.getElementById('summaryColor').innerText=selectedColorDisplay;document.getElementById('summarySize').innerText=currentSize||'--';document.getElementById('totalPrice').innerHTML=`₹${currentStyle.price}`;const mt=currentPrintMethod==='transparent'?'Transparent Print':(currentPrintMethod==='fullbg'?'Full Background':'Not selected');document.getElementById('summaryPrintMethod').innerHTML=mt;}
 function changeTShirtColor(c){selectedColor=c;const map={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};selectedColorDisplay=map[c]||c;document.querySelectorAll('.color-option').forEach(o=>o.classList.remove('active'));document.querySelector(`.color-option[data-color="${c}"]`).classList.add('active');document.getElementById('summaryColor').innerText=selectedColorDisplay;if(currentSide==='front'){frontDesignJSON=fabricCanvas.toJSON();loadTshirtImageDynamic(currentStyle.name,selectedColor,'front',true);}else{backDesignJSON=fabricCanvas.toJSON();loadTshirtImageDynamic(currentStyle.name,selectedColor,'back',true);}showToast(`✓ Color changed to ${selectedColorDisplay}`);}
 function renderColorSelectorFull(){const cont=document.getElementById('colorOptionsContainer');const cols=currentStyle.colors;const dmap={'white':'White','warm grey':'Warm Grey','cream':'Cream','black':'Black','grey':'Grey','blue':'Blue','green':'Green','olive green':'Olive Green','dark brown':'Dark Brown'};const cmap={'white':'#f5f5f5','warm grey':'#a9a9a9','cream':'#fffdd0','black':'#1a1a1a','grey':'#808080','blue':'#1e3a5f','green':'#4a5d23','olive green':'#556b2f','dark brown':'#5c4033'};cont.innerHTML=cols.map(c=>`<div class="color-option ${selectedColor===c?'active':''}" data-color="${c}"><div class="color-swatch-circle" style="background:${cmap[c]||'#808080'};"></div><span class="color-option-name">${dmap[c]||c}</span></div>`).join('');document.querySelectorAll('.color-option').forEach(o=>o.addEventListener('click',()=>changeTShirtColor(o.dataset.color)));}
-function addText(){const val=document.getElementById('textInput').value.trim() || document.getElementById('mobileTextInput')?.value.trim(); if(!val){showToast('Enter text first',true);return;}const t=new fabric.IText(val,{left:fabricCanvas.width/2,top:fabricCanvas.height/2,fontFamily:document.getElementById('fontSelect').value,fill:'#D4AF37',fontSize:36,originX:'center',originY:'center'});fabricCanvas.add(t);fabricCanvas.setActiveObject(t);fabricCanvas.renderAll();showToast('✓ Text added!');updateSummaryElements();if(document.getElementById('mobileTextInput')) document.getElementById('mobileTextInput').value='';}
+function addText(){const val=document.getElementById('textInput').value.trim() || document.getElementById('mobileTextInput')?.value.trim(); if(!val){showToast('Enter text first',true);return;}const t=new fabric.IText(val,{left:fabricCanvas.width/2,top:fabricCanvas.height/2,fontFamily:document.getElementById('fontSelect').value,fill:'#D4AF37',fontSize:36,originX:'center',originY:'center'});fabricCanvas.add(t);fabricCanvas.setActiveObject(t);fabricCanvas.renderAll();showToast('✓ Text added!');updateDesignWarning();if(document.getElementById('mobileTextInput')) document.getElementById('mobileTextInput').value='';}
 function generateColorPalette(){return ['#FF6633','#FFB399','#FF33FF','#FFFF99','#00B3E6','#E6B333','#3366E6','#999966','#99FF99','#B34D4D'];}
 function renderColorPalette(){const pal=generateColorPalette();const c=document.getElementById('colorPalette');c.innerHTML='';const mobileC=document.getElementById('mobileColorPalette');if(mobileC) mobileC.innerHTML='';pal.forEach(clr=>{const sw=document.createElement('div');sw.className='color-swatch';sw.style.backgroundColor=clr;sw.onclick=()=>{const act=fabricCanvas.getActiveObject();if(act&&(act.type==='i-text'||act.type==='text'||act.curveData)){act.set('fill',clr);if(act.curveData) act.curveData.fillColor = clr;fabricCanvas.renderAll();showToast('✓ Color applied!');document.querySelectorAll('.color-swatch').forEach(s=>s.classList.remove('active'));sw.classList.add('active');}else showToast('Select text first', true);};c.appendChild(sw);if(mobileC){const sw2=document.createElement('div');sw2.className='mobile-color-swatch';sw2.style.backgroundColor=clr;sw2.onclick=sw.onclick;mobileC.appendChild(sw2);}});}
 function applyRounded(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData)){showToast('Select a text first',true);return;}roundedActive=!roundedActive;if(roundedActive){a.set('radius',50);a.set('rx',50);a.set('ry',50);}else{a.set('radius',0);a.set('rx',0);a.set('ry',0);}fabricCanvas.renderAll();showToast(roundedActive?'Rounded applied':'Rounded removed');}
@@ -1801,7 +1907,6 @@ function flipVertical(){const a=fabricCanvas.getActiveObject();if(a){a.set('flip
 function applyTextStyle(st){const a=fabricCanvas.getActiveObject();if(a&&(a.type==='i-text'||a.type==='text'||a.curveData)){if(st==='bold'){const isBold = a.fontWeight === 'bold' || a.curveData?.isBold;if(a.curveData) a.curveData.isBold = !isBold;else a.set('fontWeight', isBold ? 'normal' : 'bold');}if(st==='italic'){const isItalic = a.fontStyle === 'italic' || a.curveData?.isItalic;if(a.curveData) a.curveData.isItalic = !isItalic;else a.set('fontStyle', isItalic ? 'normal' : 'italic');}if(st==='underline'){if(a.curveData) a.curveData.isUnderline = !a.curveData.isUnderline;else a.set('underline', !a.underline);}fabricCanvas.renderAll();showToast(`✓ ${st} toggled`);}else showToast('Select text first',true);}
 function updateSelectedText(){const a=fabricCanvas.getActiveObject();if(!a||(a.type!=='i-text'&&a.type!=='text'&&!a.curveData))return;const fontVal=document.getElementById('fontSelect')?.value || 'Space Grotesk';const sizeVal=parseInt(document.getElementById('fontSizeSlider')?.value || document.getElementById('mobileFontSizeSlider')?.value || 36);if(a.curveData){a.curveData.fontFamily = fontVal;a.curveData.fontSize = sizeVal;}else{a.set('fontFamily',fontVal);a.set('fontSize',sizeVal);}fabricCanvas.renderAll();}
 
-// Curve panel event handlers
 function setupCurvePanel() {
     const curvePanel = document.getElementById('curvePanel');
     const curveBtn = document.getElementById('curveTextBtn');
@@ -1815,7 +1920,6 @@ function setupCurvePanel() {
     const mobileCurveRadiusValue = document.getElementById('mobileCurveRadiusValue');
     const mobileApplyCurveBtn = document.getElementById('mobileApplyCurveBtn');
     
-    // Toggle curve panel
     curveBtn.onclick = () => {
         if (curvePanel.style.display === 'none') {
             curvePanel.style.display = 'block';
@@ -1824,7 +1928,6 @@ function setupCurvePanel() {
         }
     };
     
-    // Shape selection
     document.querySelectorAll('.curve-option-btn').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active'));
@@ -1833,7 +1936,6 @@ function setupCurvePanel() {
         };
     });
     
-    // Slider updates
     if (curveAmountSlider) {
         curveAmountSlider.oninput = () => {
             curveAmountValue.innerText = curveAmountSlider.value;
@@ -1858,7 +1960,6 @@ function setupCurvePanel() {
         };
     }
     
-    // Mobile sliders
     if (mobileCurveAmountSlider) {
         mobileCurveAmountSlider.oninput = () => {
             mobileCurveAmountValue.innerText = mobileCurveAmountSlider.value;
@@ -1879,7 +1980,6 @@ function setupCurvePanel() {
         mobileApplyCurveBtn.onclick = applyCurveToSelected;
     }
     
-    // Sync mobile shape selection
     document.querySelectorAll('.mobile-toolbar .curve-option-btn').forEach(btn => {
         btn.onclick = () => {
             document.querySelectorAll('.curve-option-btn').forEach(b => b.classList.remove('active'));
@@ -1889,20 +1989,39 @@ function setupCurvePanel() {
     });
 }
 
-document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart; document.getElementById('buyNowBtn').onclick=buyNow; document.getElementById('saveImageBtn').onclick=async()=>{showLoading("SAVING...");try{if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor);await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor);showToast('✅ Designs saved!');}catch(e){showToast('Save failed',true);}finally{hideLoading();}};
-document.getElementById('frontSideBtn').onclick=switchToFront; document.getElementById('backSideBtn').onclick=switchToBack; document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();}; document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();}); document.getElementById('addTextBtn').onclick=addText; document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open'); document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open'); document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout2.html';}; 
+document.getElementById('addToCartBtn').onclick=addCurrentDesignToCart; 
+document.getElementById('buyNowBtn').onclick=buyNow; 
+document.getElementById('saveImageBtn').onclick=async()=>{showLoading("SAVING...");try{if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();await saveDesignImageToFirebase('front',frontDesignJSON,currentStyle.name,selectedColor);await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor);showToast('✅ Designs saved!');}catch(e){showToast('Save failed',true);}finally{hideLoading();}};
+document.getElementById('frontSideBtn').onclick=switchToFront; 
+document.getElementById('backSideBtn').onclick=switchToBack; 
+document.getElementById('sizeSelect').onchange=e=>{currentSize=e.target.value;updateSummary();updateDesignWarning();}; 
+document.querySelectorAll('.print-option input').forEach(r=>r.onchange=e=>{if(e.target.checked)currentPrintMethod=e.target.value;updateSummary();updateDesignWarning();}); 
+document.getElementById('addTextBtn').onclick=addText; 
+document.getElementById('cartIconBtn').onclick=()=>document.getElementById('cartSidebar').classList.add('open'); 
+document.getElementById('closeCartBtn').onclick=()=>document.getElementById('cartSidebar').classList.remove('open'); 
+document.getElementById('cartCheckoutBtn').onclick=()=>{if(cart.length===0)showToast('Cart empty',true);else window.location.href='secure-checkout2.html';}; 
 document.getElementById('uploadArea').onclick=()=>document.getElementById('imageUpload').click(); 
-document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
-document.getElementById('glowBtn').onclick=applyGlow; document.getElementById('roundedBtn').onclick=applyRounded; document.getElementById('borderBtn').onclick=applyBorderToggle; 
+document.getElementById('imageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateDesignWarning();});};r.readAsDataURL(e.target.files[0]);}};
+document.getElementById('glowBtn').onclick=applyGlow; 
+document.getElementById('roundedBtn').onclick=applyRounded; 
+document.getElementById('borderBtn').onclick=applyBorderToggle; 
 document.getElementById('glowSizeSlider').oninput=updateGlowFromSliders; 
 document.getElementById('glowColorPicker').oninput=updateGlowFromSliders;
 document.getElementById('glowBlurSlider').oninput=updateGlowFromSliders;
 document.getElementById('glowIntensitySlider').oninput=updateGlowFromSliders;
-document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; document.getElementById('flipVerticalBtn').onclick=flipVertical; document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic'); document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline'); document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);}; document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');}; document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
+document.getElementById('flipHorizontalBtn').onclick=flipHorizontal; 
+document.getElementById('flipVerticalBtn').onclick=flipVertical; 
+document.getElementById('boldBtn').onclick=()=>applyTextStyle('bold'); 
+document.getElementById('italicBtn').onclick=()=>applyTextStyle('italic'); 
+document.getElementById('underlineBtn').onclick=()=>applyTextStyle('underline'); 
+document.getElementById('deleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateDesignWarning();showToast('✓ Deleted');}else showToast('Select element',true);}; 
+document.getElementById('clearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateDesignWarning();showToast('✓ Side cleared');}; 
+document.getElementById('fontSizeSlider').oninput=e=>{document.getElementById('fontSizeValue').innerText=e.target.value+'px';updateSelectedText();}; 
+document.getElementById('fontSelect').onchange=()=>{updateSelectedText();document.getElementById('fontPreview').style.fontFamily=document.getElementById('fontSelect').value;};
 if(document.querySelectorAll('.tool-btn[data-tool]')){document.querySelectorAll('.tool-btn[data-tool]').forEach(btn=>{btn.onclick=()=>{const tool=btn.dataset.tool;document.querySelectorAll('.tool-panel').forEach(panel=>panel.classList.remove('open'));const targetPanel=document.getElementById(`mobilePanel${tool.charAt(0).toUpperCase()+tool.slice(1)}`);if(targetPanel)targetPanel.classList.add('open');}});}
 if(document.getElementById('mobileAddTextBtn')) document.getElementById('mobileAddTextBtn').onclick=addText;
-if(document.getElementById('mobileDeleteBtn')) document.getElementById('mobileDeleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateSummaryElements();showToast('✓ Deleted');}else showToast('Select element',true);};
-if(document.getElementById('mobileClearBtn')) document.getElementById('mobileClearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateSummaryElements();showToast('✓ Side cleared');};
+if(document.getElementById('mobileDeleteBtn')) document.getElementById('mobileDeleteBtn').onclick=()=>{const o=fabricCanvas.getActiveObject();if(o){fabricCanvas.remove(o);fabricCanvas.renderAll();updateDesignWarning();showToast('✓ Deleted');}else showToast('Select element',true);};
+if(document.getElementById('mobileClearBtn')) document.getElementById('mobileClearBtn').onclick=()=>{fabricCanvas.getObjects().forEach(o=>fabricCanvas.remove(o));fabricCanvas.renderAll();if(currentSide==='front')frontDesignJSON=fabricCanvas.toJSON();else backDesignJSON=fabricCanvas.toJSON();updateDesignWarning();showToast('✓ Side cleared');};
 if(document.getElementById('mobileGlowBtn')) document.getElementById('mobileGlowBtn').onclick=applyGlow;
 if(document.getElementById('mobileRoundedBtn')) document.getElementById('mobileRoundedBtn').onclick=applyRounded;
 if(document.getElementById('mobileBorderBtn')) document.getElementById('mobileBorderBtn').onclick=applyBorderToggle;
@@ -1917,13 +2036,14 @@ if(document.getElementById('mobileGlowBlurSlider')) document.getElementById('mob
 if(document.getElementById('mobileGlowIntensitySlider')) document.getElementById('mobileGlowIntensitySlider').oninput=updateGlowFromSliders;
 if(document.getElementById('mobileFontSizeSlider')) document.getElementById('mobileFontSizeSlider').oninput=e=>{if(document.getElementById('mobileFontSizeValue')) document.getElementById('mobileFontSizeValue').innerText=e.target.value+'px';updateSelectedText();};
 if(document.getElementById('mobileUploadArea')) document.getElementById('mobileUploadArea').onclick=()=>document.getElementById('mobileImageUpload').click();
-if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateSummaryElements();});};r.readAsDataURL(e.target.files[0]);}};
+if(document.getElementById('mobileImageUpload')) document.getElementById('mobileImageUpload').onchange=e=>{if(e.target.files[0]){const r=new FileReader();r.onload=ev=>{fabric.Image.fromURL(ev.target.result,img=>{img.scaleToWidth(200);img.set({left:fabricCanvas.width/2,top:fabricCanvas.height/2,originX:'center',originY:'center'});fabricCanvas.add(img);fabricCanvas.renderAll();showToast('✓ Image added!');updateDesignWarning();});};r.readAsDataURL(e.target.files[0]);}};
 const fonts=['Space Grotesk','Arial','Poppins','Montserrat','Dancing Script','Pacifico','Oswald','Lobster'];
 const mobileFontGrid=document.getElementById('mobileFontGrid');
 if(mobileFontGrid){fonts.forEach(f=>{const div=document.createElement('div');div.className='mobile-font-option';div.innerText=f;div.style.fontFamily=f;div.onclick=()=>{document.getElementById('fontSelect').value=f;updateSelectedText();document.querySelectorAll('.mobile-font-option').forEach(opt=>opt.classList.remove('active'));div.classList.add('active');showToast(`Font: ${f}`);};mobileFontGrid.appendChild(div);});}
 function openLoginModal(){document.getElementById('loginModal').classList.add('show');} function closeLoginModal(){document.getElementById('loginModal').classList.remove('show');document.getElementById('otpSection').style.display='none';document.getElementById('otpInput').value='';} document.getElementById('closeModalBtn').onclick=closeLoginModal; function setupRecaptcha(){if(window.recaptchaVerifier)return;window.recaptchaVerifier=new firebase.auth.RecaptchaVerifier('sendOtpBtn',{size:'invisible',callback:()=>{}});} document.getElementById('sendOtpBtn').onclick=async()=>{const phone=document.getElementById('loginPhone').value;if(!phone||phone.length<10){showToast('Enter valid phone number',true);return;}const fullPhone=phone.startsWith('+')?phone:'+91'+phone;showLoading("SENDING OTP...");try{setupRecaptcha();const cr=await auth.signInWithPhoneNumber(fullPhone,window.recaptchaVerifier);globalConfirmationResult=cr;hideLoading();showToast("OTP sent!");document.getElementById('otpSection').style.display='block';}catch(e){hideLoading();showToast("Error: "+e.message,true);}}; document.getElementById('verifyOtpBtn').onclick=async()=>{const otp=document.getElementById('otpInput').value;if(!otp||otp.length<6){showToast('Enter valid OTP',true);return;}if(!globalConfirmationResult){showToast('Request OTP first',true);return;}showLoading("VERIFYING...");try{const result=await globalConfirmationResult.confirm(otp);const user=result.user;localStorage.setItem('vedantaUser',JSON.stringify({uid:user.uid,phone:user.phoneNumber,name:'Customer'}));hideLoading();closeLoginModal();showToast('✓ Login successful!');if(pendingBuyAfterLogin){pendingBuyAfterLogin=false;setTimeout(()=>buyNow(),500);}}catch(e){hideLoading();showToast("Invalid OTP",true);}};
 initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
 setupCurvePanel();
+updateDesignWarning();
 </script>
 </body>
 </html>
