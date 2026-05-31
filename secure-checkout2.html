@@ -161,57 +161,41 @@
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
-  async function fetchAllProductsImages() {
-    try {
-      const snapshot = await db.collection('products').get();
-      snapshot.forEach(doc => {
-        const p = doc.data();
-        if (p.name) productImagesCache[p.name.toLowerCase()] = p.images?.[0] || p.image || null;
-        productImagesCache[doc.id] = p.images?.[0] || p.image || null;
-        if (p.displayName) productImagesCache[p.displayName.toLowerCase()] = p.images?.[0] || p.image || null;
-      });
-    } catch(e) { console.warn("Could not fetch products:", e); }
-  }
-
   function getProductImageUrl(productName, productId, selectedColor) {
     if (productName && productImagesCache[productName]) return productImagesCache[productName];
     if (productName && productImagesCache[productName.toLowerCase()]) return productImagesCache[productName.toLowerCase()];
     if (productId && productImagesCache[productId]) return productImagesCache[productId];
-    const lowerName = (productName || '').toLowerCase();
-    if (lowerName.includes('sweatshirt')) return productImagesCache['sweatshirt'] || null;
-    if (lowerName.includes('regular fit')) return productImagesCache['regular fit'] || null;
-    if (lowerName.includes('polo')) return productImagesCache['polo'] || null;
-    if (lowerName.includes('oversized')) return productImagesCache['oversized'] || null;
-    if (lowerName.includes('acid wash')) return productImagesCache['acid wash'] || null;
-    if (lowerName.includes('hoodie')) return productImagesCache['hoodie'] || null;
     return null;
   }
 
-  // CRITICAL FIX: Clear custom data when cart is from regular products
+  // FIXED: Custom order detection - DIRECT from localStorage, no session flag issues
   function loadCartFromSource() {
-    // First check for regular cart (non-custom)
     const savedCart = localStorage.getItem('vedantaCart');
     const customDataRaw = localStorage.getItem('customCheckoutData');
     
-    // Determine priority: If custom data exists but cart is empty OR we force check flag?
-    // The bug: custom data persists and overrides regular cart. 
-    // Solution: Always prefer regular cart if it contains non-custom items, unless we are explicitly coming from custom flow.
-    // We read a flag 'fromCustomDesign' set on customizer page.
-    const fromCustomDesign = sessionStorage.getItem('fromCustomDesign') === 'true';
+    // RESET first
+    isCustomizedOrder = false;
+    frontDesignImageURL = null;
+    backDesignImageURL = null;
+    document.getElementById('customDesignPreviewContainer').style.display = 'none';
     
-    if (fromCustomDesign && customDataRaw) {
-      // Coming from custom design: use custom data
+    // CHECK: Agar custom data hai with design images, use custom order
+    if (customDataRaw) {
       try {
         const data = JSON.parse(customDataRaw);
-        if (data && data.isCustomized === true) {
+        // Agar design images hain to custom order hai
+        if ((data.frontDesignImage || data.customDesignImage || data.backDesignImage) && data.isCustomized === true) {
           isCustomizedOrder = true;
           frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
           backDesignImageURL = data.backDesignImage || null;
+          
           if (frontDesignImageURL || backDesignImageURL) {
-            document.getElementById('customDesignPreviewContainer').style.display = 'block';
+            const previewContainer = document.getElementById('customDesignPreviewContainer');
+            previewContainer.style.display = 'block';
             if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
             if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
           }
+          
           cart = [{
             id: 'custom_' + Date.now(),
             name: data.tshirtType || 'Custom T-Shirt',
@@ -224,43 +208,45 @@
             backDesignImage: backDesignImageURL,
             isCustomized: true
           }];
-          // Clear the flag after loading
-          sessionStorage.removeItem('fromCustomDesign');
-          // Clear custom data to avoid reuse for regular products
-          // But keep for this session? We will clear after order or after exit. For now we keep but flag prevents reuse.
-        } else { fallbackToRegularCart(); }
-      } catch(e) { fallbackToRegularCart(); }
-    } else {
-      fallbackToRegularCart();
+          
+          cartTotal = cart[0].price * cart[0].quantity;
+          renderOrderItems();
+          return;
+        }
+      } catch(e) { console.warn("Custom data parse error:", e); }
     }
     
-    function fallbackToRegularCart() {
-      // Reset custom flags
-      isCustomizedOrder = false;
-      frontDesignImageURL = null;
-      backDesignImageURL = null;
-      document.getElementById('customDesignPreviewContainer').style.display = 'none';
-      if (savedCart) {
-        try { 
-          cart = JSON.parse(savedCart);
-          // Ensure no custom properties leak
-          cart.forEach(item => { 
-            item.isCustomized = false; 
-            item.printMethod = null; 
-            item.frontDesignImage = null; 
-            item.backDesignImage = null;
-          });
-        } catch(e) { cart = []; }
-      } else { cart = []; }
+    // Regular cart
+    if (savedCart) {
+      try { 
+        cart = JSON.parse(savedCart);
+        cart.forEach(item => { 
+          item.isCustomized = false; 
+          item.printMethod = null; 
+          item.frontDesignImage = null; 
+          item.backDesignImage = null;
+        });
+        cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+      } catch(e) { cart = []; cartTotal = 0; }
+    } else { 
+      cart = []; 
+      cartTotal = 0;
     }
     
-    cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+    renderOrderItems();
   }
 
-  async function renderOrderItems() {
+  function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
+    
+    if (cart.length === 0) {
+      container.innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-shopping-bag"></i><p>No items in cart</p></div>';
+      updateTotalsDisplay();
+      return;
+    }
+    
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
@@ -271,8 +257,8 @@
       const isCustom = item.isCustomized === true;
       
       if (isCustom) {
-        imageUrl = item.frontDesignImage || frontDesignImageURL || item.backDesignImage || backDesignImageURL;
-        designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
+        imageUrl = item.frontDesignImage || frontDesignImageURL;
+        designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> ✨ Custom Design</div>';
       } else {
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
@@ -318,47 +304,69 @@
     document.getElementById('rewardPoints').innerHTML = Math.floor((selectedPaymentMethod === 'razorpay' ? discountedTotal : cartTotal) / 100);
   }
 
-  async function fetchSavedAddress() {
-    if (!currentUser || !currentUser.phone) return null;
-    try {
-      const snap = await db.collection('orders').where('customerPhone', '==', currentUser.phone).orderBy('orderDate', 'desc').limit(1).get();
-      if (!snap.empty) {
-        const last = snap.docs[0].data();
-        if (last.shippingAddress) return { fullName: last.customerName, street: last.shippingAddress.address, city: last.shippingAddress.city, state: last.shippingAddress.state, pincode: last.shippingAddress.pincode, landmark: last.shippingAddress.landmark || '', phone: last.customerPhone };
-      }
-      const addrSnap = await db.collection('addresses').where('userId', '==', currentUser.uid).limit(1).get();
-      if (!addrSnap.empty) { const a = addrSnap.docs[0].data(); return { fullName: a.name, street: a.street, city: a.city, state: a.state, pincode: a.pincode, landmark: a.landmark || '', phone: a.phone || currentUser.phone }; }
-    } catch(e) { }
-    return null;
-  }
-
-  async function displayAddressSelection() {
-    const container = document.getElementById('addressSelectionArea');
-    const addr = await fetchSavedAddress();
-    if (addr && !selectedAddress) {
-      container.innerHTML = `<div class="saved-address-card" id="useSavedAddrBtn"><div class="address-name">📦 Saved Address</div><div class="address-detail">${escapeHtml(addr.fullName)}</div><div class="address-detail">${escapeHtml(addr.street)}</div><div class="address-detail">${escapeHtml(addr.city)}, ${escapeHtml(addr.state)} - ${escapeHtml(addr.pincode)}</div><div class="address-phone">📞 ${escapeHtml(addr.phone)}</div><div class="address-label">Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="showNewAddrBtn"><i class="fas fa-plus"></i> Add New Address</button>`;
-      document.getElementById('useSavedAddrBtn')?.addEventListener('click', () => { selectedAddress = { fullName: addr.fullName, phone: addr.phone, address: addr.street, city: addr.city, state: addr.state, pincode: addr.pincode, landmark: addr.landmark || '' }; displaySelectedAddressCard(); });
-      document.getElementById('showNewAddrBtn')?.addEventListener('click', showNewAddressForm);
-    } else if (!selectedAddress) {
-      showNewAddressForm();
-    } else {
-      displaySelectedAddressCard();
+  // INSTANT ADDRESS LOAD - no await, use localStorage
+  function loadAddressInstantly() {
+    const savedAddr = localStorage.getItem('lastUsedAddress');
+    if (savedAddr) {
+      try {
+        selectedAddress = JSON.parse(savedAddr);
+        displaySelectedAddressCard();
+        return;
+      } catch(e) {}
     }
+    showNewAddressForm();
   }
-
+  
   function displaySelectedAddressCard() {
     const container = document.getElementById('addressSelectionArea');
     if (!selectedAddress) return;
     container.innerHTML = `<div class="selected-address-card"><div class="address-name">✅ Selected Address</div><div class="address-detail">${escapeHtml(selectedAddress.fullName)}</div><div class="address-detail">${escapeHtml(selectedAddress.address)}</div><div class="address-detail">${escapeHtml(selectedAddress.city)}, ${escapeHtml(selectedAddress.state)} - ${escapeHtml(selectedAddress.pincode)}</div><div class="address-phone">📞 ${escapeHtml(selectedAddress.phone)}</div><div class="address-label">Deliver here</div></div><div class="option-divider"><span>OR</span></div><button class="add-new-address-btn" id="changeAddrBtn"><i class="fas fa-edit"></i> Change Address</button>`;
-    document.getElementById('changeAddrBtn')?.addEventListener('click', () => { selectedAddress = null; displayAddressSelection(); });
+    document.getElementById('changeAddrBtn')?.addEventListener('click', () => { selectedAddress = null; showNewAddressForm(); });
   }
 
   function showNewAddressForm() {
     const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
-    document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { const fullName=document.getElementById('newFullName').value; const street=document.getElementById('newStreet').value; const city=document.getElementById('newCity').value; const state=document.getElementById('newState').value; const pincode=document.getElementById('newPincode').value; const landmark=document.getElementById('newLandmark').value; if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; displaySelectedAddressCard(); showToast('Address saved'); });
-    document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { selectedAddress=null; displayAddressSelection(); });
-    document.getElementById('useLocationBtn')?.addEventListener('click', () => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(async (pos)=>{ const geocoder=new google.maps.Geocoder(); geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{ if(res[0]){ const comps=res[0].address_components; let st='', ct='', stt='', pin=''; comps.forEach(c=>{ if(c.types.includes('route')) st=c.long_name; if(c.types.includes('locality')) ct=c.long_name; if(c.types.includes('administrative_area_level_1')) stt=c.long_name; if(c.types.includes('postal_code')) pin=c.long_name; }); document.getElementById('newStreet').value=st; document.getElementById('newCity').value=ct; document.getElementById('newState').value=stt; document.getElementById('newPincode').value=pin; showToast('Location filled'); } }); }, ()=>showToast('Location failed',true)); else showToast('Enable GPS',true); });
+    container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name" value="${currentUser?.name || ''}"></div><div class="form-group"><label>Phone</label><input type="tel" id="newPhone" placeholder="Phone number" value="${currentUser?.phone || ''}"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button></div></div>`;
+    document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { 
+      const fullName = document.getElementById('newFullName').value; 
+      const phone = document.getElementById('newPhone').value;
+      const street = document.getElementById('newStreet').value; 
+      const city = document.getElementById('newCity').value; 
+      const state = document.getElementById('newState').value; 
+      const pincode = document.getElementById('newPincode').value; 
+      const landmark = document.getElementById('newLandmark').value; 
+      if(!fullName || !street || !city || !state || !pincode || !phone){
+        showToast('Fill all fields', true); 
+        return; 
+      }
+      selectedAddress = { fullName, phone, address: street, city, state, pincode, landmark }; 
+      localStorage.setItem('lastUsedAddress', JSON.stringify(selectedAddress));
+      displaySelectedAddressCard(); 
+      showToast('Address saved'); 
+    });
+    document.getElementById('useLocationBtn')?.addEventListener('click', () => { 
+      if(navigator.geolocation) navigator.geolocation.getCurrentPosition(async (pos)=>{ 
+        const geocoder=new google.maps.Geocoder(); 
+        geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{ 
+          if(res[0]){ 
+            const comps=res[0].address_components; 
+            let st='', ct='', stt='', pin=''; 
+            comps.forEach(c=>{ 
+              if(c.types.includes('route')) st=c.long_name; 
+              if(c.types.includes('locality')) ct=c.long_name; 
+              if(c.types.includes('administrative_area_level_1')) stt=c.long_name; 
+              if(c.types.includes('postal_code')) pin=c.long_name; 
+            }); 
+            document.getElementById('newStreet').value=st; 
+            document.getElementById('newCity').value=ct; 
+            document.getElementById('newState').value=stt; 
+            document.getElementById('newPincode').value=pin; 
+            showToast('Location filled'); 
+          } 
+        }); 
+      }, ()=>showToast('Location failed',true)); 
+      else showToast('Enable GPS',true); 
+    });
     document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
   }
 
@@ -434,21 +442,27 @@
     try { await db.collection('orders').doc(orderId).set(orderData); return { success: true, orderId }; } catch(e) { console.error(e); return { success: false }; }
   }
   
-  async function placeCOD() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const res = await saveOrder('Cash on Delivery'); showLoading(false); if(res.success) { showToast(`Order placed! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); sessionStorage.removeItem('fromCustomDesign'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order failed', true); isProcessing=false; } }
+  async function placeCOD() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const res = await saveOrder('Cash on Delivery'); showLoading(false); if(res.success) { showToast(`Order placed! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order failed', true); isProcessing=false; } }
   
-  async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); sessionStorage.removeItem('fromCustomDesign'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
+  async function razorpayPayment() { if (!selectedAddress) { showToast('Add address first', true); return; } if(isProcessing) return; isProcessing=true; showLoading(true); const amt = discountedTotal || cartTotal; if(amt<=0){ showLoading(false); isProcessing=false; return; } const options = { key: RAZORPAY_KEY_ID, amount: Math.round(amt)*100, currency: 'INR', name: 'VEDANTA', description: 'T-Shirt Order', prefill: { name: selectedAddress.fullName, contact: selectedAddress.phone }, theme: { color: '#D4AF37' }, handler: async (resp) => { const res = await saveOrder('Razorpay', resp.razorpay_payment_id); showLoading(false); if(res.success) { showToast(`Payment success! ${res.orderId}`); localStorage.removeItem('vedantaCart'); localStorage.removeItem('customCheckoutData'); setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); } else { showToast('Order save issue', true); isProcessing=false; } }, modal: { ondismiss: () => { showLoading(false); isProcessing=false; showToast('Payment cancelled', true); } } }; const razor = new Razorpay(options); razor.open(); }
 
-  async function init() {
-    const stored = JSON.parse(localStorage.getItem('vedantaUser'));
-    if (stored) currentUser = stored;
-    else { const phone = localStorage.getItem('userPhone'); if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' }; else { showToast('Please login', true); setTimeout(()=> window.location.href='profile.html',1500); return; } }
-    document.getElementById('displayPhone').innerText = currentUser.phone || '';
-    await fetchAllProductsImages();
-    loadCartFromSource();
-    await renderOrderItems();
-    await displayAddressSelection();
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); });
+  // INIT - Sab kuch instant load karo
+  const stored = JSON.parse(localStorage.getItem('vedantaUser'));
+  if (stored) currentUser = stored;
+  else { const phone = localStorage.getItem('userPhone'); if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' }; else { currentUser = { uid: 'guest', phone: 'Guest', name: '' }; } }
+  document.getElementById('displayPhone').innerText = currentUser.phone || 'Guest';
+  
+  // Products fetch background mein ho (display block nahi karega)
+  fetchAllProductsImages().catch(e=>console.warn(e));
+  
+  // Load cart & address INSTANTLY
+  loadCartFromSource();
+  loadAddressInstantly();
+  
+  // Event listeners
+  setTimeout(() => {
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); updateTotalsDisplay(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); updateTotalsDisplay(); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
@@ -458,9 +472,7 @@
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('codOption').click();
-    function calculateDiscount() { updateTotalsDisplay(); }
-  }
-  init();
+  }, 100);
 </script>
 </body>
 </html>
