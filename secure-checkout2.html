@@ -173,75 +173,87 @@
     } catch(e) { console.warn("Could not fetch products:", e); }
   }
 
-  // FIXED: INSTANT LOAD WITH CORRECT CUSTOM VS REGULAR LOGIC
-  function loadCartInstantly() {
+  function getProductImageUrl(productName, productId, selectedColor) {
+    if (productName && productImagesCache[productName]) return productImagesCache[productName];
+    if (productName && productImagesCache[productName.toLowerCase()]) return productImagesCache[productName.toLowerCase()];
+    if (productId && productImagesCache[productId]) return productImagesCache[productId];
+    const lowerName = (productName || '').toLowerCase();
+    if (lowerName.includes('sweatshirt')) return productImagesCache['sweatshirt'] || null;
+    if (lowerName.includes('regular fit')) return productImagesCache['regular fit'] || null;
+    if (lowerName.includes('polo')) return productImagesCache['polo'] || null;
+    if (lowerName.includes('oversized')) return productImagesCache['oversized'] || null;
+    if (lowerName.includes('acid wash')) return productImagesCache['acid wash'] || null;
+    if (lowerName.includes('hoodie')) return productImagesCache['hoodie'] || null;
+    return null;
+  }
+
+  // CRITICAL FIX: Clear custom data when cart is from regular products
+  function loadCartFromSource() {
+    // First check for regular cart (non-custom)
     const savedCart = localStorage.getItem('vedantaCart');
     const customDataRaw = localStorage.getItem('customCheckoutData');
+    
+    // Determine priority: If custom data exists but cart is empty OR we force check flag?
+    // The bug: custom data persists and overrides regular cart. 
+    // Solution: Always prefer regular cart if it contains non-custom items, unless we are explicitly coming from custom flow.
+    // We read a flag 'fromCustomDesign' set on customizer page.
     const fromCustomDesign = sessionStorage.getItem('fromCustomDesign') === 'true';
     
-    // Reset flags
-    isCustomizedOrder = false;
-    frontDesignImageURL = null;
-    backDesignImageURL = null;
-    document.getElementById('customDesignPreviewContainer').style.display = 'none';
-    
-    // PRIORITY 1: If coming from custom design flow -> load custom order
     if (fromCustomDesign && customDataRaw) {
+      // Coming from custom design: use custom data
       try {
-        const customData = JSON.parse(customDataRaw);
-        if (customData && customData.isCustomized === true) {
+        const data = JSON.parse(customDataRaw);
+        if (data && data.isCustomized === true) {
           isCustomizedOrder = true;
-          frontDesignImageURL = customData.frontDesignImage || customData.customDesignImage || null;
-          backDesignImageURL = customData.backDesignImage || null;
-          
-          // Build custom cart item
-          cart = [{
-            id: 'custom_' + Date.now(),
-            name: customData.tshirtType || 'Custom T-Shirt',
-            price: customData.price || 1699,
-            quantity: customData.quantity || 1,
-            size: customData.size || 'M',
-            selectedColor: customData.selectedColor || 'Black',
-            printMethod: customData.printMethod || 'transparent',
-            frontDesignImage: frontDesignImageURL,
-            backDesignImage: backDesignImageURL,
-            isCustomized: true
-          }];
-          
-          // Show custom preview instantly
+          frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
+          backDesignImageURL = data.backDesignImage || null;
           if (frontDesignImageURL || backDesignImageURL) {
             document.getElementById('customDesignPreviewContainer').style.display = 'block';
             if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
             if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
           }
-          // Clear flag after use to avoid re-trigger
+          cart = [{
+            id: 'custom_' + Date.now(),
+            name: data.tshirtType || 'Custom T-Shirt',
+            price: data.price || 1699,
+            quantity: data.quantity || 1,
+            size: data.size || 'M',
+            selectedColor: data.selectedColor || 'Black',
+            printMethod: data.printMethod || 'transparent',
+            frontDesignImage: frontDesignImageURL,
+            backDesignImage: backDesignImageURL,
+            isCustomized: true
+          }];
+          // Clear the flag after loading
           sessionStorage.removeItem('fromCustomDesign');
-          calculateCartTotal();
-          return;
-        }
-      } catch(e) { console.warn("Custom data parse error", e); }
+          // Clear custom data to avoid reuse for regular products
+          // But keep for this session? We will clear after order or after exit. For now we keep but flag prevents reuse.
+        } else { fallbackToRegularCart(); }
+      } catch(e) { fallbackToRegularCart(); }
+    } else {
+      fallbackToRegularCart();
     }
     
-    // PRIORITY 2: Regular products cart
-    if (savedCart) {
-      try {
-        cart = JSON.parse(savedCart);
-        // Ensure no custom flags remain
-        cart.forEach(item => { 
-          item.isCustomized = false; 
-          item.printMethod = null; 
-          item.frontDesignImage = null; 
-          item.backDesignImage = null;
-        });
-      } catch(e) { cart = []; }
-    } else {
-      cart = [];
+    function fallbackToRegularCart() {
+      // Reset custom flags
+      isCustomizedOrder = false;
+      frontDesignImageURL = null;
+      backDesignImageURL = null;
+      document.getElementById('customDesignPreviewContainer').style.display = 'none';
+      if (savedCart) {
+        try { 
+          cart = JSON.parse(savedCart);
+          // Ensure no custom properties leak
+          cart.forEach(item => { 
+            item.isCustomized = false; 
+            item.printMethod = null; 
+            item.frontDesignImage = null; 
+            item.backDesignImage = null;
+          });
+        } catch(e) { cart = []; }
+      } else { cart = []; }
     }
-    isCustomizedOrder = false;
-    calculateCartTotal();
-  }
-  
-  function calculateCartTotal() {
+    
     cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
   }
 
@@ -259,9 +271,7 @@
       const isCustom = item.isCustomized === true;
       
       if (isCustom) {
-        // For custom orders, show the actual custom design image as preview
-        imageUrl = item.frontDesignImage || frontDesignImageURL;
-        if (!imageUrl) imageUrl = item.backDesignImage || backDesignImageURL;
+        imageUrl = item.frontDesignImage || frontDesignImageURL || item.backDesignImage || backDesignImageURL;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
       } else {
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
@@ -434,12 +444,11 @@
     else { const phone = localStorage.getItem('userPhone'); if(phone) currentUser = { uid: 'guest_'+Date.now(), phone: phone, name: '' }; else { showToast('Please login', true); setTimeout(()=> window.location.href='profile.html',1500); return; } }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
     await fetchAllProductsImages();
-    // INSTANT LOAD: no async delays
-    loadCartInstantly();
-    await renderOrderItems();    // render immediately after loading
+    loadCartFromSource();
+    await renderOrderItems();
     await displayAddressSelection();
-    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); updateTotalsDisplay(); });
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); updateTotalsDisplay(); });
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
@@ -449,6 +458,7 @@
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('codOption').click();
+    function calculateDiscount() { updateTotalsDisplay(); }
   }
   init();
 </script>
