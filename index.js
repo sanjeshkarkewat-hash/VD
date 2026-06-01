@@ -1,60 +1,50 @@
-const functions = require('firebase-functions');
-const admin = require('firebase-admin');
-const axios = require('axios');
-const FormData = require('form-data');
-const cors = require('cors')({ origin: true });
-
-admin.initializeApp();
-
-exports.removeBackgroundHttp = functions.https.onRequest((req, res) => {
-    cors(req, res, async () => {
-        if (req.method !== 'POST') {
-            res.status(405).send('Method not allowed');
-            return;
-        }
+async function removeBackgroundWithAI(file) {
+    if (!file) {
+        showToast('Koi image select karo', true);
+        return null;
+    }
+    
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('Image 5MB se chhoti honi chahiye', true);
+        return null;
+    }
+    
+    showAiLoading(true);
+    
+    try {
+        showToast('📸 Image compress ho rahi hai...', false);
+        const compressedImage = await compressImageForAI(file);
         
-        try {
-            const { imageDataUrl } = req.body;
-            
-            if (!imageDataUrl) {
-                res.status(400).json({ error: 'Image is required' });
-                return;
-            }
-            
-            const base64Data = imageDataUrl.split(',')[1];
-            const imageBuffer = Buffer.from(base64Data, 'base64');
-            
-            const formData = new FormData();
-            formData.append('image_file', imageBuffer, {
-                filename: 'upload.png',
-                contentType: 'image/png'
-            });
-            formData.append('size', 'auto');
-            formData.append('type', 'product');
-            
-            const apiKey = process.env.REMOVE_BG_API_KEY;
-            
-            const response = await axios({
-                method: 'post',
-                url: 'https://api.remove.bg/v1.0/removebg',
-                data: formData,
-                headers: {
-                    ...formData.getHeaders(),
-                    'X-Api-Key': apiKey
-                },
-                responseType: 'arraybuffer'
-            });
-            
-            const outputBase64 = Buffer.from(response.data).toString('base64');
-            
-            res.status(200).json({
-                success: true,
-                processedImage: `data:image/png;base64,${outputBase64}`
-            });
-            
-        } catch (error) {
-            console.error('Error:', error.message);
-            res.status(500).json({ error: 'Background removal failed' });
+        showToast('🤖 AI background remove kar raha hai...', false);
+        
+        // 🔥 FIX: Proper headers with Content-Length
+        const formData = new FormData();
+        // Convert base64 to blob
+        const blob = await (await fetch(compressedImage)).blob();
+        formData.append('image', blob, 'image.jpg');
+        
+        const response = await fetch('https://us-central1-nexi-53897.cloudfunctions.net/removeBackgroundHttp', {
+            method: 'POST',
+            headers: {
+                'Accept': 'application/json',
+            },
+            body: formData
+        });
+        
+        const result = await response.json();
+        
+        if (result.success) {
+            await addImageToCanvasAfterBgRemoval(result.processedImage);
+            showToast('✅ Background remove ho gaya!', false);
+            return result.processedImage;
+        } else {
+            throw new Error(result.error || 'Invalid response');
         }
-    });
-});
+    } catch (error) {
+        console.error('Error:', error);
+        showToast('❌ Background removal failed: ' + error.message, true);
+        return null;
+    } finally {
+        showAiLoading(false);
+    }
+}
