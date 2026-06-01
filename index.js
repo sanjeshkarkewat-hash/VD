@@ -1,50 +1,79 @@
-async function removeBackgroundWithAI(file) {
-    if (!file) {
-        showToast('Koi image select karo', true);
-        return null;
+const functions = require('firebase-functions');
+const axios = require('axios');
+const FormData = require('form-data');
+const busboy = require('busboy');
+
+exports.removeBackgroundHttp = functions.https.onRequest(async (req, res) => {
+    // CORS headers
+    res.set('Access-Control-Allow-Origin', '*');
+    res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
+    res.set('Access-Control-Allow-Headers', 'Content-Type, Accept');
+    
+    if (req.method === 'OPTIONS') {
+        res.status(204).send('');
+        return;
     }
     
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('Image 5MB se chhoti honi chahiye', true);
-        return null;
+    if (req.method !== 'POST') {
+        res.status(405).json({ error: 'Method not allowed' });
+        return;
     }
-    
-    showAiLoading(true);
     
     try {
-        showToast('📸 Image compress ho rahi hai...', false);
-        const compressedImage = await compressImageForAI(file);
+        // Parse multipart form data
+        let imageBuffer = null;
         
-        showToast('🤖 AI background remove kar raha hai...', false);
-        
-        // 🔥 FIX: Proper headers with Content-Length
-        const formData = new FormData();
-        // Convert base64 to blob
-        const blob = await (await fetch(compressedImage)).blob();
-        formData.append('image', blob, 'image.jpg');
-        
-        const response = await fetch('https://us-central1-nexi-53897.cloudfunctions.net/removeBackgroundHttp', {
-            method: 'POST',
-            headers: {
-                'Accept': 'application/json',
-            },
-            body: formData
+        await new Promise((resolve, reject) => {
+            const bb = busboy({ headers: req.headers });
+            
+            bb.on('file', (name, file, info) => {
+                const chunks = [];
+                file.on('data', (data) => chunks.push(data));
+                file.on('end', () => {
+                    imageBuffer = Buffer.concat(chunks);
+                    resolve();
+                });
+            });
+            
+            bb.on('error', reject);
+            req.pipe(bb);
         });
         
-        const result = await response.json();
-        
-        if (result.success) {
-            await addImageToCanvasAfterBgRemoval(result.processedImage);
-            showToast('✅ Background remove ho gaya!', false);
-            return result.processedImage;
-        } else {
-            throw new Error(result.error || 'Invalid response');
+        if (!imageBuffer) {
+            res.status(400).json({ error: 'No image uploaded' });
+            return;
         }
+        
+        const formData = new FormData();
+        formData.append('image_file', imageBuffer, {
+            filename: 'upload.png',
+            contentType: 'image/png'
+        });
+        formData.append('size', 'auto');
+        formData.append('type', 'product');
+        
+        const apiKey = process.env.REMOVE_BG_API_KEY;
+        
+        const response = await axios({
+            method: 'post',
+            url: 'https://api.remove.bg/v1.0/removebg',
+            data: formData,
+            headers: {
+                ...formData.getHeaders(),
+                'X-Api-Key': apiKey
+            },
+            responseType: 'arraybuffer'
+        });
+        
+        const outputBase64 = Buffer.from(response.data).toString('base64');
+        
+        res.status(200).json({
+            success: true,
+            processedImage: `data:image/png;base64,${outputBase64}`
+        });
+        
     } catch (error) {
-        console.error('Error:', error);
-        showToast('❌ Background removal failed: ' + error.message, true);
-        return null;
-    } finally {
-        showAiLoading(false);
+        console.error('Error:', error.message);
+        res.status(500).json({ error: 'Background removal failed: ' + error.message });
     }
-}
+});
