@@ -7,7 +7,7 @@ exports.removeBackgroundHttp = functions.https.onRequest(async (req, res) => {
     // CORS headers
     res.set('Access-Control-Allow-Origin', '*');
     res.set('Access-Control-Allow-Methods', 'POST, OPTIONS');
-    res.set('Access-Control-Allow-Headers', 'Content-Type, Accept');
+    res.set('Access-Control-Allow-Headers', 'Content-Type');
     
     if (req.method === 'OPTIONS') {
         res.status(204).send('');
@@ -20,7 +20,6 @@ exports.removeBackgroundHttp = functions.https.onRequest(async (req, res) => {
     }
     
     try {
-        // Parse multipart form data
         let imageBuffer = null;
         
         await new Promise((resolve, reject) => {
@@ -62,7 +61,8 @@ exports.removeBackgroundHttp = functions.https.onRequest(async (req, res) => {
                 ...formData.getHeaders(),
                 'X-Api-Key': apiKey
             },
-            responseType: 'arraybuffer'
+            responseType: 'arraybuffer',
+            timeout: 30000
         });
         
         const outputBase64 = Buffer.from(response.data).toString('base64');
@@ -74,6 +74,9 @@ exports.removeBackgroundHttp = functions.https.onRequest(async (req, res) => {
         
     } catch (error) {
         console.error('Error:', error.message);
-        res.status(500).json({ error: 'Background removal failed: ' + error.message });
+        res.status(500).json({ 
+            success: false, 
+            error: error.message 
+        });
     }
 });
