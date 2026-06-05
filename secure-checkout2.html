@@ -193,7 +193,7 @@
     return null;
   }
 
-  // FIXED: loadCustomData - Now properly prioritizes based on URL parameter or latest selection
+  // FIXED: loadCustomData - Now properly prioritizes URL parameters first
   function loadCustomData() {
     isLoadingFromStorage = true;
     
@@ -203,19 +203,16 @@
     frontDesignImageURL = null;
     backDesignImageURL = null;
     
-    // STEP 1: Check if we have a timestamp to determine which data is fresher
-    const customTimestamp = localStorage.getItem('customCheckoutTimestamp');
-    const regularTimestamp = localStorage.getItem('regularCartTimestamp');
-    const customData = localStorage.getItem('customCheckoutData');
-    const regularCart = localStorage.getItem('vedantaCart');
+    // Hide custom preview by default
+    document.getElementById('customDesignPreviewContainer').style.display = 'none';
     
-    // STEP 2: Check URL parameters first (most reliable - comes directly from product/custom page)
+    // STEP 1: Check URL parameters first (highest priority - most reliable)
     const urlParams = new URLSearchParams(window.location.search);
     const orderType = urlParams.get('type');
-    const timestamp = urlParams.get('ts');
     
-    // STEP 3: If URL has type=custom, prioritize custom data
+    // STEP 2: If URL has type=custom, ALWAYS load custom data and clear regular cart
     if (orderType === 'custom') {
+      const customData = localStorage.getItem('customCheckoutData');
       if (customData) {
         try {
           const data = JSON.parse(customData);
@@ -245,15 +242,21 @@
             
             // Clean up regular cart data to prevent confusion
             localStorage.removeItem('vedantaCart');
+            localStorage.removeItem('regularCartTimestamp');
             isLoadingFromStorage = false;
             return;
           }
         } catch(e) { console.error("Error parsing custom data:", e); }
       }
+      // If custom data doesn't exist, load empty cart
+      cart = [];
+      isLoadingFromStorage = false;
+      return;
     }
     
-    // STEP 4: If URL has type=regular, prioritize regular cart
+    // STEP 3: If URL has type=regular, ALWAYS load regular cart and clear custom data
     if (orderType === 'regular') {
+      const regularCart = localStorage.getItem('vedantaCart');
       if (regularCart) {
         try {
           cart = JSON.parse(regularCart);
@@ -264,68 +267,77 @@
           });
           // Clean up custom data to prevent confusion
           localStorage.removeItem('customCheckoutData');
+          localStorage.removeItem('customCheckoutTimestamp');
           isLoadingFromStorage = false;
           return;
         } catch(e) { cart = []; }
       }
+      // If regular cart doesn't exist, load empty cart
+      cart = [];
+      isLoadingFromStorage = false;
+      return;
     }
     
-    // STEP 5: If no URL param, check timestamps to see which data is newer
-    if (!orderType) {
-      const customTime = parseInt(customTimestamp || '0');
-      const regularTime = parseInt(regularTimestamp || '0');
-      
-      // Custom data is newer OR regular data doesn't exist
-      if (customTime > regularTime && customData) {
-        try {
-          const data = JSON.parse(customData);
-          if (data && data.isCustomized === true) {
-            isCustomizedOrder = true;
-            frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
-            backDesignImageURL = data.backDesignImage || null;
-            
-            if (frontDesignImageURL || backDesignImageURL) {
-              document.getElementById('customDesignPreviewContainer').style.display = 'block';
-              if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
-              if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
-            }
-            
-            cart = [{
-              id: 'custom_' + Date.now(),
-              name: data.tshirtType || 'Custom T-Shirt',
-              price: data.price || 1699,
-              quantity: data.quantity || 1,
-              size: data.size || 'M',
-              selectedColor: data.selectedColor || 'Black',
-              printMethod: data.printMethod || 'transparent',
-              frontDesignImage: frontDesignImageURL,
-              backDesignImage: backDesignImageURL,
-              isCustomized: true
-            }];
-            isLoadingFromStorage = false;
-            return;
+    // STEP 4: No URL type parameter - fall back to timestamp-based logic
+    const customTimestamp = localStorage.getItem('customCheckoutTimestamp');
+    const regularTimestamp = localStorage.getItem('regularCartTimestamp');
+    const customData = localStorage.getItem('customCheckoutData');
+    const regularCart = localStorage.getItem('vedantaCart');
+    
+    const customTime = parseInt(customTimestamp || '0');
+    const regularTime = parseInt(regularTimestamp || '0');
+    
+    // Custom data is newer OR regular data doesn't exist
+    if (customTime > regularTime && customData) {
+      try {
+        const data = JSON.parse(customData);
+        if (data && data.isCustomized === true) {
+          isCustomizedOrder = true;
+          frontDesignImageURL = data.frontDesignImage || data.customDesignImage || null;
+          backDesignImageURL = data.backDesignImage || null;
+          
+          if (frontDesignImageURL || backDesignImageURL) {
+            document.getElementById('customDesignPreviewContainer').style.display = 'block';
+            if (frontDesignImageURL) document.getElementById('frontDesignPreview').src = frontDesignImageURL;
+            if (backDesignImageURL) document.getElementById('backDesignPreview').src = backDesignImageURL;
           }
-        } catch(e) { console.error("Error parsing custom data:", e); }
-      }
-      
-      // Regular data is newer OR custom data doesn't exist
-      if (regularTime >= customTime && regularCart) {
-        try {
-          cart = JSON.parse(regularCart);
-          cart.forEach(item => {
-            if (!item.isCustomized) {
-              item.printMethod = null;
-            }
-          });
-          // Clean up stale custom data
-          localStorage.removeItem('customCheckoutData');
+          
+          cart = [{
+            id: 'custom_' + Date.now(),
+            name: data.tshirtType || 'Custom T-Shirt',
+            price: data.price || 1699,
+            quantity: data.quantity || 1,
+            size: data.size || 'M',
+            selectedColor: data.selectedColor || 'Black',
+            printMethod: data.printMethod || 'transparent',
+            frontDesignImage: frontDesignImageURL,
+            backDesignImage: backDesignImageURL,
+            isCustomized: true
+          }];
           isLoadingFromStorage = false;
           return;
-        } catch(e) { cart = []; }
-      }
+        }
+      } catch(e) { console.error("Error parsing custom data:", e); }
     }
     
-    // STEP 6: Fallback - just try to load whatever exists (but don't mix them)
+    // Regular data is newer OR custom data doesn't exist
+    if (regularTime >= customTime && regularCart) {
+      try {
+        cart = JSON.parse(regularCart);
+        cart.forEach(item => {
+          if (!item.isCustomized) {
+            item.printMethod = null;
+          }
+        });
+        // Clean up stale custom data
+        localStorage.removeItem('customCheckoutData');
+        localStorage.removeItem('customCheckoutTimestamp');
+        isLoadingFromStorage = false;
+        return;
+      } catch(e) { cart = []; }
+    }
+    
+    // STEP 5: Fallback - try to load whatever exists
     if (cart.length === 0 && customData) {
       try {
         const data = JSON.parse(customData);
