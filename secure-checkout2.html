@@ -500,9 +500,184 @@
     }
   }
 
+  // IMPROVED: Enhanced address extraction from geocoding response
+  function extractDetailedAddressFromGeocode(geocodeResult) {
+    if (!geocodeResult || !geocodeResult[0]) {
+      return null;
+    }
+    
+    const result = geocodeResult[0];
+    const components = result.address_components;
+    const formattedAddress = result.formatted_address || '';
+    
+    // Initialize all address fields
+    let streetNumber = '';
+    let route = '';
+    let fullStreet = '';
+    let sublocalityLevel1 = ''; // Neighborhood/Area
+    let sublocalityLevel2 = ''; // Sub-area
+    let locality = ''; // City/Town
+    let administrativeAreaLevel2 = ''; // District
+    let administrativeAreaLevel1 = ''; // State
+    let country = '';
+    let postalCode = '';
+    let landmark = '';
+    let intersection = '';
+    let pointOfInterest = '';
+    
+    // Extract each component type
+    for (const comp of components) {
+      const types = comp.types;
+      const value = comp.long_name;
+      
+      if (types.includes('street_number')) {
+        streetNumber = value;
+      } else if (types.includes('route')) {
+        route = value;
+      } else if (types.includes('sublocality_level_1')) {
+        sublocalityLevel1 = value;
+      } else if (types.includes('sublocality_level_2')) {
+        sublocalityLevel2 = value;
+      } else if (types.includes('sublocality')) {
+        if (!sublocalityLevel1) sublocalityLevel1 = value;
+      } else if (types.includes('locality')) {
+        locality = value;
+      } else if (types.includes('administrative_area_level_2')) {
+        administrativeAreaLevel2 = value;
+      } else if (types.includes('administrative_area_level_1')) {
+        administrativeAreaLevel1 = value;
+      } else if (types.includes('country')) {
+        country = value;
+      } else if (types.includes('postal_code')) {
+        postalCode = value;
+      } else if (types.includes('intersection')) {
+        intersection = value;
+      } else if (types.includes('point_of_interest') || types.includes('establishment')) {
+        pointOfInterest = value;
+      }
+    }
+    
+    // Build full street address (house number + street name)
+    if (streetNumber && route) {
+      fullStreet = `${streetNumber}, ${route}`;
+    } else if (streetNumber) {
+      fullStreet = streetNumber;
+    } else if (route) {
+      fullStreet = route;
+    }
+    
+    // Determine best city value
+    let city = locality || sublocalityLevel1 || administrativeAreaLevel2 || '';
+    
+    // Determine best area/neighborhood
+    let area = sublocalityLevel1 || sublocalityLevel2 || '';
+    
+    // Determine best landmark (priority: point of interest > intersection > sublocality)
+    let bestLandmark = pointOfInterest || intersection || '';
+    if (!bestLandmark && area) {
+      bestLandmark = area;
+    }
+    
+    // Build complete address string for street field
+    let completeAddress = fullStreet;
+    if (area && area !== city && !completeAddress.includes(area)) {
+      completeAddress = completeAddress ? `${completeAddress}, ${area}` : area;
+    }
+    
+    // If we have a formatted address and our constructed address is empty, use formatted
+    if ((!completeAddress || completeAddress.trim() === '') && formattedAddress) {
+      // Extract just the first part before city/state if possible
+      const formattedParts = formattedAddress.split(',');
+      if (formattedParts.length >= 2) {
+        completeAddress = formattedParts[0].trim();
+      } else {
+        completeAddress = formattedAddress;
+      }
+    }
+    
+    // If still no street address, use the full formatted address
+    if (!completeAddress || completeAddress.trim() === '') {
+      completeAddress = formattedAddress;
+    }
+    
+    return {
+      street: completeAddress,
+      houseNumber: streetNumber,
+      streetName: route,
+      area: area,
+      city: city,
+      district: administrativeAreaLevel2,
+      state: administrativeAreaLevel1,
+      pincode: postalCode,
+      country: country,
+      landmark: bestLandmark,
+      formattedAddress: formattedAddress,
+      fullDetails: {
+        streetNumber, route, sublocalityLevel1, sublocalityLevel2, locality,
+        administrativeAreaLevel2, administrativeAreaLevel1, postalCode, country,
+        intersection, pointOfInterest
+      }
+    };
+  }
+
+  // IMPROVED: Fill address fields with enhanced data
+  function fillAddressFieldsFromGeocode(addressData) {
+    if (!addressData) return false;
+    
+    // Get the input elements
+    const streetInput = document.getElementById('newStreet');
+    const cityInput = document.getElementById('newCity');
+    const stateInput = document.getElementById('newState');
+    const pincodeInput = document.getElementById('newPincode');
+    const landmarkInput = document.getElementById('newLandmark');
+    
+    if (!streetInput || !cityInput || !stateInput || !pincodeInput) return false;
+    
+    // Fill street address (most complete address we have)
+    if (addressData.street && streetInput) {
+      streetInput.value = addressData.street;
+    }
+    
+    // Fill city
+    if (addressData.city && cityInput) {
+      cityInput.value = addressData.city;
+    }
+    
+    // Fill state
+    if (addressData.state && stateInput) {
+      stateInput.value = addressData.state;
+    }
+    
+    // Fill pincode
+    if (addressData.pincode && pincodeInput) {
+      pincodeInput.value = addressData.pincode;
+    }
+    
+    // Fill landmark if available
+    if (landmarkInput && addressData.landmark) {
+      landmarkInput.value = addressData.landmark;
+    } else if (landmarkInput && addressData.area) {
+      landmarkInput.value = addressData.area;
+    }
+    
+    // Show success message with details of what was filled
+    const filledFields = [];
+    if (addressData.street) filledFields.push('Street');
+    if (addressData.city) filledFields.push('City');
+    if (addressData.state) filledFields.push('State');
+    if (addressData.pincode) filledFields.push('Pincode');
+    if (addressData.landmark) filledFields.push('Landmark');
+    
+    if (filledFields.length > 0) {
+      showToast(`📍 Address filled: ${filledFields.join(', ')}`);
+    }
+    
+    return true;
+  }
+
   function showNewAddressForm() {
     const container = document.getElementById('addressSelectionArea');
-    container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
+    container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark" placeholder="Nearby landmark (optional)"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
     document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { const fullName=document.getElementById('newFullName').value; const street=document.getElementById('newStreet').value; const city=document.getElementById('newCity').value; const state=document.getElementById('newState').value; const pincode=document.getElementById('newPincode').value; const landmark=document.getElementById('newLandmark').value; if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; displaySelectedAddressCard(); showToast('Address saved'); });
     document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { selectedAddress=null; displayAddressSelection(); });
     document.getElementById('useLocationBtn')?.addEventListener('click', async () => {
@@ -523,28 +698,52 @@
       navigator.geolocation.getCurrentPosition(async (pos)=>{
         // Hide fetching toast
         showFetchingLocationToast(false);
-        btn.innerHTML = originalText;
-        btn.disabled = false;
-        btn.classList.remove('loading');
         
-        const geocoder=new google.maps.Geocoder();
-        geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{
-          if(res[0]){
-            const comps=res[0].address_components;
-            let st='', ct='', stt='', pin='';
-            comps.forEach(c=>{
-              if(c.types.includes('route')) st=c.long_name;
-              if(c.types.includes('locality')) ct=c.long_name;
-              if(c.types.includes('administrative_area_level_1')) stt=c.long_name;
-              if(c.types.includes('postal_code')) pin=c.long_name;
-            });
-            document.getElementById('newStreet').value=st;
-            document.getElementById('newCity').value=ct;
-            document.getElementById('newState').value=stt;
-            document.getElementById('newPincode').value=pin;
-            showToast('Location filled successfully');
+        const geocoder = new google.maps.Geocoder();
+        geocoder.geocode({ location: { lat: pos.coords.latitude, lng: pos.coords.longitude } }, async (results, status) => {
+          btn.innerHTML = originalText;
+          btn.disabled = false;
+          btn.classList.remove('loading');
+          
+          if (status === 'OK' && results && results[0]) {
+            // Use enhanced address extraction
+            const addressData = extractDetailedAddressFromGeocode(results);
+            if (addressData) {
+              fillAddressFieldsFromGeocode(addressData);
+              
+              // Log extracted data for debugging (optional)
+              console.log('Address extracted:', {
+                street: addressData.street,
+                area: addressData.area,
+                city: addressData.city,
+                district: addressData.district,
+                state: addressData.state,
+                pincode: addressData.pincode,
+                landmark: addressData.landmark,
+                formatted: addressData.formattedAddress
+              });
+            } else {
+              // Fallback to simple extraction
+              const comps = results[0].address_components;
+              let st = '', ct = '', stt = '', pin = '', lmark = '';
+              for (const c of comps) {
+                if (c.types.includes('route')) st = c.long_name;
+                if (c.types.includes('locality')) ct = c.long_name;
+                if (c.types.includes('administrative_area_level_1')) stt = c.long_name;
+                if (c.types.includes('postal_code')) pin = c.long_name;
+                if (c.types.includes('sublocality_level_1')) lmark = c.long_name;
+              }
+              document.getElementById('newStreet').value = st;
+              document.getElementById('newCity').value = ct;
+              document.getElementById('newState').value = stt;
+              document.getElementById('newPincode').value = pin;
+              if (lmark && document.getElementById('newLandmark')) {
+                document.getElementById('newLandmark').value = lmark;
+              }
+              showToast('Location filled (basic)');
+            }
           } else {
-            showToast('Could not get address', true);
+            showToast('Could not get address details', true);
           }
         });
       }, (err)=>{
@@ -589,22 +788,46 @@
     if (!currentSelectedLatLng) { showToast('Select location first', true); return; }
     showLoading(true);
     const geocoder = new google.maps.Geocoder();
-    geocoder.geocode({ location: currentSelectedLatLng }, (res) => {
-      if (res && res[0]) {
-        let street='', city='', state='', pincode='';
-        res[0].address_components.forEach(c=>{
-          if(c.types.includes('route')) street=c.long_name;
-          if(c.types.includes('locality')) city=c.long_name;
-          if(c.types.includes('administrative_area_level_1')) state=c.long_name;
-          if(c.types.includes('postal_code')) pincode=c.long_name;
-        });
-        document.getElementById('newStreet').value = street;
-        document.getElementById('newCity').value = city;
-        document.getElementById('newState').value = state;
-        document.getElementById('newPincode').value = pincode;
-        showToast('Address filled from map');
-      } else showToast('Could not get address', true);
+    geocoder.geocode({ location: currentSelectedLatLng }, (results, status) => {
       showLoading(false);
+      if (status === 'OK' && results && results[0]) {
+        // Use enhanced address extraction
+        const addressData = extractDetailedAddressFromGeocode(results);
+        if (addressData) {
+          fillAddressFieldsFromGeocode(addressData);
+          showToast('✅ Address filled from map with complete details');
+          
+          console.log('Map address extracted:', {
+            street: addressData.street,
+            area: addressData.area,
+            city: addressData.city,
+            district: addressData.district,
+            state: addressData.state,
+            pincode: addressData.pincode,
+            landmark: addressData.landmark
+          });
+        } else {
+          // Fallback extraction
+          let street='', city='', state='', pincode='', landmark='';
+          results[0].address_components.forEach(c=>{
+            if(c.types.includes('route')) street=c.long_name;
+            if(c.types.includes('locality')) city=c.long_name;
+            if(c.types.includes('administrative_area_level_1')) state=c.long_name;
+            if(c.types.includes('postal_code')) pincode=c.long_name;
+            if(c.types.includes('sublocality_level_1')) landmark=c.long_name;
+          });
+          document.getElementById('newStreet').value = street;
+          document.getElementById('newCity').value = city;
+          document.getElementById('newState').value = state;
+          document.getElementById('newPincode').value = pincode;
+          if (landmark && document.getElementById('newLandmark')) {
+            document.getElementById('newLandmark').value = landmark;
+          }
+          showToast('Address filled from map');
+        }
+      } else {
+        showToast('Could not get address details', true);
+      }
       document.getElementById('mapPickerModal').classList.remove('active');
     });
   }
