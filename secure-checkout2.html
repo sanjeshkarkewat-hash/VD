@@ -44,7 +44,10 @@
     .add-new-address-btn { width: 100%; background: rgba(212,175,55,0.15); border: 1px dashed rgba(212,175,55,0.5); padding: 14px; border-radius: 14px; color: #D4AF37; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; font-weight: 600; }
     .new-address-form { display: none; margin-top: 15px; padding: 15px; background: rgba(0,0,0,0.3); border-radius: 16px; }
     .new-address-form.show { display: block; }
-    .location-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; padding: 14px; border-radius: 14px; width: 100%; color: #050508; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; }
+    .location-btn { background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; padding: 14px; border-radius: 14px; width: 100%; color: #050508; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 10px; transition: all 0.2s ease; }
+    .location-btn.loading { opacity: 0.7; cursor: not-allowed; }
+    .location-btn.loading i.fa-spin { display: inline-block; }
+    .location-btn i.fa-spin { display: none; }
     .map-pin-btn { background: linear-gradient(135deg, #2196F3, #0b5e7e); color: white; }
     .action-buttons-row { display: flex; gap: 12px; margin-top: 15px; }
     .save-address-btn { background: #4CAF50 !important; color: white !important; margin-top: 0 !important; }
@@ -105,6 +108,9 @@
     .close-map-btn { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(212,175,55,0.3); padding: 14px; border-radius: 40px; font-weight: 700; color: #ccc; cursor: pointer; }
     .user-info-bar { background: rgba(212,175,55,0.1); border-radius: 14px; padding: 12px; margin-bottom: 16px; font-size: 12px; color: #D4AF37; }
     .design-preview-badge { display: inline-block; background: rgba(212,175,55,0.2); border-radius: 6px; padding: 2px 8px; font-size: 9px; margin-top: 5px; }
+    .location-fetching-toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(212,175,55,0.9); color: #050508; padding: 10px 20px; border-radius: 40px; font-weight: 600; font-size: 12px; z-index: 10001; display: none; align-items: center; gap: 8px; white-space: nowrap; }
+    .location-fetching-toast.show { display: flex; }
+    .location-fetching-toast i { animation: spin 1s linear infinite; }
   </style>
 </head>
 <body>
@@ -112,6 +118,7 @@
 <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Processing your order...</div></div>
 <div class="location-modal" id="locationModal"><div class="location-modal-content"><i class="fas fa-location-dot" style="font-size:50px; color:#FF9800;"></i><h3>Location Access Required</h3><p>Please enable location services to auto-fill your address</p><button class="location-btn" id="openSettingsBtn">Enable Location</button><button class="location-cancel-btn" id="closeLocationModalBtn" style="background:transparent; border:1px solid #D4AF37; margin-top:10px; padding:10px; border-radius:30px;">Cancel</button></div></div>
 <div class="map-picker-modal" id="mapPickerModal"><div class="map-picker-container"><div class="map-picker-header"><div><h3><i class="fas fa-map-pin"></i> Select Location</h3></div><i class="fas fa-times" id="closeMapModalBtn" style="font-size:22px; cursor:pointer;"></i></div><div class="map-picker-body" id="mapContainer"></div><div class="map-picker-footer"><button class="confirm-location-btn" id="confirmMapBtn">Confirm My Location</button><button class="close-map-btn" id="cancelMapBtn">Cancel</button></div></div></div>
+<div class="location-fetching-toast" id="locationFetchingToast"><i class="fas fa-circle-notch fa-spin"></i> Fetching your location...</div>
 
 <div class="checkout-container">
   <div class="checkout-header">
@@ -483,12 +490,76 @@
     document.getElementById('changeAddrBtn')?.addEventListener('click', () => { selectedAddress = null; displayAddressSelection(); });
   }
 
+  // Show fetching toast
+  function showFetchingLocationToast(show) {
+    const toast = document.getElementById('locationFetchingToast');
+    if (show) {
+      toast.classList.add('show');
+    } else {
+      toast.classList.remove('show');
+    }
+  }
+
   function showNewAddressForm() {
     const container = document.getElementById('addressSelectionArea');
     container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
     document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { const fullName=document.getElementById('newFullName').value; const street=document.getElementById('newStreet').value; const city=document.getElementById('newCity').value; const state=document.getElementById('newState').value; const pincode=document.getElementById('newPincode').value; const landmark=document.getElementById('newLandmark').value; if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; displaySelectedAddressCard(); showToast('Address saved'); });
     document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { selectedAddress=null; displayAddressSelection(); });
-    document.getElementById('useLocationBtn')?.addEventListener('click', () => { if(navigator.geolocation) navigator.geolocation.getCurrentPosition(async (pos)=>{ const geocoder=new google.maps.Geocoder(); geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{ if(res[0]){ const comps=res[0].address_components; let st='', ct='', stt='', pin=''; comps.forEach(c=>{ if(c.types.includes('route')) st=c.long_name; if(c.types.includes('locality')) ct=c.long_name; if(c.types.includes('administrative_area_level_1')) stt=c.long_name; if(c.types.includes('postal_code')) pin=c.long_name; }); document.getElementById('newStreet').value=st; document.getElementById('newCity').value=ct; document.getElementById('newState').value=stt; document.getElementById('newPincode').value=pin; showToast('Location filled'); } }); }, ()=>showToast('Location failed',true)); else showToast('Enable GPS',true); });
+    document.getElementById('useLocationBtn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('useLocationBtn');
+      if(!navigator.geolocation){
+        showToast('Geolocation not supported', true);
+        return;
+      }
+      // Show loading animation on button
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Fetching location...';
+      btn.disabled = true;
+      btn.classList.add('loading');
+      
+      // Show fetching toast
+      showFetchingLocationToast(true);
+      
+      navigator.geolocation.getCurrentPosition(async (pos)=>{
+        // Hide fetching toast
+        showFetchingLocationToast(false);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        
+        const geocoder=new google.maps.Geocoder();
+        geocoder.geocode({location:{lat:pos.coords.latitude,lng:pos.coords.longitude}},(res)=>{
+          if(res[0]){
+            const comps=res[0].address_components;
+            let st='', ct='', stt='', pin='';
+            comps.forEach(c=>{
+              if(c.types.includes('route')) st=c.long_name;
+              if(c.types.includes('locality')) ct=c.long_name;
+              if(c.types.includes('administrative_area_level_1')) stt=c.long_name;
+              if(c.types.includes('postal_code')) pin=c.long_name;
+            });
+            document.getElementById('newStreet').value=st;
+            document.getElementById('newCity').value=ct;
+            document.getElementById('newState').value=stt;
+            document.getElementById('newPincode').value=pin;
+            showToast('Location filled successfully');
+          } else {
+            showToast('Could not get address', true);
+          }
+        });
+      }, (err)=>{
+        showFetchingLocationToast(false);
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+        btn.classList.remove('loading');
+        if(err.code === 1){
+          document.getElementById('locationModal').classList.add('show');
+          showToast('Please enable location access', true);
+        } else {
+          showToast('Location failed: ' + err.message, true);
+        }
+      }, { enableHighAccuracy: true, timeout: 10000 });
+    });
     document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
   }
 
@@ -555,7 +626,7 @@
       ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
       frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
       backDesignImage: i.backDesignImage || backDesignImageURL, 
-      isCustomized: i.isCustomized === true || isCustomizedOrder,
+      isCustomized: i.isCustomized === true || isCustomOrder,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
     }));
     
