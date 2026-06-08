@@ -1950,6 +1950,20 @@ gtag('event', 'view_item');
     saveCart();
     showToast(combo ? `🎉 Combo Pack added!` : `🛍️ ${product.name} added!`);
     if (combo) selectedCombo = null;
+    // GA4 add_to_cart event
+    if (typeof gtag === 'function') {
+      gtag('event', 'add_to_cart', {
+        currency: 'INR',
+        value: finalPrice * qty,
+        items: [{
+          item_id: product.id,
+          item_name: product.name,
+          price: finalPrice,
+          quantity: qty,
+          item_category: product.category || 'Apparel'
+        }]
+      });
+    }
   }
   
   function addToCartWithSizeCheck(product, qty, color, combo) {
@@ -1973,6 +1987,21 @@ gtag('event', 'view_item');
     }
     const tempCart = [{ id: product.id, name: product.name, price: finalPrice, quantity: finalQty, size: size || 'Default', color: color || '', combo: comboInfo, isCombo: !!combo, comboMultiplier: comboMultiplier }];
     localStorage.setItem('vedantaCart', JSON.stringify(tempCart));
+    
+    // GA4 begin_checkout event
+    if (typeof gtag === 'function') {
+      gtag('event', 'begin_checkout', {
+        currency: 'INR',
+        value: finalPrice * finalQty,
+        items: [{
+          item_id: product.id,
+          item_name: product.name,
+          price: finalPrice,
+          quantity: finalQty,
+          item_category: product.category || 'Apparel'
+        }]
+      });
+    }
     
     const currentUser = JSON.parse(localStorage.getItem('vedantaUser'));
     if (currentUser && currentUser.uid) {
@@ -2211,7 +2240,7 @@ gtag('event', 'view_item');
       const headers = Object.keys(sizeGuideTable[0]);
       let sizeGuideHtml = `<table class="size-table"><thead><tr>`;
       headers.forEach(h => { sizeGuideHtml += `<th>${h.toUpperCase()}</th>`; });
-      sizeGuideHtml += `</tr></thead><tbody>`;
+      sizeGuideHtml += `<tr></thead><tbody>`;
       sizeGuideTable.forEach(row => {
         sizeGuideHtml += `<tr>`;
         headers.forEach(h => { sizeGuideHtml += `<td>${escapeHtml(row[h])}</td>`; });
