@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DTF Size Analyzer | VEDANTA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #050508;
+            color: #FFFFFF;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            padding: 20px 15px;
+            border-bottom: 1px solid rgba(212,175,55,0.2);
+        }
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 10px;
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .container {
+            max-width: 700px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+        .card {
+            background: rgba(15,15,22,0.92);
+            border-radius: 24px;
+            padding: 30px;
+            border: 1px solid rgba(212,175,55,0.15);
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #D4AF37;
+            margin-bottom: 8px;
+        }
+        .card-subtitle {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .upload-zone {
+            border: 2.5px dashed rgba(212,175,55,0.4);
+            border-radius: 20px;
+            padding: 50px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0,0,0,0.3);
+        }
+        .upload-zone:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.08);
+        }
+        .upload-zone i {
+            font-size: 56px;
+            color: #D4AF37;
+            margin-bottom: 15px;
+        }
+        .upload-zone p {
+            color: #aaa;
+            font-size: 16px;
+        }
+        .upload-zone .small {
+            color: #666;
+            font-size: 12px;
+            margin-top: 8px;
+        }
+        .upload-zone.dragover {
+            border-color: #FF8C00;
+            background: rgba(212,175,55,0.15);
+        }
+        #fileInput { display: none; }
+        
+        .size-selector {
+            margin-top: 20px;
+        }
+        .size-selector label {
+            display: block;
+            color: #D4AF37;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .size-selector select {
+            width: 100%;
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.3);
+            border-radius: 14px;
+            color: white;
+            font-size: 16px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .size-selector select:focus {
+            outline: none;
+            border-color: #D4AF37;
+        }
+        
+        .preview-area {
+            margin-top: 25px;
+            display: none;
+        }
+        .preview-area.show { display: block; }
+        .preview-area img {
+            width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        
+        .results-panel {
+            margin-top: 25px;
+            display: none;
+            background: rgba(0,0,0,0.4);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .results-panel.show { display: block; }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 15px;
+        }
+        .result-row:last-child { border-bottom: none; }
+        .result-label { color: #aaa; }
+        .result-value { color: #D4AF37; font-weight: 600; }
+        .result-value.green { color: #4CAF50; }
+        .result-big {
+            font-size: 28px;
+            font-weight: 800;
+            color: #D4AF37;
+            text-align: center;
+            padding: 15px 0;
+        }
+        
+        .price-display {
+            text-align: center;
+            margin-top: 20px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(255,140,0,0.08));
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.3);
+        }
+        .price-display .amount {
+            font-size: 36px;
+            font-weight: 800;
+            color: #D4AF37;
+        }
+        .price-display .label {
+            font-size: 14px;
+            color: #888;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 25px;
+        }
+        .btn-primary {
+            flex: 1;
+            padding: 14px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 40px;
+            color: #050508;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-primary:hover { transform: scale(1.02); }
+        .btn-secondary {
+            flex: 1;
+            padding: 14px;
+            background: rgba(212,175,55,0.15);
+            border: 1.5px solid #D4AF37;
+            border-radius: 40px;
+            color: #D4AF37;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-secondary:hover { background: rgba(212,175,55,0.25); }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 12px 24px;
+            border-radius: 40px;
+            font-weight: 600;
+            z-index: 10000;
+            display: none;
+            font-size: 14px;
+        }
+        .toast.show { display: block; animation: fade 2.5s ease; }
+        .toast.error { background: #F44336; color: white; }
+        @keyframes fade {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 30000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212,175,55,0.2);
+            border-top: 4px solid #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.9s linear infinite;
+            margin-bottom: 15px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-text { color: #D4AF37; font-size: 16px; }
+        
+        .note {
+            margin-top: 20px;
+            padding: 14px;
+            background: rgba(255,200,0,0.08);
+            border-radius: 12px;
+            border-left: 3px solid #D4AF37;
+            font-size: 13px;
+            color: #aaa;
+        }
+        .note strong { color: #D4AF37; }
+        
+        @media (max-width: 600px) {
+            .container { padding: 0 12px; margin: 15px auto; }
+            .card { padding: 20px; }
+            .card-title { font-size: 18px; }
+            .upload-zone { padding: 30px 15px; }
+            .upload-zone i { font-size: 40px; }
+            .result-big { font-size: 22px; }
+            .price-display .amount { font-size: 28px; }
+            .action-buttons { flex-direction: column; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <div class="logo">VEDANTA</div>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Studio</a>
+</div>
+
+<div class="container">
+    <div class="card">
+        <div class="card-title"><i class="fas fa-ruler-combined" style="color:#D4AF37;"></i> DTF Print Size Analyzer</div>
+        <div class="card-subtitle">Upload a photo of T-Shirt with design → Get exact print size &amp; price</div>
+
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="uploadZone">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click or drag &amp; drop</strong> your T-Shirt photo</p>
+            <p class="small">Supports JPG, PNG, WEBP • Max 5MB</p>
+            <input type="file" id="fileInput" accept="image/*">
+        </div>
+
+        <!-- Size Selector -->
+        <div class="size-selector">
+            <label for="tshirtSizeSelect"><i class="fas fa-tshirt"></i> Select T-Shirt Size (Real Garment Size)</label>
+            <select id="tshirtSizeSelect">
+                <option value="">-- Select Size --</option>
+                <option value="S">S (18″ × 26″)</option>
+                <option value="M">M (20″ × 27″)</option>
+                <option value="L">L (22″ × 28″)</option>
+                <option value="XL">XL (23″ × 29″)</option>
+                <option value="XXL">XXL (24″ × 30″)</option>
+                <option value="3XL">3XL (25″ × 31″)</option>
+            </select>
+        </div>
+
+        <!-- Preview -->
+        <div class="preview-area" id="previewArea">
+            <img id="previewImage" src="" alt="Uploaded T-Shirt">
+        </div>
+
+        <!-- Results -->
+        <div class="results-panel" id="resultsPanel">
+            <div class="result-big" id="dtfSizeDisplay">📐 0″ × 0″</div>
+            
+            <div class="result-row">
+                <span class="result-label">📏 Print Width</span>
+                <span class="result-value" id="resultWidth">--</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">📐 Print Height</span>
+                <span class="result-value" id="resultHeight">--</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">⬅️ Left Margin</span>
+                <span class="result-value" id="resultLeftMargin">--</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">⬆️ Top Margin</span>
+                <span class="result-value" id="resultTopMargin">--</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">📦 Print Category</span>
+                <span class="result-value green" id="resultCategory">--</span>
+            </div>
+
+            <div class="price-display">
+                <div class="label">💰 Estimated Final Price (Incl. All)</div>
+                <div class="amount" id="finalPrice">₹0</div>
+                <div style="font-size:12px; color:#666; margin-top:5px;">
+                    Base + DTF + Shipping + Packaging + Margin
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+                <button class="btn-primary" id="addToCartBtn"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+            </div>
+        </div>
+
+        <div class="note">
+            <i class="fas fa-info-circle" style="color:#D4AF37;"></i>
+            <strong>How it works:</strong> AI detects design area on T-Shirt → Calculates exact inches → 
+            Automatically determines DTF print size &amp; final price.
+        </div>
+    </div>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toastMsg"></div>
+
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">🔍 Analyzing T-Shirt Design...</div>
+</div>
+
+<script>
+// ============================================================
+// 1. SIZE CHART (Real Garment Inches)
+// ============================================================
+const GARMENT_SIZES = {
+    'S':  { width: 18, height: 26 },
+    'M':  { width: 20, height: 27 },
+    'L':  { width: 22, height: 28 },
+    'XL': { width: 23, height: 29 },
+    'XXL':{ width: 24, height: 30 },
+    '3XL':{ width: 25, height: 31 }
+};
+
+// ============================================================
+// 2. DOM ELEMENTS
+// ============================================================
+const uploadZone = document.getElementById('uploadZone');
+const fileInput = document.getElementById('fileInput');
+const previewArea = document.getElementById('previewArea');
+const previewImage = document.getElementById('previewImage');
+const resultsPanel = document.getElementById('resultsPanel');
+const tshirtSizeSelect = document.getElementById('tshirtSizeSelect');
+const toastMsg = document.getElementById('toastMsg');
+const loadingOverlay = document.getElementById('loadingOverlay');
+
+let uploadedImageDataURL = null;
+let analysisResult = null;
+
+// ============================================================
+// 3. TOAST FUNCTION
+// ============================================================
+function showToast(msg, isError = false) {
+    toastMsg.innerText = msg;
+    toastMsg.className = 'toast' + (isError ? ' error' : '');
+    toastMsg.classList.add('show');
+    clearTimeout(toastMsg._timer);
+    toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 3000);
+}
+
+// ============================================================
+// 4. LOADING
+// ============================================================
+function showLoading() { loadingOverlay.classList.add('active'); }
+function hideLoading() { loadingOverlay.classList.remove('active'); }
+
+// ============================================================
+// 5. CORE: DTF SIZE DETECTION (OpenCV-style logic)
+// ============================================================
+function detectDTFSize(imageDataURL, garmentSize) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            // Canvas पर image render करो
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            // Image Data लो
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // --- STEP 1: T-Shirt Body Detect (सबसे बड़ा क्षेत्र) ---
+            // Simple threshold: गहरे रंग (Design) vs हल्के (T-Shirt)
+            // मान लो T-Shirt हल्का है और Design गहरा
+            
+            let minX = w, minY = h, maxX = 0, maxY = 0;
+            let foundPixels = 0;
+            
+            // Design पिक्सल ढूंढो (जो सफेद/हल्के से अलग हैं)
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    const r = data[idx];
+                    const g = data[idx + 1];
+                    const b = data[idx + 2];
+                    
+                    // अगर पिक्सल हल्का नहीं है (सफेद नहीं) तो Design का हिस्सा मानो
+                    const brightness = (r + g + b) / 3;
+                    if (brightness < 220) {  // 220 से कम = Design (डार्क)
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                        foundPixels++;
+                    }
+                }
+            }
+            
+            // अगर Design नहीं मिला तो पूरी Image को Design मानो
+            if (foundPixels === 0 || maxX - minX < 10 || maxY - minY < 10) {
+                minX = 0; minY = 0; maxX = w; maxY = h;
+            }
+            
+            // --- STEP 2: Design का Pixel Size ---
+            const designWidthPx = maxX - minX;
+            const designHeightPx = maxY - minY;
+            const canvasWidthPx = w;
+            const canvasHeightPx = h;
+            
+            // --- STEP 3: Garment Size (इंच में) ---
+            const garmentW = garmentSize.width;
+            const garmentH = garmentSize.height;
+            
+            // --- STEP 4: DTF Size (इंच में) ---
+            let dtfWidth = (designWidthPx / canvasWidthPx) * garmentW;
+            let dtfHeight = (designHeightPx / canvasHeightPx) * garmentH;
+            
+            // --- STEP 5: Margins ---
+            const marginLeft = (garmentW - dtfWidth) / 2;
+            const marginTop = (garmentH - dtfHeight) / 2;
+            const marginRight = marginLeft;
+            const marginBottom = marginTop;
+            
+            // --- STEP 6: Print Category ---
+            let category = '';
+            const area = dtfWidth * dtfHeight;
+            if (dtfWidth > garmentW * 0.85 && dtfHeight > garmentH * 0.85) {
+                category = '🟢 Full Cover';
+            } else if (dtfWidth > garmentW * 0.5 || dtfHeight > garmentH * 0.5) {
+                category = '🟡 Half Cover / Custom';
+            } else if (dtfWidth < 5 && dtfHeight < 5) {
+                category = '🔵 Small (Pocket/Logo)';
+            } else if (Math.abs(dtfWidth - 8.27) < 1 && Math.abs(dtfHeight - 11.69) < 1) {
+                category = '📄 A4 Size';
+            } else {
+                category = '🟠 Custom Size';
+            }
+            
+            // --- STEP 7: Round to 1 decimal ---
+            dtfWidth = Math.round(dtfWidth * 10) / 10;
+            dtfHeight = Math.round(dtfHeight * 10) / 10;
+            
+            resolve({
+                dtfWidth,
+                dtfHeight,
+                marginLeft: Math.round(marginLeft * 10) / 10,
+                marginTop: Math.round(marginTop * 10) / 10,
+                marginRight: Math.round(marginRight * 10) / 10,
+                marginBottom: Math.round(marginBottom * 10) / 10,
+                category,
+                designWidthPx,
+                designHeightPx,
+                canvasWidthPx,
+                canvasHeightPx,
+                garmentW,
+                garmentH
+            });
+        };
+        img.src = imageDataURL;
+    });
+}
+
+// ============================================================
+// 6. PRICE CALCULATION
+// ============================================================
+function calculatePrice(dtfWidth, dtfHeight, basePrice = 699) {
+    const area = dtfWidth * dtfHeight;
+    
+    let dtfCost = 120; // Default A4
+    if (area > 350) dtfCost = 200;      // Full Cover
+    else if (area > 200) dtfCost = 160; // Large
+    else if (area > 100) dtfCost = 130; // Medium
+    else dtfCost = 100;                 // Small
+    
+    const shipping = 120;
+    const packaging = 50;
+    const margin = 199;
+    
+    const finalPrice = basePrice + dtfCost + shipping + packaging + margin;
+    return { finalPrice, dtfCost, shipping, packaging, margin, basePrice };
+}
+
+// ============================================================
+// 7. MAIN ANALYSIS FUNCTION
+// ============================================================
+async function analyzeTShirt() {
+    const sizeKey = tshirtSizeSelect.value;
+    if (!sizeKey) {
+        showToast('❌ Please select T-Shirt Size first!', true);
+        return;
+    }
+    if (!uploadedImageDataURL) {
+        showToast('❌ Please upload a T-Shirt photo first!', true);
+        return;
+    }
+    
+    const garmentSize = GARMENT_SIZES[sizeKey];
+    showLoading();
+    
+    try {
+        // AI Analysis (simulated with canvas)
+        const result = await detectDTFSize(uploadedImageDataURL, garmentSize);
+        analysisResult = result;
+        
+        // Display Results
+        document.getElementById('dtfSizeDisplay').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
+        document.getElementById('resultWidth').innerHTML = `${result.dtfWidth}″`;
+        document.getElementById('resultHeight').innerHTML = `${result.dtfHeight}″`;
+        document.getElementById('resultLeftMargin').innerHTML = `${result.marginLeft}″`;
+        document.getElementById('resultTopMargin').innerHTML = `${result.marginTop}″`;
+        document.getElementById('resultCategory').innerHTML = result.category;
+        
+        // Price Calculation
+        const basePrice = 699; // Default, आप Style के हिसाब से change कर सकते हैं
+        const priceData = calculatePrice(result.dtfWidth, result.dtfHeight, basePrice);
+        document.getElementById('finalPrice').innerHTML = `₹${priceData.finalPrice}`;
+        
+        // Show results
+        resultsPanel.classList.add('show');
+        showToast('✅ Analysis complete! Exact DTF size detected.');
+        
+    } catch (err) {
+        console.error(err);
+        showToast('❌ Analysis failed. Please try again.', true);
+    } finally {
+        hideLoading();
+    }
+}
+
+// ============================================================
+// 8. RESET
+// ============================================================
+function resetAll() {
+    uploadedImageDataURL = null;
+    analysisResult = null;
+    previewArea.classList.remove('show');
+    previewImage.src = '';
+    resultsPanel.classList.remove('show');
+    fileInput.value = '';
+    tshirtSizeSelect.value = '';
+    showToast('🔄 Reset complete');
+}
+
+// ============================================================
+// 9. ADD TO CART
+// ============================================================
+function addToCart() {
+    if (!analysisResult) {
+        showToast('❌ Please analyze the design first!', true);
+        return;
+    }
+    const sizeKey = tshirtSizeSelect.value;
+    if (!sizeKey) {
+        showToast('❌ Please select size!', true);
+        return;
+    }
+    
+    // Cart Data
+    const cartItem = {
+        id: Date.now(),
+        type: 'dtf_analyzer',
+        garmentSize: sizeKey,
+        dtfWidth: analysisResult.dtfWidth,
+        dtfHeight: analysisResult.dtfHeight,
+        category: analysisResult.category,
+        imageData: uploadedImageDataURL,
+        price: parseInt(document.getElementById('finalPrice').innerText.replace('₹', '')),
+        timestamp: Date.now()
+    };
+    
+    // LocalStorage में Save
+    let cart = JSON.parse(localStorage.getItem('vedanta_analyzer_cart') || '[]');
+    cart.push(cartItem);
+    localStorage.setItem('vedanta_analyzer_cart', JSON.stringify(cart));
+    
+    showToast('✅ Added to cart!');
+}
+
+// ============================================================
+// 10. EVENT LISTENERS
+// ============================================================
+
+// Upload Click
+uploadZone.addEventListener('click', () => fileInput.click());
+
+// Drag & Drop
+uploadZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZone.classList.add('dragover');
+});
+uploadZone.addEventListener('dragleave', () => {
+    uploadZone.classList.remove('dragover');
+});
+uploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        fileInput.files = e.dataTransfer.files;
+        handleFileUpload(e.dataTransfer.files[0]);
+    }
+});
+
+// File Input Change
+fileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+        handleFileUpload(e.target.files[0]);
+    }
+});
+
+function handleFileUpload(file) {
+    if (!file.type.startsWith('image/')) {
+        showToast('❌ Please upload an image file!', true);
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ File too large! Max 5MB.', true);
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        uploadedImageDataURL = e.target.result;
+        previewImage.src = uploadedImageDataURL;
+        previewArea.classList.add('show');
+        resultsPanel.classList.remove('show');
+        showToast('✅ Image uploaded! Select size and click Analyze.');
+    };
+    reader.readAsDataURL(file);
+}
+
+// Auto-Analyze on Size Change (अगर पहले से Image Uploaded है)
+tshirtSizeSelect.addEventListener('change', () => {
+    if (uploadedImageDataURL) {
+        analyzeTShirt();
+    }
+});
+
+// Buttons
+document.getElementById('resetBtn').addEventListener('click', resetAll);
+document.getElementById('addToCartBtn').addEventListener('click', addToCart);
+
+// ============================================================
+// 11. INIT - Clear any stale data
+// ============================================================
+localStorage.removeItem('vedanta_analyzer_cart');
+console.log('✅ DTF Size Analyzer ready!');
+</script>
+</body>
+</html>
