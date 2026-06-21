@@ -212,6 +212,64 @@ let frontData = null, frontFile = null, backData = null, backFile = null;
 let result = null, cart = [], user = null;
 
 // ============================================================
+// CLEAN LOCALSTORAGE (Fix Quota Error)
+// ============================================================
+function cleanLocalStorage() {
+    // Remove old/stale data
+    const keys = ['vedanta_dtf_cart', 'dtfDirectOrder', 'dtfCartCheckout', 'customCheckoutData'];
+    keys.forEach(key => {
+        try { localStorage.removeItem(key); } catch(e) {}
+    });
+    
+    // Check if there's any other large data
+    let totalSize = 0;
+    for (let i = 0; i < localStorage.length; i++) {
+        const key = localStorage.key(i);
+        const val = localStorage.getItem(key);
+        if (val) totalSize += val.length * 2; // approx bytes
+    }
+    
+    // If storage is more than 4MB, clear some old data
+    if (totalSize > 4 * 1024 * 1024) {
+        console.warn('Storage is large, clearing old data...');
+        // Keep only essential data
+        const keepKeys = ['vedantaUser', 'userPhone'];
+        const toRemove = [];
+        for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (!keepKeys.includes(key) && !key.startsWith('firebase:')) {
+                toRemove.push(key);
+            }
+        }
+        toRemove.forEach(key => {
+            try { localStorage.removeItem(key); } catch(e) {}
+        });
+    }
+}
+
+// ============================================================
+// COMPRESS IMAGE (Reduce size for storage)
+// ============================================================
+function compressImage(dataURL, maxWidth = 400, maxHeight = 400, quality = 0.5) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => {
+            let w = img.width, h = img.height;
+            if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
+            if (h > maxHeight) { w = w * maxHeight / h; h = maxHeight; }
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = w;
+            canvas.height = h;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, w, h);
+            resolve(canvas.toDataURL('image/jpeg', quality));
+        };
+        img.src = dataURL;
+    });
+}
+
+// ============================================================
 // TOAST
 // ============================================================
 function toast(msg, err = false) {
@@ -393,15 +451,70 @@ function resetAll() {
 }
 
 // ============================================================
-// CART
+// CART (With Compression)
 // ============================================================
 function saveCart() {
-    localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart));
-    updateCart();
+    try {
+        // Clean old data first
+        cleanLocalStorage();
+        
+        // Compress images before storing
+        const cartToSave = cart.map(async item => {
+            const newItem = { ...item };
+            if (item.front && item.front.startsWith('data:image')) {
+                newItem.front = await compressImage(item.front, 300, 300, 0.4);
+            }
+            if (item.back && item.back.startsWith('data:image')) {
+                newItem.back = await compressImage(item.back, 300, 300, 0.4);
+            }
+            return newItem;
+        });
+        
+        Promise.all(cartToSave).then(compressedCart => {
+            try {
+                localStorage.setItem('vedanta_dtf_cart', JSON.stringify(compressedCart));
+                updateCart();
+            } catch (e) {
+                // If still failing, try with even more compression
+                console.warn('Storage full, compressing more...');
+                const minimalCart = compressedCart.map(item => ({
+                    id: item.id,
+                    name: item.name,
+                    size: item.size,
+                    price: item.price,
+                    cat: item.cat,
+                    quantity: item.quantity,
+                    // Store only one image if both are too large
+                    front: item.front || null,
+                    back: item.back || null
+                }));
+                try {
+                    localStorage.setItem('vedanta_dtf_cart', JSON.stringify(minimalCart));
+                    updateCart();
+                } catch (e2) {
+                    toast('Cart full, please clear some items', true);
+                }
+            }
+        });
+    } catch (e) {
+        toast('Error saving cart', true);
+    }
 }
 
 function loadCart() {
-    try { const s = localStorage.getItem('vedanta_dtf_cart'); if (s) { cart = JSON.parse(s); updateCart(); } } catch {}
+    try {
+        const s = localStorage.getItem('vedanta_dtf_cart');
+        if (s) { 
+            cart = JSON.parse(s); 
+            // Convert any old format to new
+            cart = cart.map(item => ({
+                ...item,
+                front: item.front || item.imageData || null,
+                back: item.back || null
+            }));
+            updateCart(); 
+        }
+    } catch(e) { cart = []; }
 }
 
 function updateCart() {
@@ -452,13 +565,10 @@ function updateCart() {
 // 🔥 ADD TO CART (FIXED)
 // ============================================================
 function addToCart() {
-    // Check if user is logged in
     if (!user) {
         toast('Please login first', true);
         return;
     }
-    
-    // Check if analysis is done
     if (!result) {
         toast('Please analyze the design first', true);
         return;
@@ -480,13 +590,17 @@ function addToCart() {
     saveCart();
     toast('✅ Added to cart!');
     
-    // Background Firebase upload
+    // Background Firebase upload (without storing full images)
     if (frontFile && user) {
         const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
         ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
             if (url) { 
                 const idx = cart.findIndex(item => item.id === cartItem.id);
-                if (idx !== -1) { cart[idx].front = url; saveCart(); }
+                if (idx !== -1) { 
+                    cart[idx].front = url; 
+                    try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart)); } catch(e) {}
+                    updateCart(); 
+                }
             }
         }).catch(() => {});
     }
@@ -495,7 +609,11 @@ function addToCart() {
         ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
             if (url) {
                 const idx = cart.findIndex(item => item.id === cartItem.id);
-                if (idx !== -1) { cart[idx].back = url; saveCart(); }
+                if (idx !== -1) { 
+                    cart[idx].back = url; 
+                    try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart)); } catch(e) {}
+                    updateCart(); 
+                }
             }
         }).catch(() => {});
     }
@@ -505,13 +623,10 @@ function addToCart() {
 // 🔥 BUY NOW (FIXED)
 // ============================================================
 function buyNow() {
-    // Check if user is logged in
     if (!user) {
         toast('Please login first', true);
         return;
     }
-    
-    // Check if analysis is done
     if (!result) {
         toast('Please analyze the design first', true);
         return;
@@ -520,76 +635,99 @@ function buyNow() {
     const price = getPrice(result.size);
     const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 999);
     
-    // Save to localStorage for checkout page
-    const checkoutData = {
-        type: 'dtf_analyzer',
-        orderId: orderId,
-        size: result.size,
-        price: price,
-        dtfWidth: result.dw,
-        dtfHeight: result.dh,
-        category: result.cat,
-        frontImageUrl: frontData,
-        backImageUrl: backData,
-        timestamp: Date.now()
+    // Compress images before storing in localStorage
+    const compressAndStore = async () => {
+        let frontCompressed = frontData;
+        let backCompressed = backData;
+        
+        if (frontData && frontData.startsWith('data:image')) {
+            frontCompressed = await compressImage(frontData, 300, 300, 0.4);
+        }
+        if (backData && backData.startsWith('data:image')) {
+            backCompressed = await compressImage(backData, 300, 300, 0.4);
+        }
+        
+        const checkoutData = {
+            type: 'dtf_analyzer',
+            orderId: orderId,
+            size: result.size,
+            price: price,
+            dtfWidth: result.dw,
+            dtfHeight: result.dh,
+            category: result.cat,
+            frontImageUrl: frontCompressed,
+            backImageUrl: backCompressed,
+            timestamp: Date.now()
+        };
+        
+        try {
+            localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
+        } catch (e) {
+            // If still failing, store only essential data
+            const minimalData = {
+                type: 'dtf_analyzer',
+                orderId: orderId,
+                size: result.size,
+                price: price,
+                dtfWidth: result.dw,
+                dtfHeight: result.dh,
+                category: result.cat,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('dtfDirectOrder', JSON.stringify(minimalData));
+        }
+        
+        // Firebase order in background
+        const orderData = {
+            orderId: orderId,
+            type: 'dtf_analyzer',
+            size: result.size,
+            price: price,
+            dtfWidth: result.dw,
+            dtfHeight: result.dh,
+            category: result.cat,
+            frontImageUrl: frontData,
+            backImageUrl: backData,
+            itemName: 'DTF Analyzed T-Shirt',
+            quantity: 1,
+            totalAmount: price,
+            userId: user.uid,
+            customerPhone: user.phone || '',
+            customerName: user.name || 'Customer',
+            orderDate: new Date().toISOString(),
+            status: 'pending',
+            paymentStatus: 'pending',
+            source: 'dtf_analyzer',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        db.collection('orders').doc(orderId).set(orderData).catch(() => {});
+        
+        // Background uploads
+        if (frontFile) {
+            const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
+            ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
+                if (url) {
+                    db.collection('orders').doc(orderId).update({ frontImageUrl: url }).catch(() => {});
+                }
+            }).catch(() => {});
+        }
+        if (backFile) {
+            const ref = storage.ref().child(`dtf_analyzer/${user.uid}/back_${Date.now()}_${backFile.name}`);
+            ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
+                if (url) {
+                    db.collection('orders').doc(orderId).update({ backImageUrl: url }).catch(() => {});
+                }
+            }).catch(() => {});
+        }
+        
+        localStorage.removeItem('vedanta_dtf_cart');
+        toast('✅ Order created!');
+        setTimeout(() => {
+            window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
+        }, 400);
     };
-    localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
     
-    // Firebase order in background
-    const orderData = {
-        orderId: orderId,
-        type: 'dtf_analyzer',
-        size: result.size,
-        price: price,
-        dtfWidth: result.dw,
-        dtfHeight: result.dh,
-        category: result.cat,
-        frontImageUrl: frontData,
-        backImageUrl: backData,
-        itemName: 'DTF Analyzed T-Shirt',
-        quantity: 1,
-        totalAmount: price,
-        userId: user.uid,
-        customerPhone: user.phone || '',
-        customerName: user.name || 'Customer',
-        orderDate: new Date().toISOString(),
-        status: 'pending',
-        paymentStatus: 'pending',
-        source: 'dtf_analyzer',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    db.collection('orders').doc(orderId).set(orderData).catch(() => {});
-    
-    // Background uploads
-    if (frontFile) {
-        const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
-        ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) {
-                db.collection('orders').doc(orderId).update({ frontImageUrl: url }).catch(() => {});
-                const data = JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}');
-                data.frontImageUrl = url;
-                localStorage.setItem('dtfDirectOrder', JSON.stringify(data));
-            }
-        }).catch(() => {});
-    }
-    if (backFile) {
-        const ref = storage.ref().child(`dtf_analyzer/${user.uid}/back_${Date.now()}_${backFile.name}`);
-        ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) {
-                db.collection('orders').doc(orderId).update({ backImageUrl: url }).catch(() => {});
-                const data = JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}');
-                data.backImageUrl = url;
-                localStorage.setItem('dtfDirectOrder', JSON.stringify(data));
-            }
-        }).catch(() => {});
-    }
-    
-    // Clear cart and redirect
-    localStorage.removeItem('vedanta_dtf_cart');
-    toast('✅ Order created!');
-    setTimeout(() => {
-        window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
-    }, 400);
+    compressAndStore();
 }
 
 // ============================================================
@@ -632,8 +770,9 @@ $('cartCheckout').onclick = () => {
 // ============================================================
 // INIT
 // ============================================================
+cleanLocalStorage();
 loadCart();
-console.log('⚡ DTF Analyzer Ready');
+console.log('⚡ DTF Analyzer Ready - Storage Quota Fixed!');
 console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
