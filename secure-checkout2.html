@@ -22,7 +22,7 @@ gtag('event', 'begin_checkout');
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async&callback=Function.prototype"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBA21ygkn3STXFssBj8Ecr0f7zsYz_76JM&libraries=places,geocoding&loading=async"></script>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
     body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; overflow-x: hidden; min-height: 100vh; }
@@ -154,10 +154,7 @@ gtag('event', 'begin_checkout');
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
       <div id="customDesignPreviewContainer" style="display:none;" class="custom-design-preview-section">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
-        <div class="custom-preview-row">
-          <div class="custom-preview-item"><p>Front Design</p><img id="frontDesignPreview" style="max-height:120px;" alt="Front Design"></div>
-          <div class="custom-preview-item"><p>Back Design</p><img id="backDesignPreview" style="max-height:120px;" alt="Back Design"></div>
-        </div>
+        <div class="custom-preview-row"><div class="custom-preview-item"><p>Front Design</p><img id="frontDesignPreview" style="max-height:120px;"></div><div class="custom-preview-item"><p>Back Design</p><img id="backDesignPreview" style="max-height:120px;"></div></div>
       </div>
       <div id="orderItemsList"></div>
       <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 Free Express Shipping (3-5 days)</span></div></div>
@@ -181,15 +178,14 @@ gtag('event', 'begin_checkout');
   let isCustomizedOrder = false, frontDesignImageURL = null, backDesignImageURL = null;
   let productImagesCache = {};
   let mapInstance = null, mapMarker = null, currentSelectedLatLng = null;
+  
+  // Flag to track if we're currently loading
   let isLoadingFromStorage = false;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
   function escapeHtml(str) { if (!str) return ''; return String(str).replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m] || m)); }
 
-  // ============================================================
-  // FAST LOADING - PRODUCT IMAGES CACHE
-  // ============================================================
   async function fetchAllProductsImages() {
     try {
       const snapshot = await db.collection('products').get();
@@ -216,20 +212,23 @@ gtag('event', 'begin_checkout');
     return null;
   }
 
-  // ============================================================
-  // FAST LOADING - CUSTOM DATA LOAD
-  // ============================================================
   function loadCustomData() {
     isLoadingFromStorage = true;
+    
+    // RESET all variables first
     cart = [];
     isCustomizedOrder = false;
     frontDesignImageURL = null;
     backDesignImageURL = null;
+    
+    // Hide custom preview by default
     document.getElementById('customDesignPreviewContainer').style.display = 'none';
-
+    
+    // STEP 1: Check URL parameters first (highest priority - most reliable)
     const urlParams = new URLSearchParams(window.location.search);
     const orderType = urlParams.get('type');
-
+    
+    // STEP 2: If URL has type=custom, ALWAYS load custom data and clear regular cart
     if (orderType === 'custom') {
       const customData = localStorage.getItem('customCheckoutData');
       if (customData) {
@@ -259,6 +258,7 @@ gtag('event', 'begin_checkout');
               isCustomized: true
             }];
             
+            // Clean up regular cart data to prevent confusion
             localStorage.removeItem('vedantaCart');
             localStorage.removeItem('regularCartTimestamp');
             isLoadingFromStorage = false;
@@ -266,31 +266,37 @@ gtag('event', 'begin_checkout');
           }
         } catch(e) { console.error("Error parsing custom data:", e); }
       }
+      // If custom data doesn't exist, load empty cart
       cart = [];
       isLoadingFromStorage = false;
       return;
     }
-
+    
+    // STEP 3: If URL has type=regular, ALWAYS load regular cart and clear custom data
     if (orderType === 'regular') {
       const regularCart = localStorage.getItem('vedantaCart');
       if (regularCart) {
         try {
           cart = JSON.parse(regularCart);
           cart.forEach(item => {
-            if (!item.isCustomized) item.printMethod = null;
+            if (!item.isCustomized) {
+              item.printMethod = null;
+            }
           });
+          // Clean up custom data to prevent confusion
           localStorage.removeItem('customCheckoutData');
           localStorage.removeItem('customCheckoutTimestamp');
           isLoadingFromStorage = false;
           return;
         } catch(e) { cart = []; }
       }
+      // If regular cart doesn't exist, load empty cart
       cart = [];
       isLoadingFromStorage = false;
       return;
     }
-
-    // Fallback - check timestamps
+    
+    // STEP 4: No URL type parameter - fall back to timestamp-based logic
     const customTimestamp = localStorage.getItem('customCheckoutTimestamp');
     const regularTimestamp = localStorage.getItem('regularCartTimestamp');
     const customData = localStorage.getItem('customCheckoutData');
@@ -298,7 +304,8 @@ gtag('event', 'begin_checkout');
     
     const customTime = parseInt(customTimestamp || '0');
     const regularTime = parseInt(regularTimestamp || '0');
-
+    
+    // Custom data is newer OR regular data doesn't exist
     if (customTime > regularTime && customData) {
       try {
         const data = JSON.parse(customData);
@@ -328,23 +335,27 @@ gtag('event', 'begin_checkout');
           isLoadingFromStorage = false;
           return;
         }
-      } catch(e) {}
+      } catch(e) { console.error("Error parsing custom data:", e); }
     }
-
+    
+    // Regular data is newer OR custom data doesn't exist
     if (regularTime >= customTime && regularCart) {
       try {
         cart = JSON.parse(regularCart);
         cart.forEach(item => {
-          if (!item.isCustomized) item.printMethod = null;
+          if (!item.isCustomized) {
+            item.printMethod = null;
+          }
         });
+        // Clean up stale custom data
         localStorage.removeItem('customCheckoutData');
         localStorage.removeItem('customCheckoutTimestamp');
         isLoadingFromStorage = false;
         return;
       } catch(e) { cart = []; }
     }
-
-    // Final fallback
+    
+    // STEP 5: Fallback - try to load whatever exists
     if (cart.length === 0 && customData) {
       try {
         const data = JSON.parse(customData);
@@ -376,12 +387,14 @@ gtag('event', 'begin_checkout');
         }
       } catch(e) {}
     }
-
+    
     if (cart.length === 0 && regularCart) {
       try { 
         cart = JSON.parse(regularCart);
         cart.forEach(item => {
-          if (!item.isCustomized) item.printMethod = null;
+          if (!item.isCustomized) {
+            item.printMethod = null;
+          }
         });
       } catch(e) { cart = []; }
     }
@@ -389,21 +402,16 @@ gtag('event', 'begin_checkout');
     isLoadingFromStorage = false;
   }
 
-  // ============================================================
-  // FAST RENDER - ORDER ITEMS
-  // ============================================================
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
-    
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
       const infoDiv = document.createElement('div'); infoDiv.className = 'order-item-info';
       const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
-      
       let imageUrl = null, designBadge = '';
       const isCustom = item.isCustomized === true;
       
@@ -458,9 +466,6 @@ gtag('event', 'begin_checkout');
 
   function calculateDiscount() { updateTotalsDisplay(); }
 
-  // ============================================================
-  // ADDRESS FUNCTIONS
-  // ============================================================
   async function fetchSavedAddress() {
     if (!currentUser || !currentUser.phone) return null;
     try {
@@ -498,49 +503,100 @@ gtag('event', 'begin_checkout');
 
   function showFetchingLocationToast(show) {
     const toast = document.getElementById('locationFetchingToast');
-    if (show) toast.classList.add('show');
-    else toast.classList.remove('show');
+    if (show) {
+      toast.classList.add('show');
+    } else {
+      toast.classList.remove('show');
+    }
   }
 
   function extractDetailedAddressFromGeocode(geocodeResult) {
-    if (!geocodeResult || !geocodeResult[0]) return null;
+    if (!geocodeResult || !geocodeResult[0]) {
+      return null;
+    }
+    
     const result = geocodeResult[0];
     const components = result.address_components;
     const formattedAddress = result.formatted_address || '';
-    let streetNumber = '', route = '', fullStreet = '', sublocalityLevel1 = '', sublocalityLevel2 = '', locality = '', administrativeAreaLevel2 = '', administrativeAreaLevel1 = '', country = '', postalCode = '', landmark = '', intersection = '', pointOfInterest = '';
+    
+    let streetNumber = '';
+    let route = '';
+    let fullStreet = '';
+    let sublocalityLevel1 = '';
+    let sublocalityLevel2 = '';
+    let locality = '';
+    let administrativeAreaLevel2 = '';
+    let administrativeAreaLevel1 = '';
+    let country = '';
+    let postalCode = '';
+    let landmark = '';
+    let intersection = '';
+    let pointOfInterest = '';
+    
     for (const comp of components) {
       const types = comp.types;
       const value = comp.long_name;
-      if (types.includes('street_number')) streetNumber = value;
-      else if (types.includes('route')) route = value;
-      else if (types.includes('sublocality_level_1')) sublocalityLevel1 = value;
-      else if (types.includes('sublocality_level_2')) sublocalityLevel2 = value;
-      else if (types.includes('sublocality')) { if (!sublocalityLevel1) sublocalityLevel1 = value; }
-      else if (types.includes('locality')) locality = value;
-      else if (types.includes('administrative_area_level_2')) administrativeAreaLevel2 = value;
-      else if (types.includes('administrative_area_level_1')) administrativeAreaLevel1 = value;
-      else if (types.includes('country')) country = value;
-      else if (types.includes('postal_code')) postalCode = value;
-      else if (types.includes('intersection')) intersection = value;
-      else if (types.includes('point_of_interest') || types.includes('establishment')) pointOfInterest = value;
+      
+      if (types.includes('street_number')) {
+        streetNumber = value;
+      } else if (types.includes('route')) {
+        route = value;
+      } else if (types.includes('sublocality_level_1')) {
+        sublocalityLevel1 = value;
+      } else if (types.includes('sublocality_level_2')) {
+        sublocalityLevel2 = value;
+      } else if (types.includes('sublocality')) {
+        if (!sublocalityLevel1) sublocalityLevel1 = value;
+      } else if (types.includes('locality')) {
+        locality = value;
+      } else if (types.includes('administrative_area_level_2')) {
+        administrativeAreaLevel2 = value;
+      } else if (types.includes('administrative_area_level_1')) {
+        administrativeAreaLevel1 = value;
+      } else if (types.includes('country')) {
+        country = value;
+      } else if (types.includes('postal_code')) {
+        postalCode = value;
+      } else if (types.includes('intersection')) {
+        intersection = value;
+      } else if (types.includes('point_of_interest') || types.includes('establishment')) {
+        pointOfInterest = value;
+      }
     }
-    if (streetNumber && route) fullStreet = `${streetNumber}, ${route}`;
-    else if (streetNumber) fullStreet = streetNumber;
-    else if (route) fullStreet = route;
+    
+    if (streetNumber && route) {
+      fullStreet = `${streetNumber}, ${route}`;
+    } else if (streetNumber) {
+      fullStreet = streetNumber;
+    } else if (route) {
+      fullStreet = route;
+    }
+    
     let city = locality || sublocalityLevel1 || administrativeAreaLevel2 || '';
     let area = sublocalityLevel1 || sublocalityLevel2 || '';
     let bestLandmark = pointOfInterest || intersection || '';
-    if (!bestLandmark && area) bestLandmark = area;
+    if (!bestLandmark && area) {
+      bestLandmark = area;
+    }
+    
     let completeAddress = fullStreet;
     if (area && area !== city && !completeAddress.includes(area)) {
       completeAddress = completeAddress ? `${completeAddress}, ${area}` : area;
     }
+    
     if ((!completeAddress || completeAddress.trim() === '') && formattedAddress) {
       const formattedParts = formattedAddress.split(',');
-      if (formattedParts.length >= 2) completeAddress = formattedParts[0].trim();
-      else completeAddress = formattedAddress;
+      if (formattedParts.length >= 2) {
+        completeAddress = formattedParts[0].trim();
+      } else {
+        completeAddress = formattedAddress;
+      }
     }
-    if (!completeAddress || completeAddress.trim() === '') completeAddress = formattedAddress;
+    
+    if (!completeAddress || completeAddress.trim() === '') {
+      completeAddress = formattedAddress;
+    }
+    
     return {
       street: completeAddress,
       houseNumber: streetNumber,
@@ -552,55 +608,78 @@ gtag('event', 'begin_checkout');
       pincode: postalCode,
       country: country,
       landmark: bestLandmark,
-      formattedAddress: formattedAddress
+      formattedAddress: formattedAddress,
+      fullDetails: {
+        streetNumber, route, sublocalityLevel1, sublocalityLevel2, locality,
+        administrativeAreaLevel2, administrativeAreaLevel1, postalCode, country,
+        intersection, pointOfInterest
+      }
     };
   }
 
   function fillAddressFieldsFromGeocode(addressData) {
     if (!addressData) return false;
+    
     const streetInput = document.getElementById('newStreet');
     const cityInput = document.getElementById('newCity');
     const stateInput = document.getElementById('newState');
     const pincodeInput = document.getElementById('newPincode');
     const landmarkInput = document.getElementById('newLandmark');
+    
     if (!streetInput || !cityInput || !stateInput || !pincodeInput) return false;
-    if (addressData.street && streetInput) streetInput.value = addressData.street;
-    if (addressData.city && cityInput) cityInput.value = addressData.city;
-    if (addressData.state && stateInput) stateInput.value = addressData.state;
-    if (addressData.pincode && pincodeInput) pincodeInput.value = addressData.pincode;
-    if (landmarkInput && addressData.landmark) landmarkInput.value = addressData.landmark;
-    else if (landmarkInput && addressData.area) landmarkInput.value = addressData.area;
+    
+    if (addressData.street && streetInput) {
+      streetInput.value = addressData.street;
+    }
+    
+    if (addressData.city && cityInput) {
+      cityInput.value = addressData.city;
+    }
+    
+    if (addressData.state && stateInput) {
+      stateInput.value = addressData.state;
+    }
+    
+    if (addressData.pincode && pincodeInput) {
+      pincodeInput.value = addressData.pincode;
+    }
+    
+    if (landmarkInput && addressData.landmark) {
+      landmarkInput.value = addressData.landmark;
+    } else if (landmarkInput && addressData.area) {
+      landmarkInput.value = addressData.area;
+    }
+    
+    const filledFields = [];
+    if (addressData.street) filledFields.push('Street');
+    if (addressData.city) filledFields.push('City');
+    if (addressData.state) filledFields.push('State');
+    if (addressData.pincode) filledFields.push('Pincode');
+    if (addressData.landmark) filledFields.push('Landmark');
+    
+    if (filledFields.length > 0) {
+      showToast(`📍 Address filled: ${filledFields.join(', ')}`);
+    }
+    
     return true;
   }
 
   function showNewAddressForm() {
     const container = document.getElementById('addressSelectionArea');
     container.innerHTML = `<div class="new-address-form show"><div class="form-group"><label>Full Name</label><input type="text" id="newFullName" placeholder="Full name"></div><div class="form-group"><label>Street Address</label><input type="text" id="newStreet" placeholder="House/Street"></div><div class="form-row"><div class="form-group"><label>City</label><input type="text" id="newCity"></div><div class="form-group"><label>State</label><input type="text" id="newState"></div></div><div class="form-row"><div class="form-group"><label>Pincode</label><input type="text" id="newPincode" maxlength="6"></div><div class="form-group"><label>Landmark</label><input type="text" id="newLandmark" placeholder="Nearby landmark (optional)"></div></div><button class="location-btn" id="useLocationBtn"><i class="fas fa-location-dot"></i> Use My Current Location</button><button class="location-btn map-pin-btn" id="openMapPickerBtn"><i class="fas fa-map-marked-alt"></i> Pick on Map</button><div class="action-buttons-row"><button class="location-btn save-address-btn" id="saveNewAddrBtn">Save & Use</button><button class="location-btn cancel-address-btn" id="cancelNewAddrBtn">Cancel</button></div></div>`;
+    document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { const fullName=document.getElementById('newFullName').value; const street=document.getElementById('newStreet').value; const city=document.getElementById('newCity').value; const state=document.getElementById('newState').value; const pincode=document.getElementById('newPincode').value; const landmark=document.getElementById('newLandmark').value; if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; displaySelectedAddressCard(); showToast('Address saved'); });
+    document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { selectedAddress=null; displayAddressSelection(); });
     
-    document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { 
-      const fullName=document.getElementById('newFullName').value; 
-      const street=document.getElementById('newStreet').value; 
-      const city=document.getElementById('newCity').value; 
-      const state=document.getElementById('newState').value; 
-      const pincode=document.getElementById('newPincode').value; 
-      const landmark=document.getElementById('newLandmark').value; 
-      if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} 
-      selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; 
-      displaySelectedAddressCard(); 
-      showToast('Address saved'); 
-    });
-    
-    document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { 
-      selectedAddress=null; 
-      displayAddressSelection(); 
-    });
-    
-    // GPS Location - FAST with watchPosition
+    // IMPROVED GPS ACCURACY CODE - Using watchPosition for best accuracy
     document.getElementById('useLocationBtn')?.addEventListener('click', async () => {
       const btn = document.getElementById('useLocationBtn');
-      if(!navigator.geolocation){ showToast('Geolocation not supported', true); return; }
+      if(!navigator.geolocation){
+        showToast('Geolocation not supported', true);
+        return;
+      }
+      
       const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Getting GPS...';
+      btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Getting accurate GPS...';
       btn.disabled = true;
       btn.classList.add('loading');
       showFetchingLocationToast(true);
@@ -608,39 +687,82 @@ gtag('event', 'begin_checkout');
       let bestPosition = null;
       let watchId = null;
       let attempts = 0;
-      const maxAttempts = 8;
+      const maxAttempts = 10;
       let resolved = false;
       
+      // Function to process a position update
       const processPosition = (position) => {
         attempts++;
         const accuracy = position.coords.accuracy;
-        const toastEl = document.getElementById('locationFetchingToast');
-        if (toastEl) toastEl.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> GPS: ${Math.round(accuracy)}m`;
-        if (!bestPosition || accuracy < bestPosition.coords.accuracy) bestPosition = position;
         
-        const isGoodEnough = bestPosition.coords.accuracy <= 20;
+        // Update toast message with accuracy info
+        const toastEl = document.getElementById('locationFetchingToast');
+        if (toastEl) {
+          toastEl.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> GPS accuracy: ${Math.round(accuracy)}m`;
+        }
+        
+        // If this is the first position or better accuracy, store it
+        if (!bestPosition || accuracy < bestPosition.coords.accuracy) {
+          bestPosition = position;
+        }
+        
+        // Check if we have good enough accuracy (<= 15 meters) or max attempts reached
+        const isGoodEnough = bestPosition.coords.accuracy <= 15;
         const maxAttemptsReached = attempts >= maxAttempts;
-        const isImproving = bestPosition.coords.accuracy <= 35 && attempts >= 2;
+        const isImproving = bestPosition.coords.accuracy <= 30 && attempts >= 3;
         
         if ((isGoodEnough || maxAttemptsReached || isImproving) && !resolved) {
           resolved = true;
-          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
           
+          // Stop watching for more updates
+          if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+          }
+          
+          // Log final accuracy
+          console.log(`Final GPS accuracy: ${bestPosition.coords.accuracy} meters after ${attempts} attempts`);
+          
+          // Use the best position for reverse geocoding
           const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ location: { lat: bestPosition.coords.latitude, lng: bestPosition.coords.longitude } }, (results, status) => {
+          geocoder.geocode({ 
+            location: { 
+              lat: bestPosition.coords.latitude, 
+              lng: bestPosition.coords.longitude 
+            } 
+          }, (results, status) => {
             showFetchingLocationToast(false);
             btn.innerHTML = originalText;
             btn.disabled = false;
             btn.classList.remove('loading');
+            
             if (status === 'OK' && results && results[0]) {
               const addressData = extractDetailedAddressFromGeocode(results);
-              if (addressData && fillAddressFieldsFromGeocode(addressData)) {
-                showToast(`📍 Location set (${Math.round(bestPosition.coords.accuracy)}m)`);
+              if (addressData) {
+                fillAddressFieldsFromGeocode(addressData);
+                const accuracyMsg = bestPosition.coords.accuracy <= 15 ? ' (High accuracy GPS)' : ` (${Math.round(bestPosition.coords.accuracy)}m accuracy)`;
+                showToast(`📍 Location set${accuracyMsg}`);
               } else {
-                showToast('Location set', false);
+                // Fallback extraction
+                const comps = results[0].address_components;
+                let st = '', ct = '', stt = '', pin = '', lmark = '';
+                for (const c of comps) {
+                  if (c.types.includes('route')) st = c.long_name;
+                  if (c.types.includes('locality')) ct = c.long_name;
+                  if (c.types.includes('administrative_area_level_1')) stt = c.long_name;
+                  if (c.types.includes('postal_code')) pin = c.long_name;
+                  if (c.types.includes('sublocality_level_1')) lmark = c.long_name;
+                }
+                document.getElementById('newStreet').value = st;
+                document.getElementById('newCity').value = ct;
+                document.getElementById('newState').value = stt;
+                document.getElementById('newPincode').value = pin;
+                if (lmark && document.getElementById('newLandmark')) {
+                  document.getElementById('newLandmark').value = lmark;
+                }
+                showToast('Location set');
               }
             } else {
-              showToast('Could not get address', true);
+              showToast('Could not get address details', true);
             }
           });
         }
@@ -649,47 +771,87 @@ gtag('event', 'begin_checkout');
       const handleError = (err) => {
         if (resolved) return;
         resolved = true;
-        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+        
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+        }
+        
         showFetchingLocationToast(false);
         btn.innerHTML = originalText;
         btn.disabled = false;
         btn.classList.remove('loading');
-        if(err.code === 1) document.getElementById('locationModal').classList.add('show');
-        else showToast('Location failed: ' + err.message, true);
+        
+        if(err.code === 1){
+          document.getElementById('locationModal').classList.add('show');
+          showToast('Please enable location access', true);
+        } else if (err.code === 2) {
+          showToast('GPS signal weak, please try again in an open area', true);
+        } else {
+          showToast('Location failed: ' + err.message, true);
+        }
       };
       
-      navigator.geolocation.getCurrentPosition(processPosition, handleError, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
-      watchId = navigator.geolocation.watchPosition(processPosition, handleError, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+      // First get a quick estimate, then watch for better accuracy
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          processPosition(position);
+        },
+        handleError,
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      );
       
+      // Also watch for better updates with higher accuracy over time
+      watchId = navigator.geolocation.watchPosition(
+        processPosition,
+        handleError,
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      );
+      
+      // Timeout fallback after 20 seconds
       setTimeout(() => {
         if (!resolved && bestPosition) {
+          // Use the best position we got
           resolved = true;
-          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+          }
+          
           const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ location: { lat: bestPosition.coords.latitude, lng: bestPosition.coords.longitude } }, (results, status) => {
+          geocoder.geocode({ 
+            location: { 
+              lat: bestPosition.coords.latitude, 
+              lng: bestPosition.coords.longitude 
+            } 
+          }, (results, status) => {
             showFetchingLocationToast(false);
             btn.innerHTML = originalText;
             btn.disabled = false;
             btn.classList.remove('loading');
+            
             if (status === 'OK' && results && results[0]) {
               const addressData = extractDetailedAddressFromGeocode(results);
-              if (addressData && fillAddressFieldsFromGeocode(addressData)) {
-                showToast(`📍 Location set (${Math.round(bestPosition.coords.accuracy)}m)`);
+              if (addressData) {
+                fillAddressFieldsFromGeocode(addressData);
+                showToast(`📍 Location set (${Math.round(bestPosition.coords.accuracy)}m accuracy)`);
+              } else {
+                showToast('Location set with partial accuracy', true);
               }
             } else {
-              showToast('Location set with partial accuracy', true);
+              showToast('Could not get address details', true);
             }
           });
         } else if (!resolved && !bestPosition) {
           resolved = true;
-          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
+          if (watchId !== null) {
+            navigator.geolocation.clearWatch(watchId);
+          }
           showFetchingLocationToast(false);
           btn.innerHTML = originalText;
           btn.disabled = false;
           btn.classList.remove('loading');
-          showToast('GPS timeout - try again', true);
+          showToast('GPS timeout - please try again', true);
         }
-      }, 15000);
+      }, 20000);
     });
     
     document.getElementById('openMapPickerBtn')?.addEventListener('click', openMapPicker);
@@ -701,10 +863,12 @@ gtag('event', 'begin_checkout');
     const mapDiv = document.getElementById('mapContainer');
     mapDiv.innerHTML = '<div style="padding:20px;text-align:center;">Loading map...</div>';
     
+    // IMPROVED GPS FOR MAP PICKER - Get best accuracy before showing map
     if (navigator.geolocation) {
       let bestAccuracy = Infinity;
       let bestPosition = null;
       let watchId = null;
+      
       const updateMapPosition = (pos) => {
         const accuracy = pos.coords.accuracy;
         if (accuracy < bestAccuracy) {
@@ -720,9 +884,27 @@ gtag('event', 'begin_checkout');
           }
         }
       };
-      navigator.geolocation.getCurrentPosition(updateMapPosition, () => { initMap({ lat: 28.6139, lng: 77.2090 }); }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-      watchId = navigator.geolocation.watchPosition(updateMapPosition, () => {}, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
-      setTimeout(() => { if (watchId !== null) navigator.geolocation.clearWatch(watchId); if (!bestPosition) initMap({ lat: 28.6139, lng: 77.2090 }); }, 10000);
+      
+      navigator.geolocation.getCurrentPosition(
+        updateMapPosition,
+        () => { initMap({ lat: 28.6139, lng: 77.2090 }); },
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      );
+      
+      watchId = navigator.geolocation.watchPosition(
+        updateMapPosition,
+        () => {},
+        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
+      );
+      
+      setTimeout(() => {
+        if (watchId !== null) {
+          navigator.geolocation.clearWatch(watchId);
+        }
+        if (!bestPosition) {
+          initMap({ lat: 28.6139, lng: 77.2090 });
+        }
+      }, 15000);
     } else { 
       initMap({ lat: 28.6139, lng: 77.2090 }); 
     }
@@ -745,8 +927,19 @@ gtag('event', 'begin_checkout');
       showLoading(false);
       if (status === 'OK' && results && results[0]) {
         const addressData = extractDetailedAddressFromGeocode(results);
-        if (addressData && fillAddressFieldsFromGeocode(addressData)) {
-          showToast('✅ Address filled from map');
+        if (addressData) {
+          fillAddressFieldsFromGeocode(addressData);
+          showToast('✅ Address filled from map with complete details');
+          
+          console.log('Map address extracted:', {
+            street: addressData.street,
+            area: addressData.area,
+            city: addressData.city,
+            district: addressData.district,
+            state: addressData.state,
+            pincode: addressData.pincode,
+            landmark: addressData.landmark
+          });
         } else {
           let street='', city='', state='', pincode='', landmark='';
           results[0].address_components.forEach(c=>{
@@ -760,7 +953,9 @@ gtag('event', 'begin_checkout');
           document.getElementById('newCity').value = city;
           document.getElementById('newState').value = state;
           document.getElementById('newPincode').value = pincode;
-          if (landmark && document.getElementById('newLandmark')) document.getElementById('newLandmark').value = landmark;
+          if (landmark && document.getElementById('newLandmark')) {
+            document.getElementById('newLandmark').value = landmark;
+          }
           showToast('Address filled from map');
         }
       } else {
@@ -772,9 +967,6 @@ gtag('event', 'begin_checkout');
 
   function closeMapModal() { document.getElementById('mapPickerModal').classList.remove('active'); }
 
-  // ============================================================
-  // ORDER FUNCTIONS
-  // ============================================================
   async function saveOrder(paymentMethod, txnId = null) {
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
     
@@ -892,9 +1084,6 @@ gtag('event', 'begin_checkout');
     razor.open(); 
   }
 
-  // ============================================================
-  // INIT - FAST LOADING
-  // ============================================================
   async function init() {
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
     if (stored) currentUser = stored;
@@ -904,36 +1093,13 @@ gtag('event', 'begin_checkout');
       else { showToast('Please login', true); setTimeout(()=> window.location.href='profile.html',1500); return; }
     }
     document.getElementById('displayPhone').innerText = currentUser.phone || '';
-    
-    // Load everything in parallel for speed
-    await Promise.all([
-      fetchAllProductsImages(),
-      new Promise(res => setTimeout(res, 50)) // small delay for UI
-    ]);
-    
+    await fetchAllProductsImages();
     loadCustomData();
     await renderOrderItems();
     await displayAddressSelection();
     
-    // Payment options
-    document.getElementById('codOption')?.addEventListener('click', () => { 
-      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
-      document.getElementById('codOption').classList.add('selected'); 
-      selectedPaymentMethod='cod'; 
-      document.getElementById('codDetails').classList.add('show'); 
-      document.getElementById('razorpaySection').classList.remove('show'); 
-      calculateDiscount(); 
-    });
-    
-    document.getElementById('razorpayOption')?.addEventListener('click', () => { 
-      document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); 
-      document.getElementById('razorpayOption').classList.add('selected'); 
-      selectedPaymentMethod='razorpay'; 
-      document.getElementById('codDetails').classList.remove('show'); 
-      document.getElementById('razorpaySection').classList.add('show'); 
-      calculateDiscount(); 
-    });
-    
+    document.getElementById('codOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('codOption').classList.add('selected'); selectedPaymentMethod='cod'; document.getElementById('codDetails').classList.add('show'); document.getElementById('razorpaySection').classList.remove('show'); calculateDiscount(); });
+    document.getElementById('razorpayOption')?.addEventListener('click', () => { document.querySelectorAll('.payment-option').forEach(o=>o.classList.remove('selected')); document.getElementById('razorpayOption').classList.add('selected'); selectedPaymentMethod='razorpay'; document.getElementById('codDetails').classList.remove('show'); document.getElementById('razorpaySection').classList.add('show'); calculateDiscount(); });
     document.getElementById('placeOrderCodBtn')?.addEventListener('click', placeCOD);
     document.getElementById('payRazorpayBtn')?.addEventListener('click', razorpayPayment);
     document.getElementById('backToShopBtn')?.addEventListener('click', (e) => { e.preventDefault(); window.location.href='index.html'; });
@@ -943,11 +1109,8 @@ gtag('event', 'begin_checkout');
     document.getElementById('openSettingsBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     document.getElementById('closeLocationModalBtn')?.addEventListener('click', () => document.getElementById('locationModal').classList.remove('show'));
     
-    // Default payment
     document.getElementById('codOption').click();
   }
-  
-  // Start fast
   init();
 </script>
 </body>
