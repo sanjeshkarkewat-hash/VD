@@ -73,11 +73,6 @@
         .toast.show { display: block; animation: toastAnim 2.5s ease; }
         .toast.error { background: #F44336; color: white; }
         @keyframes toastAnim { 0% { opacity: 0; transform: translateX(-50%) translateY(15px); } 20% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(15px); } }
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 30000; display: none; justify-content: center; align-items: center; flex-direction: column; backdrop-filter: blur(4px); }
-        .loading-overlay.active { display: flex; }
-        .loading-spinner { width: 36px; height: 36px; border: 3px solid rgba(212,175,55,0.15); border-top: 3px solid #D4AF37; border-radius: 50%; animation: spin 0.6s linear infinite; margin-bottom: 8px; }
-        @keyframes spin { 100% { transform: rotate(360deg); } }
-        .loading-text { color: #D4AF37; font-size: 13px; font-weight: 500; }
         .note { margin-top: 14px; padding: 10px 14px; background: rgba(255,200,0,0.04); border-radius: 10px; border-left: 2px solid #D4AF37; font-size: 11px; color: #999; }
         .note strong { color: #D4AF37; }
         .cart-sidebar { position: fixed; top: 0; right: -100%; width: 85%; max-width: 340px; height: 100vh; background: rgba(8,8,15,0.98); backdrop-filter: blur(20px); border-left: 1px solid rgba(212,175,55,0.12); z-index: 15000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
@@ -177,12 +172,6 @@
 <!-- Toast -->
 <div class="toast" id="toastMsg"></div>
 
-<!-- Loading -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <div class="loading-text">Processing...</div>
-</div>
-
 <script>
 // ============================================================
 // FIREBASE
@@ -223,7 +212,7 @@ let frontData = null, frontFile = null, backData = null, backFile = null;
 let result = null, cart = [], user = null;
 
 // ============================================================
-// TOAST & LOADING
+// TOAST (FAST)
 // ============================================================
 function toast(msg, err = false) {
     toastMsg.innerText = msg;
@@ -232,12 +221,6 @@ function toast(msg, err = false) {
     clearTimeout(toastMsg._timer);
     toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 2000);
 }
-
-function showLoad(t = 'Processing...') {
-    document.querySelector('.loading-text').innerText = t;
-    document.getElementById('loadingOverlay').classList.add('active');
-}
-function hideLoad() { document.getElementById('loadingOverlay').classList.remove('active'); }
 
 // ============================================================
 // AUTH
@@ -270,19 +253,7 @@ $('logoutBtn').onclick = () => {
 };
 
 // ============================================================
-// FIREBASE UPLOAD (BACKGROUND - Non-blocking)
-// ============================================================
-async function uploadBackground(file, side) {
-    if (!user || !file) return null;
-    const ref = storage.ref().child(`dtf_analyzer/${user.uid}/${side}_${Date.now()}_${file.name}`);
-    try {
-        await ref.put(file);
-        return await ref.getDownloadURL();
-    } catch { return null; }
-}
-
-// ============================================================
-// DTF DETECTION (FAST - <50ms)
+// DTF DETECTION (FAST)
 // ============================================================
 function detectSize(dataURL, g) {
     return new Promise(resolve => {
@@ -331,7 +302,7 @@ function detectSize(dataURL, g) {
 }
 
 // ============================================================
-// ANALYZE (FAST)
+// ANALYZE
 // ============================================================
 async function analyze() {
     const size = sizeSelect.value;
@@ -422,7 +393,7 @@ function resetAll() {
 }
 
 // ============================================================
-// CART (FAST)
+// CART
 // ============================================================
 function saveCart() {
     localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart));
@@ -478,139 +449,115 @@ function updateCart() {
 }
 
 // ============================================================
-// 🔥 ADD TO CART (INSTANT - 0.5 sec)
+// 🔥 ADD TO CART (INSTANT)
 // ============================================================
-async function addToCart() {
+function addToCart() {
     if (!result || !user) {
         if (!user) toast('Login first', true);
         else if (!result) toast('Analyze first', true);
         return;
     }
     
-    addBtn.disabled = true;
-    
-    try {
-        const price = getPrice(result.size);
-        
-        // Add to cart IMMEDIATELY with local data URLs
-        cart.push({
-            id: Date.now() + Math.floor(Math.random() * 999),
-            name: 'DTF Analyzed T-Shirt',
-            size: result.size,
-            price: price,
-            cat: result.cat,
-            front: frontData,  // Local data URL - instant!
-            back: backData,    // Local data URL - instant!
-            quantity: 1
-        });
-        saveCart();
-        toast('✅ Added!');
-        
-        // Upload to Firebase in BACKGROUND (no waiting)
-        if (frontFile) {
-            uploadBackground(frontFile, 'front').then(url => {
-                if (url) { cart[cart.length-1].front = url; saveCart(); }
-            });
-        }
-        if (backFile) {
-            uploadBackground(backFile, 'back').then(url => {
-                if (url) { cart[cart.length-1].back = url; saveCart(); }
-            });
-        }
-        
-    } catch (e) { toast('Failed', true); }
-    addBtn.disabled = false;
+    const price = getPrice(result.size);
+    cart.push({
+        id: Date.now() + Math.floor(Math.random() * 999),
+        name: 'DTF Analyzed T-Shirt',
+        size: result.size,
+        price: price,
+        cat: result.cat,
+        front: frontData,
+        back: backData,
+        quantity: 1
+    });
+    saveCart();
+    toast('✅ Added to cart!');
 }
 
 // ============================================================
-// 🔥 BUY NOW (INSTANT - 0.5 sec)
+// 🔥 BUY NOW (INSTANT - NO LOADING, NO WAITING)
 // ============================================================
-async function buyNow() {
+function buyNow() {
     if (!result || !user) {
         if (!user) toast('Login first', true);
         else if (!result) toast('Analyze first', true);
         return;
     }
     
-    buyBtn.disabled = true;
-    showLoad('Creating order...');
+    const price = getPrice(result.size);
+    const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 999);
     
-    try {
-        const price = getPrice(result.size);
-        
-        // Create order in Firestore IMMEDIATELY
-        const oid = 'DTF' + Date.now() + Math.floor(Math.random() * 999);
-        const orderData = {
-            type: 'dtf_analyzer',
-            size: result.size,
-            price: price,
-            dtfWidth: result.dw,
-            dtfHeight: result.dh,
-            category: result.cat,
-            frontImageUrl: frontData,  // Local data URL - instant!
-            backImageUrl: backData,    // Local data URL - instant!
-            itemName: 'DTF Analyzed T-Shirt',
-            quantity: 1,
-            totalAmount: price,
-            orderId: oid,
-            userId: user.uid,
-            customerPhone: user.phone || '',
-            customerName: user.name || 'Customer',
-            orderDate: new Date().toISOString(),
-            status: 'pending',
-            paymentStatus: 'pending',
-            source: 'dtf_analyzer',
-            createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        await db.collection('orders').doc(oid).set(orderData);
-        
-        // Upload to Firebase in BACKGROUND
-        if (frontFile) {
-            uploadBackground(frontFile, 'front').then(url => {
-                if (url) {
-                    db.collection('orders').doc(oid).update({ frontImageUrl: url });
-                    localStorage.setItem('dtfDirectOrder', JSON.stringify({
-                        ...JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}'),
-                        frontImageUrl: url
-                    }));
-                }
-            });
-        }
-        if (backFile) {
-            uploadBackground(backFile, 'back').then(url => {
-                if (url) {
-                    db.collection('orders').doc(oid).update({ backImageUrl: url });
-                    localStorage.setItem('dtfDirectOrder', JSON.stringify({
-                        ...JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}'),
-                        backImageUrl: url
-                    }));
-                }
-            });
-        }
-        
-        localStorage.removeItem('vedanta_dtf_cart');
-        localStorage.setItem('dtfDirectOrder', JSON.stringify({
-            type: 'dtf_analyzer',
-            orderId: oid,
-            size: result.size,
-            price: price,
-            dtfWidth: result.dw,
-            dtfHeight: result.dh,
-            category: result.cat,
-            frontImageUrl: frontData,
-            backImageUrl: backData
-        }));
-        
-        hideLoad();
-        toast('✅ Order created!');
-        setTimeout(() => window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + oid, 500);
-        
-    } catch (e) {
-        hideLoad();
-        toast('Order failed: ' + e.message, true);
-        buyBtn.disabled = false;
+    // Save to localStorage for checkout page
+    const checkoutData = {
+        type: 'dtf_analyzer',
+        orderId: orderId,
+        size: result.size,
+        price: price,
+        dtfWidth: result.dw,
+        dtfHeight: result.dh,
+        category: result.cat,
+        frontImageUrl: frontData,
+        backImageUrl: backData,
+        timestamp: Date.now()
+    };
+    localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
+    
+    // Save order to Firebase in BACKGROUND (fire and forget)
+    const orderData = {
+        orderId: orderId,
+        type: 'dtf_analyzer',
+        size: result.size,
+        price: price,
+        dtfWidth: result.dw,
+        dtfHeight: result.dh,
+        category: result.cat,
+        frontImageUrl: frontData,
+        backImageUrl: backData,
+        itemName: 'DTF Analyzed T-Shirt',
+        quantity: 1,
+        totalAmount: price,
+        userId: user.uid,
+        customerPhone: user.phone || '',
+        customerName: user.name || 'Customer',
+        orderDate: new Date().toISOString(),
+        status: 'pending',
+        paymentStatus: 'pending',
+        source: 'dtf_analyzer',
+        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+    };
+    
+    // Fire and forget - no await, no waiting
+    db.collection('orders').doc(orderId).set(orderData).catch(() => {});
+    
+    // Upload images in background
+    if (frontFile) {
+        const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
+        ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
+            if (url) {
+                db.collection('orders').doc(orderId).update({ frontImageUrl: url }).catch(() => {});
+                const data = JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}');
+                data.frontImageUrl = url;
+                localStorage.setItem('dtfDirectOrder', JSON.stringify(data));
+            }
+        }).catch(() => {});
     }
+    if (backFile) {
+        const ref = storage.ref().child(`dtf_analyzer/${user.uid}/back_${Date.now()}_${backFile.name}`);
+        ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
+            if (url) {
+                db.collection('orders').doc(orderId).update({ backImageUrl: url }).catch(() => {});
+                const data = JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}');
+                data.backImageUrl = url;
+                localStorage.setItem('dtfDirectOrder', JSON.stringify(data));
+            }
+        }).catch(() => {});
+    }
+    
+    // Clear cart and redirect IMMEDIATELY
+    localStorage.removeItem('vedanta_dtf_cart');
+    toast('✅ Order created!');
+    setTimeout(() => {
+        window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
+    }, 300);
 }
 
 // ============================================================
@@ -654,7 +601,7 @@ $('cartCheckout').onclick = () => {
 // INIT
 // ============================================================
 loadCart();
-console.log('⚡ DTF Analyzer Ready!');
+console.log('⚡ DTF Analyzer Ready - Instant Buy Now!');
 console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
