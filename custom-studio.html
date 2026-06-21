@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
     <title>DTF Size Analyzer | VEDANTA</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -20,290 +20,341 @@
         }
         .header {
             text-align: center;
-            padding: 20px 15px;
-            border-bottom: 1px solid rgba(212,175,55,0.2);
+            padding: 16px 15px;
+            border-bottom: 1px solid rgba(212,175,55,0.15);
             position: relative;
+            background: rgba(5,5,8,0.95);
+            backdrop-filter: blur(10px);
         }
         .logo {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
             background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            letter-spacing: 1px;
         }
         .back-link {
             display: inline-block;
-            margin-top: 10px;
+            margin-top: 6px;
             color: #D4AF37;
             text-decoration: none;
-            font-size: 14px;
+            font-size: 13px;
+            opacity: 0.8;
+            transition: 0.3s;
         }
+        .back-link:hover { opacity: 1; }
         .cart-icon-header {
             position: absolute;
             right: 15px;
-            top: 18px;
+            top: 14px;
             cursor: pointer;
-            background: rgba(212,175,55,0.15);
-            padding: 8px 14px;
+            background: rgba(212,175,55,0.12);
+            padding: 6px 14px;
             border-radius: 40px;
-            border: 1px solid rgba(212,175,55,0.4);
+            border: 1px solid rgba(212,175,55,0.3);
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 13px;
+            font-size: 12px;
+            transition: 0.3s;
         }
+        .cart-icon-header:hover { background: rgba(212,175,55,0.2); }
         .cart-count {
             background: #D4AF37;
             color: #050508;
             border-radius: 30px;
-            padding: 2px 8px;
-            font-size: 12px;
+            padding: 1px 8px;
+            font-size: 11px;
             font-weight: bold;
         }
         .container {
-            max-width: 700px;
-            margin: 30px auto;
-            padding: 0 20px;
+            max-width: 720px;
+            margin: 20px auto;
+            padding: 0 16px;
         }
         .card {
             background: rgba(15,15,22,0.92);
             border-radius: 24px;
-            padding: 30px;
-            border: 1px solid rgba(212,175,55,0.15);
+            padding: 28px;
+            border: 1px solid rgba(212,175,55,0.1);
+            backdrop-filter: blur(10px);
         }
         .card-title {
             font-size: 22px;
             font-weight: 700;
             color: #D4AF37;
-            margin-bottom: 8px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
         .card-subtitle {
             color: #888;
-            font-size: 14px;
-            margin-bottom: 25px;
+            font-size: 13px;
+            margin-bottom: 22px;
+            padding-left: 2px;
         }
         
         /* ====== DUAL UPLOAD ZONES ====== */
         .upload-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 15px;
+            gap: 14px;
         }
         .upload-zone {
-            border: 2.5px dashed rgba(212,175,55,0.4);
-            border-radius: 20px;
-            padding: 30px 15px;
+            border: 2px dashed rgba(212,175,55,0.3);
+            border-radius: 18px;
+            padding: 24px 12px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(0,0,0,0.3);
+            background: rgba(0,0,0,0.25);
             position: relative;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         .upload-zone:hover {
             border-color: #D4AF37;
-            background: rgba(212,175,55,0.08);
+            background: rgba(212,175,55,0.06);
         }
         .upload-zone.uploaded {
             border-color: #4CAF50;
-            background: rgba(76,175,80,0.08);
+            background: rgba(76,175,80,0.06);
         }
         .upload-zone i {
-            font-size: 36px;
+            font-size: 32px;
             color: #D4AF37;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
+            opacity: 0.7;
         }
         .upload-zone p {
             color: #aaa;
             font-size: 13px;
+            font-weight: 500;
         }
         .upload-zone .small {
             color: #666;
             font-size: 11px;
-            margin-top: 5px;
+            margin-top: 2px;
         }
         .upload-zone .upload-label {
             display: inline-block;
-            background: rgba(212,175,55,0.2);
+            background: rgba(212,175,55,0.15);
             padding: 2px 12px;
             border-radius: 20px;
-            font-size: 10px;
+            font-size: 9px;
             color: #D4AF37;
-            margin-top: 5px;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            font-weight: 600;
         }
         .upload-zone.dragover {
             border-color: #FF8C00;
-            background: rgba(212,175,55,0.15);
+            background: rgba(212,175,55,0.12);
         }
         .upload-zone input[type="file"] { display: none; }
         .upload-zone .preview-thumb {
             max-width: 100%;
-            max-height: 80px;
+            max-height: 70px;
             border-radius: 10px;
-            margin-top: 8px;
-            border: 1px solid rgba(212,175,55,0.2);
+            margin-top: 6px;
+            border: 1px solid rgba(212,175,55,0.15);
+            object-fit: contain;
         }
         .upload-zone .remove-img {
             position: absolute;
-            top: 8px;
-            right: 12px;
-            background: rgba(200,50,50,0.8);
+            top: 6px;
+            right: 10px;
+            background: rgba(200,50,50,0.85);
             border: none;
             color: white;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 22px;
+            height: 22px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 11px;
+            display: none;
+            transition: 0.2s;
+            line-height: 22px;
+            text-align: center;
+        }
+        .upload-zone .remove-img:hover { transform: scale(1.1); }
+        .upload-zone.uploaded .remove-img { display: block; }
+        .upload-zone .status-text {
+            font-size: 10px;
+            color: #4CAF50;
+            margin-top: 4px;
             display: none;
         }
-        .upload-zone.uploaded .remove-img {
-            display: block;
-        }
+        .upload-zone.uploaded .status-text { display: block; }
         
         .size-selector {
-            margin-top: 20px;
+            margin-top: 18px;
         }
         .size-selector label {
             display: block;
             color: #D4AF37;
             font-weight: 600;
-            margin-bottom: 8px;
-            font-size: 14px;
+            margin-bottom: 6px;
+            font-size: 13px;
         }
         .size-selector select {
             width: 100%;
-            padding: 12px 16px;
+            padding: 11px 16px;
             background: rgba(0,0,0,0.5);
-            border: 1px solid rgba(212,175,55,0.3);
+            border: 1px solid rgba(212,175,55,0.25);
             border-radius: 14px;
             color: white;
-            font-size: 16px;
+            font-size: 15px;
             font-family: 'Space Grotesk', sans-serif;
+            appearance: none;
+            cursor: pointer;
+            transition: 0.2s;
         }
         .size-selector select:focus {
             outline: none;
             border-color: #D4AF37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.05);
         }
+        .size-selector select option { background: #1a1a2e; }
         
         .preview-area {
-            margin-top: 25px;
+            margin-top: 20px;
             display: none;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 16px;
         }
         .preview-area.show { display: block; }
-        .preview-area img {
+        .preview-area .preview-grid {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .preview-area .preview-item {
+            flex: 1;
+            min-width: 140px;
+            max-width: 280px;
+            text-align: center;
+        }
+        .preview-area .preview-item p {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .preview-area .preview-item img {
             width: 100%;
-            max-height: 400px;
+            max-height: 150px;
             object-fit: contain;
-            border-radius: 16px;
-            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 12px;
+            border: 1px solid rgba(212,175,55,0.12);
+            background: rgba(0,0,0,0.3);
         }
         
         .results-panel {
-            margin-top: 25px;
+            margin-top: 22px;
             display: none;
-            background: rgba(0,0,0,0.4);
-            border-radius: 16px;
+            background: rgba(0,0,0,0.35);
+            border-radius: 18px;
             padding: 20px;
-            border: 1px solid rgba(212,175,55,0.2);
+            border: 1px solid rgba(212,175,55,0.12);
+            animation: fadeIn 0.4s ease;
         }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .results-panel.show { display: block; }
         .result-row {
             display: flex;
             justify-content: space-between;
-            padding: 10px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 15px;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
         }
         .result-row:last-child { border-bottom: none; }
-        .result-label { color: #aaa; }
+        .result-label { color: #999; }
         .result-value { color: #D4AF37; font-weight: 600; }
         .result-value.green { color: #4CAF50; }
         .result-big {
-            font-size: 28px;
+            font-size: 26px;
             font-weight: 800;
             color: #D4AF37;
             text-align: center;
-            padding: 15px 0;
+            padding: 12px 0;
+            letter-spacing: 0.5px;
         }
         
         .price-display {
             text-align: center;
-            margin-top: 20px;
-            padding: 20px;
-            background: linear-gradient(135deg, rgba(212,175,55,0.15), rgba(255,140,0,0.08));
+            margin-top: 16px;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(255,140,0,0.06));
             border-radius: 16px;
-            border: 1px solid rgba(212,175,55,0.3);
+            border: 1px solid rgba(212,175,55,0.15);
         }
         .price-display .amount {
-            font-size: 36px;
+            font-size: 34px;
             font-weight: 800;
             color: #D4AF37;
+            letter-spacing: 0.5px;
         }
         .price-display .label {
-            font-size: 14px;
+            font-size: 13px;
             color: #888;
         }
         .price-display .size-info {
-            font-size: 13px;
-            color: #aaa;
-            margin-top: 5px;
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
         }
         
         .action-buttons {
             display: flex;
-            gap: 12px;
-            margin-top: 25px;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            flex: 1;
+            padding: 13px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
         }
         .btn-primary {
-            flex: 1;
-            padding: 14px;
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            border-radius: 40px;
             color: #050508;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
         }
-        .btn-primary:hover { transform: scale(1.02); }
-        .btn-primary:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-primary:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(212,175,55,0.2); }
         .btn-secondary {
-            flex: 1;
-            padding: 14px;
-            background: rgba(212,175,55,0.15);
-            border: 1.5px solid #D4AF37;
-            border-radius: 40px;
+            background: rgba(212,175,55,0.12);
+            border: 1.5px solid rgba(212,175,55,0.3);
             color: #D4AF37;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
         }
-        .btn-secondary:hover { background: rgba(212,175,55,0.25); }
+        .btn-secondary:hover:not(:disabled) { background: rgba(212,175,55,0.2); }
         .btn-buy {
-            flex: 1;
-            padding: 14px;
             background: linear-gradient(135deg, #FF4500, #FF8C00);
-            border: none;
-            border-radius: 40px;
             color: white;
-            font-weight: 700;
-            font-size: 16px;
-            cursor: pointer;
-            transition: 0.3s;
         }
-        .btn-buy:hover { transform: scale(1.02); }
-        .btn-buy:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .btn-buy:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(255,69,0,0.2); }
         
         .toast {
             position: fixed;
@@ -312,20 +363,21 @@
             transform: translateX(-50%);
             background: #D4AF37;
             color: #050508;
-            padding: 12px 24px;
+            padding: 10px 22px;
             border-radius: 40px;
             font-weight: 600;
             z-index: 10000;
             display: none;
-            font-size: 14px;
+            font-size: 13px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
         }
-        .toast.show { display: block; animation: fade 2.5s ease; }
+        .toast.show { display: block; animation: toastAnim 2.8s ease; }
         .toast.error { background: #F44336; color: white; }
-        @keyframes fade {
-            0% { opacity: 0; transform: translateX(-50%) translateY(20px); }
-            15% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            85% { opacity: 1; transform: translateX(-50%) translateY(0); }
-            100% { opacity: 0; transform: translateX(-50%) translateY(20px); }
+        @keyframes toastAnim {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
         }
         
         .loading-overlay {
@@ -334,34 +386,35 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.92);
+            background: rgba(0,0,0,0.88);
             z-index: 30000;
             display: none;
             justify-content: center;
             align-items: center;
             flex-direction: column;
+            backdrop-filter: blur(8px);
         }
         .loading-overlay.active { display: flex; }
         .loading-spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid rgba(212,175,55,0.2);
-            border-top: 4px solid #D4AF37;
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(212,175,55,0.15);
+            border-top: 3px solid #D4AF37;
             border-radius: 50%;
-            animation: spin 0.9s linear infinite;
-            margin-bottom: 15px;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
         }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-        .loading-text { color: #D4AF37; font-size: 16px; }
+        .loading-text { color: #D4AF37; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; }
         
         .note {
-            margin-top: 20px;
-            padding: 14px;
-            background: rgba(255,200,0,0.08);
+            margin-top: 18px;
+            padding: 12px 16px;
+            background: rgba(255,200,0,0.05);
             border-radius: 12px;
             border-left: 3px solid #D4AF37;
-            font-size: 13px;
-            color: #aaa;
+            font-size: 12px;
+            color: #999;
         }
         .note strong { color: #D4AF37; }
 
@@ -369,70 +422,84 @@
             position: fixed;
             top: 0;
             right: -100%;
-            width: 85%;
+            width: 88%;
             max-width: 360px;
             height: 100vh;
             background: rgba(8,8,15,0.98);
             backdrop-filter: blur(20px);
-            border-left: 2px solid rgba(212,175,55,0.4);
+            border-left: 1px solid rgba(212,175,55,0.2);
             z-index: 15000;
-            transition: 0.3s ease;
+            transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
         }
         .cart-sidebar.open { right: 0; }
-        .cart-header { padding: 18px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; }
-        .cart-items { flex: 1; overflow-y: auto; padding: 15px; max-height: 70vh; }
-        .cart-item { background: rgba(20,20,30,0.6); margin-bottom: 12px; border-radius: 16px; padding: 12px; display: flex; gap: 10px; }
-        .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cart-header { padding: 16px 18px; border-bottom: 1px solid rgba(212,175,55,0.15); display: flex; justify-content: space-between; align-items: center; }
+        .cart-header h3 { font-size: 17px; color: #D4AF37; }
+        .cart-header .close-btn { font-size: 22px; cursor: pointer; color: #888; transition: 0.3s; }
+        .cart-header .close-btn:hover { color: #fff; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 12px 16px; }
+        .cart-items::-webkit-scrollbar { width: 3px; }
+        .cart-items::-webkit-scrollbar-track { background: transparent; }
+        .cart-items::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 10px; }
+        .cart-item { background: rgba(20,20,30,0.5); margin-bottom: 10px; border-radius: 14px; padding: 10px 12px; display: flex; gap: 10px; border: 1px solid rgba(255,255,255,0.04); }
+        .cart-item-img { width: 44px; height: 44px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
-        .cart-item-details { flex: 1; }
-        .cart-item-name { font-weight: 600; font-size: 13px; }
-        .cart-item-price { color: #D4AF37; font-weight: 700; font-size: 14px; }
-        .cart-item-variant { font-size: 11px; color: #888; }
-        .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
-        .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
-        .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; font-size: 16px; }
+        .cart-item-details { flex: 1; min-width: 0; }
+        .cart-item-name { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-item-price { color: #D4AF37; font-weight: 700; font-size: 13px; }
+        .cart-item-variant { font-size: 10px; color: #888; }
+        .cart-qty-control { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+        .cart-qty-control button { background: rgba(212,175,55,0.15); border: none; width: 22px; height: 22px; border-radius: 6px; color: #D4AF37; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .cart-qty-control button:hover { background: rgba(212,175,55,0.25); }
+        .cart-qty-control span { font-size: 13px; min-width: 20px; text-align: center; }
+        .cart-item-remove { background: rgba(200,50,50,0.2); border: none; padding: 3px 10px; border-radius: 6px; color: #ff8888; cursor: pointer; font-size: 10px; transition: 0.2s; }
+        .cart-item-remove:hover { background: rgba(200,50,50,0.35); }
+        .cart-total { padding: 14px 18px; border-top: 1px solid rgba(212,175,55,0.12); background: rgba(0,0,0,0.2); }
+        .cart-total .total-row { display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; color: #D4AF37; }
+        .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: 700; cursor: pointer; color: #050508; font-size: 15px; transition: 0.3s; margin-top: 8px; }
+        .checkout-btn:hover { transform: scale(1.02); }
         
         .user-info-bar {
-            background: rgba(212,175,55,0.1);
+            background: rgba(212,175,55,0.06);
             border-radius: 14px;
-            padding: 12px 16px;
-            margin-bottom: 20px;
-            font-size: 13px;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            font-size: 12px;
             color: #D4AF37;
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 8px;
+            gap: 6px;
+            border: 1px solid rgba(212,175,55,0.06);
         }
         .user-info-bar .logout-btn {
-            background: rgba(255,50,50,0.15);
-            border: 1px solid rgba(255,50,50,0.3);
-            padding: 4px 12px;
+            background: rgba(255,50,50,0.1);
+            border: 1px solid rgba(255,50,50,0.2);
+            padding: 3px 12px;
             border-radius: 20px;
             color: #ff6666;
-            font-size: 11px;
+            font-size: 10px;
             cursor: pointer;
             transition: 0.2s;
         }
-        .user-info-bar .logout-btn:hover {
-            background: rgba(255,50,50,0.25);
-        }
+        .user-info-bar .logout-btn:hover { background: rgba(255,50,50,0.2); }
         
         @media (max-width: 600px) {
-            .upload-row { grid-template-columns: 1fr; }
-            .container { padding: 0 12px; margin: 15px auto; }
-            .card { padding: 20px; }
-            .card-title { font-size: 18px; }
-            .upload-zone { padding: 20px 15px; }
-            .upload-zone i { font-size: 28px; }
+            .upload-row { grid-template-columns: 1fr; gap: 10px; }
+            .container { padding: 0 12px; margin: 12px auto; }
+            .card { padding: 18px; }
+            .card-title { font-size: 19px; }
+            .upload-zone { padding: 18px 10px; min-height: 110px; }
+            .upload-zone i { font-size: 26px; }
             .result-big { font-size: 22px; }
             .price-display .amount { font-size: 28px; }
-            .action-buttons { flex-direction: column; }
+            .action-buttons { flex-direction: column; gap: 8px; }
+            .btn { padding: 12px; font-size: 13px; }
             .cart-icon-header { padding: 4px 10px; font-size: 11px; top: 12px; right: 10px; }
-            .user-info-bar { font-size: 12px; padding: 10px 14px; }
+            .user-info-bar { font-size: 11px; padding: 8px 12px; }
+            .preview-area .preview-item { min-width: 100px; }
         }
     </style>
 </head>
@@ -442,7 +509,7 @@
     <div class="logo">VEDANTA</div>
     <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Studio</a>
     <div class="cart-icon-header" id="cartIconBtn">
-        <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
+        <i class="fas fa-shopping-cart"></i> <span class="cart-count" id="cartCount">0</span>
     </div>
 </div>
 
@@ -453,28 +520,28 @@
             <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
 
-        <div class="card-title"><i class="fas fa-ruler-combined" style="color:#D4AF37;"></i> DTF Print Size Analyzer</div>
-        <div class="card-subtitle">Upload Front &amp; Back photos of T-Shirt with design → Get exact print size &amp; price</div>
+        <div class="card-title"><i class="fas fa-ruler-combined"></i> DTF Size Analyzer</div>
+        <div class="card-subtitle">Upload Front &amp; Back photos → Get exact print size &amp; price</div>
 
         <!-- ====== DUAL UPLOAD ZONES ====== -->
         <div class="upload-row">
-            <!-- Front Upload -->
             <div class="upload-zone" id="frontUploadZone">
                 <i class="fas fa-tshirt"></i>
                 <p><strong>Front Design</strong></p>
                 <p class="small">Click or drag to upload</p>
                 <span class="upload-label">FRONT</span>
+                <span class="status-text"><i class="fas fa-check-circle"></i> Uploaded</span>
                 <input type="file" id="frontFileInput" accept="image/*">
                 <img class="preview-thumb" id="frontPreviewThumb" style="display:none;">
                 <button class="remove-img" id="frontRemoveBtn">✕</button>
             </div>
             
-            <!-- Back Upload -->
             <div class="upload-zone" id="backUploadZone">
                 <i class="fas fa-undo-alt"></i>
                 <p><strong>Back Design</strong></p>
                 <p class="small">Click or drag to upload</p>
                 <span class="upload-label">BACK</span>
+                <span class="status-text"><i class="fas fa-check-circle"></i> Uploaded</span>
                 <input type="file" id="backFileInput" accept="image/*">
                 <img class="preview-thumb" id="backPreviewThumb" style="display:none;">
                 <button class="remove-img" id="backRemoveBtn">✕</button>
@@ -485,7 +552,7 @@
         <div class="size-selector">
             <label for="tshirtSizeSelect"><i class="fas fa-tshirt"></i> Select T-Shirt Size</label>
             <select id="tshirtSizeSelect">
-                <option value="">-- Select Size --</option>
+                <option value="">— Select Size —</option>
                 <option value="S">S</option>
                 <option value="M">M</option>
                 <option value="L">L</option>
@@ -495,16 +562,16 @@
             </select>
         </div>
 
-        <!-- Preview (Main combined preview) -->
+        <!-- Preview -->
         <div class="preview-area" id="previewArea">
-            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
-                <div style="flex:1; min-width:200px; text-align:center;">
-                    <p style="font-size:11px; color:#888;">Front</p>
-                    <img id="frontPreviewMain" style="max-height:180px; border-radius:12px; border:1px solid rgba(212,175,55,0.2);">
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <p>Front</p>
+                    <img id="frontPreviewMain" src="" alt="Front">
                 </div>
-                <div style="flex:1; min-width:200px; text-align:center;">
-                    <p style="font-size:11px; color:#888;">Back</p>
-                    <img id="backPreviewMain" style="max-height:180px; border-radius:12px; border:1px solid rgba(212,175,55,0.2);">
+                <div class="preview-item">
+                    <p>Back</p>
+                    <img id="backPreviewMain" src="" alt="Back">
                 </div>
             </div>
         </div>
@@ -515,51 +582,56 @@
             
             <div class="result-row">
                 <span class="result-label">📏 Print Width</span>
-                <span class="result-value" id="resultWidth">--</span>
+                <span class="result-value" id="resultWidth">—</span>
             </div>
             <div class="result-row">
                 <span class="result-label">📐 Print Height</span>
-                <span class="result-value" id="resultHeight">--</span>
+                <span class="result-value" id="resultHeight">—</span>
             </div>
             <div class="result-row">
                 <span class="result-label">⬅️ Left Margin</span>
-                <span class="result-value" id="resultLeftMargin">--</span>
+                <span class="result-value" id="resultLeftMargin">—</span>
             </div>
             <div class="result-row">
                 <span class="result-label">⬆️ Top Margin</span>
-                <span class="result-value" id="resultTopMargin">--</span>
+                <span class="result-value" id="resultTopMargin">—</span>
             </div>
             <div class="result-row">
-                <span class="result-label">📦 Print Category</span>
-                <span class="result-value green" id="resultCategory">--</span>
+                <span class="result-label">📦 Category</span>
+                <span class="result-value green" id="resultCategory">—</span>
             </div>
 
             <div class="price-display">
                 <div class="label">💰 Final Price</div>
                 <div class="amount" id="finalPrice">₹0</div>
-                <div class="size-info" id="priceSizeInfo">Size: --</div>
+                <div class="size-info" id="priceSizeInfo">Size: —</div>
             </div>
 
             <div class="action-buttons">
-                <button class="btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
-                <button class="btn-primary" id="addToCartBtn" disabled><i class="fas fa-cart-plus"></i> Add to Cart</button>
-                <button class="btn-buy" id="buyNowBtn" disabled><i class="fas fa-bolt"></i> Buy Now</button>
+                <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
+                <button class="btn btn-primary" id="addToCartBtn" disabled><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                <button class="btn btn-buy" id="buyNowBtn" disabled><i class="fas fa-bolt"></i> Buy Now</button>
             </div>
         </div>
 
         <div class="note">
             <i class="fas fa-info-circle" style="color:#D4AF37;"></i>
-            <strong>How it works:</strong> AI detects design area on T-Shirt → Calculates exact inches → 
-            Automatically determines DTF print size &amp; final price.
+            <strong>How it works:</strong> AI detects design area → Calculates exact DTF print size → Shows final price
         </div>
     </div>
 </div>
 
 <!-- Cart Sidebar -->
 <div id="cartSidebar" class="cart-sidebar">
-    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Your Cart</h3><i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:20px;"></i></div>
-    <div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:20px;">Cart empty</div></div>
-    <div class="cart-total"><div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div><button id="cartCheckoutBtn" class="checkout-btn">Checkout</button></div>
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+        <span class="close-btn" id="closeCartBtn">&times;</span>
+    </div>
+    <div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:30px; color:#666; font-size:13px;">Cart is empty</div></div>
+    <div class="cart-total">
+        <div class="total-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+        <button id="cartCheckoutBtn" class="checkout-btn">Proceed to Checkout</button>
+    </div>
 </div>
 
 <!-- Toast -->
@@ -568,7 +640,7 @@
 <!-- Loading -->
 <div class="loading-overlay" id="loadingOverlay">
     <div class="loading-spinner"></div>
-    <div class="loading-text">🔍 Analyzing T-Shirt Design...</div>
+    <div class="loading-text">Processing...</div>
 </div>
 
 <script>
@@ -589,7 +661,7 @@ const auth = firebase.auth();
 const storage = firebase.storage();
 
 // ============================================================
-// 1. SIZE CHART
+// CONSTANTS
 // ============================================================
 const GARMENT_SIZES = {
     'S':  { width: 18, height: 26 },
@@ -600,56 +672,53 @@ const GARMENT_SIZES = {
     '3XL':{ width: 25, height: 31 }
 };
 
-// ============================================================
-// 2. PRICE LOGIC
-// ============================================================
 function getPrice(sizeKey) {
     if (sizeKey === 'XXL' || sizeKey === '3XL') return 650;
     return 599;
 }
 
 // ============================================================
-// 3. DOM ELEMENTS
+// DOM REFS
 // ============================================================
-const frontUploadZone = document.getElementById('frontUploadZone');
-const backUploadZone = document.getElementById('backUploadZone');
-const frontFileInput = document.getElementById('frontFileInput');
-const backFileInput = document.getElementById('backFileInput');
-const frontPreviewThumb = document.getElementById('frontPreviewThumb');
-const backPreviewThumb = document.getElementById('backPreviewThumb');
-const frontPreviewMain = document.getElementById('frontPreviewMain');
-const backPreviewMain = document.getElementById('backPreviewMain');
-const frontRemoveBtn = document.getElementById('frontRemoveBtn');
-const backRemoveBtn = document.getElementById('backRemoveBtn');
-const previewArea = document.getElementById('previewArea');
-const resultsPanel = document.getElementById('resultsPanel');
-const tshirtSizeSelect = document.getElementById('tshirtSizeSelect');
-const toastMsg = document.getElementById('toastMsg');
-const loadingOverlay = document.getElementById('loadingOverlay');
-const addToCartBtn = document.getElementById('addToCartBtn');
-const buyNowBtn = document.getElementById('buyNowBtn');
+const $ = id => document.getElementById(id);
+const frontZone = $('frontUploadZone');
+const backZone = $('backUploadZone');
+const frontInput = $('frontFileInput');
+const backInput = $('backFileInput');
+const frontThumb = $('frontPreviewThumb');
+const backThumb = $('backPreviewThumb');
+const frontMain = $('frontPreviewMain');
+const backMain = $('backPreviewMain');
+const frontRemove = $('frontRemoveBtn');
+const backRemove = $('backRemoveBtn');
+const previewArea = $('previewArea');
+const resultsPanel = $('resultsPanel');
+const sizeSelect = $('tshirtSizeSelect');
+const toastMsg = $('toastMsg');
+const loadingOverlay = $('loadingOverlay');
+const addBtn = $('addToCartBtn');
+const buyBtn = $('buyNowBtn');
+const resetBtn = $('resetBtn');
 
-let frontImageDataURL = null;
-let frontImageFile = null;
-let backImageDataURL = null;
-let backImageFile = null;
+let frontDataURL = null, frontFile = null;
+let backDataURL = null, backFile = null;
 let analysisResult = null;
 let cart = [];
 let currentUser = null;
 let isProcessing = false;
 
 // ============================================================
-// 4. TOAST & LOADING
+// TOAST & LOADING
 // ============================================================
 function showToast(msg, isError = false) {
     toastMsg.innerText = msg;
     toastMsg.className = 'toast' + (isError ? ' error' : '');
     toastMsg.classList.add('show');
     clearTimeout(toastMsg._timer);
-    toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 3000);
+    toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 2800);
 }
 
-function showLoading(text = "🔍 Analyzing T-Shirt Design...") {
+function showLoading(text = 'Processing...') {
     document.querySelector('.loading-text').innerText = text;
     loadingOverlay.classList.add('active');
 }
@@ -659,25 +728,20 @@ function hideLoading() {
 }
 
 // ============================================================
-// 5. AUTH
+// AUTH
 // ============================================================
 function checkUser() {
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
     if (stored) {
         currentUser = stored;
-        document.getElementById('displayUser').innerText = stored.name || stored.phone || 'Customer';
+        $('displayUser').innerText = stored.name || stored.phone || 'Customer';
         return true;
     }
     if (auth.currentUser) {
-        const user = auth.currentUser;
-        currentUser = {
-            uid: user.uid,
-            phone: user.phoneNumber || '',
-            name: user.displayName || 'Customer',
-            email: user.email || ''
-        };
+        const u = auth.currentUser;
+        currentUser = { uid: u.uid, phone: u.phoneNumber || '', name: u.displayName || 'Customer', email: u.email || '' };
         localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
-        document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+        $('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
         return true;
     }
     return false;
@@ -688,51 +752,32 @@ function logoutUser() {
         localStorage.removeItem('vedantaUser');
         localStorage.removeItem('vedanta_dtf_cart');
         currentUser = null;
-        document.getElementById('displayUser').innerText = 'Guest';
-        showToast('Logged out successfully');
-        setTimeout(() => window.location.href = 'index.html', 1000);
-    }).catch(err => {
-        showToast('Logout failed: ' + err.message, true);
-    });
+        $('displayUser').innerText = 'Guest';
+        showToast('Logged out');
+        setTimeout(() => window.location.href = 'index.html', 800);
+    }).catch(() => showToast('Logout failed', true));
 }
 
 // ============================================================
-// 6. UPLOAD IMAGE TO FIREBASE
+// FIREBASE UPLOAD (Lightweight)
 // ============================================================
-async function uploadImageToFirebase(file, side) {
-    if (!currentUser) {
-        showToast('Please login first', true);
-        return null;
-    }
-    if (!file) return null;
-    
-    const fileName = `dtf_analyzer/${currentUser.uid}/${side}_${Date.now()}_${file.name}`;
-    const ref = storage.ref().child(fileName);
-    
+async function uploadImage(file, side) {
+    if (!currentUser || !file) return null;
+    const path = `dtf_analyzer/${currentUser.uid}/${side}_${Date.now()}_${file.name}`;
     try {
+        const ref = storage.ref().child(path);
         await ref.put(file);
-        const url = await ref.getDownloadURL();
-        return url;
-    } catch (err) {
-        console.error('Upload error:', err);
-        return null;
-    }
+        return await ref.getDownloadURL();
+    } catch { return null; }
 }
 
-// ============================================================
-// 7. SAVE ORDER TO FIRESTORE
-// ============================================================
-async function saveOrderToFirebase(orderData) {
-    if (!currentUser) {
-        showToast('Please login first', true);
-        return null;
-    }
-    
+async function saveOrder(data) {
+    if (!currentUser) return null;
+    const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 1000);
     try {
-        const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 1000);
-        const orderDoc = {
-            ...orderData,
-            orderId: orderId,
+        await db.collection('orders').doc(orderId).set({
+            ...data,
+            orderId,
             userId: currentUser.uid,
             customerPhone: currentUser.phone || '',
             customerName: currentUser.name || 'Customer',
@@ -741,623 +786,388 @@ async function saveOrderToFirebase(orderData) {
             paymentStatus: 'pending',
             source: 'dtf_analyzer',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
-        };
-        
-        await db.collection('orders').doc(orderId).set(orderDoc);
+        });
         return orderId;
-    } catch (err) {
-        console.error('Save order error:', err);
-        showToast('Failed to save order: ' + err.message, true);
-        return null;
-    }
+    } catch { return null; }
 }
 
 // ============================================================
-// 8. DTF SIZE DETECTION (Uses Front Image for analysis)
+// DTF SIZE DETECTION (Fast)
 // ============================================================
-function detectDTFSize(imageDataURL, garmentSize) {
+function detectSize(dataURL, garment) {
     return new Promise((resolve) => {
         const img = new Image();
         img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            c.width = img.width; c.height = img.height;
             ctx.drawImage(img, 0, 0);
-            
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            const w = canvas.width;
-            const h = canvas.height;
-            
-            let minX = w, minY = h, maxX = 0, maxY = 0;
-            let foundPixels = 0;
-            
+            const d = ctx.getImageData(0, 0, c.width, c.height);
+            const data = d.data;
+            const w = c.width, h = c.height;
+            let minX = w, minY = h, maxX = 0, maxY = 0, found = 0;
             for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
-                    const idx = (y * w + x) * 4;
-                    const r = data[idx];
-                    const g = data[idx + 1];
-                    const b = data[idx + 2];
-                    const brightness = (r + g + b) / 3;
-                    if (brightness < 220) {
+                    const i = (y * w + x) * 4;
+                    const b = (data[i] + data[i+1] + data[i+2]) / 3;
+                    if (b < 220) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
                         if (y < minY) minY = y;
                         if (y > maxY) maxY = y;
-                        foundPixels++;
+                        found++;
                     }
                 }
             }
-            
-            if (foundPixels === 0 || maxX - minX < 10 || maxY - minY < 10) {
+            if (found === 0 || maxX - minX < 10 || maxY - minY < 10) {
                 minX = 0; minY = 0; maxX = w; maxY = h;
             }
-            
-            const designWidthPx = maxX - minX;
-            const designHeightPx = maxY - minY;
-            const canvasWidthPx = w;
-            const canvasHeightPx = h;
-            
-            const garmentW = garmentSize.width;
-            const garmentH = garmentSize.height;
-            
-            let dtfWidth = (designWidthPx / canvasWidthPx) * garmentW;
-            let dtfHeight = (designHeightPx / canvasHeightPx) * garmentH;
-            
-            const marginLeft = (garmentW - dtfWidth) / 2;
-            const marginTop = (garmentH - dtfHeight) / 2;
-            
-            let category = '';
-            const area = dtfWidth * dtfHeight;
-            if (dtfWidth > garmentW * 0.85 && dtfHeight > garmentH * 0.85) {
-                category = '🟢 Full Cover';
-            } else if (dtfWidth > garmentW * 0.5 || dtfHeight > garmentH * 0.5) {
-                category = '🟡 Half Cover / Custom';
-            } else if (dtfWidth < 5 && dtfHeight < 5) {
-                category = '🔵 Small (Pocket/Logo)';
-            } else if (Math.abs(dtfWidth - 8.27) < 1 && Math.abs(dtfHeight - 11.69) < 1) {
-                category = '📄 A4 Size';
-            } else {
-                category = '🟠 Custom Size';
-            }
-            
-            dtfWidth = Math.round(dtfWidth * 10) / 10;
-            dtfHeight = Math.round(dtfHeight * 10) / 10;
-            
+            let dw = (maxX - minX) / w * garment.width;
+            let dh = (maxY - minY) / h * garment.height;
+            const ml = (garment.width - dw) / 2;
+            const mt = (garment.height - dh) / 2;
+            let cat = '';
+            const area = dw * dh;
+            if (dw > garment.width * 0.85 && dh > garment.height * 0.85) cat = '🟢 Full Cover';
+            else if (dw > garment.width * 0.5 || dh > garment.height * 0.5) cat = '🟡 Half Cover / Custom';
+            else if (dw < 5 && dh < 5) cat = '🔵 Small (Pocket/Logo)';
+            else if (Math.abs(dw - 8.27) < 1 && Math.abs(dh - 11.69) < 1) cat = '📄 A4 Size';
+            else cat = '🟠 Custom Size';
             resolve({
-                dtfWidth,
-                dtfHeight,
-                marginLeft: Math.round(marginLeft * 10) / 10,
-                marginTop: Math.round(marginTop * 10) / 10,
-                marginRight: Math.round(((garmentW - dtfWidth) / 2) * 10) / 10,
-                marginBottom: Math.round(((garmentH - dtfHeight) / 2) * 10) / 10,
-                category,
-                garmentW,
-                garmentH
+                dw: Math.round(dw * 10) / 10,
+                dh: Math.round(dh * 10) / 10,
+                ml: Math.round(ml * 10) / 10,
+                mt: Math.round(mt * 10) / 10,
+                cat
             });
         };
-        img.src = imageDataURL;
+        img.src = dataURL;
     });
 }
 
 // ============================================================
-// 9. MAIN ANALYSIS FUNCTION
+// ANALYZE (Fast)
 // ============================================================
-async function analyzeTShirt() {
-    const sizeKey = tshirtSizeSelect.value;
-    if (!sizeKey) {
-        showToast('❌ Please select T-Shirt Size first!', true);
-        return;
-    }
-    if (!frontImageDataURL) {
-        showToast('❌ Please upload Front image first!', true);
-        return;
-    }
+async function analyze() {
+    const sizeKey = sizeSelect.value;
+    if (!sizeKey) { showToast('Select size first', true); return; }
+    if (!frontDataURL) { showToast('Upload Front image first', true); return; }
     
-    // Disable buttons during analysis
-    addToCartBtn.disabled = true;
-    buyNowBtn.disabled = true;
-    
-    const garmentSize = GARMENT_SIZES[sizeKey];
-    showLoading();
+    addBtn.disabled = true;
+    buyBtn.disabled = true;
+    showLoading('Analyzing...');
     
     try {
-        // Use Front image for analysis (back image is for preview only)
-        const result = await detectDTFSize(frontImageDataURL, garmentSize);
-        analysisResult = result;
+        const g = GARMENT_SIZES[sizeKey];
+        const r = await detectSize(frontDataURL, g);
+        analysisResult = { ...r, sizeKey };
         
-        document.getElementById('dtfSizeDisplay').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
-        document.getElementById('resultWidth').innerHTML = `${result.dtfWidth}″`;
-        document.getElementById('resultHeight').innerHTML = `${result.dtfHeight}″`;
-        document.getElementById('resultLeftMargin').innerHTML = `${result.marginLeft}″`;
-        document.getElementById('resultTopMargin').innerHTML = `${result.marginTop}″`;
-        document.getElementById('resultCategory').innerHTML = result.category;
+        $('dtfSizeDisplay').innerHTML = `📐 ${r.dw}″ × ${r.dh}″`;
+        $('resultWidth').innerHTML = `${r.dw}″`;
+        $('resultHeight').innerHTML = `${r.dh}″`;
+        $('resultLeftMargin').innerHTML = `${r.ml}″`;
+        $('resultTopMargin').innerHTML = `${r.mt}″`;
+        $('resultCategory').innerHTML = r.cat;
         
-        const finalPrice = getPrice(sizeKey);
-        document.getElementById('finalPrice').innerHTML = `₹${finalPrice}`;
-        document.getElementById('priceSizeInfo').innerHTML = `Size: ${sizeKey} • ₹${finalPrice}`;
+        const price = getPrice(sizeKey);
+        $('finalPrice').innerHTML = `₹${price}`;
+        $('priceSizeInfo').innerHTML = `Size: ${sizeKey} • ₹${price}`;
         
         resultsPanel.classList.add('show');
-        
-        // Enable buttons after successful analysis
-        addToCartBtn.disabled = false;
-        buyNowBtn.disabled = false;
-        
-        showToast('✅ Analysis complete! Exact DTF size detected.');
-        
-    } catch (err) {
-        console.error(err);
-        showToast('❌ Analysis failed. Please try again.', true);
-        addToCartBtn.disabled = true;
-        buyNowBtn.disabled = true;
+        addBtn.disabled = false;
+        buyBtn.disabled = false;
+        showToast('✅ Analysis complete!');
+    } catch (e) {
+        showToast('Analysis failed', true);
     } finally {
         hideLoading();
     }
 }
 
 // ============================================================
-// 10. FILE UPLOAD HANDLERS
+// FILE HANDLERS
 // ============================================================
-function handleFileUpload(file, side) {
-    if (!file.type.startsWith('image/')) {
-        showToast('❌ Please upload an image file!', true);
-        return false;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ File too large! Max 5MB.', true);
-        return false;
-    }
+function handleFile(file, side) {
+    if (!file.type.startsWith('image/')) { showToast('Upload image only', true); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('Max 5MB', true); return; }
     
     const reader = new FileReader();
     reader.onload = (e) => {
-        const dataURL = e.target.result;
-        
+        const url = e.target.result;
         if (side === 'front') {
-            frontImageDataURL = dataURL;
-            frontImageFile = file;
-            frontPreviewThumb.src = dataURL;
-            frontPreviewThumb.style.display = 'block';
-            frontPreviewMain.src = dataURL;
-            frontUploadZone.classList.add('uploaded');
-            showToast('✅ Front image uploaded!');
+            frontDataURL = url; frontFile = file;
+            frontThumb.src = url; frontThumb.style.display = 'block';
+            frontMain.src = url;
+            frontZone.classList.add('uploaded');
         } else {
-            backImageDataURL = dataURL;
-            backImageFile = file;
-            backPreviewThumb.src = dataURL;
-            backPreviewThumb.style.display = 'block';
-            backPreviewMain.src = dataURL;
-            backUploadZone.classList.add('uploaded');
-            showToast('✅ Back image uploaded!');
+            backDataURL = url; backFile = file;
+            backThumb.src = url; backThumb.style.display = 'block';
+            backMain.src = url;
+            backZone.classList.add('uploaded');
         }
-        
-        // Show combined preview
         previewArea.classList.add('show');
-        
-        // Auto-analyze if both images are uploaded or front is uploaded
-        if (frontImageDataURL && tshirtSizeSelect.value) {
-            analyzeTShirt();
+        if (frontDataURL && sizeSelect.value) {
+            setTimeout(analyze, 100);
         }
     };
     reader.readAsDataURL(file);
-    return true;
 }
 
 function removeImage(side) {
     if (side === 'front') {
-        frontImageDataURL = null;
-        frontImageFile = null;
-        frontPreviewThumb.style.display = 'none';
-        frontPreviewThumb.src = '';
-        frontPreviewMain.src = '';
-        frontUploadZone.classList.remove('uploaded');
-        frontFileInput.value = '';
+        frontDataURL = null; frontFile = null;
+        frontThumb.style.display = 'none'; frontThumb.src = '';
+        frontMain.src = '';
+        frontZone.classList.remove('uploaded');
+        frontInput.value = '';
     } else {
-        backImageDataURL = null;
-        backImageFile = null;
-        backPreviewThumb.style.display = 'none';
-        backPreviewThumb.src = '';
-        backPreviewMain.src = '';
-        backUploadZone.classList.remove('uploaded');
-        backFileInput.value = '';
+        backDataURL = null; backFile = null;
+        backThumb.style.display = 'none'; backThumb.src = '';
+        backMain.src = '';
+        backZone.classList.remove('uploaded');
+        backInput.value = '';
     }
-    
-    // Hide preview if both are empty
-    if (!frontImageDataURL && !backImageDataURL) {
+    if (!frontDataURL && !backDataURL) {
         previewArea.classList.remove('show');
         resultsPanel.classList.remove('show');
-        addToCartBtn.disabled = true;
-        buyNowBtn.disabled = true;
+        addBtn.disabled = true;
+        buyBtn.disabled = true;
         analysisResult = null;
-    } else if (frontImageDataURL && tshirtSizeSelect.value) {
-        // Re-analyze if front still exists
-        analyzeTShirt();
+    } else if (frontDataURL && sizeSelect.value) {
+        setTimeout(analyze, 100);
     }
 }
 
-// ============================================================
-// 11. RESET
-// ============================================================
 function resetAll() {
     removeImage('front');
     removeImage('back');
     analysisResult = null;
     resultsPanel.classList.remove('show');
     previewArea.classList.remove('show');
-    tshirtSizeSelect.value = '';
-    addToCartBtn.disabled = true;
-    buyNowBtn.disabled = true;
-    showToast('🔄 Reset complete');
+    sizeSelect.value = '';
+    addBtn.disabled = true;
+    buyBtn.disabled = true;
+    showToast('Reset complete');
 }
 
 // ============================================================
-// 12. CART FUNCTIONS
+// CART (Fast)
 // ============================================================
 function saveCart() {
     localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart));
     updateCartUI();
-    updateCartCount();
 }
 
 function loadCart() {
-    const saved = localStorage.getItem('vedanta_dtf_cart');
-    if (saved) {
-        try {
-            cart = JSON.parse(saved);
-            updateCartUI();
-            updateCartCount();
-        } catch(e) { cart = []; }
-    }
-}
-
-function updateCartCount() {
-    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
-    document.getElementById('cartCount').innerText = count;
+    try {
+        const s = localStorage.getItem('vedanta_dtf_cart');
+        if (s) { cart = JSON.parse(s); updateCartUI(); }
+    } catch {}
 }
 
 function updateCartUI() {
-    const container = document.getElementById('cartItemsList');
-    if (!container) return;
-    
-    if (cart.length === 0) {
-        container.innerHTML = '<div style="text-align:center; padding:20px;">Cart empty</div>';
-        document.getElementById('cartSubtotal').innerText = '₹0';
+    const count = cart.reduce((s, i) => s + i.quantity, 0);
+    $('cartCount').innerText = count;
+    const container = $('cartItemsList');
+    if (!cart.length) {
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:#666;font-size:13px;">Cart is empty</div>';
+        $('cartSubtotal').innerText = '₹0';
         return;
     }
-    
-    let subtotal = 0;
+    let sub = 0;
     container.innerHTML = '';
     cart.forEach((item, idx) => {
-        subtotal += item.price * item.quantity;
+        sub += item.price * item.quantity;
         container.innerHTML += `
             <div class="cart-item">
-                <div class="cart-item-img">
-                    ${item.frontImageData ? `<img src="${item.frontImageData}">` : '<i class="fas fa-tshirt"></i>'}
-                </div>
+                <div class="cart-item-img">${item.frontData ? `<img src="${item.frontData}">` : '<i class="fas fa-tshirt"></i>'}</div>
                 <div class="cart-item-details">
-                    <div class="cart-item-name">${item.name || 'Uploaded T-Shirt'}</div>
+                    <div class="cart-item-name">${item.name || 'DTF T-Shirt'}</div>
                     <div class="cart-item-price">₹${item.price}</div>
-                    <div class="cart-item-variant">Size: ${item.size} • ${item.category || ''}</div>
+                    <div class="cart-item-variant">Size: ${item.size} • ${item.cat || ''}</div>
                     <div class="cart-qty-control">
-                        <button class="cart-qty-dec" data-index="${idx}">-</button>
+                        <button class="qty-dec" data-i="${idx}">−</button>
                         <span>${item.quantity}</span>
-                        <button class="cart-qty-inc" data-index="${idx}">+</button>
-                        <button class="cart-item-remove" data-index="${idx}">Remove</button>
+                        <button class="qty-inc" data-i="${idx}">+</button>
+                        <button class="item-remove" data-i="${idx}">Remove</button>
                     </div>
                 </div>
             </div>
         `;
     });
-    
-    document.getElementById('cartSubtotal').innerHTML = `₹${subtotal}`;
-    
-    document.querySelectorAll('.cart-qty-dec').forEach(btn => {
-        btn.onclick = () => {
-            const idx = parseInt(btn.dataset.index);
-            if (cart[idx].quantity > 1) cart[idx].quantity--;
-            else cart.splice(idx, 1);
-            saveCart();
-            updateCartUI();
-            showToast('Cart updated');
-        };
+    $('cartSubtotal').innerHTML = `₹${sub}`;
+    document.querySelectorAll('.qty-dec').forEach(b => b.onclick = () => {
+        const i = parseInt(b.dataset.i);
+        if (cart[i].quantity > 1) cart[i].quantity--;
+        else cart.splice(i, 1);
+        saveCart();
     });
-    
-    document.querySelectorAll('.cart-qty-inc').forEach(btn => {
-        btn.onclick = () => {
-            const idx = parseInt(btn.dataset.index);
-            cart[idx].quantity++;
-            saveCart();
-            updateCartUI();
-            showToast('Quantity increased');
-        };
+    document.querySelectorAll('.qty-inc').forEach(b => b.onclick = () => {
+        const i = parseInt(b.dataset.i);
+        cart[i].quantity++;
+        saveCart();
     });
-    
-    document.querySelectorAll('.cart-item-remove').forEach(btn => {
-        btn.onclick = () => {
-            cart.splice(parseInt(btn.dataset.index), 1);
-            saveCart();
-            updateCartUI();
-            showToast('Item removed');
-        };
+    document.querySelectorAll('.item-remove').forEach(b => b.onclick = () => {
+        cart.splice(parseInt(b.dataset.i), 1);
+        saveCart();
     });
 }
 
 // ============================================================
-// 13. ADD TO CART (FIXED - Always works)
+// ADD TO CART (Fast)
 // ============================================================
 async function addToCart() {
-    if (isProcessing) return;
-    
-    if (!analysisResult) {
-        showToast('❌ Please analyze the design first!', true);
+    if (isProcessing || !analysisResult || !currentUser) {
+        if (!currentUser) showToast('Please login first', true);
+        else if (!analysisResult) showToast('Analyze first', true);
         return;
     }
-    const sizeKey = tshirtSizeSelect.value;
-    if (!sizeKey) {
-        showToast('❌ Please select size!', true);
-        return;
-    }
-    if (!currentUser) {
-        showToast('❌ Please login first!', true);
-        return;
-    }
-    if (!frontImageDataURL) {
-        showToast('❌ Please upload Front image first!', true);
-        return;
-    }
-    
     isProcessing = true;
-    showLoading('Adding to cart...');
+    addBtn.disabled = true;
+    showLoading('Adding...');
     
     try {
-        let frontUrl = frontImageDataURL;
-        if (frontImageFile) {
-            const uploaded = await uploadImageToFirebase(frontImageFile, 'front');
-            if (uploaded) frontUrl = uploaded;
-        }
+        let fu = frontDataURL, bu = backDataURL;
+        if (frontFile) { const u = await uploadImage(frontFile, 'front'); if (u) fu = u; }
+        if (backFile) { const u = await uploadImage(backFile, 'back'); if (u) bu = u; }
         
-        let backUrl = backImageDataURL;
-        if (backImageFile) {
-            const uploaded = await uploadImageToFirebase(backImageFile, 'back');
-            if (uploaded) backUrl = uploaded;
-        }
-        
-        const price = getPrice(sizeKey);
-        
-        const cartItem = {
-            id: Date.now() + Math.floor(Math.random() * 1000),
-            name: 'DTF Analyzed T-Shirt 🖼️',
-            size: sizeKey,
-            price: price,
-            dtfWidth: analysisResult.dtfWidth,
-            dtfHeight: analysisResult.dtfHeight,
-            category: analysisResult.category,
-            frontImageData: frontUrl,
-            backImageData: backUrl,
+        cart.push({
+            id: Date.now() + Math.floor(Math.random() * 999),
+            name: 'DTF Analyzed T-Shirt',
+            size: analysisResult.sizeKey,
+            price: getPrice(analysisResult.sizeKey),
+            cat: analysisResult.cat,
+            frontData: fu,
+            backData: bu,
             quantity: 1,
-            timestamp: Date.now(),
-            userId: currentUser.uid,
             isDTF: true
-        };
-        
-        cart.push(cartItem);
+        });
         saveCart();
         showToast('✅ Added to cart!');
-        
-    } catch (err) {
-        console.error(err);
-        showToast('Failed to add to cart: ' + err.message, true);
+    } catch (e) {
+        showToast('Failed to add', true);
     } finally {
         isProcessing = false;
+        addBtn.disabled = false;
         hideLoading();
     }
 }
 
 // ============================================================
-// 14. BUY NOW (FIXED - Always works)
+// BUY NOW (Fast)
 // ============================================================
 async function buyNow() {
-    if (isProcessing) return;
-    
-    if (!analysisResult) {
-        showToast('❌ Please analyze the design first!', true);
+    if (isProcessing || !analysisResult || !currentUser) {
+        if (!currentUser) showToast('Please login first', true);
+        else if (!analysisResult) showToast('Analyze first', true);
         return;
     }
-    const sizeKey = tshirtSizeSelect.value;
-    if (!sizeKey) {
-        showToast('❌ Please select size!', true);
-        return;
-    }
-    if (!currentUser) {
-        showToast('❌ Please login first!', true);
-        return;
-    }
-    if (!frontImageDataURL) {
-        showToast('❌ Please upload Front image first!', true);
-        return;
-    }
-    
     isProcessing = true;
-    showLoading('Processing order...');
+    buyBtn.disabled = true;
+    showLoading('Processing...');
     
     try {
-        let frontUrl = frontImageDataURL;
-        if (frontImageFile) {
-            const uploaded = await uploadImageToFirebase(frontImageFile, 'front');
-            if (uploaded) frontUrl = uploaded;
-        }
+        let fu = frontDataURL, bu = backDataURL;
+        if (frontFile) { const u = await uploadImage(frontFile, 'front'); if (u) fu = u; }
+        if (backFile) { const u = await uploadImage(backFile, 'back'); if (u) bu = u; }
         
-        let backUrl = backImageDataURL;
-        if (backImageFile) {
-            const uploaded = await uploadImageToFirebase(backImageFile, 'back');
-            if (uploaded) backUrl = uploaded;
-        }
-        
-        const price = getPrice(sizeKey);
-        
-        const orderData = {
+        const price = getPrice(analysisResult.sizeKey);
+        const oid = await saveOrder({
             type: 'dtf_analyzer',
-            size: sizeKey,
-            price: price,
-            dtfWidth: analysisResult.dtfWidth,
-            dtfHeight: analysisResult.dtfHeight,
-            category: analysisResult.category,
-            frontImageUrl: frontUrl,
-            backImageUrl: backUrl,
+            size: analysisResult.sizeKey,
+            price,
+            dtfWidth: analysisResult.dw,
+            dtfHeight: analysisResult.dh,
+            category: analysisResult.cat,
+            frontImageUrl: fu,
+            backImageUrl: bu,
             itemName: 'DTF Analyzed T-Shirt',
             quantity: 1,
-            totalAmount: price,
-            timestamp: Date.now()
-        };
+            totalAmount: price
+        });
         
-        const orderId = await saveOrderToFirebase(orderData);
-        
-        if (orderId) {
+        if (oid) {
             localStorage.removeItem('vedanta_dtf_cart');
-            
-            const checkoutData = {
-                type: 'dtf_analyzer',
-                orderId: orderId,
-                size: sizeKey,
-                price: price,
-                dtfWidth: analysisResult.dtfWidth,
-                dtfHeight: analysisResult.dtfHeight,
-                category: analysisResult.category,
-                frontImageUrl: frontUrl,
-                backImageUrl: backUrl,
-                timestamp: Date.now()
-            };
-            localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
-            
-            showToast('✅ Order created! Redirecting...');
-            setTimeout(() => {
-                window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
-            }, 1000);
+            localStorage.setItem('dtfDirectOrder', JSON.stringify({
+                type: 'dtf_analyzer', orderId: oid, size: analysisResult.sizeKey,
+                price, dtfWidth: analysisResult.dw, dtfHeight: analysisResult.dh,
+                category: analysisResult.cat, frontImageUrl: fu, backImageUrl: bu
+            }));
+            showToast('✅ Order created!');
+            setTimeout(() => window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + oid, 800);
         }
-        
-    } catch (err) {
-        console.error(err);
-        showToast('Order failed: ' + err.message, true);
+    } catch (e) {
+        showToast('Order failed', true);
     } finally {
         isProcessing = false;
+        buyBtn.disabled = false;
         hideLoading();
     }
 }
 
 // ============================================================
-// 15. EVENT LISTENERS
+// EVENTS
 // ============================================================
-
-// Front Upload
-frontUploadZone.addEventListener('click', () => frontFileInput.click());
-frontUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); frontUploadZone.classList.add('dragover'); });
-frontUploadZone.addEventListener('dragleave', () => { frontUploadZone.classList.remove('dragover'); });
-frontUploadZone.addEventListener('drop', (e) => {
+frontZone.addEventListener('click', () => frontInput.click());
+frontZone.addEventListener('dragover', e => { e.preventDefault(); frontZone.classList.add('dragover'); });
+frontZone.addEventListener('dragleave', () => frontZone.classList.remove('dragover'));
+frontZone.addEventListener('drop', e => {
     e.preventDefault();
-    frontUploadZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-        handleFileUpload(e.dataTransfer.files[0], 'front');
-    }
+    frontZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0], 'front');
 });
-frontFileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) {
-        handleFileUpload(e.target.files[0], 'front');
-    }
-});
-frontRemoveBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    removeImage('front');
-});
+frontInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0], 'front'); });
+frontRemove.addEventListener('click', e => { e.stopPropagation(); removeImage('front'); });
 
-// Back Upload
-backUploadZone.addEventListener('click', () => backFileInput.click());
-backUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); backUploadZone.classList.add('dragover'); });
-backUploadZone.addEventListener('dragleave', () => { backUploadZone.classList.remove('dragover'); });
-backUploadZone.addEventListener('drop', (e) => {
+backZone.addEventListener('click', () => backInput.click());
+backZone.addEventListener('dragover', e => { e.preventDefault(); backZone.classList.add('dragover'); });
+backZone.addEventListener('dragleave', () => backZone.classList.remove('dragover'));
+backZone.addEventListener('drop', e => {
     e.preventDefault();
-    backUploadZone.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-        handleFileUpload(e.dataTransfer.files[0], 'back');
-    }
+    backZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0], 'back');
 });
-backFileInput.addEventListener('change', (e) => {
-    if (e.target.files.length) {
-        handleFileUpload(e.target.files[0], 'back');
-    }
-});
-backRemoveBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    removeImage('back');
-});
+backInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0], 'back'); });
+backRemove.addEventListener('click', e => { e.stopPropagation(); removeImage('back'); });
 
-// Size Select - Auto Analyze
-tshirtSizeSelect.addEventListener('change', () => {
-    if (frontImageDataURL) {
-        analyzeTShirt();
-    }
-});
+sizeSelect.addEventListener('change', () => { if (frontDataURL) setTimeout(analyze, 100); });
+resetBtn.addEventListener('click', resetAll);
+addBtn.addEventListener('click', addToCart);
+buyBtn.addEventListener('click', buyNow);
 
-// Buttons
-document.getElementById('resetBtn').addEventListener('click', resetAll);
-addToCartBtn.addEventListener('click', addToCart);
-buyNowBtn.addEventListener('click', buyNow);
-
-// Cart Sidebar
-document.getElementById('cartIconBtn').addEventListener('click', () => {
-    document.getElementById('cartSidebar').classList.add('open');
-});
-document.getElementById('closeCartBtn').addEventListener('click', () => {
-    document.getElementById('cartSidebar').classList.remove('open');
-});
-document.getElementById('cartCheckoutBtn').addEventListener('click', () => {
-    if (cart.length === 0) {
-        showToast('Cart is empty', true);
-        return;
-    }
+$('cartIconBtn').addEventListener('click', () => $('cartSidebar').classList.add('open'));
+$('closeCartBtn').addEventListener('click', () => $('cartSidebar').classList.remove('open'));
+$('cartCheckoutBtn').addEventListener('click', () => {
+    if (!cart.length) { showToast('Cart empty', true); return; }
     localStorage.setItem('dtfCartCheckout', JSON.stringify(cart));
     localStorage.removeItem('vedanta_dtf_cart');
     window.location.href = 'secure-checkout2.html?type=dtf';
 });
-
-// Logout
-document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+$('logoutBtn').addEventListener('click', logoutUser);
 
 // ============================================================
-// 16. AUTH STATE LISTENER
+// AUTH STATE
 // ============================================================
-auth.onAuthStateChanged((user) => {
+auth.onAuthStateChanged(user => {
     if (user) {
-        currentUser = {
-            uid: user.uid,
-            phone: user.phoneNumber || '',
-            name: user.displayName || 'Customer',
-            email: user.email || ''
-        };
+        currentUser = { uid: user.uid, phone: user.phoneNumber || '', name: user.displayName || 'Customer', email: user.email || '' };
         localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
-        document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+        $('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
         loadCart();
     } else {
         const stored = JSON.parse(localStorage.getItem('vedantaUser'));
-        if (stored) {
-            currentUser = stored;
-            document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
-            loadCart();
-        } else {
-            currentUser = null;
-            document.getElementById('displayUser').innerText = 'Guest';
-            loadCart();
-        }
+        if (stored) { currentUser = stored; $('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer'; loadCart(); }
+        else { currentUser = null; $('displayUser').innerText = 'Guest'; loadCart(); }
     }
 });
 
 // ============================================================
-// 17. INIT
+// INIT
 // ============================================================
-loadCart();
 checkUser();
-console.log('✅ DTF Size Analyzer with Firebase ready!');
-console.log('💰 Pricing: S/M/L/XL = ₹599 | XXL/3XL = ₹650');
-console.log('📸 Front + Back image upload supported!');
+loadCart();
+console.log('✅ DTF Analyzer ready!');
+console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
 </html>
