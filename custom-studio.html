@@ -83,38 +83,83 @@
             font-size: 14px;
             margin-bottom: 25px;
         }
+        
+        /* ====== DUAL UPLOAD ZONES ====== */
+        .upload-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
         .upload-zone {
             border: 2.5px dashed rgba(212,175,55,0.4);
             border-radius: 20px;
-            padding: 50px 20px;
+            padding: 30px 15px;
             text-align: center;
             cursor: pointer;
             transition: all 0.3s ease;
             background: rgba(0,0,0,0.3);
+            position: relative;
         }
         .upload-zone:hover {
             border-color: #D4AF37;
             background: rgba(212,175,55,0.08);
         }
+        .upload-zone.uploaded {
+            border-color: #4CAF50;
+            background: rgba(76,175,80,0.08);
+        }
         .upload-zone i {
-            font-size: 56px;
+            font-size: 36px;
             color: #D4AF37;
-            margin-bottom: 15px;
+            margin-bottom: 8px;
         }
         .upload-zone p {
             color: #aaa;
-            font-size: 16px;
+            font-size: 13px;
         }
         .upload-zone .small {
             color: #666;
-            font-size: 12px;
-            margin-top: 8px;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+        .upload-zone .upload-label {
+            display: inline-block;
+            background: rgba(212,175,55,0.2);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            color: #D4AF37;
+            margin-top: 5px;
         }
         .upload-zone.dragover {
             border-color: #FF8C00;
             background: rgba(212,175,55,0.15);
         }
-        #fileInput { display: none; }
+        .upload-zone input[type="file"] { display: none; }
+        .upload-zone .preview-thumb {
+            max-width: 100%;
+            max-height: 80px;
+            border-radius: 10px;
+            margin-top: 8px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .upload-zone .remove-img {
+            position: absolute;
+            top: 8px;
+            right: 12px;
+            background: rgba(200,50,50,0.8);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            font-size: 12px;
+            display: none;
+        }
+        .upload-zone.uploaded .remove-img {
+            display: block;
+        }
         
         .size-selector {
             margin-top: 20px;
@@ -223,6 +268,11 @@
             transition: 0.3s;
         }
         .btn-primary:hover { transform: scale(1.02); }
+        .btn-primary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         .btn-secondary {
             flex: 1;
             padding: 14px;
@@ -249,6 +299,11 @@
             transition: 0.3s;
         }
         .btn-buy:hover { transform: scale(1.02); }
+        .btn-buy:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
         
         .toast {
             position: fixed;
@@ -310,7 +365,6 @@
         }
         .note strong { color: #D4AF37; }
 
-        /* Cart Sidebar */
         .cart-sidebar {
             position: fixed;
             top: 0;
@@ -340,7 +394,6 @@
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; font-size: 16px; }
         
-        /* User info bar */
         .user-info-bar {
             background: rgba(212,175,55,0.1);
             border-radius: 14px;
@@ -369,11 +422,12 @@
         }
         
         @media (max-width: 600px) {
+            .upload-row { grid-template-columns: 1fr; }
             .container { padding: 0 12px; margin: 15px auto; }
             .card { padding: 20px; }
             .card-title { font-size: 18px; }
-            .upload-zone { padding: 30px 15px; }
-            .upload-zone i { font-size: 40px; }
+            .upload-zone { padding: 20px 15px; }
+            .upload-zone i { font-size: 28px; }
             .result-big { font-size: 22px; }
             .price-display .amount { font-size: 28px; }
             .action-buttons { flex-direction: column; }
@@ -394,21 +448,37 @@
 
 <div class="container">
     <div class="card">
-        <!-- User Info Bar -->
         <div class="user-info-bar" id="userInfoBar">
             <span><i class="fas fa-user-circle"></i> <span id="displayUser">Loading...</span></span>
             <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
 
         <div class="card-title"><i class="fas fa-ruler-combined" style="color:#D4AF37;"></i> DTF Print Size Analyzer</div>
-        <div class="card-subtitle">Upload a photo of T-Shirt with design → Get exact print size &amp; price</div>
+        <div class="card-subtitle">Upload Front &amp; Back photos of T-Shirt with design → Get exact print size &amp; price</div>
 
-        <!-- Upload Zone -->
-        <div class="upload-zone" id="uploadZone">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p><strong>Click or drag &amp; drop</strong> your T-Shirt photo</p>
-            <p class="small">Supports JPG, PNG, WEBP • Max 5MB</p>
-            <input type="file" id="fileInput" accept="image/*">
+        <!-- ====== DUAL UPLOAD ZONES ====== -->
+        <div class="upload-row">
+            <!-- Front Upload -->
+            <div class="upload-zone" id="frontUploadZone">
+                <i class="fas fa-tshirt"></i>
+                <p><strong>Front Design</strong></p>
+                <p class="small">Click or drag to upload</p>
+                <span class="upload-label">FRONT</span>
+                <input type="file" id="frontFileInput" accept="image/*">
+                <img class="preview-thumb" id="frontPreviewThumb" style="display:none;">
+                <button class="remove-img" id="frontRemoveBtn">✕</button>
+            </div>
+            
+            <!-- Back Upload -->
+            <div class="upload-zone" id="backUploadZone">
+                <i class="fas fa-undo-alt"></i>
+                <p><strong>Back Design</strong></p>
+                <p class="small">Click or drag to upload</p>
+                <span class="upload-label">BACK</span>
+                <input type="file" id="backFileInput" accept="image/*">
+                <img class="preview-thumb" id="backPreviewThumb" style="display:none;">
+                <button class="remove-img" id="backRemoveBtn">✕</button>
+            </div>
         </div>
 
         <!-- Size Selector -->
@@ -425,9 +495,18 @@
             </select>
         </div>
 
-        <!-- Preview -->
+        <!-- Preview (Main combined preview) -->
         <div class="preview-area" id="previewArea">
-            <img id="previewImage" src="" alt="Uploaded T-Shirt">
+            <div style="display:flex; gap:10px; flex-wrap:wrap; justify-content:center;">
+                <div style="flex:1; min-width:200px; text-align:center;">
+                    <p style="font-size:11px; color:#888;">Front</p>
+                    <img id="frontPreviewMain" style="max-height:180px; border-radius:12px; border:1px solid rgba(212,175,55,0.2);">
+                </div>
+                <div style="flex:1; min-width:200px; text-align:center;">
+                    <p style="font-size:11px; color:#888;">Back</p>
+                    <img id="backPreviewMain" style="max-height:180px; border-radius:12px; border:1px solid rgba(212,175,55,0.2);">
+                </div>
+            </div>
         </div>
 
         <!-- Results -->
@@ -463,8 +542,8 @@
 
             <div class="action-buttons">
                 <button class="btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
-                <button class="btn-primary" id="addToCartBtn"><i class="fas fa-cart-plus"></i> Add to Cart</button>
-                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> Buy Now</button>
+                <button class="btn-primary" id="addToCartBtn" disabled><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                <button class="btn-buy" id="buyNowBtn" disabled><i class="fas fa-bolt"></i> Buy Now</button>
             </div>
         </div>
 
@@ -510,7 +589,7 @@ const auth = firebase.auth();
 const storage = firebase.storage();
 
 // ============================================================
-// 1. SIZE CHART (Real Garment Inches - Internal Use Only)
+// 1. SIZE CHART
 // ============================================================
 const GARMENT_SIZES = {
     'S':  { width: 18, height: 26 },
@@ -522,7 +601,7 @@ const GARMENT_SIZES = {
 };
 
 // ============================================================
-// 2. PRICE LOGIC (Fixed Pricing)
+// 2. PRICE LOGIC
 // ============================================================
 function getPrice(sizeKey) {
     if (sizeKey === 'XXL' || sizeKey === '3XL') return 650;
@@ -532,23 +611,35 @@ function getPrice(sizeKey) {
 // ============================================================
 // 3. DOM ELEMENTS
 // ============================================================
-const uploadZone = document.getElementById('uploadZone');
-const fileInput = document.getElementById('fileInput');
+const frontUploadZone = document.getElementById('frontUploadZone');
+const backUploadZone = document.getElementById('backUploadZone');
+const frontFileInput = document.getElementById('frontFileInput');
+const backFileInput = document.getElementById('backFileInput');
+const frontPreviewThumb = document.getElementById('frontPreviewThumb');
+const backPreviewThumb = document.getElementById('backPreviewThumb');
+const frontPreviewMain = document.getElementById('frontPreviewMain');
+const backPreviewMain = document.getElementById('backPreviewMain');
+const frontRemoveBtn = document.getElementById('frontRemoveBtn');
+const backRemoveBtn = document.getElementById('backRemoveBtn');
 const previewArea = document.getElementById('previewArea');
-const previewImage = document.getElementById('previewImage');
 const resultsPanel = document.getElementById('resultsPanel');
 const tshirtSizeSelect = document.getElementById('tshirtSizeSelect');
 const toastMsg = document.getElementById('toastMsg');
 const loadingOverlay = document.getElementById('loadingOverlay');
+const addToCartBtn = document.getElementById('addToCartBtn');
+const buyNowBtn = document.getElementById('buyNowBtn');
 
-let uploadedImageDataURL = null;
-let uploadedImageFile = null;
+let frontImageDataURL = null;
+let frontImageFile = null;
+let backImageDataURL = null;
+let backImageFile = null;
 let analysisResult = null;
 let cart = [];
 let currentUser = null;
+let isProcessing = false;
 
 // ============================================================
-// 4. TOAST FUNCTION
+// 4. TOAST & LOADING
 // ============================================================
 function showToast(msg, isError = false) {
     toastMsg.innerText = msg;
@@ -558,17 +649,17 @@ function showToast(msg, isError = false) {
     toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 3000);
 }
 
-// ============================================================
-// 5. LOADING
-// ============================================================
 function showLoading(text = "🔍 Analyzing T-Shirt Design...") {
     document.querySelector('.loading-text').innerText = text;
     loadingOverlay.classList.add('active');
 }
-function hideLoading() { loadingOverlay.classList.remove('active'); }
+
+function hideLoading() {
+    loadingOverlay.classList.remove('active');
+}
 
 // ============================================================
-// 6. AUTH - CHECK USER
+// 5. AUTH
 // ============================================================
 function checkUser() {
     const stored = JSON.parse(localStorage.getItem('vedantaUser'));
@@ -577,8 +668,6 @@ function checkUser() {
         document.getElementById('displayUser').innerText = stored.name || stored.phone || 'Customer';
         return true;
     }
-    
-    // Check if Firebase auth has user
     if (auth.currentUser) {
         const user = auth.currentUser;
         currentUser = {
@@ -591,7 +680,6 @@ function checkUser() {
         document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
         return true;
     }
-    
     return false;
 }
 
@@ -609,15 +697,16 @@ function logoutUser() {
 }
 
 // ============================================================
-// 7. UPLOAD IMAGE TO FIREBASE STORAGE
+// 6. UPLOAD IMAGE TO FIREBASE
 // ============================================================
-async function uploadImageToFirebase(file) {
+async function uploadImageToFirebase(file, side) {
     if (!currentUser) {
         showToast('Please login first', true);
         return null;
     }
+    if (!file) return null;
     
-    const fileName = `dtf_analyzer/${currentUser.uid}/${Date.now()}_${file.name}`;
+    const fileName = `dtf_analyzer/${currentUser.uid}/${side}_${Date.now()}_${file.name}`;
     const ref = storage.ref().child(fileName);
     
     try {
@@ -626,13 +715,12 @@ async function uploadImageToFirebase(file) {
         return url;
     } catch (err) {
         console.error('Upload error:', err);
-        showToast('Image upload failed: ' + err.message, true);
         return null;
     }
 }
 
 // ============================================================
-// 8. SAVE ORDER TO FIRESTORE
+// 7. SAVE ORDER TO FIRESTORE
 // ============================================================
 async function saveOrderToFirebase(orderData) {
     if (!currentUser) {
@@ -665,7 +753,7 @@ async function saveOrderToFirebase(orderData) {
 }
 
 // ============================================================
-// 9. CORE: DTF SIZE DETECTION
+// 8. DTF SIZE DETECTION (Uses Front Image for analysis)
 // ============================================================
 function detectDTFSize(imageDataURL, garmentSize) {
     return new Promise((resolve) => {
@@ -754,7 +842,7 @@ function detectDTFSize(imageDataURL, garmentSize) {
 }
 
 // ============================================================
-// 10. MAIN ANALYSIS FUNCTION
+// 9. MAIN ANALYSIS FUNCTION
 // ============================================================
 async function analyzeTShirt() {
     const sizeKey = tshirtSizeSelect.value;
@@ -762,16 +850,21 @@ async function analyzeTShirt() {
         showToast('❌ Please select T-Shirt Size first!', true);
         return;
     }
-    if (!uploadedImageDataURL) {
-        showToast('❌ Please upload a T-Shirt photo first!', true);
+    if (!frontImageDataURL) {
+        showToast('❌ Please upload Front image first!', true);
         return;
     }
+    
+    // Disable buttons during analysis
+    addToCartBtn.disabled = true;
+    buyNowBtn.disabled = true;
     
     const garmentSize = GARMENT_SIZES[sizeKey];
     showLoading();
     
     try {
-        const result = await detectDTFSize(uploadedImageDataURL, garmentSize);
+        // Use Front image for analysis (back image is for preview only)
+        const result = await detectDTFSize(frontImageDataURL, garmentSize);
         analysisResult = result;
         
         document.getElementById('dtfSizeDisplay').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
@@ -786,13 +879,99 @@ async function analyzeTShirt() {
         document.getElementById('priceSizeInfo').innerHTML = `Size: ${sizeKey} • ₹${finalPrice}`;
         
         resultsPanel.classList.add('show');
+        
+        // Enable buttons after successful analysis
+        addToCartBtn.disabled = false;
+        buyNowBtn.disabled = false;
+        
         showToast('✅ Analysis complete! Exact DTF size detected.');
         
     } catch (err) {
         console.error(err);
         showToast('❌ Analysis failed. Please try again.', true);
+        addToCartBtn.disabled = true;
+        buyNowBtn.disabled = true;
     } finally {
         hideLoading();
+    }
+}
+
+// ============================================================
+// 10. FILE UPLOAD HANDLERS
+// ============================================================
+function handleFileUpload(file, side) {
+    if (!file.type.startsWith('image/')) {
+        showToast('❌ Please upload an image file!', true);
+        return false;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ File too large! Max 5MB.', true);
+        return false;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const dataURL = e.target.result;
+        
+        if (side === 'front') {
+            frontImageDataURL = dataURL;
+            frontImageFile = file;
+            frontPreviewThumb.src = dataURL;
+            frontPreviewThumb.style.display = 'block';
+            frontPreviewMain.src = dataURL;
+            frontUploadZone.classList.add('uploaded');
+            showToast('✅ Front image uploaded!');
+        } else {
+            backImageDataURL = dataURL;
+            backImageFile = file;
+            backPreviewThumb.src = dataURL;
+            backPreviewThumb.style.display = 'block';
+            backPreviewMain.src = dataURL;
+            backUploadZone.classList.add('uploaded');
+            showToast('✅ Back image uploaded!');
+        }
+        
+        // Show combined preview
+        previewArea.classList.add('show');
+        
+        // Auto-analyze if both images are uploaded or front is uploaded
+        if (frontImageDataURL && tshirtSizeSelect.value) {
+            analyzeTShirt();
+        }
+    };
+    reader.readAsDataURL(file);
+    return true;
+}
+
+function removeImage(side) {
+    if (side === 'front') {
+        frontImageDataURL = null;
+        frontImageFile = null;
+        frontPreviewThumb.style.display = 'none';
+        frontPreviewThumb.src = '';
+        frontPreviewMain.src = '';
+        frontUploadZone.classList.remove('uploaded');
+        frontFileInput.value = '';
+    } else {
+        backImageDataURL = null;
+        backImageFile = null;
+        backPreviewThumb.style.display = 'none';
+        backPreviewThumb.src = '';
+        backPreviewMain.src = '';
+        backUploadZone.classList.remove('uploaded');
+        backFileInput.value = '';
+    }
+    
+    // Hide preview if both are empty
+    if (!frontImageDataURL && !backImageDataURL) {
+        previewArea.classList.remove('show');
+        resultsPanel.classList.remove('show');
+        addToCartBtn.disabled = true;
+        buyNowBtn.disabled = true;
+        analysisResult = null;
+    } else if (frontImageDataURL && tshirtSizeSelect.value) {
+        // Re-analyze if front still exists
+        analyzeTShirt();
     }
 }
 
@@ -800,14 +979,14 @@ async function analyzeTShirt() {
 // 11. RESET
 // ============================================================
 function resetAll() {
-    uploadedImageDataURL = null;
-    uploadedImageFile = null;
+    removeImage('front');
+    removeImage('back');
     analysisResult = null;
-    previewArea.classList.remove('show');
-    previewImage.src = '';
     resultsPanel.classList.remove('show');
-    fileInput.value = '';
+    previewArea.classList.remove('show');
     tshirtSizeSelect.value = '';
+    addToCartBtn.disabled = true;
+    buyNowBtn.disabled = true;
     showToast('🔄 Reset complete');
 }
 
@@ -853,7 +1032,7 @@ function updateCartUI() {
         container.innerHTML += `
             <div class="cart-item">
                 <div class="cart-item-img">
-                    ${item.imageData ? `<img src="${item.imageData}">` : '<i class="fas fa-tshirt"></i>'}
+                    ${item.frontImageData ? `<img src="${item.frontImageData}">` : '<i class="fas fa-tshirt"></i>'}
                 </div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.name || 'Uploaded T-Shirt'}</div>
@@ -904,9 +1083,11 @@ function updateCartUI() {
 }
 
 // ============================================================
-// 13. ADD TO CART (With Firebase)
+// 13. ADD TO CART (FIXED - Always works)
 // ============================================================
 async function addToCart() {
+    if (isProcessing) return;
+    
     if (!analysisResult) {
         showToast('❌ Please analyze the design first!', true);
         return;
@@ -920,31 +1101,43 @@ async function addToCart() {
         showToast('❌ Please login first!', true);
         return;
     }
+    if (!frontImageDataURL) {
+        showToast('❌ Please upload Front image first!', true);
+        return;
+    }
     
+    isProcessing = true;
     showLoading('Adding to cart...');
     
     try {
-        // Upload image to Firebase
-        let imageUrl = uploadedImageDataURL;
-        if (uploadedImageFile) {
-            const uploadedUrl = await uploadImageToFirebase(uploadedImageFile);
-            if (uploadedUrl) imageUrl = uploadedUrl;
+        let frontUrl = frontImageDataURL;
+        if (frontImageFile) {
+            const uploaded = await uploadImageToFirebase(frontImageFile, 'front');
+            if (uploaded) frontUrl = uploaded;
+        }
+        
+        let backUrl = backImageDataURL;
+        if (backImageFile) {
+            const uploaded = await uploadImageToFirebase(backImageFile, 'back');
+            if (uploaded) backUrl = uploaded;
         }
         
         const price = getPrice(sizeKey);
         
         const cartItem = {
-            id: Date.now(),
-            name: 'Uploaded T-Shirt 🖼️',
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            name: 'DTF Analyzed T-Shirt 🖼️',
             size: sizeKey,
             price: price,
             dtfWidth: analysisResult.dtfWidth,
             dtfHeight: analysisResult.dtfHeight,
             category: analysisResult.category,
-            imageData: imageUrl,
+            frontImageData: frontUrl,
+            backImageData: backUrl,
             quantity: 1,
             timestamp: Date.now(),
-            userId: currentUser.uid
+            userId: currentUser.uid,
+            isDTF: true
         };
         
         cart.push(cartItem);
@@ -955,14 +1148,17 @@ async function addToCart() {
         console.error(err);
         showToast('Failed to add to cart: ' + err.message, true);
     } finally {
+        isProcessing = false;
         hideLoading();
     }
 }
 
 // ============================================================
-// 14. BUY NOW (With Firebase Order Save)
+// 14. BUY NOW (FIXED - Always works)
 // ============================================================
 async function buyNow() {
+    if (isProcessing) return;
+    
     if (!analysisResult) {
         showToast('❌ Please analyze the design first!', true);
         return;
@@ -976,15 +1172,25 @@ async function buyNow() {
         showToast('❌ Please login first!', true);
         return;
     }
+    if (!frontImageDataURL) {
+        showToast('❌ Please upload Front image first!', true);
+        return;
+    }
     
+    isProcessing = true;
     showLoading('Processing order...');
     
     try {
-        // Upload image to Firebase
-        let imageUrl = uploadedImageDataURL;
-        if (uploadedImageFile) {
-            const uploadedUrl = await uploadImageToFirebase(uploadedImageFile);
-            if (uploadedUrl) imageUrl = uploadedUrl;
+        let frontUrl = frontImageDataURL;
+        if (frontImageFile) {
+            const uploaded = await uploadImageToFirebase(frontImageFile, 'front');
+            if (uploaded) frontUrl = uploaded;
+        }
+        
+        let backUrl = backImageDataURL;
+        if (backImageFile) {
+            const uploaded = await uploadImageToFirebase(backImageFile, 'back');
+            if (uploaded) backUrl = uploaded;
         }
         
         const price = getPrice(sizeKey);
@@ -996,8 +1202,9 @@ async function buyNow() {
             dtfWidth: analysisResult.dtfWidth,
             dtfHeight: analysisResult.dtfHeight,
             category: analysisResult.category,
-            imageUrl: imageUrl,
-            itemName: 'Uploaded T-Shirt',
+            frontImageUrl: frontUrl,
+            backImageUrl: backUrl,
+            itemName: 'DTF Analyzed T-Shirt',
             quantity: 1,
             totalAmount: price,
             timestamp: Date.now()
@@ -1006,10 +1213,8 @@ async function buyNow() {
         const orderId = await saveOrderToFirebase(orderData);
         
         if (orderId) {
-            // Clear cart and redirect
             localStorage.removeItem('vedanta_dtf_cart');
             
-            // Save for checkout page
             const checkoutData = {
                 type: 'dtf_analyzer',
                 orderId: orderId,
@@ -1018,7 +1223,8 @@ async function buyNow() {
                 dtfWidth: analysisResult.dtfWidth,
                 dtfHeight: analysisResult.dtfHeight,
                 category: analysisResult.category,
-                imageUrl: imageUrl,
+                frontImageUrl: frontUrl,
+                backImageUrl: backUrl,
                 timestamp: Date.now()
             };
             localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
@@ -1033,6 +1239,7 @@ async function buyNow() {
         console.error(err);
         showToast('Order failed: ' + err.message, true);
     } finally {
+        isProcessing = false;
         hideLoading();
     }
 }
@@ -1041,64 +1248,59 @@ async function buyNow() {
 // 15. EVENT LISTENERS
 // ============================================================
 
-// Upload
-uploadZone.addEventListener('click', () => fileInput.click());
-
-uploadZone.addEventListener('dragover', (e) => {
+// Front Upload
+frontUploadZone.addEventListener('click', () => frontFileInput.click());
+frontUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); frontUploadZone.classList.add('dragover'); });
+frontUploadZone.addEventListener('dragleave', () => { frontUploadZone.classList.remove('dragover'); });
+frontUploadZone.addEventListener('drop', (e) => {
     e.preventDefault();
-    uploadZone.classList.add('dragover');
-});
-uploadZone.addEventListener('dragleave', () => {
-    uploadZone.classList.remove('dragover');
-});
-uploadZone.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadZone.classList.remove('dragover');
+    frontUploadZone.classList.remove('dragover');
     if (e.dataTransfer.files.length) {
-        fileInput.files = e.dataTransfer.files;
-        handleFileUpload(e.dataTransfer.files[0]);
+        handleFileUpload(e.dataTransfer.files[0], 'front');
     }
 });
-
-fileInput.addEventListener('change', (e) => {
+frontFileInput.addEventListener('change', (e) => {
     if (e.target.files.length) {
-        handleFileUpload(e.target.files[0]);
+        handleFileUpload(e.target.files[0], 'front');
     }
 });
+frontRemoveBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    removeImage('front');
+});
 
-function handleFileUpload(file) {
-    if (!file.type.startsWith('image/')) {
-        showToast('❌ Please upload an image file!', true);
-        return;
+// Back Upload
+backUploadZone.addEventListener('click', () => backFileInput.click());
+backUploadZone.addEventListener('dragover', (e) => { e.preventDefault(); backUploadZone.classList.add('dragover'); });
+backUploadZone.addEventListener('dragleave', () => { backUploadZone.classList.remove('dragover'); });
+backUploadZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    backUploadZone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        handleFileUpload(e.dataTransfer.files[0], 'back');
     }
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ File too large! Max 5MB.', true);
-        return;
+});
+backFileInput.addEventListener('change', (e) => {
+    if (e.target.files.length) {
+        handleFileUpload(e.target.files[0], 'back');
     }
-    
-    uploadedImageFile = file;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        uploadedImageDataURL = e.target.result;
-        previewImage.src = uploadedImageDataURL;
-        previewArea.classList.add('show');
-        resultsPanel.classList.remove('show');
-        showToast('✅ Image uploaded! Select size and click Analyze.');
-    };
-    reader.readAsDataURL(file);
-}
+});
+backRemoveBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    removeImage('back');
+});
 
-// Auto-Analyze on Size Change
+// Size Select - Auto Analyze
 tshirtSizeSelect.addEventListener('change', () => {
-    if (uploadedImageDataURL) {
+    if (frontImageDataURL) {
         analyzeTShirt();
     }
 });
 
 // Buttons
 document.getElementById('resetBtn').addEventListener('click', resetAll);
-document.getElementById('addToCartBtn').addEventListener('click', addToCart);
-document.getElementById('buyNowBtn').addEventListener('click', buyNow);
+addToCartBtn.addEventListener('click', addToCart);
+buyNowBtn.addEventListener('click', buyNow);
 
 // Cart Sidebar
 document.getElementById('cartIconBtn').addEventListener('click', () => {
@@ -1152,8 +1354,10 @@ auth.onAuthStateChanged((user) => {
 // 17. INIT
 // ============================================================
 loadCart();
+checkUser();
 console.log('✅ DTF Size Analyzer with Firebase ready!');
 console.log('💰 Pricing: S/M/L/XL = ₹599 | XXL/3XL = ₹650');
+console.log('📸 Front + Back image upload supported!');
 </script>
 </body>
 </html>
