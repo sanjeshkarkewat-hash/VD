@@ -75,19 +75,19 @@
         }
 
         /* ============================================================ */
-        /* 🔥 HERO SECTION - BIG "UPLOAD YOUR T-SHIRT WITH DESIGN" BUTTON */
+        /* 🔥 HERO SECTION - MEDIUM SIZE BUTTON (SIRF BUTTON) */
         /* ============================================================ */
         .hero-upload-section {
             text-align: center;
-            padding: 60px 20px 50px 20px;
-            background: radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, transparent 70%);
+            padding: 30px 20px 25px 20px;
+            background: radial-gradient(ellipse at center, rgba(212,175,55,0.06) 0%, transparent 70%);
             border-bottom: 1px solid rgba(212,175,55,0.1);
         }
         .hero-upload-section h1 {
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             color: #FFFFFF;
-            margin-bottom: 10px;
+            margin-bottom: 6px;
         }
         .hero-upload-section h1 span {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -97,30 +97,30 @@
         }
         .hero-upload-section p {
             color: #888;
-            font-size: 16px;
-            margin-bottom: 35px;
-            max-width: 600px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            max-width: 500px;
             margin-left: auto;
             margin-right: auto;
         }
 
-        /* 🚀 The Main Big Button - SIRF BUTTON, KOI UPLOAD NAHI */
+        /* 🚀 The Main Button - MEDIUM SIZE */
         .upload-tshirt-hero {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 20px;
-            padding: 28px 60px;
+            gap: 14px;
+            padding: 16px 40px;
             background: linear-gradient(135deg, #D4AF37, #FF8C00, #D4AF37);
             background-size: 200% 200%;
             border: none;
-            border-radius: 80px;
+            border-radius: 60px;
             color: #050508;
-            font-size: 30px;
-            font-weight: 800;
+            font-size: 20px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.5s ease;
-            box-shadow: 0 0 60px rgba(212,175,55,0.2);
+            box-shadow: 0 0 40px rgba(212,175,55,0.15);
             animation: shimmer 3s ease-in-out infinite, float 3s ease-in-out infinite;
             position: relative;
             overflow: hidden;
@@ -134,24 +134,17 @@
             left: -50%;
             width: 200%;
             height: 200%;
-            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.12), transparent);
             transform: rotate(45deg);
             animation: shine 4s ease-in-out infinite;
         }
         .upload-tshirt-hero i {
-            font-size: 40px;
+            font-size: 26px;
             animation: bounce-icon 2s ease-in-out infinite;
         }
-        .upload-tshirt-hero .sub-text {
-            display: block;
-            font-size: 14px;
-            font-weight: 400;
-            opacity: 0.8;
-            margin-top: 4px;
-        }
         .upload-tshirt-hero:hover {
-            transform: scale(1.06) translateY(-4px);
-            box-shadow: 0 0 100px rgba(212,175,55,0.4);
+            transform: scale(1.04) translateY(-3px);
+            box-shadow: 0 0 60px rgba(212,175,55,0.3);
         }
         .upload-tshirt-hero:active {
             transform: scale(0.97);
@@ -165,7 +158,7 @@
         }
         @keyframes float {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-10px); }
+            50% { transform: translateY(-5px); }
             100% { transform: translateY(0px); }
         }
         @keyframes shine {
@@ -174,10 +167,9 @@
         }
         @keyframes bounce-icon {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-5px); }
         }
 
-        /* Rest of the page - Design Tools etc. */
         .designer-container {
             width: 100%;
             margin: 0;
@@ -658,28 +650,25 @@
 
         @media (max-width: 768px) {
             .hero-upload-section {
-                padding: 40px 15px 30px 15px;
+                padding: 20px 15px 18px 15px;
             }
             .hero-upload-section h1 {
-                font-size: 24px;
+                font-size: 20px;
             }
             .hero-upload-section p {
-                font-size: 14px;
+                font-size: 12px;
+                margin-bottom: 15px;
                 padding: 0 10px;
             }
             .upload-tshirt-hero {
-                padding: 20px 30px;
-                font-size: 20px;
-                gap: 14px;
+                padding: 12px 24px;
+                font-size: 16px;
+                gap: 10px;
                 width: 100%;
                 max-width: 100%;
-                flex-wrap: wrap;
             }
             .upload-tshirt-hero i {
-                font-size: 28px;
-            }
-            .upload-tshirt-hero .sub-text {
-                font-size: 12px;
+                font-size: 20px;
             }
 
             .style-section {
@@ -921,19 +910,16 @@
 </div>
 
 <!-- ============================================================== -->
-<!-- 🔥 HERO SECTION - SIRF EK BADA BUTTON (KOI UPLOAD NAHI) -->
+<!-- 🔥 HERO SECTION - SIRF MEDIUM SIZE BUTTON -->
 <!-- ============================================================== -->
 <div class="hero-upload-section">
     <h1>📸 Upload Your <span>T-Shirt</span></h1>
-    <p>Upload a photo of your T-Shirt with the design already on it.<br>We'll detect the exact print size automatically!</p>
+    <p>Upload your T-Shirt photo with the design and get exact print size</p>
     
-    <!-- 🚀 BIG BUTTON - SIRF LINK, KOI UPLOAD NAHI -->
+    <!-- 🚀 BUTTON - SIRF LINK, KOI EXTRA TEXT NAHI -->
     <a href="custom-studio.html" class="upload-tshirt-hero">
         <i class="fas fa-cloud-upload-alt"></i>
-        <span>
-            Upload Your T-Shirt With Design
-            <span class="sub-text">📐 Get Exact DTF Size &amp; Price</span>
-        </span>
+        Upload Your T-Shirt With Design
     </a>
 </div>
 
