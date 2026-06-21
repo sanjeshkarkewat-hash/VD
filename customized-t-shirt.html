@@ -12,7 +12,7 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>VEDANTA | Design Studio</title>
+    <title>VEDANTA | Custom T-Shirt Designer</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -32,7 +32,7 @@
 
         .header {
             text-align: center;
-            padding: 15px 15px 10px 15px;
+            padding: 20px 15px;
             border-bottom: 1px solid rgba(212,175,55,0.2);
             position: relative;
             background: #050508;
@@ -51,76 +51,13 @@
             color: #D4AF37;
             margin-top: 4px;
         }
-
-        /* ========== NAVIGATION LINKS ========== */
-        .nav-links {
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-            margin: 10px 0 8px 0;
-            flex-wrap: wrap;
-        }
-        .nav-link {
-            color: #888;
-            text-decoration: none;
-            font-size: 13px;
-            font-weight: 600;
-            padding: 6px 20px;
-            border-radius: 30px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            border: 1.5px solid transparent;
-        }
-        .nav-link:hover {
-            color: #D4AF37;
-            border-color: rgba(212,175,55,0.25);
-            background: rgba(212,175,55,0.05);
-        }
-        .nav-link.active {
-            color: #D4AF37;
-            background: rgba(212,175,55,0.12);
-            border-color: rgba(212,175,55,0.35);
-            box-shadow: 0 0 20px rgba(212,175,55,0.05);
-        }
-        .nav-link i {
-            font-size: 14px;
-        }
-
-        /* ========== UPLOAD T-SHIRT BUTTON ========== */
-        .upload-tshirt-btn {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            border: none;
-            color: #050508;
-            padding: 8px 20px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 13px;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            margin: 6px 0 4px 0;
-            border: 1px solid rgba(212,175,55,0.4);
-            box-shadow: 0 0 30px rgba(212,175,55,0.1);
-        }
-        .upload-tshirt-btn:hover {
-            transform: scale(1.05);
-            box-shadow: 0 0 40px rgba(212,175,55,0.3);
-        }
-        .upload-tshirt-btn i {
-            font-size: 14px;
-        }
-
         .cart-icon-header {
             position: absolute;
             right: 15px;
-            top: 12px;
+            top: 18px;
             cursor: pointer;
             background: rgba(212,175,55,0.15);
-            padding: 6px 14px;
+            padding: 8px 14px;
             border-radius: 40px;
             border: 1px solid rgba(212,175,55,0.4);
             display: flex;
@@ -137,176 +74,201 @@
             font-weight: bold;
         }
 
-        /* ========== T-SHIRT UPLOAD MODAL ========== */
-        .tshirt-upload-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.95);
-            z-index: 25000;
-            align-items: center;
-            justify-content: center;
-            backdrop-filter: blur(10px);
-        }
-        .tshirt-upload-modal.open {
-            display: flex;
-        }
-        .tshirt-upload-content {
-            background: rgba(15,15,22,0.98);
-            border-radius: 28px;
-            padding: 35px;
-            max-width: 550px;
-            width: 92%;
+        /* ============================================================ */
+        /* 🔥 BIG UPLOAD YOUR T-SHIRT BUTTON - HERO SECTION */
+        /* ============================================================ */
+        .hero-upload-section {
             text-align: center;
-            border: 1px solid rgba(212,175,55,0.2);
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
+            padding: 50px 20px 40px 20px;
+            background: radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, transparent 70%);
+            border-bottom: 1px solid rgba(212,175,55,0.1);
         }
-        .tshirt-upload-content h2 {
-            color: #D4AF37;
-            font-size: 24px;
+        .hero-upload-section h1 {
+            font-size: 32px;
+            font-weight: 700;
+            color: #FFFFFF;
             margin-bottom: 8px;
         }
-        .tshirt-upload-content p {
-            color: #aaa;
-            font-size: 14px;
-            margin-bottom: 25px;
-        }
-        .close-modal-btn {
-            position: absolute;
-            top: 15px;
-            right: 20px;
-            font-size: 28px;
-            cursor: pointer;
-            color: #888;
-            transition: 0.3s;
-            background: none;
-            border: none;
-        }
-        .close-modal-btn:hover {
-            color: #D4AF37;
-        }
-        .upload-zone-modal {
-            border: 2.5px dashed rgba(212,175,55,0.4);
-            border-radius: 20px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(0,0,0,0.3);
-        }
-        .upload-zone-modal:hover {
-            border-color: #D4AF37;
-            background: rgba(212,175,55,0.08);
-        }
-        .upload-zone-modal i {
-            font-size: 48px;
-            color: #D4AF37;
-            margin-bottom: 12px;
-        }
-        .upload-zone-modal p {
-            color: #ccc;
-            font-size: 15px;
-            margin-bottom: 4px;
-        }
-        .upload-zone-modal .small {
-            color: #666;
-            font-size: 12px;
-        }
-        .upload-zone-modal.dragover {
-            border-color: #FF8C00;
-            background: rgba(212,175,55,0.15);
-        }
-        .preview-modal-img {
-            margin-top: 20px;
-            max-width: 100%;
-            max-height: 300px;
-            border-radius: 16px;
-            border: 1px solid rgba(212,175,55,0.2);
-            display: none;
-        }
-        .modal-actions {
-            display: flex;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        .modal-actions .btn-primary {
-            flex: 1;
-            padding: 12px;
+        .hero-upload-section h1 span {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .hero-upload-section p {
+            color: #888;
+            font-size: 15px;
+            margin-bottom: 30px;
+        }
+
+        /* 🚀 The Main Big Button */
+        .upload-tshirt-hero {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 18px;
+            padding: 24px 55px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00, #D4AF37);
+            background-size: 200% 200%;
             border: none;
-            border-radius: 40px;
+            border-radius: 80px;
             color: #050508;
-            font-weight: 700;
+            font-size: 28px;
+            font-weight: 800;
             cursor: pointer;
+            transition: all 0.5s ease;
+            box-shadow: 0 0 60px rgba(212,175,55,0.2);
+            animation: shimmer 3s ease-in-out infinite, float 3s ease-in-out infinite;
+            position: relative;
+            overflow: hidden;
+            text-decoration: none;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .upload-tshirt-hero::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.15), transparent);
+            transform: rotate(45deg);
+            animation: shine 4s ease-in-out infinite;
+        }
+        .upload-tshirt-hero i {
+            font-size: 38px;
+            animation: bounce-icon 2s ease-in-out infinite;
+        }
+        .upload-tshirt-hero .sub-text {
+            display: block;
             font-size: 14px;
+            font-weight: 400;
+            opacity: 0.8;
+            margin-top: 2px;
         }
-        .modal-actions .btn-secondary {
-            flex: 1;
-            padding: 12px;
-            background: rgba(212,175,55,0.15);
-            border: 1px solid #D4AF37;
-            border-radius: 40px;
-            color: #D4AF37;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
+        .upload-tshirt-hero:hover {
+            transform: scale(1.06) translateY(-4px);
+            box-shadow: 0 0 100px rgba(212,175,55,0.4);
         }
-        .modal-actions .btn-secondary:hover {
-            background: rgba(212,175,55,0.25);
+        .upload-tshirt-hero:active {
+            transform: scale(0.97);
         }
-        .modal-actions .btn-danger {
-            flex: 0.5;
-            padding: 12px;
-            background: rgba(200,50,50,0.2);
-            border: 1px solid #F44336;
-            border-radius: 40px;
-            color: #F44336;
-            font-weight: 700;
-            cursor: pointer;
-            font-size: 14px;
+
+        /* Animations */
+        @keyframes shimmer {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
         }
-        .analysis-result-box {
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+        @keyframes shine {
+            0% { transform: translateX(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) rotate(45deg); }
+        }
+        @keyframes bounce-icon {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-6px); }
+        }
+
+        /* Hidden file input */
+        #tshirtFileInputHero {
             display: none;
-            margin-top: 15px;
-            background: rgba(0,0,0,0.4);
-            border-radius: 14px;
-            padding: 15px;
-            border: 1px solid rgba(212,175,55,0.2);
         }
-        .analysis-result-box.show {
+
+        /* Upload Preview Section */
+        .upload-preview-area {
+            display: none;
+            text-align: center;
+            padding: 20px;
+            margin-top: 20px;
+            background: rgba(15,15,22,0.6);
+            border-radius: 20px;
+            border: 2px solid rgba(212,175,55,0.2);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .upload-preview-area.show {
             display: block;
         }
-        .analysis-row {
+        .upload-preview-area img {
+            max-width: 100%;
+            max-height: 350px;
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .upload-preview-area .preview-actions {
             display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 14px;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
         }
-        .analysis-row:last-child {
-            border-bottom: none;
-        }
-        .analysis-label {
-            color: #aaa;
-        }
-        .analysis-value {
-            color: #D4AF37;
+        .upload-preview-area .btn-sm {
+            padding: 10px 24px;
+            border-radius: 40px;
             font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            border: none;
+            transition: 0.3s;
         }
-        .analysis-value.green {
-            color: #4CAF50;
+        .upload-preview-area .btn-sm.analyze {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            color: #050508;
         }
-        .analysis-big {
-            font-size: 24px;
+        .upload-preview-area .btn-sm.reset {
+            background: rgba(212,175,55,0.15);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+        }
+        .upload-preview-area .btn-sm:hover {
+            transform: scale(1.05);
+        }
+
+        /* Analysis Result */
+        .analysis-result-hero {
+            display: none;
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.2);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: left;
+        }
+        .analysis-result-hero.show {
+            display: block;
+        }
+        .analysis-result-hero .big-size {
+            font-size: 28px;
             font-weight: 800;
             color: #D4AF37;
             text-align: center;
             padding: 10px 0;
+        }
+        .analysis-result-hero .row {
+            display: flex;
+            justify-content: space-between;
+            padding: 6px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 14px;
+        }
+        .analysis-result-hero .row:last-child {
+            border-bottom: none;
+        }
+        .analysis-result-hero .label {
+            color: #aaa;
+        }
+        .analysis-result-hero .value {
+            color: #D4AF37;
+            font-weight: 600;
         }
 
         .designer-container {
@@ -407,7 +369,6 @@
             font-weight: 600;
             font-size: 13px;
             color: #aaa;
-            cursor: pointer;
         }
         .side-btn.active {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -697,8 +658,8 @@
         .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .cart-item-details { flex: 1; }
         .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; }
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; }
         .toast {
@@ -788,7 +749,41 @@
             text-align: center;
         }
 
-        @media (max-width: 767px) {
+        @media (max-width: 768px) {
+            .hero-upload-section {
+                padding: 30px 15px 25px 15px;
+            }
+            .hero-upload-section h1 {
+                font-size: 22px;
+            }
+            .hero-upload-section p {
+                font-size: 13px;
+            }
+            .upload-tshirt-hero {
+                padding: 18px 30px;
+                font-size: 20px;
+                gap: 12px;
+                width: 100%;
+                max-width: 100%;
+            }
+            .upload-tshirt-hero i {
+                font-size: 28px;
+            }
+            .upload-tshirt-hero .sub-text {
+                font-size: 12px;
+            }
+            .upload-preview-area {
+                max-width: 100%;
+                padding: 15px;
+            }
+            .analysis-result-hero {
+                max-width: 100%;
+                padding: 15px;
+            }
+            .analysis-result-hero .big-size {
+                font-size: 22px;
+            }
+
             .style-section {
                 overflow-x: auto;
                 -webkit-overflow-scrolling: touch;
@@ -809,10 +804,16 @@
                 width: 80px;
                 height: 80px;
             }
-            .style-name { font-size: 10px; }
-            .style-price { font-size: 9px; }
+            .style-name {
+                font-size: 10px;
+            }
+            .style-price {
+                font-size: 9px;
+            }
             
-            .design-tools-box { display: none; }
+            .design-tools-box {
+                display: none;
+            }
             
             .mobile-toolbar {
                 display: block;
@@ -829,9 +830,20 @@
                 white-space: nowrap;
                 padding: 12px;
             }
-            .toolbar-scroll::-webkit-scrollbar { height: 3px; }
-            .toolbar-scroll::-webkit-scrollbar-track { background: rgba(212,175,55,0.1); border-radius: 10px; }
-            .toolbar-scroll::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
+            
+            .toolbar-scroll::-webkit-scrollbar {
+                height: 3px;
+            }
+            
+            .toolbar-scroll::-webkit-scrollbar-track {
+                background: rgba(212,175,55,0.1);
+                border-radius: 10px;
+            }
+            
+            .toolbar-scroll::-webkit-scrollbar-thumb {
+                background: #D4AF37;
+                border-radius: 10px;
+            }
             
             .toolbar-items {
                 display: inline-flex;
@@ -852,7 +864,11 @@
                 gap: 6px;
                 white-space: nowrap;
             }
-            .tool-btn i { font-size: 14px; }
+            
+            .tool-btn i {
+                font-size: 14px;
+            }
+            
             .tool-btn.active {
                 background: linear-gradient(135deg, #D4AF37, #FF8C00);
                 color: #050508;
@@ -866,13 +882,18 @@
                 margin: 0 12px 12px 12px;
                 border-radius: 16px;
             }
-            .tool-panel.open { display: block; }
+            
+            .tool-panel.open {
+                display: block;
+            }
+            
             .panel-title {
                 font-size: 13px;
                 color: #D4AF37;
                 margin-bottom: 12px;
                 font-weight: 600;
             }
+            
             .mobile-text-input {
                 width: 100%;
                 padding: 10px;
@@ -882,22 +903,26 @@
                 color: white;
                 margin-bottom: 10px;
             }
+            
             .mobile-color-grid {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
                 gap: 10px;
             }
+            
             .mobile-color-swatch {
                 aspect-ratio: 1/1;
                 border-radius: 50%;
                 cursor: pointer;
                 border: 2px solid rgba(255,255,255,0.2);
             }
+            
             .mobile-font-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
+            
             .mobile-font-option {
                 background: rgba(0,0,0,0.3);
                 padding: 8px;
@@ -907,16 +932,23 @@
                 font-size: 12px;
                 border: 1px solid transparent;
             }
+            
             .mobile-font-option.active {
                 border-color: #D4AF37;
                 background: rgba(212,175,55,0.15);
             }
-            .mobile-size-slider { width: 100%; margin: 10px 0; }
+            
+            .mobile-size-slider {
+                width: 100%;
+                margin: 10px 0;
+            }
+            
             .mobile-effect-buttons {
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
             }
+            
             .mobile-effect-btn {
                 background: rgba(212,175,55,0.15);
                 border: 1px solid rgba(212,175,55,0.3);
@@ -925,11 +957,13 @@
                 cursor: pointer;
                 font-size: 12px;
             }
+            
             .mobile-transform-buttons {
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
             }
+            
             .mobile-transform-btn {
                 background: rgba(212,175,55,0.15);
                 border: 1px solid rgba(212,175,55,0.3);
@@ -938,6 +972,7 @@
                 cursor: pointer;
                 font-size: 12px;
             }
+            
             .mobile-upload-area {
                 border: 2px dashed rgba(212,175,55,0.4);
                 border-radius: 14px;
@@ -946,34 +981,15 @@
                 cursor: pointer;
             }
             
-            .nav-links { gap: 8px; margin: 6px 0 4px 0; }
-            .nav-link { font-size: 10px; padding: 4px 12px; }
-            .nav-link i { font-size: 11px; }
-            .upload-tshirt-btn {
-                font-size: 11px;
-                padding: 6px 14px;
-            }
-            .tshirt-upload-content {
-                padding: 20px;
-            }
-            .tshirt-upload-content h2 {
-                font-size: 20px;
-            }
-            .upload-zone-modal {
-                padding: 25px 15px;
-            }
-            .modal-actions {
-                flex-direction: column;
-            }
             .cart-icon-header {
                 padding: 4px 10px;
                 font-size: 11px;
-                top: 10px;
+                top: 12px;
                 right: 10px;
             }
         }
 
-        @media (min-width: 768px) {
+        @media (min-width: 769px) {
             .style-section {
                 overflow-x: visible;
                 overflow-y: visible;
@@ -984,7 +1000,9 @@
                 gap: 12px;
                 width: 100%;
             }
-            .style-card { width: 100%; }
+            .style-card {
+                width: 100%;
+            }
             .style-img {
                 width: 100%;
                 height: auto;
@@ -999,78 +1017,51 @@
 <div class="header">
     <div class="logo">VEDANTA</div>
     <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
-    
-    <!-- ====== NAVIGATION LINKS ====== -->
-    <div class="nav-links">
-        <a href="custom-studio.html" class="nav-link active">
-            <i class="fas fa-paint-brush"></i> Design Studio
-        </a>
-        <a href="dtf-analyzer.html" class="nav-link">
-            <i class="fas fa-ruler-combined"></i> DTF Analyzer
-        </a>
-    </div>
-    
-    <!-- ====== UPLOAD YOUR T-SHIRT BUTTON ====== -->
-    <button class="upload-tshirt-btn" id="uploadTshirtBtn">
-        <i class="fas fa-upload"></i> Upload Your T-Shirt
-    </button>
-    
     <div class="cart-icon-header" id="cartIconBtn">
         <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
     </div>
 </div>
 
-<!-- ====== T-SHIRT UPLOAD MODAL ====== -->
-<div class="tshirt-upload-modal" id="tshirtUploadModal">
-    <div class="tshirt-upload-content">
-        <button class="close-modal-btn" id="closeTshirtModal">&times;</button>
-        <h2><i class="fas fa-tshirt"></i> Upload Your T-Shirt</h2>
-        <p>Upload a photo of the T-Shirt with the design already on it.<br>We'll detect the exact print size automatically!</p>
-        
-        <div class="upload-zone-modal" id="uploadZoneModal">
-            <i class="fas fa-cloud-upload-alt"></i>
-            <p><strong>Click or drag &amp; drop</strong> your T-Shirt photo</p>
-            <p class="small">Supports JPG, PNG, WEBP • Max 5MB</p>
-            <input type="file" id="tshirtFileInput" accept="image/*" style="display:none">
+<!-- ============================================================== -->
+<!-- 🔥 HERO SECTION - SIRF EK BADA BUTTON -->
+<!-- ============================================================== -->
+<div class="hero-upload-section">
+    <h1>📸 Upload Your <span>T-Shirt</span></h1>
+    <p>Upload a photo of your T-Shirt with the design already on it.<br>We'll detect the exact print size automatically!</p>
+    
+    <!-- 🚀 BIG UPLOAD BUTTON -->
+    <button class="upload-tshirt-hero" id="uploadTshirtHeroBtn">
+        <i class="fas fa-cloud-upload-alt"></i>
+        <span>
+            Upload Your T-Shirt
+            <span class="sub-text">📐 Get Exact DTF Size &amp; Price</span>
+        </span>
+    </button>
+    
+    <input type="file" id="tshirtFileInputHero" accept="image/*">
+    
+    <!-- Preview Area -->
+    <div class="upload-preview-area" id="uploadPreviewArea">
+        <img id="uploadPreviewImg" src="" alt="T-Shirt Preview">
+        <div class="preview-actions">
+            <button class="btn-sm analyze" id="analyzeHeroBtn"><i class="fas fa-ruler-combined"></i> Analyze Size</button>
+            <button class="btn-sm reset" id="resetHeroBtn"><i class="fas fa-redo"></i> Reset</button>
         </div>
-        
-        <img id="tshirtPreview" class="preview-modal-img" alt="T-Shirt Preview">
-        
-        <div class="modal-actions">
-            <button class="btn-secondary" id="resetTshirtBtn"><i class="fas fa-redo"></i> Reset</button>
-            <button class="btn-primary" id="analyzeTshirtBtn"><i class="fas fa-ruler-combined"></i> Analyze Size</button>
+    </div>
+    
+    <!-- Analysis Result -->
+    <div class="analysis-result-hero" id="analysisResultHero">
+        <div class="big-size" id="heroDtfSize">📐 0″ × 0″</div>
+        <div class="row"><span class="label">📏 Print Width</span><span class="value" id="heroWidth">--</span></div>
+        <div class="row"><span class="label">📐 Print Height</span><span class="value" id="heroHeight">--</span></div>
+        <div class="row"><span class="label">⬅️ Left Margin</span><span class="value" id="heroLeftMargin">--</span></div>
+        <div class="row"><span class="label">⬆️ Top Margin</span><span class="value" id="heroTopMargin">--</span></div>
+        <div class="row"><span class="label">📦 Category</span><span class="value" id="heroCategory">--</span></div>
+        <div class="row" style="border-bottom:none; padding-top:10px;">
+            <span class="label" style="font-weight:700;">💰 Price</span>
+            <span class="value" style="font-size:20px;" id="heroPrice">₹0</span>
         </div>
-        
-        <div class="analysis-result-box" id="analysisResultBox">
-            <div class="analysis-big" id="dtfSizeDisplay">📐 0″ × 0″</div>
-            <div class="analysis-row">
-                <span class="analysis-label">📏 Print Width</span>
-                <span class="analysis-value" id="resultWidth">--</span>
-            </div>
-            <div class="analysis-row">
-                <span class="analysis-label">📐 Print Height</span>
-                <span class="analysis-value" id="resultHeight">--</span>
-            </div>
-            <div class="analysis-row">
-                <span class="analysis-label">⬅️ Left Margin</span>
-                <span class="analysis-value" id="resultLeftMargin">--</span>
-            </div>
-            <div class="analysis-row">
-                <span class="analysis-label">⬆️ Top Margin</span>
-                <span class="analysis-value" id="resultTopMargin">--</span>
-            </div>
-            <div class="analysis-row">
-                <span class="analysis-label">📦 Print Category</span>
-                <span class="analysis-value green" id="resultCategory">--</span>
-            </div>
-            <div class="analysis-row" style="border-bottom: none; padding-top: 12px;">
-                <span class="analysis-label" style="font-weight:700;">💰 Estimated Price</span>
-                <span class="analysis-value" style="font-size:20px;" id="resultPrice">₹0</span>
-            </div>
-            <button class="btn-primary" style="width:100%; margin-top:12px;" id="addAnalyzedToCart">
-                <i class="fas fa-cart-plus"></i> Add to Cart
-            </button>
-        </div>
+        <button class="btn-sm analyze" style="width:100%; margin-top:12px;" id="heroAddToCart"><i class="fas fa-cart-plus"></i> Add to Cart</button>
     </div>
 </div>
 
@@ -1371,102 +1362,52 @@ const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Swe
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 
 // ============================================================
-// T-SHIRT UPLOAD MODAL LOGIC
+// HERO UPLOAD LOGIC
 // ============================================================
+const heroBtn = document.getElementById('uploadTshirtHeroBtn');
+const heroFileInput = document.getElementById('tshirtFileInputHero');
+const previewArea = document.getElementById('uploadPreviewArea');
+const previewImg = document.getElementById('uploadPreviewImg');
+const analyzeBtn = document.getElementById('analyzeHeroBtn');
+const resetBtn = document.getElementById('resetHeroBtn');
+const resultBox = document.getElementById('analysisResultHero');
+let uploadedHeroDataURL = null;
+let heroAnalyzedData = null;
 
-const tshirtUploadModal = document.getElementById('tshirtUploadModal');
-const uploadTshirtBtn = document.getElementById('uploadTshirtBtn');
-const closeTshirtModal = document.getElementById('closeTshirtModal');
-const uploadZoneModal = document.getElementById('uploadZoneModal');
-const tshirtFileInput = document.getElementById('tshirtFileInput');
-const tshirtPreview = document.getElementById('tshirtPreview');
-const resetTshirtBtn = document.getElementById('resetTshirtBtn');
-const analyzeTshirtBtn = document.getElementById('analyzeTshirtBtn');
-const analysisResultBox = document.getElementById('analysisResultBox');
-let uploadedTshirtDataURL = null;
-let analyzedData = null;
+heroBtn.onclick = () => heroFileInput.click();
 
-// Open Modal
-uploadTshirtBtn.onclick = () => {
-    tshirtUploadModal.classList.add('open');
-    resetTshirtUpload();
-};
-
-// Close Modal
-closeTshirtModal.onclick = () => {
-    tshirtUploadModal.classList.remove('open');
-    resetTshirtUpload();
-};
-
-// Click on modal background to close
-tshirtUploadModal.onclick = (e) => {
-    if (e.target === tshirtUploadModal) {
-        tshirtUploadModal.classList.remove('open');
-        resetTshirtUpload();
-    }
-};
-
-// Upload Zone Click
-uploadZoneModal.onclick = () => tshirtFileInput.click();
-
-// Drag & Drop
-uploadZoneModal.addEventListener('dragover', (e) => {
-    e.preventDefault();
-    uploadZoneModal.classList.add('dragover');
-});
-uploadZoneModal.addEventListener('dragleave', () => {
-    uploadZoneModal.classList.remove('dragover');
-});
-uploadZoneModal.addEventListener('drop', (e) => {
-    e.preventDefault();
-    uploadZoneModal.classList.remove('dragover');
-    if (e.dataTransfer.files.length) {
-        handleTshirtFile(e.dataTransfer.files[0]);
-    }
-});
-
-// File Input Change
-tshirtFileInput.onchange = (e) => {
+heroFileInput.onchange = (e) => {
     if (e.target.files.length) {
-        handleTshirtFile(e.target.files[0]);
+        const file = e.target.files[0];
+        if (!file.type.startsWith('image/')) {
+            showToast('❌ Please upload an image!', true);
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            showToast('❌ Max 5MB allowed!', true);
+            return;
+        }
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            uploadedHeroDataURL = ev.target.result;
+            previewImg.src = uploadedHeroDataURL;
+            previewArea.classList.add('show');
+            resultBox.classList.remove('show');
+            heroAnalyzedData = null;
+            showToast('✅ Image uploaded! Click "Analyze Size"');
+        };
+        reader.readAsDataURL(file);
     }
 };
 
-function handleTshirtFile(file) {
-    if (!file.type.startsWith('image/')) {
-        showToast('❌ Please upload an image file!', true);
-        return;
-    }
-    if (file.size > 5 * 1024 * 1024) {
-        showToast('❌ File too large! Max 5MB.', true);
-        return;
-    }
-    
-    const reader = new FileReader();
-    reader.onload = (e) => {
-        uploadedTshirtDataURL = e.target.result;
-        tshirtPreview.src = uploadedTshirtDataURL;
-        tshirtPreview.style.display = 'block';
-        analysisResultBox.classList.remove('show');
-        showToast('✅ T-Shirt photo uploaded! Click "Analyze Size"');
-    };
-    reader.readAsDataURL(file);
-}
-
-function resetTshirtUpload() {
-    uploadedTshirtDataURL = null;
-    analyzedData = null;
-    tshirtPreview.src = '';
-    tshirtPreview.style.display = 'none';
-    tshirtFileInput.value = '';
-    analysisResultBox.classList.remove('show');
-}
-
-resetTshirtBtn.onclick = resetTshirtUpload;
-
-// ============================================================
-// ANALYZE T-SHIRT (DTF Size Detection)
-// ============================================================
+resetBtn.onclick = () => {
+    uploadedHeroDataURL = null;
+    heroAnalyzedData = null;
+    previewArea.classList.remove('show');
+    resultBox.classList.remove('show');
+    heroFileInput.value = '';
+    showToast('🔄 Reset');
+};
 
 function detectDTFSizeFromImage(imageDataURL) {
     return new Promise((resolve) => {
@@ -1483,7 +1424,6 @@ function detectDTFSizeFromImage(imageDataURL) {
             const w = canvas.width;
             const h = canvas.height;
             
-            // Detect design area (non-white/colored pixels)
             let minX = w, minY = h, maxX = 0, maxY = 0;
             let foundPixels = 0;
             
@@ -1495,7 +1435,6 @@ function detectDTFSizeFromImage(imageDataURL) {
                     const b = data[idx + 2];
                     const brightness = (r + g + b) / 3;
                     
-                    // Design pixels (non-white/light)
                     if (brightness < 220) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
@@ -1506,7 +1445,6 @@ function detectDTFSizeFromImage(imageDataURL) {
                 }
             }
             
-            // If no design found, use whole image
             if (foundPixels === 0 || maxX - minX < 10 || maxY - minY < 10) {
                 minX = 0; minY = 0; maxX = w; maxY = h;
             }
@@ -1516,19 +1454,15 @@ function detectDTFSizeFromImage(imageDataURL) {
             const canvasWidthPx = w;
             const canvasHeightPx = h;
             
-            // Garment size (default L - 22x28 inches)
             const garmentW = 22;
             const garmentH = 28;
             
-            // DTF Size in inches
             let dtfWidth = (designWidthPx / canvasWidthPx) * garmentW;
             let dtfHeight = (designHeightPx / canvasHeightPx) * garmentH;
             
-            // Margins
             const marginLeft = (garmentW - dtfWidth) / 2;
             const marginTop = (garmentH - dtfHeight) / 2;
             
-            // Category
             let category = '';
             const area = dtfWidth * dtfHeight;
             if (dtfWidth > garmentW * 0.85 && dtfHeight > garmentH * 0.85) {
@@ -1543,7 +1477,6 @@ function detectDTFSizeFromImage(imageDataURL) {
                 category = '🟠 Custom Size';
             }
             
-            // Round to 1 decimal
             dtfWidth = Math.round(dtfWidth * 10) / 10;
             dtfHeight = Math.round(dtfHeight * 10) / 10;
             
@@ -1566,77 +1499,56 @@ function detectDTFSizeFromImage(imageDataURL) {
 function calculatePrice(dtfWidth, dtfHeight) {
     const area = dtfWidth * dtfHeight;
     const basePrice = 699;
-    
     let dtfCost = 120;
     if (area > 350) dtfCost = 200;
     else if (area > 200) dtfCost = 160;
     else if (area > 100) dtfCost = 130;
     else dtfCost = 100;
-    
     const shipping = 120;
     const packaging = 50;
     const margin = 199;
-    
     return basePrice + dtfCost + shipping + packaging + margin;
 }
 
-analyzeTshirtBtn.onclick = async () => {
-    if (!uploadedTshirtDataURL) {
+analyzeBtn.onclick = async () => {
+    if (!uploadedHeroDataURL) {
         showToast('❌ Please upload a T-Shirt photo first!', true);
         return;
     }
-    
-    showLoading("🔍 Analyzing T-Shirt Design...");
-    
+    showLoading("🔍 Analyzing...");
     try {
-        const result = await detectDTFSizeFromImage(uploadedTshirtDataURL);
-        analyzedData = result;
+        const result = await detectDTFSizeFromImage(uploadedHeroDataURL);
+        heroAnalyzedData = result;
         
-        // Display results
-        document.getElementById('dtfSizeDisplay').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
-        document.getElementById('resultWidth').innerHTML = `${result.dtfWidth}″`;
-        document.getElementById('resultHeight').innerHTML = `${result.dtfHeight}″`;
-        document.getElementById('resultLeftMargin').innerHTML = `${result.marginLeft}″`;
-        document.getElementById('resultTopMargin').innerHTML = `${result.marginTop}″`;
-        document.getElementById('resultCategory').innerHTML = result.category;
+        document.getElementById('heroDtfSize').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
+        document.getElementById('heroWidth').innerHTML = `${result.dtfWidth}″`;
+        document.getElementById('heroHeight').innerHTML = `${result.dtfHeight}″`;
+        document.getElementById('heroLeftMargin').innerHTML = `${result.marginLeft}″`;
+        document.getElementById('heroTopMargin').innerHTML = `${result.marginTop}″`;
+        document.getElementById('heroCategory').innerHTML = result.category;
+        document.getElementById('heroPrice').innerHTML = `₹${calculatePrice(result.dtfWidth, result.dtfHeight)}`;
         
-        const finalPrice = calculatePrice(result.dtfWidth, result.dtfHeight);
-        document.getElementById('resultPrice').innerHTML = `₹${finalPrice}`;
-        
-        analysisResultBox.classList.add('show');
-        showToast('✅ Analysis complete! Exact DTF size detected.');
-        
-    } catch (error) {
-        console.error(error);
-        showToast('❌ Analysis failed. Please try again.', true);
+        resultBox.classList.add('show');
+        showToast('✅ Analysis complete!');
+    } catch (e) {
+        console.error(e);
+        showToast('❌ Analysis failed', true);
     } finally {
         hideLoading();
     }
 };
 
-// Add Analyzed T-Shirt to Cart
-document.getElementById('addAnalyzedToCart').onclick = () => {
-    if (!analyzedData) {
-        showToast('❌ Please analyze the design first!', true);
+document.getElementById('heroAddToCart').onclick = () => {
+    if (!heroAnalyzedData) {
+        showToast('❌ Please analyze first!', true);
         return;
     }
-    
-    const cartItem = {
-        id: Date.now(),
-        type: 'uploaded_tshirt',
-        dtfWidth: analyzedData.dtfWidth,
-        dtfHeight: analyzedData.dtfHeight,
-        category: analyzedData.category,
-        imageData: uploadedTshirtDataURL,
-        price: parseInt(document.getElementById('resultPrice').innerText.replace('₹', '')),
-        timestamp: Date.now()
-    };
-    
+    const price = calculatePrice(heroAnalyzedData.dtfWidth, heroAnalyzedData.dtfHeight);
     cart.push({
-        id: cartItem.id,
+        id: Date.now(),
         styleName: 'Uploaded T-Shirt 🖼️',
-        price: cartItem.price,
-        frontDesignImage: uploadedTshirtDataURL,
+        price: price,
+        frontDesignImage: uploadedHeroDataURL,
         isCustomized: true,
         size: 'L',
         printMethod: 'transparent',
@@ -1644,15 +1556,17 @@ document.getElementById('addAnalyzedToCart').onclick = () => {
         quantity: 1,
         isUploaded: true
     });
-    
     saveCart();
     showToast('✅ Added to cart!');
-    tshirtUploadModal.classList.remove('open');
-    resetTshirtUpload();
+    resultBox.classList.remove('show');
+    previewArea.classList.remove('show');
+    heroFileInput.value = '';
+    uploadedHeroDataURL = null;
+    heroAnalyzedData = null;
 };
 
 // ============================================================
-// EXISTING CODE (Fabric, Firebase, Cart, etc.)
+// EXISTING CODE - Fabric, Firebase, Cart, etc.
 // ============================================================
 
 function clearCheckoutPendingData() {
