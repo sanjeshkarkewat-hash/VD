@@ -253,7 +253,7 @@ $('logoutBtn').onclick = () => {
 };
 
 // ============================================================
-// DTF DETECTION (FAST)
+// DTF DETECTION
 // ============================================================
 function detectSize(dataURL, g) {
     return new Promise(resolve => {
@@ -449,17 +449,23 @@ function updateCart() {
 }
 
 // ============================================================
-// 🔥 ADD TO CART (INSTANT - 0.5 sec)
+// 🔥 ADD TO CART (FIXED)
 // ============================================================
 function addToCart() {
-    if (!result || !user) {
-        if (!user) toast('Login first', true);
-        else if (!result) toast('Analyze first', true);
+    // Check if user is logged in
+    if (!user) {
+        toast('Please login first', true);
+        return;
+    }
+    
+    // Check if analysis is done
+    if (!result) {
+        toast('Please analyze the design first', true);
         return;
     }
     
     const price = getPrice(result.size);
-    cart.push({
+    const cartItem = {
         id: Date.now() + Math.floor(Math.random() * 999),
         name: 'DTF Analyzed T-Shirt',
         size: result.size,
@@ -468,39 +474,53 @@ function addToCart() {
         front: frontData,
         back: backData,
         quantity: 1
-    });
+    };
+    
+    cart.push(cartItem);
     saveCart();
     toast('✅ Added to cart!');
     
-    // 🔥 Firebase upload in BACKGROUND (no waiting)
-    if (frontFile) {
+    // Background Firebase upload
+    if (frontFile && user) {
         const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
         ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) { cart[cart.length-1].front = url; saveCart(); }
+            if (url) { 
+                const idx = cart.findIndex(item => item.id === cartItem.id);
+                if (idx !== -1) { cart[idx].front = url; saveCart(); }
+            }
         }).catch(() => {});
     }
-    if (backFile) {
+    if (backFile && user) {
         const ref = storage.ref().child(`dtf_analyzer/${user.uid}/back_${Date.now()}_${backFile.name}`);
         ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) { cart[cart.length-1].back = url; saveCart(); }
+            if (url) {
+                const idx = cart.findIndex(item => item.id === cartItem.id);
+                if (idx !== -1) { cart[idx].back = url; saveCart(); }
+            }
         }).catch(() => {});
     }
 }
 
 // ============================================================
-// 🔥 BUY NOW (INSTANT - 0.5 sec)
+// 🔥 BUY NOW (FIXED)
 // ============================================================
 function buyNow() {
-    if (!result || !user) {
-        if (!user) toast('Login first', true);
-        else if (!result) toast('Analyze first', true);
+    // Check if user is logged in
+    if (!user) {
+        toast('Please login first', true);
+        return;
+    }
+    
+    // Check if analysis is done
+    if (!result) {
+        toast('Please analyze the design first', true);
         return;
     }
     
     const price = getPrice(result.size);
     const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 999);
     
-    // Save to localStorage for checkout page (INSTANT)
+    // Save to localStorage for checkout page
     const checkoutData = {
         type: 'dtf_analyzer',
         orderId: orderId,
@@ -515,7 +535,7 @@ function buyNow() {
     };
     localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
     
-    // 🔥 Firebase order in BACKGROUND (no waiting)
+    // Firebase order in background
     const orderData = {
         orderId: orderId,
         type: 'dtf_analyzer',
@@ -540,7 +560,7 @@ function buyNow() {
     };
     db.collection('orders').doc(orderId).set(orderData).catch(() => {});
     
-    // 🔥 Firebase upload in BACKGROUND (no waiting)
+    // Background uploads
     if (frontFile) {
         const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
         ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
@@ -564,7 +584,7 @@ function buyNow() {
         }).catch(() => {});
     }
     
-    // Clear cart and redirect INSTANTLY
+    // Clear cart and redirect
     localStorage.removeItem('vedanta_dtf_cart');
     toast('✅ Order created!');
     setTimeout(() => {
@@ -613,7 +633,7 @@ $('cartCheckout').onclick = () => {
 // INIT
 // ============================================================
 loadCart();
-console.log('⚡ DTF Analyzer Ready - Instant Buy Now!');
+console.log('⚡ DTF Analyzer Ready');
 console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
