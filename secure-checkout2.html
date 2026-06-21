@@ -85,12 +85,64 @@ gtag('event', 'begin_checkout');
     .order-item-info h4 { font-size: 13px; margin-bottom: 4px; }
     .order-item-info p { font-size: 10px; color: #888; margin-top: 3px; }
     .order-item-price { font-weight: 700; color: #D4AF37; text-align: right; font-size: 13px; min-width: 70px; }
+    
+    /* ====== DTF PREVIEW SECTION - FRONT + BACK ====== */
+    .dtf-preview-section {
+      background: rgba(0,0,0,0.3);
+      border-radius: 16px;
+      padding: 15px;
+      margin-bottom: 20px;
+      text-align: center;
+      border: 1px solid rgba(212,175,55,0.15);
+    }
+    .dtf-badge {
+      background: linear-gradient(135deg, #D4AF37, #FF8C00);
+      color: #050508;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: bold;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+    .dtf-preview-row {
+      display: flex;
+      gap: 15px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .dtf-preview-item {
+      flex: 1;
+      min-width: 130px;
+      text-align: center;
+    }
+    .dtf-preview-item img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: contain;
+      border-radius: 12px;
+      background: #1a1a2e;
+      border: 1px solid rgba(212,175,55,0.1);
+    }
+    .dtf-preview-item p {
+      font-size: 10px;
+      color: #D4AF37;
+      margin-top: 6px;
+      font-weight: 600;
+    }
+    .dtf-size-info {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 8px;
+    }
+    
     .custom-design-preview-section { background: rgba(0,0,0,0.3); border-radius: 16px; padding: 15px; margin-bottom: 20px; text-align: center; border: 1px solid rgba(212,175,55,0.2); }
     .custom-badge { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; padding: 4px 12px; border-radius: 20px; font-size: 10px; font-weight: bold; display: inline-block; margin-bottom: 10px; }
     .custom-preview-row { display: flex; gap: 15px; justify-content: center; flex-wrap: wrap; }
     .custom-preview-item { flex: 1; min-width: 130px; text-align: center; }
     .custom-preview-item img { width: 100%; max-height: 130px; object-fit: contain; border-radius: 12px; background: #1a1a2e; }
     .custom-preview-item p { font-size: 10px; color: #D4AF37; margin-top: 6px; }
+    
     .delivery-benefits { background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(76,175,80,0.05)); border-radius: 16px; padding: 12px; margin: 12px 0; }
     .benefit-row { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #aaa; }
     .free-shipping-badge { background: rgba(76,175,80,0.15); padding: 8px; border-radius: 12px; text-align: center; margin: 12px 0; color: #4CAF50; font-size: 11px; }
@@ -152,10 +204,29 @@ gtag('event', 'begin_checkout');
     </div>
     <div class="order-summary">
       <h3><i class="fas fa-shopping-bag"></i> Order Summary</h3>
+      
+      <!-- ====== DTF PREVIEW - FRONT + BACK ====== -->
+      <div id="dtfPreviewContainer" style="display:none;" class="dtf-preview-section">
+        <div class="dtf-badge"><i class="fas fa-ruler-combined"></i> DTF ANALYZED DESIGN</div>
+        <div class="dtf-preview-row">
+          <div class="dtf-preview-item">
+            <p><i class="fas fa-tshirt"></i> Front</p>
+            <img id="dtfFrontPreview" src="" alt="Front Design">
+          </div>
+          <div class="dtf-preview-item">
+            <p><i class="fas fa-undo-alt"></i> Back</p>
+            <img id="dtfBackPreview" src="" alt="Back Design">
+          </div>
+        </div>
+        <div class="dtf-size-info" id="dtfSizeInfo">📐 Size: -- | Width: --″ × Height: --″</div>
+      </div>
+      
+      <!-- Custom Design Preview (for custom orders) -->
       <div id="customDesignPreviewContainer" style="display:none;" class="custom-design-preview-section">
         <div class="custom-badge"><i class="fas fa-palette"></i> YOUR CUSTOM DESIGN</div>
         <div class="custom-preview-row"><div class="custom-preview-item"><p>Front Design</p><img id="frontDesignPreview" style="max-height:120px;"></div><div class="custom-preview-item"><p>Back Design</p><img id="backDesignPreview" style="max-height:120px;"></div></div>
       </div>
+      
       <div id="orderItemsList"></div>
       <div class="delivery-benefits"><div class="benefit-row"><i class="fas fa-truck"></i><span>🚚 Free Express Shipping (3-5 days)</span></div></div>
       <div class="free-shipping-badge"><i class="fas fa-truck"></i> FREE SHIPPING | 0% TAX</div>
@@ -178,9 +249,10 @@ gtag('event', 'begin_checkout');
   let isCustomizedOrder = false, frontDesignImageURL = null, backDesignImageURL = null;
   let productImagesCache = {};
   let mapInstance = null, mapMarker = null, currentSelectedLatLng = null;
-  
-  // Flag to track if we're currently loading
   let isLoadingFromStorage = false;
+  
+  // DTF specific data
+  let dtfFrontImage = null, dtfBackImage = null, dtfSize = null, dtfCategory = null;
 
   function showToast(msg, isError = false) { const t = document.getElementById('toast'); t.innerText = msg; t.style.background = isError ? '#F44336' : '#D4AF37'; t.style.color = isError ? 'white' : '#050508'; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), 3000); }
   function showLoading(show) { document.getElementById('loadingOverlay').classList.toggle('show', show); }
@@ -213,22 +285,26 @@ gtag('event', 'begin_checkout');
   }
 
   // ============================================================
-  // 🔥 DTF ANALYZER DATA LOAD - ADDED
+  // 🔥 DTF ANALYZER DATA LOAD - FRONT + BACK
   // ============================================================
   function loadDTFData() {
     const urlParams = new URLSearchParams(window.location.search);
     const orderType = urlParams.get('type');
     const orderId = urlParams.get('orderId');
     
-    // Check if this is a DTF analyzer order
     if (orderType === 'dtf' || orderType === 'dtf_analyzer') {
-      // First try to get data from dtfDirectOrder
       const dtfData = localStorage.getItem('dtfDirectOrder');
       if (dtfData) {
         try {
           const data = JSON.parse(dtfData);
           if (data && data.size) {
-            // Create cart item from DTF data
+            // Store DTF data for preview
+            dtfFrontImage = data.frontImageUrl || data.imageData || data.imageUrl || null;
+            dtfBackImage = data.backImageUrl || null;
+            dtfSize = data.dtfWidth && data.dtfHeight ? `${data.dtfWidth}″ × ${data.dtfHeight}″` : null;
+            dtfCategory = data.category || '';
+            
+            // Create cart item
             const dtfCartItem = {
               id: 'dtf_' + Date.now(),
               name: 'DTF Analyzed T-Shirt 🖼️',
@@ -236,58 +312,48 @@ gtag('event', 'begin_checkout');
               quantity: 1,
               size: data.size || 'L',
               selectedColor: 'White',
-              imageData: data.imageData || data.imageUrl || null,
+              imageData: data.frontImageUrl || data.imageData || data.imageUrl || null,
               dtfWidth: data.dtfWidth || 0,
               dtfHeight: data.dtfHeight || 0,
               category: data.category || '',
               isDTF: true,
-              isCustomized: false
+              isCustomized: false,
+              frontImage: data.frontImageUrl || data.imageData || data.imageUrl || null,
+              backImage: data.backImageUrl || null
             };
             cart = [dtfCartItem];
             cartTotal = dtfCartItem.price;
             
-            // Show DTF badge in order summary
-            document.getElementById('customDesignPreviewContainer').style.display = 'block';
-            document.querySelector('#customDesignPreviewContainer .custom-badge').innerHTML = 
-              '<i class="fas fa-ruler-combined"></i> DTF ANALYZED DESIGN';
-            
-            // If there's an image, show it
-            if (data.imageData || data.imageUrl) {
-              const imgSrc = data.imageData || data.imageUrl;
-              document.getElementById('frontDesignPreview').src = imgSrc;
-              document.getElementById('frontDesignPreview').style.display = 'block';
-              document.querySelector('#customDesignPreviewContainer .custom-preview-item:first-child p').innerHTML = 
-                `📐 ${data.dtfWidth || 0}″ × ${data.dtfHeight || 0}″`;
-            }
-            
-            // Clean up
+            // Show DTF preview with front + back images
+            showDTFPreview(dtfFrontImage, dtfBackImage, dtfSize, data.size, dtfCategory);
             localStorage.removeItem('dtfDirectOrder');
             return true;
           }
         } catch(e) { console.error('Error loading DTF data:', e); }
       }
       
-      // Fallback: try to get from dtfCartCheckout
+      // Fallback: try dtfCartCheckout
       const dtfCartData = localStorage.getItem('dtfCartCheckout');
       if (dtfCartData) {
         try {
           const items = JSON.parse(dtfCartData);
           if (items && items.length > 0) {
+            const item = items[0];
+            dtfFrontImage = item.frontData || item.frontImage || item.imageData || null;
+            dtfBackImage = item.backData || item.backImage || null;
+            dtfSize = item.dtfWidth && item.dtfHeight ? `${item.dtfWidth}″ × ${item.dtfHeight}″` : null;
+            dtfCategory = item.cat || item.category || '';
+            
             cart = items.map(item => ({
               ...item,
               isDTF: true,
-              isCustomized: false
+              isCustomized: false,
+              frontImage: item.frontData || item.frontImage || item.imageData || null,
+              backImage: item.backData || item.backImage || null
             }));
             cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
             
-            // Show DTF badge
-            document.getElementById('customDesignPreviewContainer').style.display = 'block';
-            document.querySelector('#customDesignPreviewContainer .custom-badge').innerHTML = 
-              '<i class="fas fa-ruler-combined"></i> DTF ANALYZED DESIGN';
-            
-            if (items[0].imageData) {
-              document.getElementById('frontDesignPreview').src = items[0].imageData;
-            }
+            showDTFPreview(dtfFrontImage, dtfBackImage, dtfSize, cart[0]?.size, dtfCategory);
             localStorage.removeItem('dtfCartCheckout');
             return true;
           }
@@ -298,31 +364,73 @@ gtag('event', 'begin_checkout');
   }
 
   // ============================================================
-  // 🔥 MODIFIED loadCustomData - Added DTF support
+  // 🔥 SHOW DTF PREVIEW - FRONT + BACK
+  // ============================================================
+  function showDTFPreview(frontImg, backImg, sizeText, sizeLabel, category) {
+    const container = document.getElementById('dtfPreviewContainer');
+    if (!container) return;
+    
+    // Check if we have at least one image
+    if (!frontImg && !backImg) return;
+    
+    container.style.display = 'block';
+    
+    // Set front image
+    const frontEl = document.getElementById('dtfFrontPreview');
+    if (frontEl && frontImg) {
+      frontEl.src = frontImg;
+      frontEl.style.display = 'block';
+    }
+    
+    // Set back image
+    const backEl = document.getElementById('dtfBackPreview');
+    if (backEl && backImg) {
+      backEl.src = backImg;
+      backEl.style.display = 'block';
+    } else if (backEl) {
+      // If no back image, hide it or show placeholder
+      backEl.style.display = 'none';
+      backEl.closest('.dtf-preview-item').querySelector('p').innerHTML = '<i class="fas fa-undo-alt"></i> Back (Not Uploaded)';
+    }
+    
+    // Update size info
+    const sizeInfo = document.getElementById('dtfSizeInfo');
+    if (sizeInfo) {
+      let info = `📐 Size: ${sizeLabel || '—'}`;
+      if (sizeText) info += ` | Print: ${sizeText}`;
+      if (category) info += ` | ${category}`;
+      sizeInfo.innerText = info;
+    }
+  }
+
+  // ============================================================
+  // 🔥 MODIFIED loadCustomData
   // ============================================================
   function loadCustomData() {
     isLoadingFromStorage = true;
     
-    // RESET all variables first
     cart = [];
     isCustomizedOrder = false;
     frontDesignImageURL = null;
     backDesignImageURL = null;
+    dtfFrontImage = null;
+    dtfBackImage = null;
+    dtfSize = null;
+    dtfCategory = null;
     
-    // Hide custom preview by default
     document.getElementById('customDesignPreviewContainer').style.display = 'none';
+    document.getElementById('dtfPreviewContainer').style.display = 'none';
     
-    // STEP 0: Check for DTF Analyzer data first
+    // Check for DTF data first
     if (loadDTFData()) {
       isLoadingFromStorage = false;
       return;
     }
     
-    // STEP 1: Check URL parameters first (highest priority - most reliable)
+    // Rest of the function remains same...
     const urlParams = new URLSearchParams(window.location.search);
     const orderType = urlParams.get('type');
     
-    // STEP 2: If URL has type=custom, ALWAYS load custom data and clear regular cart
     if (orderType === 'custom') {
       const customData = localStorage.getItem('customCheckoutData');
       if (customData) {
@@ -352,7 +460,6 @@ gtag('event', 'begin_checkout');
               isCustomized: true
             }];
             
-            // Clean up regular cart data to prevent confusion
             localStorage.removeItem('vedantaCart');
             localStorage.removeItem('regularCartTimestamp');
             isLoadingFromStorage = false;
@@ -360,46 +467,38 @@ gtag('event', 'begin_checkout');
           }
         } catch(e) { console.error("Error parsing custom data:", e); }
       }
-      // If custom data doesn't exist, load empty cart
       cart = [];
       isLoadingFromStorage = false;
       return;
     }
     
-    // STEP 3: If URL has type=regular, ALWAYS load regular cart and clear custom data
     if (orderType === 'regular') {
       const regularCart = localStorage.getItem('vedantaCart');
       if (regularCart) {
         try {
           cart = JSON.parse(regularCart);
           cart.forEach(item => {
-            if (!item.isCustomized) {
-              item.printMethod = null;
-            }
+            if (!item.isCustomized) item.printMethod = null;
           });
-          // Clean up custom data to prevent confusion
           localStorage.removeItem('customCheckoutData');
           localStorage.removeItem('customCheckoutTimestamp');
           isLoadingFromStorage = false;
           return;
         } catch(e) { cart = []; }
       }
-      // If regular cart doesn't exist, load empty cart
       cart = [];
       isLoadingFromStorage = false;
       return;
     }
     
-    // STEP 4: No URL type parameter - fall back to timestamp-based logic
+    // Fallback logic...
     const customTimestamp = localStorage.getItem('customCheckoutTimestamp');
     const regularTimestamp = localStorage.getItem('regularCartTimestamp');
     const customData = localStorage.getItem('customCheckoutData');
     const regularCart = localStorage.getItem('vedantaCart');
-    
     const customTime = parseInt(customTimestamp || '0');
     const regularTime = parseInt(regularTimestamp || '0');
     
-    // Custom data is newer OR regular data doesn't exist
     if (customTime > regularTime && customData) {
       try {
         const data = JSON.parse(customData);
@@ -429,19 +528,15 @@ gtag('event', 'begin_checkout');
           isLoadingFromStorage = false;
           return;
         }
-      } catch(e) { console.error("Error parsing custom data:", e); }
+      } catch(e) {}
     }
     
-    // Regular data is newer OR custom data doesn't exist
     if (regularTime >= customTime && regularCart) {
       try {
         cart = JSON.parse(regularCart);
         cart.forEach(item => {
-          if (!item.isCustomized) {
-            item.printMethod = null;
-          }
+          if (!item.isCustomized) item.printMethod = null;
         });
-        // Clean up stale custom data
         localStorage.removeItem('customCheckoutData');
         localStorage.removeItem('customCheckoutTimestamp');
         isLoadingFromStorage = false;
@@ -449,7 +544,6 @@ gtag('event', 'begin_checkout');
       } catch(e) { cart = []; }
     }
     
-    // STEP 5: Fallback - try to load whatever exists
     if (cart.length === 0 && customData) {
       try {
         const data = JSON.parse(customData);
@@ -486,9 +580,7 @@ gtag('event', 'begin_checkout');
       try { 
         cart = JSON.parse(regularCart);
         cart.forEach(item => {
-          if (!item.isCustomized) {
-            item.printMethod = null;
-          }
+          if (!item.isCustomized) item.printMethod = null;
         });
       } catch(e) { cart = []; }
     }
@@ -497,7 +589,7 @@ gtag('event', 'begin_checkout');
   }
 
   // ============================================================
-  // 🔥 MODIFIED renderOrderItems - DTF support
+  // 🔥 MODIFIED renderOrderItems - DTF with front+back
   // ============================================================
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
@@ -519,8 +611,10 @@ gtag('event', 'begin_checkout');
         imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
       } else if (isDTF) {
-        imageUrl = item.imageData || item.imageUrl || null;
-        designBadge = `<div class="design-preview-badge"><i class="fas fa-ruler-combined"></i> DTF Analyzed ${item.dtfWidth ? '📐' + item.dtfWidth + '″ × ' + item.dtfHeight + '″' : ''}</div>`;
+        // Use front image for main display
+        imageUrl = item.frontImage || item.imageData || item.imageUrl || null;
+        const hasBack = item.backImage || item.backData || null;
+        designBadge = `<div class="design-preview-badge"><i class="fas fa-ruler-combined"></i> DTF Analyzed ${item.dtfWidth ? '📐' + item.dtfWidth + '″ × ' + item.dtfHeight + '″' : ''} ${hasBack ? '| Front + Back' : ''}</div>`;
       } else {
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
@@ -545,6 +639,9 @@ gtag('event', 'begin_checkout');
       let dtfInfo = '';
       if (isDTF) {
         dtfInfo = ` | DTF: ${item.dtfWidth || 0}″ × ${item.dtfHeight || 0}″`;
+        if (item.backImage || item.backData) {
+          dtfInfo += ' | Front + Back';
+        }
       }
       
       infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4>
@@ -612,100 +709,49 @@ gtag('event', 'begin_checkout');
 
   function showFetchingLocationToast(show) {
     const toast = document.getElementById('locationFetchingToast');
-    if (show) {
-      toast.classList.add('show');
-    } else {
-      toast.classList.remove('show');
-    }
+    if (show) toast.classList.add('show');
+    else toast.classList.remove('show');
   }
 
   function extractDetailedAddressFromGeocode(geocodeResult) {
-    if (!geocodeResult || !geocodeResult[0]) {
-      return null;
-    }
-    
+    if (!geocodeResult || !geocodeResult[0]) return null;
     const result = geocodeResult[0];
     const components = result.address_components;
     const formattedAddress = result.formatted_address || '';
-    
-    let streetNumber = '';
-    let route = '';
-    let fullStreet = '';
-    let sublocalityLevel1 = '';
-    let sublocalityLevel2 = '';
-    let locality = '';
-    let administrativeAreaLevel2 = '';
-    let administrativeAreaLevel1 = '';
-    let country = '';
-    let postalCode = '';
-    let landmark = '';
-    let intersection = '';
-    let pointOfInterest = '';
-    
+    let streetNumber = '', route = '', fullStreet = '', sublocalityLevel1 = '', sublocalityLevel2 = '', locality = '', administrativeAreaLevel2 = '', administrativeAreaLevel1 = '', country = '', postalCode = '', landmark = '', intersection = '', pointOfInterest = '';
     for (const comp of components) {
       const types = comp.types;
       const value = comp.long_name;
-      
-      if (types.includes('street_number')) {
-        streetNumber = value;
-      } else if (types.includes('route')) {
-        route = value;
-      } else if (types.includes('sublocality_level_1')) {
-        sublocalityLevel1 = value;
-      } else if (types.includes('sublocality_level_2')) {
-        sublocalityLevel2 = value;
-      } else if (types.includes('sublocality')) {
-        if (!sublocalityLevel1) sublocalityLevel1 = value;
-      } else if (types.includes('locality')) {
-        locality = value;
-      } else if (types.includes('administrative_area_level_2')) {
-        administrativeAreaLevel2 = value;
-      } else if (types.includes('administrative_area_level_1')) {
-        administrativeAreaLevel1 = value;
-      } else if (types.includes('country')) {
-        country = value;
-      } else if (types.includes('postal_code')) {
-        postalCode = value;
-      } else if (types.includes('intersection')) {
-        intersection = value;
-      } else if (types.includes('point_of_interest') || types.includes('establishment')) {
-        pointOfInterest = value;
-      }
+      if (types.includes('street_number')) streetNumber = value;
+      else if (types.includes('route')) route = value;
+      else if (types.includes('sublocality_level_1')) sublocalityLevel1 = value;
+      else if (types.includes('sublocality_level_2')) sublocalityLevel2 = value;
+      else if (types.includes('sublocality')) { if (!sublocalityLevel1) sublocalityLevel1 = value; }
+      else if (types.includes('locality')) locality = value;
+      else if (types.includes('administrative_area_level_2')) administrativeAreaLevel2 = value;
+      else if (types.includes('administrative_area_level_1')) administrativeAreaLevel1 = value;
+      else if (types.includes('country')) country = value;
+      else if (types.includes('postal_code')) postalCode = value;
+      else if (types.includes('intersection')) intersection = value;
+      else if (types.includes('point_of_interest') || types.includes('establishment')) pointOfInterest = value;
     }
-    
-    if (streetNumber && route) {
-      fullStreet = `${streetNumber}, ${route}`;
-    } else if (streetNumber) {
-      fullStreet = streetNumber;
-    } else if (route) {
-      fullStreet = route;
-    }
-    
+    if (streetNumber && route) fullStreet = `${streetNumber}, ${route}`;
+    else if (streetNumber) fullStreet = streetNumber;
+    else if (route) fullStreet = route;
     let city = locality || sublocalityLevel1 || administrativeAreaLevel2 || '';
     let area = sublocalityLevel1 || sublocalityLevel2 || '';
     let bestLandmark = pointOfInterest || intersection || '';
-    if (!bestLandmark && area) {
-      bestLandmark = area;
-    }
-    
+    if (!bestLandmark && area) bestLandmark = area;
     let completeAddress = fullStreet;
     if (area && area !== city && !completeAddress.includes(area)) {
       completeAddress = completeAddress ? `${completeAddress}, ${area}` : area;
     }
-    
     if ((!completeAddress || completeAddress.trim() === '') && formattedAddress) {
       const formattedParts = formattedAddress.split(',');
-      if (formattedParts.length >= 2) {
-        completeAddress = formattedParts[0].trim();
-      } else {
-        completeAddress = formattedAddress;
-      }
+      if (formattedParts.length >= 2) completeAddress = formattedParts[0].trim();
+      else completeAddress = formattedAddress;
     }
-    
-    if (!completeAddress || completeAddress.trim() === '') {
-      completeAddress = formattedAddress;
-    }
-    
+    if (!completeAddress || completeAddress.trim() === '') completeAddress = formattedAddress;
     return {
       street: completeAddress,
       houseNumber: streetNumber,
@@ -717,59 +763,24 @@ gtag('event', 'begin_checkout');
       pincode: postalCode,
       country: country,
       landmark: bestLandmark,
-      formattedAddress: formattedAddress,
-      fullDetails: {
-        streetNumber, route, sublocalityLevel1, sublocalityLevel2, locality,
-        administrativeAreaLevel2, administrativeAreaLevel1, postalCode, country,
-        intersection, pointOfInterest
-      }
+      formattedAddress: formattedAddress
     };
   }
 
   function fillAddressFieldsFromGeocode(addressData) {
     if (!addressData) return false;
-    
     const streetInput = document.getElementById('newStreet');
     const cityInput = document.getElementById('newCity');
     const stateInput = document.getElementById('newState');
     const pincodeInput = document.getElementById('newPincode');
     const landmarkInput = document.getElementById('newLandmark');
-    
     if (!streetInput || !cityInput || !stateInput || !pincodeInput) return false;
-    
-    if (addressData.street && streetInput) {
-      streetInput.value = addressData.street;
-    }
-    
-    if (addressData.city && cityInput) {
-      cityInput.value = addressData.city;
-    }
-    
-    if (addressData.state && stateInput) {
-      stateInput.value = addressData.state;
-    }
-    
-    if (addressData.pincode && pincodeInput) {
-      pincodeInput.value = addressData.pincode;
-    }
-    
-    if (landmarkInput && addressData.landmark) {
-      landmarkInput.value = addressData.landmark;
-    } else if (landmarkInput && addressData.area) {
-      landmarkInput.value = addressData.area;
-    }
-    
-    const filledFields = [];
-    if (addressData.street) filledFields.push('Street');
-    if (addressData.city) filledFields.push('City');
-    if (addressData.state) filledFields.push('State');
-    if (addressData.pincode) filledFields.push('Pincode');
-    if (addressData.landmark) filledFields.push('Landmark');
-    
-    if (filledFields.length > 0) {
-      showToast(`📍 Address filled: ${filledFields.join(', ')}`);
-    }
-    
+    if (addressData.street && streetInput) streetInput.value = addressData.street;
+    if (addressData.city && cityInput) cityInput.value = addressData.city;
+    if (addressData.state && stateInput) stateInput.value = addressData.state;
+    if (addressData.pincode && pincodeInput) pincodeInput.value = addressData.pincode;
+    if (landmarkInput && addressData.landmark) landmarkInput.value = addressData.landmark;
+    else if (landmarkInput && addressData.area) landmarkInput.value = addressData.area;
     return true;
   }
 
@@ -779,71 +790,37 @@ gtag('event', 'begin_checkout');
     document.getElementById('saveNewAddrBtn')?.addEventListener('click', () => { const fullName=document.getElementById('newFullName').value; const street=document.getElementById('newStreet').value; const city=document.getElementById('newCity').value; const state=document.getElementById('newState').value; const pincode=document.getElementById('newPincode').value; const landmark=document.getElementById('newLandmark').value; if(!fullName||!street||!city||!state||!pincode){showToast('Fill all fields',true); return;} selectedAddress={fullName, phone:currentUser.phone, address:street, city, state, pincode, landmark}; displaySelectedAddressCard(); showToast('Address saved'); });
     document.getElementById('cancelNewAddrBtn')?.addEventListener('click', () => { selectedAddress=null; displayAddressSelection(); });
     
-    // IMPROVED GPS ACCURACY CODE - Using watchPosition for best accuracy
     document.getElementById('useLocationBtn')?.addEventListener('click', async () => {
       const btn = document.getElementById('useLocationBtn');
-      if(!navigator.geolocation){
-        showToast('Geolocation not supported', true);
-        return;
-      }
-      
+      if(!navigator.geolocation){ showToast('Geolocation not supported', true); return; }
       const originalText = btn.innerHTML;
       btn.innerHTML = '<i class="fas fa-circle-notch fa-spin"></i> Getting accurate GPS...';
       btn.disabled = true;
       btn.classList.add('loading');
       showFetchingLocationToast(true);
-      
       let bestPosition = null;
       let watchId = null;
       let attempts = 0;
       const maxAttempts = 10;
       let resolved = false;
-      
-      // Function to process a position update
       const processPosition = (position) => {
         attempts++;
         const accuracy = position.coords.accuracy;
-        
-        // Update toast message with accuracy info
         const toastEl = document.getElementById('locationFetchingToast');
-        if (toastEl) {
-          toastEl.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> GPS accuracy: ${Math.round(accuracy)}m`;
-        }
-        
-        // If this is the first position or better accuracy, store it
-        if (!bestPosition || accuracy < bestPosition.coords.accuracy) {
-          bestPosition = position;
-        }
-        
-        // Check if we have good enough accuracy (<= 15 meters) or max attempts reached
+        if (toastEl) toastEl.innerHTML = `<i class="fas fa-circle-notch fa-spin"></i> GPS accuracy: ${Math.round(accuracy)}m`;
+        if (!bestPosition || accuracy < bestPosition.coords.accuracy) bestPosition = position;
         const isGoodEnough = bestPosition.coords.accuracy <= 15;
         const maxAttemptsReached = attempts >= maxAttempts;
         const isImproving = bestPosition.coords.accuracy <= 30 && attempts >= 3;
-        
         if ((isGoodEnough || maxAttemptsReached || isImproving) && !resolved) {
           resolved = true;
-          
-          // Stop watching for more updates
-          if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-          }
-          
-          // Log final accuracy
-          console.log(`Final GPS accuracy: ${bestPosition.coords.accuracy} meters after ${attempts} attempts`);
-          
-          // Use the best position for reverse geocoding
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
           const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ 
-            location: { 
-              lat: bestPosition.coords.latitude, 
-              lng: bestPosition.coords.longitude 
-            } 
-          }, (results, status) => {
+          geocoder.geocode({ location: { lat: bestPosition.coords.latitude, lng: bestPosition.coords.longitude } }, (results, status) => {
             showFetchingLocationToast(false);
             btn.innerHTML = originalText;
             btn.disabled = false;
             btn.classList.remove('loading');
-            
             if (status === 'OK' && results && results[0]) {
               const addressData = extractDetailedAddressFromGeocode(results);
               if (addressData) {
@@ -851,7 +828,6 @@ gtag('event', 'begin_checkout');
                 const accuracyMsg = bestPosition.coords.accuracy <= 15 ? ' (High accuracy GPS)' : ` (${Math.round(bestPosition.coords.accuracy)}m accuracy)`;
                 showToast(`📍 Location set${accuracyMsg}`);
               } else {
-                // Fallback extraction
                 const comps = results[0].address_components;
                 let st = '', ct = '', stt = '', pin = '', lmark = '';
                 for (const c of comps) {
@@ -865,9 +841,7 @@ gtag('event', 'begin_checkout');
                 document.getElementById('newCity').value = ct;
                 document.getElementById('newState').value = stt;
                 document.getElementById('newPincode').value = pin;
-                if (lmark && document.getElementById('newLandmark')) {
-                  document.getElementById('newLandmark').value = lmark;
-                }
+                if (lmark && document.getElementById('newLandmark')) document.getElementById('newLandmark').value = lmark;
                 showToast('Location set');
               }
             } else {
@@ -876,67 +850,30 @@ gtag('event', 'begin_checkout');
           });
         }
       };
-      
       const handleError = (err) => {
         if (resolved) return;
         resolved = true;
-        
-        if (watchId !== null) {
-          navigator.geolocation.clearWatch(watchId);
-        }
-        
+        if (watchId !== null) navigator.geolocation.clearWatch(watchId);
         showFetchingLocationToast(false);
         btn.innerHTML = originalText;
         btn.disabled = false;
         btn.classList.remove('loading');
-        
-        if(err.code === 1){
-          document.getElementById('locationModal').classList.add('show');
-          showToast('Please enable location access', true);
-        } else if (err.code === 2) {
-          showToast('GPS signal weak, please try again in an open area', true);
-        } else {
-          showToast('Location failed: ' + err.message, true);
-        }
+        if(err.code === 1) document.getElementById('locationModal').classList.add('show');
+        else if (err.code === 2) showToast('GPS signal weak, try again', true);
+        else showToast('Location failed: ' + err.message, true);
       };
-      
-      // First get a quick estimate, then watch for better accuracy
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          processPosition(position);
-        },
-        handleError,
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-      );
-      
-      // Also watch for better updates with higher accuracy over time
-      watchId = navigator.geolocation.watchPosition(
-        processPosition,
-        handleError,
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-      );
-      
-      // Timeout fallback after 20 seconds
+      navigator.geolocation.getCurrentPosition(processPosition, handleError, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+      watchId = navigator.geolocation.watchPosition(processPosition, handleError, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
       setTimeout(() => {
         if (!resolved && bestPosition) {
-          // Use the best position we got
           resolved = true;
-          if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-          }
-          
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
           const geocoder = new google.maps.Geocoder();
-          geocoder.geocode({ 
-            location: { 
-              lat: bestPosition.coords.latitude, 
-              lng: bestPosition.coords.longitude 
-            } 
-          }, (results, status) => {
+          geocoder.geocode({ location: { lat: bestPosition.coords.latitude, lng: bestPosition.coords.longitude } }, (results, status) => {
             showFetchingLocationToast(false);
             btn.innerHTML = originalText;
             btn.disabled = false;
             btn.classList.remove('loading');
-            
             if (status === 'OK' && results && results[0]) {
               const addressData = extractDetailedAddressFromGeocode(results);
               if (addressData) {
@@ -951,9 +888,7 @@ gtag('event', 'begin_checkout');
           });
         } else if (!resolved && !bestPosition) {
           resolved = true;
-          if (watchId !== null) {
-            navigator.geolocation.clearWatch(watchId);
-          }
+          if (watchId !== null) navigator.geolocation.clearWatch(watchId);
           showFetchingLocationToast(false);
           btn.innerHTML = originalText;
           btn.disabled = false;
@@ -971,13 +906,10 @@ gtag('event', 'begin_checkout');
     modal.classList.add('active');
     const mapDiv = document.getElementById('mapContainer');
     mapDiv.innerHTML = '<div style="padding:20px;text-align:center;">Loading map...</div>';
-    
-    // IMPROVED GPS FOR MAP PICKER - Get best accuracy before showing map
     if (navigator.geolocation) {
       let bestAccuracy = Infinity;
       let bestPosition = null;
       let watchId = null;
-      
       const updateMapPosition = (pos) => {
         const accuracy = pos.coords.accuracy;
         if (accuracy < bestAccuracy) {
@@ -993,31 +925,10 @@ gtag('event', 'begin_checkout');
           }
         }
       };
-      
-      navigator.geolocation.getCurrentPosition(
-        updateMapPosition,
-        () => { initMap({ lat: 28.6139, lng: 77.2090 }); },
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-      );
-      
-      watchId = navigator.geolocation.watchPosition(
-        updateMapPosition,
-        () => {},
-        { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 }
-      );
-      
-      setTimeout(() => {
-        if (watchId !== null) {
-          navigator.geolocation.clearWatch(watchId);
-        }
-        if (!bestPosition) {
-          initMap({ lat: 28.6139, lng: 77.2090 });
-        }
-      }, 15000);
-    } else { 
-      initMap({ lat: 28.6139, lng: 77.2090 }); 
-    }
-    
+      navigator.geolocation.getCurrentPosition(updateMapPosition, () => { initMap({ lat: 28.6139, lng: 77.2090 }); }, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+      watchId = navigator.geolocation.watchPosition(updateMapPosition, () => {}, { enableHighAccuracy: true, timeout: 20000, maximumAge: 0 });
+      setTimeout(() => { if (watchId !== null) navigator.geolocation.clearWatch(watchId); if (!bestPosition) initMap({ lat: 28.6139, lng: 77.2090 }); }, 15000);
+    } else { initMap({ lat: 28.6139, lng: 77.2090 }); }
     function initMap(center) {
       mapDiv.innerHTML = '';
       const map = new google.maps.Map(mapDiv, { center, zoom: 16 });
@@ -1039,16 +950,6 @@ gtag('event', 'begin_checkout');
         if (addressData) {
           fillAddressFieldsFromGeocode(addressData);
           showToast('✅ Address filled from map with complete details');
-          
-          console.log('Map address extracted:', {
-            street: addressData.street,
-            area: addressData.area,
-            city: addressData.city,
-            district: addressData.district,
-            state: addressData.state,
-            pincode: addressData.pincode,
-            landmark: addressData.landmark
-          });
         } else {
           let street='', city='', state='', pincode='', landmark='';
           results[0].address_components.forEach(c=>{
@@ -1062,9 +963,7 @@ gtag('event', 'begin_checkout');
           document.getElementById('newCity').value = city;
           document.getElementById('newState').value = state;
           document.getElementById('newPincode').value = pincode;
-          if (landmark && document.getElementById('newLandmark')) {
-            document.getElementById('newLandmark').value = landmark;
-          }
+          if (landmark && document.getElementById('newLandmark')) document.getElementById('newLandmark').value = landmark;
           showToast('Address filled from map');
         }
       } else {
@@ -1091,8 +990,8 @@ gtag('event', 'begin_checkout');
       selectedColor: i.selectedColor || 'Black',
       ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
       ...(i.isDTF === true ? { dtfWidth: i.dtfWidth || 0, dtfHeight: i.dtfHeight || 0, category: i.category || '' } : {}),
-      frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
-      backDesignImage: i.backDesignImage || backDesignImageURL, 
+      frontDesignImage: i.frontDesignImage || frontDesignImageURL || i.frontImage || null, 
+      backDesignImage: i.backDesignImage || backDesignImageURL || i.backImage || null, 
       isCustomized: i.isCustomized === true || isCustomOrder,
       isDTF: i.isDTF === true || isDTFOrder,
       productImage: getProductImageUrl(i.name, i.id, i.selectedColor) || i.imageData || null
@@ -1128,12 +1027,12 @@ gtag('event', 'begin_checkout');
       backDesignImage: backDesignImageURL
     };
     
-    // Add DTF specific fields
     if (isDTFOrder && cart[0]) {
       orderData.dtfWidth = cart[0].dtfWidth || 0;
       orderData.dtfHeight = cart[0].dtfHeight || 0;
       orderData.dtfCategory = cart[0].category || '';
-      orderData.dtfImage = cart[0].imageData || null;
+      orderData.dtfFrontImage = cart[0].frontImage || cart[0].imageData || null;
+      orderData.dtfBackImage = cart[0].backImage || null;
     }
     
     if (isCustomOrder && orderPrintMethod) {
