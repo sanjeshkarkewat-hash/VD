@@ -6,6 +6,10 @@
     <title>DTF Size Analyzer | VEDANTA</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -336,6 +340,34 @@
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; font-size: 16px; }
         
+        /* User info bar */
+        .user-info-bar {
+            background: rgba(212,175,55,0.1);
+            border-radius: 14px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+            font-size: 13px;
+            color: #D4AF37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        .user-info-bar .logout-btn {
+            background: rgba(255,50,50,0.15);
+            border: 1px solid rgba(255,50,50,0.3);
+            padding: 4px 12px;
+            border-radius: 20px;
+            color: #ff6666;
+            font-size: 11px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .user-info-bar .logout-btn:hover {
+            background: rgba(255,50,50,0.25);
+        }
+        
         @media (max-width: 600px) {
             .container { padding: 0 12px; margin: 15px auto; }
             .card { padding: 20px; }
@@ -346,6 +378,7 @@
             .price-display .amount { font-size: 28px; }
             .action-buttons { flex-direction: column; }
             .cart-icon-header { padding: 4px 10px; font-size: 11px; top: 12px; right: 10px; }
+            .user-info-bar { font-size: 12px; padding: 10px 14px; }
         }
     </style>
 </head>
@@ -361,6 +394,12 @@
 
 <div class="container">
     <div class="card">
+        <!-- User Info Bar -->
+        <div class="user-info-bar" id="userInfoBar">
+            <span><i class="fas fa-user-circle"></i> <span id="displayUser">Loading...</span></span>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+
         <div class="card-title"><i class="fas fa-ruler-combined" style="color:#D4AF37;"></i> DTF Print Size Analyzer</div>
         <div class="card-subtitle">Upload a photo of T-Shirt with design → Get exact print size &amp; price</div>
 
@@ -372,7 +411,7 @@
             <input type="file" id="fileInput" accept="image/*">
         </div>
 
-        <!-- Size Selector - ONLY SIZE NAMES -->
+        <!-- Size Selector -->
         <div class="size-selector">
             <label for="tshirtSizeSelect"><i class="fas fa-tshirt"></i> Select T-Shirt Size</label>
             <select id="tshirtSizeSelect">
@@ -455,6 +494,22 @@
 
 <script>
 // ============================================================
+// 🔥 FIREBASE CONFIG
+// ============================================================
+const firebaseConfig = {
+    apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
+    authDomain: "nexi-53897.firebaseapp.com",
+    projectId: "nexi-53897",
+    storageBucket: "nexi-53897.firebasestorage.app",
+    messagingSenderId: "337349382612",
+    appId: "1:337349382612:web:ae3c9b3d0fbf69f0e38641"
+};
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+const auth = firebase.auth();
+const storage = firebase.storage();
+
+// ============================================================
 // 1. SIZE CHART (Real Garment Inches - Internal Use Only)
 // ============================================================
 const GARMENT_SIZES = {
@@ -470,10 +525,7 @@ const GARMENT_SIZES = {
 // 2. PRICE LOGIC (Fixed Pricing)
 // ============================================================
 function getPrice(sizeKey) {
-    // XXL और 3XL का price 650, बाकी सब 599
-    if (sizeKey === 'XXL' || sizeKey === '3XL') {
-        return 650;
-    }
+    if (sizeKey === 'XXL' || sizeKey === '3XL') return 650;
     return 599;
 }
 
@@ -490,8 +542,10 @@ const toastMsg = document.getElementById('toastMsg');
 const loadingOverlay = document.getElementById('loadingOverlay');
 
 let uploadedImageDataURL = null;
+let uploadedImageFile = null;
 let analysisResult = null;
 let cart = [];
+let currentUser = null;
 
 // ============================================================
 // 4. TOAST FUNCTION
@@ -507,11 +561,111 @@ function showToast(msg, isError = false) {
 // ============================================================
 // 5. LOADING
 // ============================================================
-function showLoading() { loadingOverlay.classList.add('active'); }
+function showLoading(text = "🔍 Analyzing T-Shirt Design...") {
+    document.querySelector('.loading-text').innerText = text;
+    loadingOverlay.classList.add('active');
+}
 function hideLoading() { loadingOverlay.classList.remove('active'); }
 
 // ============================================================
-// 6. CORE: DTF SIZE DETECTION
+// 6. AUTH - CHECK USER
+// ============================================================
+function checkUser() {
+    const stored = JSON.parse(localStorage.getItem('vedantaUser'));
+    if (stored) {
+        currentUser = stored;
+        document.getElementById('displayUser').innerText = stored.name || stored.phone || 'Customer';
+        return true;
+    }
+    
+    // Check if Firebase auth has user
+    if (auth.currentUser) {
+        const user = auth.currentUser;
+        currentUser = {
+            uid: user.uid,
+            phone: user.phoneNumber || '',
+            name: user.displayName || 'Customer',
+            email: user.email || ''
+        };
+        localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
+        document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+        return true;
+    }
+    
+    return false;
+}
+
+function logoutUser() {
+    auth.signOut().then(() => {
+        localStorage.removeItem('vedantaUser');
+        localStorage.removeItem('vedanta_dtf_cart');
+        currentUser = null;
+        document.getElementById('displayUser').innerText = 'Guest';
+        showToast('Logged out successfully');
+        setTimeout(() => window.location.href = 'index.html', 1000);
+    }).catch(err => {
+        showToast('Logout failed: ' + err.message, true);
+    });
+}
+
+// ============================================================
+// 7. UPLOAD IMAGE TO FIREBASE STORAGE
+// ============================================================
+async function uploadImageToFirebase(file) {
+    if (!currentUser) {
+        showToast('Please login first', true);
+        return null;
+    }
+    
+    const fileName = `dtf_analyzer/${currentUser.uid}/${Date.now()}_${file.name}`;
+    const ref = storage.ref().child(fileName);
+    
+    try {
+        await ref.put(file);
+        const url = await ref.getDownloadURL();
+        return url;
+    } catch (err) {
+        console.error('Upload error:', err);
+        showToast('Image upload failed: ' + err.message, true);
+        return null;
+    }
+}
+
+// ============================================================
+// 8. SAVE ORDER TO FIRESTORE
+// ============================================================
+async function saveOrderToFirebase(orderData) {
+    if (!currentUser) {
+        showToast('Please login first', true);
+        return null;
+    }
+    
+    try {
+        const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 1000);
+        const orderDoc = {
+            ...orderData,
+            orderId: orderId,
+            userId: currentUser.uid,
+            customerPhone: currentUser.phone || '',
+            customerName: currentUser.name || 'Customer',
+            orderDate: new Date().toISOString(),
+            status: 'pending',
+            paymentStatus: 'pending',
+            source: 'dtf_analyzer',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        };
+        
+        await db.collection('orders').doc(orderId).set(orderDoc);
+        return orderId;
+    } catch (err) {
+        console.error('Save order error:', err);
+        showToast('Failed to save order: ' + err.message, true);
+        return null;
+    }
+}
+
+// ============================================================
+// 9. CORE: DTF SIZE DETECTION
 // ============================================================
 function detectDTFSize(imageDataURL, garmentSize) {
     return new Promise((resolve) => {
@@ -600,7 +754,7 @@ function detectDTFSize(imageDataURL, garmentSize) {
 }
 
 // ============================================================
-// 7. MAIN ANALYSIS FUNCTION
+// 10. MAIN ANALYSIS FUNCTION
 // ============================================================
 async function analyzeTShirt() {
     const sizeKey = tshirtSizeSelect.value;
@@ -627,7 +781,6 @@ async function analyzeTShirt() {
         document.getElementById('resultTopMargin').innerHTML = `${result.marginTop}″`;
         document.getElementById('resultCategory').innerHTML = result.category;
         
-        // 🔥 FIXED PRICE LOGIC
         const finalPrice = getPrice(sizeKey);
         document.getElementById('finalPrice').innerHTML = `₹${finalPrice}`;
         document.getElementById('priceSizeInfo').innerHTML = `Size: ${sizeKey} • ₹${finalPrice}`;
@@ -644,10 +797,11 @@ async function analyzeTShirt() {
 }
 
 // ============================================================
-// 8. RESET
+// 11. RESET
 // ============================================================
 function resetAll() {
     uploadedImageDataURL = null;
+    uploadedImageFile = null;
     analysisResult = null;
     previewArea.classList.remove('show');
     previewImage.src = '';
@@ -658,7 +812,7 @@ function resetAll() {
 }
 
 // ============================================================
-// 9. CART FUNCTIONS
+// 12. CART FUNCTIONS
 // ============================================================
 function saveCart() {
     localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart));
@@ -718,7 +872,6 @@ function updateCartUI() {
     
     document.getElementById('cartSubtotal').innerHTML = `₹${subtotal}`;
     
-    // Event listeners for cart buttons
     document.querySelectorAll('.cart-qty-dec').forEach(btn => {
         btn.onclick = () => {
             const idx = parseInt(btn.dataset.index);
@@ -751,9 +904,9 @@ function updateCartUI() {
 }
 
 // ============================================================
-// 10. ADD TO CART
+// 13. ADD TO CART (With Firebase)
 // ============================================================
-function addToCart() {
+async function addToCart() {
     if (!analysisResult) {
         showToast('❌ Please analyze the design first!', true);
         return;
@@ -763,31 +916,53 @@ function addToCart() {
         showToast('❌ Please select size!', true);
         return;
     }
+    if (!currentUser) {
+        showToast('❌ Please login first!', true);
+        return;
+    }
     
-    const price = getPrice(sizeKey);
+    showLoading('Adding to cart...');
     
-    const cartItem = {
-        id: Date.now(),
-        name: 'Uploaded T-Shirt 🖼️',
-        size: sizeKey,
-        price: price,
-        dtfWidth: analysisResult.dtfWidth,
-        dtfHeight: analysisResult.dtfHeight,
-        category: analysisResult.category,
-        imageData: uploadedImageDataURL,
-        quantity: 1,
-        timestamp: Date.now()
-    };
-    
-    cart.push(cartItem);
-    saveCart();
-    showToast('✅ Added to cart!');
+    try {
+        // Upload image to Firebase
+        let imageUrl = uploadedImageDataURL;
+        if (uploadedImageFile) {
+            const uploadedUrl = await uploadImageToFirebase(uploadedImageFile);
+            if (uploadedUrl) imageUrl = uploadedUrl;
+        }
+        
+        const price = getPrice(sizeKey);
+        
+        const cartItem = {
+            id: Date.now(),
+            name: 'Uploaded T-Shirt 🖼️',
+            size: sizeKey,
+            price: price,
+            dtfWidth: analysisResult.dtfWidth,
+            dtfHeight: analysisResult.dtfHeight,
+            category: analysisResult.category,
+            imageData: imageUrl,
+            quantity: 1,
+            timestamp: Date.now(),
+            userId: currentUser.uid
+        };
+        
+        cart.push(cartItem);
+        saveCart();
+        showToast('✅ Added to cart!');
+        
+    } catch (err) {
+        console.error(err);
+        showToast('Failed to add to cart: ' + err.message, true);
+    } finally {
+        hideLoading();
+    }
 }
 
 // ============================================================
-// 11. BUY NOW (Direct Checkout)
+// 14. BUY NOW (With Firebase Order Save)
 // ============================================================
-function buyNow() {
+async function buyNow() {
     if (!analysisResult) {
         showToast('❌ Please analyze the design first!', true);
         return;
@@ -797,30 +972,73 @@ function buyNow() {
         showToast('❌ Please select size!', true);
         return;
     }
+    if (!currentUser) {
+        showToast('❌ Please login first!', true);
+        return;
+    }
     
-    const price = getPrice(sizeKey);
+    showLoading('Processing order...');
     
-    const orderData = {
-        type: 'dtf_analyzer',
-        size: sizeKey,
-        price: price,
-        dtfWidth: analysisResult.dtfWidth,
-        dtfHeight: analysisResult.dtfHeight,
-        category: analysisResult.category,
-        imageData: uploadedImageDataURL,
-        timestamp: Date.now()
-    };
-    
-    // Save to localStorage for checkout
-    localStorage.setItem('dtfDirectOrder', JSON.stringify(orderData));
-    localStorage.removeItem('vedanta_dtf_cart');
-    
-    // Redirect to checkout
-    window.location.href = 'secure-checkout2.html';
+    try {
+        // Upload image to Firebase
+        let imageUrl = uploadedImageDataURL;
+        if (uploadedImageFile) {
+            const uploadedUrl = await uploadImageToFirebase(uploadedImageFile);
+            if (uploadedUrl) imageUrl = uploadedUrl;
+        }
+        
+        const price = getPrice(sizeKey);
+        
+        const orderData = {
+            type: 'dtf_analyzer',
+            size: sizeKey,
+            price: price,
+            dtfWidth: analysisResult.dtfWidth,
+            dtfHeight: analysisResult.dtfHeight,
+            category: analysisResult.category,
+            imageUrl: imageUrl,
+            itemName: 'Uploaded T-Shirt',
+            quantity: 1,
+            totalAmount: price,
+            timestamp: Date.now()
+        };
+        
+        const orderId = await saveOrderToFirebase(orderData);
+        
+        if (orderId) {
+            // Clear cart and redirect
+            localStorage.removeItem('vedanta_dtf_cart');
+            
+            // Save for checkout page
+            const checkoutData = {
+                type: 'dtf_analyzer',
+                orderId: orderId,
+                size: sizeKey,
+                price: price,
+                dtfWidth: analysisResult.dtfWidth,
+                dtfHeight: analysisResult.dtfHeight,
+                category: analysisResult.category,
+                imageUrl: imageUrl,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
+            
+            showToast('✅ Order created! Redirecting...');
+            setTimeout(() => {
+                window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
+            }, 1000);
+        }
+        
+    } catch (err) {
+        console.error(err);
+        showToast('Order failed: ' + err.message, true);
+    } finally {
+        hideLoading();
+    }
 }
 
 // ============================================================
-// 12. EVENT LISTENERS
+// 15. EVENT LISTENERS
 // ============================================================
 
 // Upload
@@ -858,6 +1076,7 @@ function handleFileUpload(file) {
         return;
     }
     
+    uploadedImageFile = file;
     const reader = new FileReader();
     reader.onload = (e) => {
         uploadedImageDataURL = e.target.result;
@@ -895,14 +1114,45 @@ document.getElementById('cartCheckoutBtn').addEventListener('click', () => {
     }
     localStorage.setItem('dtfCartCheckout', JSON.stringify(cart));
     localStorage.removeItem('vedanta_dtf_cart');
-    window.location.href = 'secure-checkout2.html';
+    window.location.href = 'secure-checkout2.html?type=dtf';
+});
+
+// Logout
+document.getElementById('logoutBtn').addEventListener('click', logoutUser);
+
+// ============================================================
+// 16. AUTH STATE LISTENER
+// ============================================================
+auth.onAuthStateChanged((user) => {
+    if (user) {
+        currentUser = {
+            uid: user.uid,
+            phone: user.phoneNumber || '',
+            name: user.displayName || 'Customer',
+            email: user.email || ''
+        };
+        localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
+        document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+        loadCart();
+    } else {
+        const stored = JSON.parse(localStorage.getItem('vedantaUser'));
+        if (stored) {
+            currentUser = stored;
+            document.getElementById('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+            loadCart();
+        } else {
+            currentUser = null;
+            document.getElementById('displayUser').innerText = 'Guest';
+            loadCart();
+        }
+    }
 });
 
 // ============================================================
-// 13. INIT
+// 17. INIT
 // ============================================================
 loadCart();
-console.log('✅ DTF Size Analyzer ready!');
+console.log('✅ DTF Size Analyzer with Firebase ready!');
 console.log('💰 Pricing: S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
