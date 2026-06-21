@@ -12,169 +12,640 @@
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Space Grotesk', sans-serif; background: #050508; color: #FFFFFF; min-height: 100vh; }
-        .header { text-align: center; padding: 14px 15px; border-bottom: 1px solid rgba(212,175,55,0.12); position: relative; background: rgba(5,5,8,0.95); }
-        .logo { font-size: 24px; font-weight: 800; background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700); -webkit-background-clip: text; background-clip: text; color: transparent; }
-        .back-link { display: inline-block; margin-top: 4px; color: #D4AF37; text-decoration: none; font-size: 12px; opacity: 0.7; }
+        body {
+            font-family: 'Space Grotesk', sans-serif;
+            background: #050508;
+            color: #FFFFFF;
+            min-height: 100vh;
+        }
+        .header {
+            text-align: center;
+            padding: 16px 15px;
+            border-bottom: 1px solid rgba(212,175,55,0.15);
+            position: relative;
+            background: rgba(5,5,8,0.95);
+            backdrop-filter: blur(10px);
+        }
+        .logo {
+            font-size: 26px;
+            font-weight: 800;
+            background: linear-gradient(135deg, #FFF8E7, #D4AF37, #FFD700);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+        .back-link {
+            display: inline-block;
+            margin-top: 6px;
+            color: #D4AF37;
+            text-decoration: none;
+            font-size: 13px;
+            opacity: 0.8;
+            transition: 0.3s;
+        }
         .back-link:hover { opacity: 1; }
-        .cart-icon-header { position: absolute; right: 14px; top: 12px; cursor: pointer; background: rgba(212,175,55,0.1); padding: 4px 12px; border-radius: 30px; border: 1px solid rgba(212,175,55,0.2); display: flex; align-items: center; gap: 4px; font-size: 11px; }
-        .cart-count { background: #D4AF37; color: #050508; border-radius: 30px; padding: 0 7px; font-size: 10px; font-weight: 700; }
-        .container { max-width: 700px; margin: 14px auto; padding: 0 14px; }
-        .card { background: rgba(15,15,22,0.92); border-radius: 20px; padding: 22px; border: 1px solid rgba(212,175,55,0.08); }
-        .card-title { font-size: 20px; font-weight: 700; color: #D4AF37; display: flex; align-items: center; gap: 8px; }
-        .card-subtitle { color: #888; font-size: 12px; margin-bottom: 16px; }
-        .upload-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .upload-zone { border: 2px dashed rgba(212,175,55,0.2); border-radius: 16px; padding: 16px 10px; text-align: center; cursor: pointer; transition: all 0.2s ease; background: rgba(0,0,0,0.2); position: relative; min-height: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .upload-zone:hover { border-color: #D4AF37; background: rgba(212,175,55,0.04); }
-        .upload-zone.uploaded { border-color: #4CAF50; background: rgba(76,175,80,0.04); }
-        .upload-zone i { font-size: 26px; color: #D4AF37; opacity: 0.6; margin-bottom: 4px; }
-        .upload-zone p { color: #aaa; font-size: 12px; font-weight: 500; }
-        .upload-zone .small { color: #666; font-size: 10px; }
-        .upload-zone .label { background: rgba(212,175,55,0.12); padding: 1px 10px; border-radius: 20px; font-size: 8px; color: #D4AF37; margin-top: 3px; font-weight: 600; letter-spacing: 0.5px; }
+        .cart-icon-header {
+            position: absolute;
+            right: 15px;
+            top: 14px;
+            cursor: pointer;
+            background: rgba(212,175,55,0.12);
+            padding: 6px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(212,175,55,0.3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            transition: 0.3s;
+        }
+        .cart-icon-header:hover { background: rgba(212,175,55,0.2); }
+        .cart-count {
+            background: #D4AF37;
+            color: #050508;
+            border-radius: 30px;
+            padding: 1px 8px;
+            font-size: 11px;
+            font-weight: bold;
+        }
+        .container {
+            max-width: 720px;
+            margin: 20px auto;
+            padding: 0 16px;
+        }
+        .card {
+            background: rgba(15,15,22,0.92);
+            border-radius: 24px;
+            padding: 28px;
+            border: 1px solid rgba(212,175,55,0.1);
+            backdrop-filter: blur(10px);
+        }
+        .card-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: #D4AF37;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .card-subtitle {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 22px;
+            padding-left: 2px;
+        }
+        
+        /* ====== DUAL UPLOAD ZONES ====== */
+        .upload-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+        .upload-zone {
+            border: 2px dashed rgba(212,175,55,0.3);
+            border-radius: 18px;
+            padding: 24px 12px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0,0,0,0.25);
+            position: relative;
+            min-height: 140px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .upload-zone:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.06);
+        }
+        .upload-zone.uploaded {
+            border-color: #4CAF50;
+            background: rgba(76,175,80,0.06);
+        }
+        .upload-zone i {
+            font-size: 32px;
+            color: #D4AF37;
+            margin-bottom: 6px;
+            opacity: 0.7;
+        }
+        .upload-zone p {
+            color: #aaa;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        .upload-zone .small {
+            color: #666;
+            font-size: 11px;
+            margin-top: 2px;
+        }
+        .upload-zone .upload-label {
+            display: inline-block;
+            background: rgba(212,175,55,0.15);
+            padding: 2px 12px;
+            border-radius: 20px;
+            font-size: 9px;
+            color: #D4AF37;
+            margin-top: 4px;
+            letter-spacing: 1px;
+            font-weight: 600;
+        }
+        .upload-zone.dragover {
+            border-color: #FF8C00;
+            background: rgba(212,175,55,0.12);
+        }
         .upload-zone input[type="file"] { display: none; }
-        .upload-zone .thumb { max-width: 100%; max-height: 55px; border-radius: 8px; margin-top: 4px; border: 1px solid rgba(212,175,55,0.1); object-fit: contain; display: none; }
-        .upload-zone .remove-btn { position: absolute; top: 4px; right: 8px; background: rgba(200,50,50,0.8); border: none; color: white; border-radius: 50%; width: 20px; height: 20px; cursor: pointer; font-size: 10px; display: none; line-height: 20px; text-align: center; }
-        .upload-zone.uploaded .remove-btn { display: block; }
-        .upload-zone .status { font-size: 9px; color: #4CAF50; display: none; margin-top: 2px; }
-        .upload-zone.uploaded .status { display: block; }
-        .size-selector { margin-top: 14px; }
-        .size-selector label { display: block; color: #D4AF37; font-weight: 600; font-size: 12px; margin-bottom: 4px; }
-        .size-selector select { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; color: white; font-size: 14px; font-family: 'Space Grotesk', sans-serif; cursor: pointer; }
-        .size-selector select:focus { outline: none; border-color: #D4AF37; }
-        .preview-area { display: none; margin-top: 14px; background: rgba(0,0,0,0.15); border-radius: 14px; padding: 12px; }
+        .upload-zone .preview-thumb {
+            max-width: 100%;
+            max-height: 70px;
+            border-radius: 10px;
+            margin-top: 6px;
+            border: 1px solid rgba(212,175,55,0.15);
+            object-fit: contain;
+        }
+        .upload-zone .remove-img {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            background: rgba(200,50,50,0.85);
+            border: none;
+            color: white;
+            border-radius: 50%;
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            font-size: 11px;
+            display: none;
+            transition: 0.2s;
+            line-height: 22px;
+            text-align: center;
+        }
+        .upload-zone .remove-img:hover { transform: scale(1.1); }
+        .upload-zone.uploaded .remove-img { display: block; }
+        .upload-zone .status-text {
+            font-size: 10px;
+            color: #4CAF50;
+            margin-top: 4px;
+            display: none;
+        }
+        .upload-zone.uploaded .status-text { display: block; }
+        
+        .size-selector {
+            margin-top: 18px;
+        }
+        .size-selector label {
+            display: block;
+            color: #D4AF37;
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .size-selector select {
+            width: 100%;
+            padding: 11px 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.25);
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            appearance: none;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .size-selector select:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.05);
+        }
+        .size-selector select option { background: #1a1a2e; }
+        
+        .preview-area {
+            margin-top: 20px;
+            display: none;
+            background: rgba(0,0,0,0.2);
+            border-radius: 16px;
+            padding: 16px;
+        }
         .preview-area.show { display: block; }
-        .preview-grid { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-        .preview-item { flex: 1; min-width: 100px; max-width: 200px; text-align: center; }
-        .preview-item p { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
-        .preview-item img { width: 100%; max-height: 100px; object-fit: contain; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.06); }
-        .results-panel { display: none; margin-top: 16px; background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; border: 1px solid rgba(212,175,55,0.08); animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .preview-area .preview-grid {
+            display: flex;
+            gap: 16px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .preview-area .preview-item {
+            flex: 1;
+            min-width: 140px;
+            max-width: 280px;
+            text-align: center;
+        }
+        .preview-area .preview-item p {
+            font-size: 10px;
+            color: #888;
+            margin-bottom: 4px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+        .preview-area .preview-item img {
+            width: 100%;
+            max-height: 150px;
+            object-fit: contain;
+            border-radius: 12px;
+            border: 1px solid rgba(212,175,55,0.12);
+            background: rgba(0,0,0,0.3);
+        }
+        
+        .results-panel {
+            margin-top: 22px;
+            display: none;
+            background: rgba(0,0,0,0.35);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid rgba(212,175,55,0.12);
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .results-panel.show { display: block; }
-        .result-big { font-size: 24px; font-weight: 800; color: #D4AF37; text-align: center; padding: 8px 0; }
-        .result-row { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); font-size: 13px; }
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-size: 14px;
+        }
         .result-row:last-child { border-bottom: none; }
         .result-label { color: #999; }
         .result-value { color: #D4AF37; font-weight: 600; }
         .result-value.green { color: #4CAF50; }
-        .price-display { text-align: center; margin-top: 12px; padding: 14px; background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(255,140,0,0.04)); border-radius: 14px; border: 1px solid rgba(212,175,55,0.1); }
-        .price-display .amount { font-size: 30px; font-weight: 800; color: #D4AF37; }
-        .price-display .label { font-size: 12px; color: #888; }
-        .price-display .size-info { font-size: 11px; color: #999; margin-top: 2px; }
-        .action-buttons { display: flex; gap: 8px; margin-top: 16px; }
-        .btn { flex: 1; padding: 11px; border-radius: 40px; font-weight: 700; font-size: 13px; cursor: pointer; transition: all 0.2s ease; border: none; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Space Grotesk', sans-serif; }
-        .btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none !important; }
-        .btn-primary { background: linear-gradient(135deg, #D4AF37, #FF8C00); color: #050508; }
-        .btn-primary:hover:not(:disabled) { transform: scale(1.02); }
-        .btn-secondary { background: rgba(212,175,55,0.08); border: 1px solid rgba(212,175,55,0.2); color: #D4AF37; }
-        .btn-secondary:hover:not(:disabled) { background: rgba(212,175,55,0.15); }
-        .btn-buy { background: linear-gradient(135deg, #FF4500, #FF8C00); color: white; }
-        .btn-buy:hover:not(:disabled) { transform: scale(1.02); }
-        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 8px 18px; border-radius: 30px; font-weight: 600; z-index: 10000; display: none; font-size: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
-        .toast.show { display: block; animation: toastAnim 2.5s ease; }
+        .result-big {
+            font-size: 26px;
+            font-weight: 800;
+            color: #D4AF37;
+            text-align: center;
+            padding: 12px 0;
+            letter-spacing: 0.5px;
+        }
+        
+        .price-display {
+            text-align: center;
+            margin-top: 16px;
+            padding: 18px;
+            background: linear-gradient(135deg, rgba(212,175,55,0.12), rgba(255,140,0,0.06));
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.15);
+        }
+        .price-display .amount {
+            font-size: 34px;
+            font-weight: 800;
+            color: #D4AF37;
+            letter-spacing: 0.5px;
+        }
+        .price-display .label {
+            font-size: 13px;
+            color: #888;
+        }
+        .price-display .size-info {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .btn {
+            flex: 1;
+            padding: 13px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: 'Space Grotesk', sans-serif;
+        }
+        .btn:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            color: #050508;
+        }
+        .btn-primary:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(212,175,55,0.2); }
+        .btn-secondary {
+            background: rgba(212,175,55,0.12);
+            border: 1.5px solid rgba(212,175,55,0.3);
+            color: #D4AF37;
+        }
+        .btn-secondary:hover:not(:disabled) { background: rgba(212,175,55,0.2); }
+        .btn-buy {
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
+            color: white;
+        }
+        .btn-buy:hover:not(:disabled) { transform: scale(1.02); box-shadow: 0 0 30px rgba(255,69,0,0.2); }
+        
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #050508;
+            padding: 10px 22px;
+            border-radius: 40px;
+            font-weight: 600;
+            z-index: 10000;
+            display: none;
+            font-size: 13px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+        .toast.show { display: block; animation: toastAnim 2.8s ease; }
         .toast.error { background: #F44336; color: white; }
-        @keyframes toastAnim { 0% { opacity: 0; transform: translateX(-50%) translateY(15px); } 20% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(15px); } }
-        .note { margin-top: 14px; padding: 10px 14px; background: rgba(255,200,0,0.04); border-radius: 10px; border-left: 2px solid #D4AF37; font-size: 11px; color: #999; }
+        @keyframes toastAnim {
+            0% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+            15% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+            85% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateX(-50%) translateY(20px) scale(0.95); }
+        }
+        
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.88);
+            z-index: 30000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            backdrop-filter: blur(8px);
+        }
+        .loading-overlay.active { display: flex; }
+        .loading-spinner {
+            width: 44px;
+            height: 44px;
+            border: 3px solid rgba(212,175,55,0.15);
+            border-top: 3px solid #D4AF37;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 12px;
+        }
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        .loading-text { color: #D4AF37; font-size: 14px; font-weight: 500; letter-spacing: 0.5px; }
+        
+        .note {
+            margin-top: 18px;
+            padding: 12px 16px;
+            background: rgba(255,200,0,0.05);
+            border-radius: 12px;
+            border-left: 3px solid #D4AF37;
+            font-size: 12px;
+            color: #999;
+        }
         .note strong { color: #D4AF37; }
-        .cart-sidebar { position: fixed; top: 0; right: -100%; width: 85%; max-width: 340px; height: 100vh; background: rgba(8,8,15,0.98); backdrop-filter: blur(20px); border-left: 1px solid rgba(212,175,55,0.12); z-index: 15000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 88%;
+            max-width: 360px;
+            height: 100vh;
+            background: rgba(8,8,15,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(212,175,55,0.2);
+            z-index: 15000;
+            transition: 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
         .cart-sidebar.open { right: 0; }
-        .cart-header { padding: 14px 16px; border-bottom: 1px solid rgba(212,175,55,0.1); display: flex; justify-content: space-between; align-items: center; }
-        .cart-header h3 { font-size: 16px; color: #D4AF37; }
-        .cart-header .close { font-size: 20px; cursor: pointer; color: #888; }
-        .cart-header .close:hover { color: #fff; }
-        .cart-items { flex: 1; overflow-y: auto; padding: 10px 14px; }
-        .cart-item { background: rgba(20,20,30,0.4); margin-bottom: 8px; border-radius: 12px; padding: 8px 10px; display: flex; gap: 8px; border: 1px solid rgba(255,255,255,0.03); }
-        .cart-item-img { width: 38px; height: 38px; background: #1a1a2e; border-radius: 8px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+        .cart-header { padding: 16px 18px; border-bottom: 1px solid rgba(212,175,55,0.15); display: flex; justify-content: space-between; align-items: center; }
+        .cart-header h3 { font-size: 17px; color: #D4AF37; }
+        .cart-header .close-btn { font-size: 22px; cursor: pointer; color: #888; transition: 0.3s; }
+        .cart-header .close-btn:hover { color: #fff; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 12px 16px; }
+        .cart-items::-webkit-scrollbar { width: 3px; }
+        .cart-items::-webkit-scrollbar-track { background: transparent; }
+        .cart-items::-webkit-scrollbar-thumb { background: rgba(212,175,55,0.3); border-radius: 10px; }
+        .cart-item { background: rgba(20,20,30,0.5); margin-bottom: 10px; border-radius: 14px; padding: 10px 12px; display: flex; gap: 10px; border: 1px solid rgba(255,255,255,0.04); }
+        .cart-item-img { width: 44px; height: 44px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
         .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
         .cart-item-details { flex: 1; min-width: 0; }
-        .cart-item-name { font-weight: 600; font-size: 11px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .cart-item-price { color: #D4AF37; font-weight: 700; font-size: 12px; }
-        .cart-item-variant { font-size: 9px; color: #888; }
-        .cart-qty { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
-        .cart-qty button { background: rgba(212,175,55,0.12); border: none; width: 20px; height: 20px; border-radius: 4px; color: #D4AF37; cursor: pointer; font-size: 11px; }
-        .cart-qty button:hover { background: rgba(212,175,55,0.2); }
-        .cart-qty span { font-size: 12px; min-width: 18px; text-align: center; }
-        .cart-remove { background: rgba(200,50,50,0.15); border: none; padding: 2px 8px; border-radius: 4px; color: #ff8888; cursor: pointer; font-size: 9px; }
-        .cart-remove:hover { background: rgba(200,50,50,0.25); }
-        .cart-total { padding: 12px 16px; border-top: 1px solid rgba(212,175,55,0.1); background: rgba(0,0,0,0.2); }
-        .cart-total .row { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; color: #D4AF37; }
-        .checkout-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 30px; font-weight: 700; cursor: pointer; color: #050508; font-size: 14px; margin-top: 6px; }
+        .cart-item-name { font-weight: 600; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .cart-item-price { color: #D4AF37; font-weight: 700; font-size: 13px; }
+        .cart-item-variant { font-size: 10px; color: #888; }
+        .cart-qty-control { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+        .cart-qty-control button { background: rgba(212,175,55,0.15); border: none; width: 22px; height: 22px; border-radius: 6px; color: #D4AF37; cursor: pointer; font-size: 12px; transition: 0.2s; }
+        .cart-qty-control button:hover { background: rgba(212,175,55,0.25); }
+        .cart-qty-control span { font-size: 13px; min-width: 20px; text-align: center; }
+        .cart-item-remove { background: rgba(200,50,50,0.2); border: none; padding: 3px 10px; border-radius: 6px; color: #ff8888; cursor: pointer; font-size: 10px; transition: 0.2s; }
+        .cart-item-remove:hover { background: rgba(200,50,50,0.35); }
+        .cart-total { padding: 14px 18px; border-top: 1px solid rgba(212,175,55,0.12); background: rgba(0,0,0,0.2); }
+        .cart-total .total-row { display: flex; justify-content: space-between; font-weight: 600; font-size: 16px; color: #D4AF37; }
+        .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: 700; cursor: pointer; color: #050508; font-size: 15px; transition: 0.3s; margin-top: 8px; }
         .checkout-btn:hover { transform: scale(1.02); }
-        .user-bar { background: rgba(212,175,55,0.04); border-radius: 12px; padding: 8px 14px; margin-bottom: 14px; font-size: 11px; color: #D4AF37; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; border: 1px solid rgba(212,175,55,0.04); }
-        .user-bar .logout { background: rgba(255,50,50,0.08); border: 1px solid rgba(255,50,50,0.15); padding: 2px 10px; border-radius: 20px; color: #ff6666; font-size: 9px; cursor: pointer; }
-        .user-bar .logout:hover { background: rgba(255,50,50,0.15); }
-        @media (max-width: 600px) { .upload-row { grid-template-columns: 1fr; gap: 8px; } .container { padding: 0 10px; margin: 10px auto; } .card { padding: 14px; } .card-title { font-size: 17px; } .upload-zone { padding: 12px 8px; min-height: 80px; } .upload-zone i { font-size: 20px; } .result-big { font-size: 20px; } .price-display .amount { font-size: 24px; } .action-buttons { flex-direction: column; gap: 6px; } .btn { padding: 10px; font-size: 12px; } .cart-icon-header { padding: 3px 8px; font-size: 10px; top: 10px; right: 8px; } .user-bar { font-size: 10px; padding: 6px 10px; } .preview-item { min-width: 80px; } }
+        
+        .user-info-bar {
+            background: rgba(212,175,55,0.06);
+            border-radius: 14px;
+            padding: 10px 16px;
+            margin-bottom: 18px;
+            font-size: 12px;
+            color: #D4AF37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+            border: 1px solid rgba(212,175,55,0.06);
+        }
+        .user-info-bar .logout-btn {
+            background: rgba(255,50,50,0.1);
+            border: 1px solid rgba(255,50,50,0.2);
+            padding: 3px 12px;
+            border-radius: 20px;
+            color: #ff6666;
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .user-info-bar .logout-btn:hover { background: rgba(255,50,50,0.2); }
+        
+        @media (max-width: 600px) {
+            .upload-row { grid-template-columns: 1fr; gap: 10px; }
+            .container { padding: 0 12px; margin: 12px auto; }
+            .card { padding: 18px; }
+            .card-title { font-size: 19px; }
+            .upload-zone { padding: 18px 10px; min-height: 110px; }
+            .upload-zone i { font-size: 26px; }
+            .result-big { font-size: 22px; }
+            .price-display .amount { font-size: 28px; }
+            .action-buttons { flex-direction: column; gap: 8px; }
+            .btn { padding: 12px; font-size: 13px; }
+            .cart-icon-header { padding: 4px 10px; font-size: 11px; top: 12px; right: 10px; }
+            .user-info-bar { font-size: 11px; padding: 8px 12px; }
+            .preview-area .preview-item { min-width: 100px; }
+        }
     </style>
 </head>
 <body>
 
 <div class="header">
     <div class="logo">VEDANTA</div>
-    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back</a>
-    <div class="cart-icon-header" id="cartIconBtn"><i class="fas fa-shopping-cart"></i> <span class="cart-count" id="cartCount">0</span></div>
+    <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Studio</a>
+    <div class="cart-icon-header" id="cartIconBtn">
+        <i class="fas fa-shopping-cart"></i> <span class="cart-count" id="cartCount">0</span>
+    </div>
 </div>
 
 <div class="container">
     <div class="card">
-        <div class="user-bar"><span><i class="fas fa-user-circle"></i> <span id="displayUser">Loading...</span></span><button class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+        <div class="user-info-bar" id="userInfoBar">
+            <span><i class="fas fa-user-circle"></i> <span id="displayUser">Loading...</span></span>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+        </div>
+
         <div class="card-title"><i class="fas fa-ruler-combined"></i> DTF Size Analyzer</div>
-        <div class="card-subtitle">Upload Front &amp; Back → Get exact print size &amp; price</div>
+        <div class="card-subtitle">Upload Front &amp; Back photos → Get exact print size &amp; price</div>
 
+        <!-- ====== DUAL UPLOAD ZONES ====== -->
         <div class="upload-row">
-            <div class="upload-zone" id="frontZone">
-                <i class="fas fa-tshirt"></i><p><strong>Front</strong></p><p class="small">Click or drag</p>
-                <span class="label">FRONT</span><span class="status"><i class="fas fa-check-circle"></i> Uploaded</span>
-                <input type="file" id="frontInput" accept="image/*">
-                <img class="thumb" id="frontThumb"><button class="remove-btn" id="frontRemove">✕</button>
+            <div class="upload-zone" id="frontUploadZone">
+                <i class="fas fa-tshirt"></i>
+                <p><strong>Front Design</strong></p>
+                <p class="small">Click or drag to upload</p>
+                <span class="upload-label">FRONT</span>
+                <span class="status-text"><i class="fas fa-check-circle"></i> Uploaded</span>
+                <input type="file" id="frontFileInput" accept="image/*">
+                <img class="preview-thumb" id="frontPreviewThumb" style="display:none;">
+                <button class="remove-img" id="frontRemoveBtn">✕</button>
             </div>
-            <div class="upload-zone" id="backZone">
-                <i class="fas fa-undo-alt"></i><p><strong>Back</strong></p><p class="small">Click or drag</p>
-                <span class="label">BACK</span><span class="status"><i class="fas fa-check-circle"></i> Uploaded</span>
-                <input type="file" id="backInput" accept="image/*">
-                <img class="thumb" id="backThumb"><button class="remove-btn" id="backRemove">✕</button>
+            
+            <div class="upload-zone" id="backUploadZone">
+                <i class="fas fa-undo-alt"></i>
+                <p><strong>Back Design</strong></p>
+                <p class="small">Click or drag to upload</p>
+                <span class="upload-label">BACK</span>
+                <span class="status-text"><i class="fas fa-check-circle"></i> Uploaded</span>
+                <input type="file" id="backFileInput" accept="image/*">
+                <img class="preview-thumb" id="backPreviewThumb" style="display:none;">
+                <button class="remove-img" id="backRemoveBtn">✕</button>
             </div>
         </div>
 
+        <!-- Size Selector -->
         <div class="size-selector">
-            <label for="sizeSelect"><i class="fas fa-tshirt"></i> Size</label>
-            <select id="sizeSelect"><option value="">— Select —</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="3XL">3XL</option></select>
+            <label for="tshirtSizeSelect"><i class="fas fa-tshirt"></i> Select T-Shirt Size</label>
+            <select id="tshirtSizeSelect">
+                <option value="">— Select Size —</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+                <option value="3XL">3XL</option>
+            </select>
         </div>
 
+        <!-- Preview -->
         <div class="preview-area" id="previewArea">
-            <div class="preview-grid"><div class="preview-item"><p>Front</p><img id="frontMain"></div><div class="preview-item"><p>Back</p><img id="backMain"></div></div>
+            <div class="preview-grid">
+                <div class="preview-item">
+                    <p>Front</p>
+                    <img id="frontPreviewMain" src="" alt="Front">
+                </div>
+                <div class="preview-item">
+                    <p>Back</p>
+                    <img id="backPreviewMain" src="" alt="Back">
+                </div>
+            </div>
         </div>
 
+        <!-- Results -->
         <div class="results-panel" id="resultsPanel">
-            <div class="result-big" id="dtfDisplay">📐 0″ × 0″</div>
-            <div class="result-row"><span class="result-label">📏 Width</span><span class="result-value" id="rWidth">—</span></div>
-            <div class="result-row"><span class="result-label">📐 Height</span><span class="result-value" id="rHeight">—</span></div>
-            <div class="result-row"><span class="result-label">⬅️ Left Margin</span><span class="result-value" id="rLeft">—</span></div>
-            <div class="result-row"><span class="result-label">⬆️ Top Margin</span><span class="result-value" id="rTop">—</span></div>
-            <div class="result-row"><span class="result-label">📦 Category</span><span class="result-value green" id="rCat">—</span></div>
-            <div class="price-display"><div class="label">💰 Final Price</div><div class="amount" id="finalPrice">₹0</div><div class="size-info" id="priceInfo">Size: —</div></div>
+            <div class="result-big" id="dtfSizeDisplay">📐 0″ × 0″</div>
+            
+            <div class="result-row">
+                <span class="result-label">📏 Print Width</span>
+                <span class="result-value" id="resultWidth">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">📐 Print Height</span>
+                <span class="result-value" id="resultHeight">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">⬅️ Left Margin</span>
+                <span class="result-value" id="resultLeftMargin">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">⬆️ Top Margin</span>
+                <span class="result-value" id="resultTopMargin">—</span>
+            </div>
+            <div class="result-row">
+                <span class="result-label">📦 Category</span>
+                <span class="result-value green" id="resultCategory">—</span>
+            </div>
+
+            <div class="price-display">
+                <div class="label">💰 Final Price</div>
+                <div class="amount" id="finalPrice">₹0</div>
+                <div class="size-info" id="priceSizeInfo">Size: —</div>
+            </div>
+
             <div class="action-buttons">
                 <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
-                <button class="btn btn-primary" id="addBtn" disabled><i class="fas fa-cart-plus"></i> Cart</button>
-                <button class="btn btn-buy" id="buyBtn" disabled><i class="fas fa-bolt"></i> Buy</button>
+                <button class="btn btn-primary" id="addToCartBtn" disabled><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                <button class="btn btn-buy" id="buyNowBtn" disabled><i class="fas fa-bolt"></i> Buy Now</button>
             </div>
         </div>
 
-        <div class="note"><i class="fas fa-info-circle" style="color:#D4AF37;"></i> <strong>AI detects</strong> design area → Calculates DTF size → Shows price</div>
+        <div class="note">
+            <i class="fas fa-info-circle" style="color:#D4AF37;"></i>
+            <strong>How it works:</strong> AI detects design area → Calculates exact DTF print size → Shows final price
+        </div>
     </div>
 </div>
 
-<!-- Cart -->
+<!-- Cart Sidebar -->
 <div id="cartSidebar" class="cart-sidebar">
-    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Cart</h3><span class="close" id="closeCart">&times;</span></div>
-    <div id="cartList" class="cart-items"><div style="text-align:center;padding:20px;color:#666;font-size:12px;">Empty</div></div>
-    <div class="cart-total"><div class="row"><span>Total</span><span id="cartTotal">₹0</span></div><button id="cartCheckout" class="checkout-btn">Checkout</button></div>
+    <div class="cart-header">
+        <h3><i class="fas fa-shopping-bag"></i> Your Cart</h3>
+        <span class="close-btn" id="closeCartBtn">&times;</span>
+    </div>
+    <div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:30px; color:#666; font-size:13px;">Cart is empty</div></div>
+    <div class="cart-total">
+        <div class="total-row"><span>Subtotal</span><span id="cartSubtotal">₹0</span></div>
+        <button id="cartCheckoutBtn" class="checkout-btn">Proceed to Checkout</button>
+    </div>
 </div>
 
 <!-- Toast -->
 <div class="toast" id="toastMsg"></div>
 
+<!-- Loading -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Processing...</div>
+</div>
+
 <script>
 // ============================================================
-// FIREBASE
+// 🔥 FIREBASE CONFIG
 // ============================================================
 const firebaseConfig = {
     apiKey: "AIzaSyCBZuwN4SKkXX1fEriYEwWDyTm-3uZnrKI",
@@ -192,84 +663,153 @@ const storage = firebase.storage();
 // ============================================================
 // CONSTANTS
 // ============================================================
-const SIZES = { 'S':{w:18,h:26}, 'M':{w:20,h:27}, 'L':{w:22,h:28}, 'XL':{w:23,h:29}, 'XXL':{w:24,h:30}, '3XL':{w:25,h:31} };
-const getPrice = s => (s === 'XXL' || s === '3XL') ? 650 : 599;
+const GARMENT_SIZES = {
+    'S':  { width: 18, height: 26 },
+    'M':  { width: 20, height: 27 },
+    'L':  { width: 22, height: 28 },
+    'XL': { width: 23, height: 29 },
+    'XXL':{ width: 24, height: 30 },
+    '3XL':{ width: 25, height: 31 }
+};
+
+function getPrice(sizeKey) {
+    if (sizeKey === 'XXL' || sizeKey === '3XL') return 650;
+    return 599;
+}
 
 // ============================================================
 // DOM REFS
 // ============================================================
 const $ = id => document.getElementById(id);
-const frontZone = $('frontZone'), backZone = $('backZone');
-const frontIn = $('frontInput'), backIn = $('backInput');
-const frontThumb = $('frontThumb'), backThumb = $('backThumb');
-const frontMain = $('frontMain'), backMain = $('backMain');
-const frontRem = $('frontRemove'), backRem = $('backRemove');
-const previewArea = $('previewArea'), resultsPanel = $('resultsPanel');
-const sizeSelect = $('sizeSelect'), toastMsg = $('toastMsg');
-const addBtn = $('addBtn'), buyBtn = $('buyBtn'), resetBtn = $('resetBtn');
+const frontZone = $('frontUploadZone');
+const backZone = $('backUploadZone');
+const frontInput = $('frontFileInput');
+const backInput = $('backFileInput');
+const frontThumb = $('frontPreviewThumb');
+const backThumb = $('backPreviewThumb');
+const frontMain = $('frontPreviewMain');
+const backMain = $('backPreviewMain');
+const frontRemove = $('frontRemoveBtn');
+const backRemove = $('backRemoveBtn');
+const previewArea = $('previewArea');
+const resultsPanel = $('resultsPanel');
+const sizeSelect = $('tshirtSizeSelect');
+const toastMsg = $('toastMsg');
+const loadingOverlay = $('loadingOverlay');
+const addBtn = $('addToCartBtn');
+const buyBtn = $('buyNowBtn');
+const resetBtn = $('resetBtn');
 
-let frontData = null, frontFile = null, backData = null, backFile = null;
-let result = null, cart = [], user = null;
+let frontDataURL = null, frontFile = null;
+let backDataURL = null, backFile = null;
+let analysisResult = null;
+let cart = [];
+let currentUser = null;
+let isProcessing = false;
 
 // ============================================================
-// TOAST (FAST)
+// TOAST & LOADING
 // ============================================================
-function toast(msg, err = false) {
+function showToast(msg, isError = false) {
     toastMsg.innerText = msg;
-    toastMsg.className = 'toast' + (err ? ' error' : '');
+    toastMsg.className = 'toast' + (isError ? ' error' : '');
     toastMsg.classList.add('show');
     clearTimeout(toastMsg._timer);
-    toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 2000);
+    toastMsg._timer = setTimeout(() => toastMsg.classList.remove('show'), 2800);
+}
+
+function showLoading(text = 'Processing...') {
+    document.querySelector('.loading-text').innerText = text;
+    loadingOverlay.classList.add('active');
+}
+
+function hideLoading() {
+    loadingOverlay.classList.remove('active');
 }
 
 // ============================================================
 // AUTH
 // ============================================================
-function setUser(u) {
-    user = u;
-    $('displayUser').innerText = u ? (u.name || u.phone || 'Customer') : 'Guest';
-}
-auth.onAuthStateChanged(u => {
-    if (u) {
-        const cu = { uid: u.uid, phone: u.phoneNumber || '', name: u.displayName || 'Customer' };
-        localStorage.setItem('vedantaUser', JSON.stringify(cu));
-        setUser(cu);
-    } else {
-        const s = JSON.parse(localStorage.getItem('vedantaUser'));
-        setUser(s || null);
+function checkUser() {
+    const stored = JSON.parse(localStorage.getItem('vedantaUser'));
+    if (stored) {
+        currentUser = stored;
+        $('displayUser').innerText = stored.name || stored.phone || 'Customer';
+        return true;
     }
-    loadCart();
-});
-setUser(JSON.parse(localStorage.getItem('vedantaUser')) || null);
+    if (auth.currentUser) {
+        const u = auth.currentUser;
+        currentUser = { uid: u.uid, phone: u.phoneNumber || '', name: u.displayName || 'Customer', email: u.email || '' };
+        localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
+        $('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+        return true;
+    }
+    return false;
+}
 
-$('logoutBtn').onclick = () => {
+function logoutUser() {
     auth.signOut().then(() => {
         localStorage.removeItem('vedantaUser');
         localStorage.removeItem('vedanta_dtf_cart');
-        setUser(null);
-        toast('Logged out');
-        setTimeout(() => window.location.href = 'index.html', 500);
-    });
-};
+        currentUser = null;
+        $('displayUser').innerText = 'Guest';
+        showToast('Logged out');
+        setTimeout(() => window.location.href = 'index.html', 800);
+    }).catch(() => showToast('Logout failed', true));
+}
 
 // ============================================================
-// DTF DETECTION (FAST)
+// FIREBASE UPLOAD (Lightweight)
 // ============================================================
-function detectSize(dataURL, g) {
-    return new Promise(resolve => {
+async function uploadImage(file, side) {
+    if (!currentUser || !file) return null;
+    const path = `dtf_analyzer/${currentUser.uid}/${side}_${Date.now()}_${file.name}`;
+    try {
+        const ref = storage.ref().child(path);
+        await ref.put(file);
+        return await ref.getDownloadURL();
+    } catch { return null; }
+}
+
+async function saveOrder(data) {
+    if (!currentUser) return null;
+    const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 1000);
+    try {
+        await db.collection('orders').doc(orderId).set({
+            ...data,
+            orderId,
+            userId: currentUser.uid,
+            customerPhone: currentUser.phone || '',
+            customerName: currentUser.name || 'Customer',
+            orderDate: new Date().toISOString(),
+            status: 'pending',
+            paymentStatus: 'pending',
+            source: 'dtf_analyzer',
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+        return orderId;
+    } catch { return null; }
+}
+
+// ============================================================
+// DTF SIZE DETECTION (Fast)
+// ============================================================
+function detectSize(dataURL, garment) {
+    return new Promise((resolve) => {
         const img = new Image();
-        img.onload = () => {
+        img.onload = function() {
             const c = document.createElement('canvas');
             const ctx = c.getContext('2d');
             c.width = img.width; c.height = img.height;
             ctx.drawImage(img, 0, 0);
-            const d = ctx.getImageData(0, 0, c.width, c.height).data;
+            const d = ctx.getImageData(0, 0, c.width, c.height);
+            const data = d.data;
             const w = c.width, h = c.height;
             let minX = w, minY = h, maxX = 0, maxY = 0, found = 0;
             for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
                     const i = (y * w + x) * 4;
-                    const b = (d[i] + d[i+1] + d[i+2]) / 3;
+                    const b = (data[i] + data[i+1] + data[i+2]) / 3;
                     if (b < 220) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
@@ -282,18 +822,22 @@ function detectSize(dataURL, g) {
             if (found === 0 || maxX - minX < 10 || maxY - minY < 10) {
                 minX = 0; minY = 0; maxX = w; maxY = h;
             }
-            let dw = (maxX - minX) / w * g.w;
-            let dh = (maxY - minY) / h * g.h;
+            let dw = (maxX - minX) / w * garment.width;
+            let dh = (maxY - minY) / h * garment.height;
+            const ml = (garment.width - dw) / 2;
+            const mt = (garment.height - dh) / 2;
             let cat = '';
-            if (dw > g.w * 0.85 && dh > g.h * 0.85) cat = '🟢 Full Cover';
-            else if (dw > g.w * 0.5 || dh > g.h * 0.5) cat = '🟡 Half Cover';
-            else if (dw < 5 && dh < 5) cat = '🔵 Small Logo';
+            const area = dw * dh;
+            if (dw > garment.width * 0.85 && dh > garment.height * 0.85) cat = '🟢 Full Cover';
+            else if (dw > garment.width * 0.5 || dh > garment.height * 0.5) cat = '🟡 Half Cover / Custom';
+            else if (dw < 5 && dh < 5) cat = '🔵 Small (Pocket/Logo)';
             else if (Math.abs(dw - 8.27) < 1 && Math.abs(dh - 11.69) < 1) cat = '📄 A4 Size';
-            else cat = '🟠 Custom';
+            else cat = '🟠 Custom Size';
             resolve({
-                dw: Math.round(dw * 10) / 10, dh: Math.round(dh * 10) / 10,
-                ml: Math.round((g.w - dw) / 2 * 10) / 10,
-                mt: Math.round((g.h - dh) / 2 * 10) / 10,
+                dw: Math.round(dw * 10) / 10,
+                dh: Math.round(dh * 10) / 10,
+                ml: Math.round(ml * 10) / 10,
+                mt: Math.round(mt * 10) / 10,
                 cat
             });
         };
@@ -302,306 +846,327 @@ function detectSize(dataURL, g) {
 }
 
 // ============================================================
-// ANALYZE
+// ANALYZE (Fast)
 // ============================================================
 async function analyze() {
-    const size = sizeSelect.value;
-    if (!size) { toast('Select size first', true); return; }
-    if (!frontData) { toast('Upload Front image', true); return; }
+    const sizeKey = sizeSelect.value;
+    if (!sizeKey) { showToast('Select size first', true); return; }
+    if (!frontDataURL) { showToast('Upload Front image first', true); return; }
     
-    addBtn.disabled = true; buyBtn.disabled = true;
+    addBtn.disabled = true;
+    buyBtn.disabled = true;
+    showLoading('Analyzing...');
     
     try {
-        const g = SIZES[size];
-        const r = await detectSize(frontData, g);
-        result = { ...r, size };
+        const g = GARMENT_SIZES[sizeKey];
+        const r = await detectSize(frontDataURL, g);
+        analysisResult = { ...r, sizeKey };
         
-        $('dtfDisplay').innerHTML = `📐 ${r.dw}″ × ${r.dh}″`;
-        $('rWidth').innerHTML = `${r.dw}″`;
-        $('rHeight').innerHTML = `${r.dh}″`;
-        $('rLeft').innerHTML = `${r.ml}″`;
-        $('rTop').innerHTML = `${r.mt}″`;
-        $('rCat').innerHTML = r.cat;
+        $('dtfSizeDisplay').innerHTML = `📐 ${r.dw}″ × ${r.dh}″`;
+        $('resultWidth').innerHTML = `${r.dw}″`;
+        $('resultHeight').innerHTML = `${r.dh}″`;
+        $('resultLeftMargin').innerHTML = `${r.ml}″`;
+        $('resultTopMargin').innerHTML = `${r.mt}″`;
+        $('resultCategory').innerHTML = r.cat;
         
-        const price = getPrice(size);
+        const price = getPrice(sizeKey);
         $('finalPrice').innerHTML = `₹${price}`;
-        $('priceInfo').innerHTML = `Size: ${size} • ₹${price}`;
+        $('priceSizeInfo').innerHTML = `Size: ${sizeKey} • ₹${price}`;
         
         resultsPanel.classList.add('show');
-        addBtn.disabled = false; buyBtn.disabled = false;
-    } catch (e) { toast('Analysis failed', true); }
+        addBtn.disabled = false;
+        buyBtn.disabled = false;
+        showToast('✅ Analysis complete!');
+    } catch (e) {
+        showToast('Analysis failed', true);
+    } finally {
+        hideLoading();
+    }
 }
 
 // ============================================================
 // FILE HANDLERS
 // ============================================================
 function handleFile(file, side) {
-    if (!file.type.startsWith('image/')) { toast('Image only', true); return; }
-    if (file.size > 5*1024*1024) { toast('Max 5MB', true); return; }
+    if (!file.type.startsWith('image/')) { showToast('Upload image only', true); return; }
+    if (file.size > 5 * 1024 * 1024) { showToast('Max 5MB', true); return; }
     
     const reader = new FileReader();
-    reader.onload = e => {
+    reader.onload = (e) => {
         const url = e.target.result;
         if (side === 'front') {
-            frontData = url; frontFile = file;
+            frontDataURL = url; frontFile = file;
             frontThumb.src = url; frontThumb.style.display = 'block';
             frontMain.src = url;
             frontZone.classList.add('uploaded');
         } else {
-            backData = url; backFile = file;
+            backDataURL = url; backFile = file;
             backThumb.src = url; backThumb.style.display = 'block';
             backMain.src = url;
             backZone.classList.add('uploaded');
         }
         previewArea.classList.add('show');
-        if (frontData && sizeSelect.value) setTimeout(analyze, 50);
+        if (frontDataURL && sizeSelect.value) {
+            setTimeout(analyze, 100);
+        }
     };
     reader.readAsDataURL(file);
 }
 
-function removeImg(side) {
+function removeImage(side) {
     if (side === 'front') {
-        frontData = null; frontFile = null;
+        frontDataURL = null; frontFile = null;
         frontThumb.style.display = 'none'; frontThumb.src = '';
         frontMain.src = '';
         frontZone.classList.remove('uploaded');
-        frontIn.value = '';
+        frontInput.value = '';
     } else {
-        backData = null; backFile = null;
+        backDataURL = null; backFile = null;
         backThumb.style.display = 'none'; backThumb.src = '';
         backMain.src = '';
         backZone.classList.remove('uploaded');
-        backIn.value = '';
+        backInput.value = '';
     }
-    if (!frontData && !backData) {
+    if (!frontDataURL && !backDataURL) {
         previewArea.classList.remove('show');
         resultsPanel.classList.remove('show');
-        addBtn.disabled = true; buyBtn.disabled = true;
-        result = null;
-    } else if (frontData && sizeSelect.value) {
-        setTimeout(analyze, 50);
+        addBtn.disabled = true;
+        buyBtn.disabled = true;
+        analysisResult = null;
+    } else if (frontDataURL && sizeSelect.value) {
+        setTimeout(analyze, 100);
     }
 }
 
 function resetAll() {
-    removeImg('front'); removeImg('back');
-    result = null; resultsPanel.classList.remove('show');
+    removeImage('front');
+    removeImage('back');
+    analysisResult = null;
+    resultsPanel.classList.remove('show');
     previewArea.classList.remove('show');
     sizeSelect.value = '';
-    addBtn.disabled = true; buyBtn.disabled = true;
-    toast('Reset');
+    addBtn.disabled = true;
+    buyBtn.disabled = true;
+    showToast('Reset complete');
 }
 
 // ============================================================
-// CART
+// CART (Fast)
 // ============================================================
 function saveCart() {
     localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart));
-    updateCart();
+    updateCartUI();
 }
 
 function loadCart() {
-    try { const s = localStorage.getItem('vedanta_dtf_cart'); if (s) { cart = JSON.parse(s); updateCart(); } } catch {}
+    try {
+        const s = localStorage.getItem('vedanta_dtf_cart');
+        if (s) { cart = JSON.parse(s); updateCartUI(); }
+    } catch {}
 }
 
-function updateCart() {
+function updateCartUI() {
     const count = cart.reduce((s, i) => s + i.quantity, 0);
     $('cartCount').innerText = count;
-    const list = $('cartList');
-    if (!cart.length) { list.innerHTML = '<div style="text-align:center;padding:20px;color:#666;font-size:12px;">Empty</div>'; $('cartTotal').innerHTML = '₹0'; return; }
+    const container = $('cartItemsList');
+    if (!cart.length) {
+        container.innerHTML = '<div style="text-align:center;padding:30px;color:#666;font-size:13px;">Cart is empty</div>';
+        $('cartSubtotal').innerText = '₹0';
+        return;
+    }
     let sub = 0;
-    list.innerHTML = '';
+    container.innerHTML = '';
     cart.forEach((item, idx) => {
         sub += item.price * item.quantity;
-        list.innerHTML += `
+        container.innerHTML += `
             <div class="cart-item">
-                <div class="cart-item-img">${item.front ? `<img src="${item.front}">` : '<i class="fas fa-tshirt"></i>'}</div>
+                <div class="cart-item-img">${item.frontData ? `<img src="${item.frontData}">` : '<i class="fas fa-tshirt"></i>'}</div>
                 <div class="cart-item-details">
                     <div class="cart-item-name">${item.name || 'DTF T-Shirt'}</div>
                     <div class="cart-item-price">₹${item.price}</div>
-                    <div class="cart-item-variant">${item.size} • ${item.cat || ''}</div>
-                    <div class="cart-qty">
-                        <button class="qtyDec" data-i="${idx}">−</button>
+                    <div class="cart-item-variant">Size: ${item.size} • ${item.cat || ''}</div>
+                    <div class="cart-qty-control">
+                        <button class="qty-dec" data-i="${idx}">−</button>
                         <span>${item.quantity}</span>
-                        <button class="qtyInc" data-i="${idx}">+</button>
-                        <button class="cartRemove" data-i="${idx}">Remove</button>
+                        <button class="qty-inc" data-i="${idx}">+</button>
+                        <button class="item-remove" data-i="${idx}">Remove</button>
                     </div>
                 </div>
             </div>
         `;
     });
-    $('cartTotal').innerHTML = `₹${sub}`;
-    document.querySelectorAll('.qtyDec').forEach(b => b.onclick = () => {
+    $('cartSubtotal').innerHTML = `₹${sub}`;
+    document.querySelectorAll('.qty-dec').forEach(b => b.onclick = () => {
         const i = parseInt(b.dataset.i);
         if (cart[i].quantity > 1) cart[i].quantity--;
         else cart.splice(i, 1);
         saveCart();
     });
-    document.querySelectorAll('.qtyInc').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.qty-inc').forEach(b => b.onclick = () => {
         const i = parseInt(b.dataset.i);
         cart[i].quantity++;
         saveCart();
     });
-    document.querySelectorAll('.cartRemove').forEach(b => b.onclick = () => {
+    document.querySelectorAll('.item-remove').forEach(b => b.onclick = () => {
         cart.splice(parseInt(b.dataset.i), 1);
         saveCart();
     });
 }
 
 // ============================================================
-// 🔥 ADD TO CART (INSTANT)
+// ADD TO CART (Fast)
 // ============================================================
-function addToCart() {
-    if (!result || !user) {
-        if (!user) toast('Login first', true);
-        else if (!result) toast('Analyze first', true);
+async function addToCart() {
+    if (isProcessing || !analysisResult || !currentUser) {
+        if (!currentUser) showToast('Please login first', true);
+        else if (!analysisResult) showToast('Analyze first', true);
         return;
     }
+    isProcessing = true;
+    addBtn.disabled = true;
+    showLoading('Adding...');
     
-    const price = getPrice(result.size);
-    cart.push({
-        id: Date.now() + Math.floor(Math.random() * 999),
-        name: 'DTF Analyzed T-Shirt',
-        size: result.size,
-        price: price,
-        cat: result.cat,
-        front: frontData,
-        back: backData,
-        quantity: 1
-    });
-    saveCart();
-    toast('✅ Added to cart!');
+    try {
+        let fu = frontDataURL, bu = backDataURL;
+        if (frontFile) { const u = await uploadImage(frontFile, 'front'); if (u) fu = u; }
+        if (backFile) { const u = await uploadImage(backFile, 'back'); if (u) bu = u; }
+        
+        cart.push({
+            id: Date.now() + Math.floor(Math.random() * 999),
+            name: 'DTF Analyzed T-Shirt',
+            size: analysisResult.sizeKey,
+            price: getPrice(analysisResult.sizeKey),
+            cat: analysisResult.cat,
+            frontData: fu,
+            backData: bu,
+            quantity: 1,
+            isDTF: true
+        });
+        saveCart();
+        showToast('✅ Added to cart!');
+    } catch (e) {
+        showToast('Failed to add', true);
+    } finally {
+        isProcessing = false;
+        addBtn.disabled = false;
+        hideLoading();
+    }
 }
 
 // ============================================================
-// 🔥 BUY NOW (INSTANT - NO LOADING, NO WAITING)
+// BUY NOW (Fast)
 // ============================================================
-function buyNow() {
-    if (!result || !user) {
-        if (!user) toast('Login first', true);
-        else if (!result) toast('Analyze first', true);
+async function buyNow() {
+    if (isProcessing || !analysisResult || !currentUser) {
+        if (!currentUser) showToast('Please login first', true);
+        else if (!analysisResult) showToast('Analyze first', true);
         return;
     }
+    isProcessing = true;
+    buyBtn.disabled = true;
+    showLoading('Processing...');
     
-    const price = getPrice(result.size);
-    const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 999);
-    
-    // Save to localStorage for checkout page
-    const checkoutData = {
-        type: 'dtf_analyzer',
-        orderId: orderId,
-        size: result.size,
-        price: price,
-        dtfWidth: result.dw,
-        dtfHeight: result.dh,
-        category: result.cat,
-        frontImageUrl: frontData,
-        backImageUrl: backData,
-        timestamp: Date.now()
-    };
-    localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
-    
-    // Save order to Firebase in BACKGROUND (fire and forget)
-    const orderData = {
-        orderId: orderId,
-        type: 'dtf_analyzer',
-        size: result.size,
-        price: price,
-        dtfWidth: result.dw,
-        dtfHeight: result.dh,
-        category: result.cat,
-        frontImageUrl: frontData,
-        backImageUrl: backData,
-        itemName: 'DTF Analyzed T-Shirt',
-        quantity: 1,
-        totalAmount: price,
-        userId: user.uid,
-        customerPhone: user.phone || '',
-        customerName: user.name || 'Customer',
-        orderDate: new Date().toISOString(),
-        status: 'pending',
-        paymentStatus: 'pending',
-        source: 'dtf_analyzer',
-        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-    };
-    
-    // Fire and forget - no await, no waiting
-    db.collection('orders').doc(orderId).set(orderData).catch(() => {});
-    
-    // Upload images in background
-    if (frontFile) {
-        const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
-        ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) {
-                db.collection('orders').doc(orderId).update({ frontImageUrl: url }).catch(() => {});
-                const data = JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}');
-                data.frontImageUrl = url;
-                localStorage.setItem('dtfDirectOrder', JSON.stringify(data));
-            }
-        }).catch(() => {});
+    try {
+        let fu = frontDataURL, bu = backDataURL;
+        if (frontFile) { const u = await uploadImage(frontFile, 'front'); if (u) fu = u; }
+        if (backFile) { const u = await uploadImage(backFile, 'back'); if (u) bu = u; }
+        
+        const price = getPrice(analysisResult.sizeKey);
+        const oid = await saveOrder({
+            type: 'dtf_analyzer',
+            size: analysisResult.sizeKey,
+            price,
+            dtfWidth: analysisResult.dw,
+            dtfHeight: analysisResult.dh,
+            category: analysisResult.cat,
+            frontImageUrl: fu,
+            backImageUrl: bu,
+            itemName: 'DTF Analyzed T-Shirt',
+            quantity: 1,
+            totalAmount: price
+        });
+        
+        if (oid) {
+            localStorage.removeItem('vedanta_dtf_cart');
+            localStorage.setItem('dtfDirectOrder', JSON.stringify({
+                type: 'dtf_analyzer', orderId: oid, size: analysisResult.sizeKey,
+                price, dtfWidth: analysisResult.dw, dtfHeight: analysisResult.dh,
+                category: analysisResult.cat, frontImageUrl: fu, backImageUrl: bu
+            }));
+            showToast('✅ Order created!');
+            setTimeout(() => window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + oid, 800);
+        }
+    } catch (e) {
+        showToast('Order failed', true);
+    } finally {
+        isProcessing = false;
+        buyBtn.disabled = false;
+        hideLoading();
     }
-    if (backFile) {
-        const ref = storage.ref().child(`dtf_analyzer/${user.uid}/back_${Date.now()}_${backFile.name}`);
-        ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) {
-                db.collection('orders').doc(orderId).update({ backImageUrl: url }).catch(() => {});
-                const data = JSON.parse(localStorage.getItem('dtfDirectOrder') || '{}');
-                data.backImageUrl = url;
-                localStorage.setItem('dtfDirectOrder', JSON.stringify(data));
-            }
-        }).catch(() => {});
-    }
-    
-    // Clear cart and redirect IMMEDIATELY
-    localStorage.removeItem('vedanta_dtf_cart');
-    toast('✅ Order created!');
-    setTimeout(() => {
-        window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
-    }, 300);
 }
 
 // ============================================================
 // EVENTS
 // ============================================================
-frontZone.onclick = () => frontIn.click();
-frontZone.ondragover = e => { e.preventDefault(); frontZone.classList.add('dragover'); };
-frontZone.ondragleave = () => frontZone.classList.remove('dragover');
-frontZone.ondrop = e => {
-    e.preventDefault(); frontZone.classList.remove('dragover');
+frontZone.addEventListener('click', () => frontInput.click());
+frontZone.addEventListener('dragover', e => { e.preventDefault(); frontZone.classList.add('dragover'); });
+frontZone.addEventListener('dragleave', () => frontZone.classList.remove('dragover'));
+frontZone.addEventListener('drop', e => {
+    e.preventDefault();
+    frontZone.classList.remove('dragover');
     if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0], 'front');
-};
-frontIn.onchange = e => { if (e.target.files.length) handleFile(e.target.files[0], 'front'); };
-frontRem.onclick = e => { e.stopPropagation(); removeImg('front'); };
+});
+frontInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0], 'front'); });
+frontRemove.addEventListener('click', e => { e.stopPropagation(); removeImage('front'); });
 
-backZone.onclick = () => backIn.click();
-backZone.ondragover = e => { e.preventDefault(); backZone.classList.add('dragover'); };
-backZone.ondragleave = () => backZone.classList.remove('dragover');
-backZone.ondrop = e => {
-    e.preventDefault(); backZone.classList.remove('dragover');
+backZone.addEventListener('click', () => backInput.click());
+backZone.addEventListener('dragover', e => { e.preventDefault(); backZone.classList.add('dragover'); });
+backZone.addEventListener('dragleave', () => backZone.classList.remove('dragover'));
+backZone.addEventListener('drop', e => {
+    e.preventDefault();
+    backZone.classList.remove('dragover');
     if (e.dataTransfer.files.length) handleFile(e.dataTransfer.files[0], 'back');
-};
-backIn.onchange = e => { if (e.target.files.length) handleFile(e.target.files[0], 'back'); };
-backRem.onclick = e => { e.stopPropagation(); removeImg('back'); };
+});
+backInput.addEventListener('change', e => { if (e.target.files.length) handleFile(e.target.files[0], 'back'); });
+backRemove.addEventListener('click', e => { e.stopPropagation(); removeImage('back'); });
 
-sizeSelect.onchange = () => { if (frontData) setTimeout(analyze, 50); };
-resetBtn.onclick = resetAll;
-addBtn.onclick = addToCart;
-buyBtn.onclick = buyNow;
+sizeSelect.addEventListener('change', () => { if (frontDataURL) setTimeout(analyze, 100); });
+resetBtn.addEventListener('click', resetAll);
+addBtn.addEventListener('click', addToCart);
+buyBtn.addEventListener('click', buyNow);
 
-$('cartIconBtn').onclick = () => $('cartSidebar').classList.add('open');
-$('closeCart').onclick = () => $('cartSidebar').classList.remove('open');
-$('cartCheckout').onclick = () => {
-    if (!cart.length) { toast('Cart empty', true); return; }
+$('cartIconBtn').addEventListener('click', () => $('cartSidebar').classList.add('open'));
+$('closeCartBtn').addEventListener('click', () => $('cartSidebar').classList.remove('open'));
+$('cartCheckoutBtn').addEventListener('click', () => {
+    if (!cart.length) { showToast('Cart empty', true); return; }
     localStorage.setItem('dtfCartCheckout', JSON.stringify(cart));
     localStorage.removeItem('vedanta_dtf_cart');
     window.location.href = 'secure-checkout2.html?type=dtf';
-};
+});
+$('logoutBtn').addEventListener('click', logoutUser);
+
+// ============================================================
+// AUTH STATE
+// ============================================================
+auth.onAuthStateChanged(user => {
+    if (user) {
+        currentUser = { uid: user.uid, phone: user.phoneNumber || '', name: user.displayName || 'Customer', email: user.email || '' };
+        localStorage.setItem('vedantaUser', JSON.stringify(currentUser));
+        $('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer';
+        loadCart();
+    } else {
+        const stored = JSON.parse(localStorage.getItem('vedantaUser'));
+        if (stored) { currentUser = stored; $('displayUser').innerText = currentUser.name || currentUser.phone || 'Customer'; loadCart(); }
+        else { currentUser = null; $('displayUser').innerText = 'Guest'; loadCart(); }
+    }
+});
 
 // ============================================================
 // INIT
 // ============================================================
+checkUser();
 loadCart();
-console.log('⚡ DTF Analyzer Ready - Instant Buy Now!');
+console.log('✅ DTF Analyzer ready!');
 console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
