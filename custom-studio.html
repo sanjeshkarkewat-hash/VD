@@ -18,6 +18,7 @@
             text-align: center;
             padding: 20px 15px;
             border-bottom: 1px solid rgba(212,175,55,0.2);
+            position: relative;
         }
         .logo {
             font-size: 28px;
@@ -33,6 +34,28 @@
             color: #D4AF37;
             text-decoration: none;
             font-size: 14px;
+        }
+        .cart-icon-header {
+            position: absolute;
+            right: 15px;
+            top: 18px;
+            cursor: pointer;
+            background: rgba(212,175,55,0.15);
+            padding: 8px 14px;
+            border-radius: 40px;
+            border: 1px solid rgba(212,175,55,0.4);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+        }
+        .cart-count {
+            background: #D4AF37;
+            color: #050508;
+            border-radius: 30px;
+            padding: 2px 8px;
+            font-size: 12px;
+            font-weight: bold;
         }
         .container {
             max-width: 700px;
@@ -172,6 +195,11 @@
             font-size: 14px;
             color: #888;
         }
+        .price-display .size-info {
+            font-size: 13px;
+            color: #aaa;
+            margin-top: 5px;
+        }
         
         .action-buttons {
             display: flex;
@@ -204,6 +232,19 @@
             transition: 0.3s;
         }
         .btn-secondary:hover { background: rgba(212,175,55,0.25); }
+        .btn-buy {
+            flex: 1;
+            padding: 14px;
+            background: linear-gradient(135deg, #FF4500, #FF8C00);
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .btn-buy:hover { transform: scale(1.02); }
         
         .toast {
             position: fixed;
@@ -264,6 +305,36 @@
             color: #aaa;
         }
         .note strong { color: #D4AF37; }
+
+        /* Cart Sidebar */
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 360px;
+            height: 100vh;
+            background: rgba(8,8,15,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 2px solid rgba(212,175,55,0.4);
+            z-index: 15000;
+            transition: 0.3s ease;
+        }
+        .cart-sidebar.open { right: 0; }
+        .cart-header { padding: 18px; border-bottom: 1px solid rgba(212,175,55,0.3); display: flex; justify-content: space-between; }
+        .cart-items { flex: 1; overflow-y: auto; padding: 15px; max-height: 70vh; }
+        .cart-item { background: rgba(20,20,30,0.6); margin-bottom: 12px; border-radius: 16px; padding: 12px; display: flex; gap: 10px; }
+        .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .cart-item-img img { width: 100%; height: 100%; object-fit: cover; }
+        .cart-item-details { flex: 1; }
+        .cart-item-name { font-weight: 600; font-size: 13px; }
+        .cart-item-price { color: #D4AF37; font-weight: 700; font-size: 14px; }
+        .cart-item-variant { font-size: 11px; color: #888; }
+        .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
+        .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
+        .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; font-size: 16px; }
         
         @media (max-width: 600px) {
             .container { padding: 0 12px; margin: 15px auto; }
@@ -274,6 +345,7 @@
             .result-big { font-size: 22px; }
             .price-display .amount { font-size: 28px; }
             .action-buttons { flex-direction: column; }
+            .cart-icon-header { padding: 4px 10px; font-size: 11px; top: 12px; right: 10px; }
         }
     </style>
 </head>
@@ -282,6 +354,9 @@
 <div class="header">
     <div class="logo">VEDANTA</div>
     <a href="index.html" class="back-link"><i class="fas fa-arrow-left"></i> Back to Studio</a>
+    <div class="cart-icon-header" id="cartIconBtn">
+        <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
+    </div>
 </div>
 
 <div class="container">
@@ -342,16 +417,15 @@
             </div>
 
             <div class="price-display">
-                <div class="label">💰 Estimated Final Price (Incl. All)</div>
+                <div class="label">💰 Final Price</div>
                 <div class="amount" id="finalPrice">₹0</div>
-                <div style="font-size:12px; color:#666; margin-top:5px;">
-                    Base + DTF + Shipping + Packaging + Margin
-                </div>
+                <div class="size-info" id="priceSizeInfo">Size: --</div>
             </div>
 
             <div class="action-buttons">
                 <button class="btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
                 <button class="btn-primary" id="addToCartBtn"><i class="fas fa-cart-plus"></i> Add to Cart</button>
+                <button class="btn-buy" id="buyNowBtn"><i class="fas fa-bolt"></i> Buy Now</button>
             </div>
         </div>
 
@@ -361,6 +435,13 @@
             Automatically determines DTF print size &amp; final price.
         </div>
     </div>
+</div>
+
+<!-- Cart Sidebar -->
+<div id="cartSidebar" class="cart-sidebar">
+    <div class="cart-header"><h3><i class="fas fa-shopping-bag"></i> Your Cart</h3><i class="fas fa-times" id="closeCartBtn" style="cursor:pointer; font-size:20px;"></i></div>
+    <div id="cartItemsList" class="cart-items"><div style="text-align:center; padding:20px;">Cart empty</div></div>
+    <div class="cart-total"><div style="display:flex; justify-content:space-between;"><span>Subtotal:</span><span id="cartSubtotal">₹0</span></div><button id="cartCheckoutBtn" class="checkout-btn">Checkout</button></div>
 </div>
 
 <!-- Toast -->
@@ -386,7 +467,18 @@ const GARMENT_SIZES = {
 };
 
 // ============================================================
-// 2. DOM ELEMENTS
+// 2. PRICE LOGIC (Fixed Pricing)
+// ============================================================
+function getPrice(sizeKey) {
+    // XXL और 3XL का price 650, बाकी सब 599
+    if (sizeKey === 'XXL' || sizeKey === '3XL') {
+        return 650;
+    }
+    return 599;
+}
+
+// ============================================================
+// 3. DOM ELEMENTS
 // ============================================================
 const uploadZone = document.getElementById('uploadZone');
 const fileInput = document.getElementById('fileInput');
@@ -399,9 +491,10 @@ const loadingOverlay = document.getElementById('loadingOverlay');
 
 let uploadedImageDataURL = null;
 let analysisResult = null;
+let cart = [];
 
 // ============================================================
-// 3. TOAST FUNCTION
+// 4. TOAST FUNCTION
 // ============================================================
 function showToast(msg, isError = false) {
     toastMsg.innerText = msg;
@@ -412,49 +505,40 @@ function showToast(msg, isError = false) {
 }
 
 // ============================================================
-// 4. LOADING
+// 5. LOADING
 // ============================================================
 function showLoading() { loadingOverlay.classList.add('active'); }
 function hideLoading() { loadingOverlay.classList.remove('active'); }
 
 // ============================================================
-// 5. CORE: DTF SIZE DETECTION (OpenCV-style logic)
+// 6. CORE: DTF SIZE DETECTION
 // ============================================================
 function detectDTFSize(imageDataURL, garmentSize) {
     return new Promise((resolve) => {
         const img = new Image();
         img.onload = function() {
-            // Canvas पर image render करो
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             canvas.width = img.width;
             canvas.height = img.height;
             ctx.drawImage(img, 0, 0);
             
-            // Image Data लो
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const data = imageData.data;
             const w = canvas.width;
             const h = canvas.height;
             
-            // --- STEP 1: T-Shirt Body Detect (सबसे बड़ा क्षेत्र) ---
-            // Simple threshold: गहरे रंग (Design) vs हल्के (T-Shirt)
-            // मान लो T-Shirt हल्का है और Design गहरा
-            
             let minX = w, minY = h, maxX = 0, maxY = 0;
             let foundPixels = 0;
             
-            // Design पिक्सल ढूंढो (जो सफेद/हल्के से अलग हैं)
             for (let y = 0; y < h; y++) {
                 for (let x = 0; x < w; x++) {
                     const idx = (y * w + x) * 4;
                     const r = data[idx];
                     const g = data[idx + 1];
                     const b = data[idx + 2];
-                    
-                    // अगर पिक्सल हल्का नहीं है (सफेद नहीं) तो Design का हिस्सा मानो
                     const brightness = (r + g + b) / 3;
-                    if (brightness < 220) {  // 220 से कम = Design (डार्क)
+                    if (brightness < 220) {
                         if (x < minX) minX = x;
                         if (x > maxX) maxX = x;
                         if (y < minY) minY = y;
@@ -464,32 +548,24 @@ function detectDTFSize(imageDataURL, garmentSize) {
                 }
             }
             
-            // अगर Design नहीं मिला तो पूरी Image को Design मानो
             if (foundPixels === 0 || maxX - minX < 10 || maxY - minY < 10) {
                 minX = 0; minY = 0; maxX = w; maxY = h;
             }
             
-            // --- STEP 2: Design का Pixel Size ---
             const designWidthPx = maxX - minX;
             const designHeightPx = maxY - minY;
             const canvasWidthPx = w;
             const canvasHeightPx = h;
             
-            // --- STEP 3: Garment Size (इंच में) ---
             const garmentW = garmentSize.width;
             const garmentH = garmentSize.height;
             
-            // --- STEP 4: DTF Size (इंच में) ---
             let dtfWidth = (designWidthPx / canvasWidthPx) * garmentW;
             let dtfHeight = (designHeightPx / canvasHeightPx) * garmentH;
             
-            // --- STEP 5: Margins ---
             const marginLeft = (garmentW - dtfWidth) / 2;
             const marginTop = (garmentH - dtfHeight) / 2;
-            const marginRight = marginLeft;
-            const marginBottom = marginTop;
             
-            // --- STEP 6: Print Category ---
             let category = '';
             const area = dtfWidth * dtfHeight;
             if (dtfWidth > garmentW * 0.85 && dtfHeight > garmentH * 0.85) {
@@ -504,7 +580,6 @@ function detectDTFSize(imageDataURL, garmentSize) {
                 category = '🟠 Custom Size';
             }
             
-            // --- STEP 7: Round to 1 decimal ---
             dtfWidth = Math.round(dtfWidth * 10) / 10;
             dtfHeight = Math.round(dtfHeight * 10) / 10;
             
@@ -513,39 +588,15 @@ function detectDTFSize(imageDataURL, garmentSize) {
                 dtfHeight,
                 marginLeft: Math.round(marginLeft * 10) / 10,
                 marginTop: Math.round(marginTop * 10) / 10,
-                marginRight: Math.round(marginRight * 10) / 10,
-                marginBottom: Math.round(marginBottom * 10) / 10,
+                marginRight: Math.round(((garmentW - dtfWidth) / 2) * 10) / 10,
+                marginBottom: Math.round(((garmentH - dtfHeight) / 2) * 10) / 10,
                 category,
-                designWidthPx,
-                designHeightPx,
-                canvasWidthPx,
-                canvasHeightPx,
                 garmentW,
                 garmentH
             });
         };
         img.src = imageDataURL;
     });
-}
-
-// ============================================================
-// 6. PRICE CALCULATION
-// ============================================================
-function calculatePrice(dtfWidth, dtfHeight, basePrice = 699) {
-    const area = dtfWidth * dtfHeight;
-    
-    let dtfCost = 120; // Default A4
-    if (area > 350) dtfCost = 200;      // Full Cover
-    else if (area > 200) dtfCost = 160; // Large
-    else if (area > 100) dtfCost = 130; // Medium
-    else dtfCost = 100;                 // Small
-    
-    const shipping = 120;
-    const packaging = 50;
-    const margin = 199;
-    
-    const finalPrice = basePrice + dtfCost + shipping + packaging + margin;
-    return { finalPrice, dtfCost, shipping, packaging, margin, basePrice };
 }
 
 // ============================================================
@@ -566,11 +617,9 @@ async function analyzeTShirt() {
     showLoading();
     
     try {
-        // AI Analysis (simulated with canvas)
         const result = await detectDTFSize(uploadedImageDataURL, garmentSize);
         analysisResult = result;
         
-        // Display Results
         document.getElementById('dtfSizeDisplay').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
         document.getElementById('resultWidth').innerHTML = `${result.dtfWidth}″`;
         document.getElementById('resultHeight').innerHTML = `${result.dtfHeight}″`;
@@ -578,12 +627,11 @@ async function analyzeTShirt() {
         document.getElementById('resultTopMargin').innerHTML = `${result.marginTop}″`;
         document.getElementById('resultCategory').innerHTML = result.category;
         
-        // Price Calculation
-        const basePrice = 699; // Default, आप Style के हिसाब से change कर सकते हैं
-        const priceData = calculatePrice(result.dtfWidth, result.dtfHeight, basePrice);
-        document.getElementById('finalPrice').innerHTML = `₹${priceData.finalPrice}`;
+        // 🔥 FIXED PRICE LOGIC
+        const finalPrice = getPrice(sizeKey);
+        document.getElementById('finalPrice').innerHTML = `₹${finalPrice}`;
+        document.getElementById('priceSizeInfo').innerHTML = `Size: ${sizeKey} • ₹${finalPrice}`;
         
-        // Show results
         resultsPanel.classList.add('show');
         showToast('✅ Analysis complete! Exact DTF size detected.');
         
@@ -610,7 +658,100 @@ function resetAll() {
 }
 
 // ============================================================
-// 9. ADD TO CART
+// 9. CART FUNCTIONS
+// ============================================================
+function saveCart() {
+    localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart));
+    updateCartUI();
+    updateCartCount();
+}
+
+function loadCart() {
+    const saved = localStorage.getItem('vedanta_dtf_cart');
+    if (saved) {
+        try {
+            cart = JSON.parse(saved);
+            updateCartUI();
+            updateCartCount();
+        } catch(e) { cart = []; }
+    }
+}
+
+function updateCartCount() {
+    const count = cart.reduce((sum, item) => sum + item.quantity, 0);
+    document.getElementById('cartCount').innerText = count;
+}
+
+function updateCartUI() {
+    const container = document.getElementById('cartItemsList');
+    if (!container) return;
+    
+    if (cart.length === 0) {
+        container.innerHTML = '<div style="text-align:center; padding:20px;">Cart empty</div>';
+        document.getElementById('cartSubtotal').innerText = '₹0';
+        return;
+    }
+    
+    let subtotal = 0;
+    container.innerHTML = '';
+    cart.forEach((item, idx) => {
+        subtotal += item.price * item.quantity;
+        container.innerHTML += `
+            <div class="cart-item">
+                <div class="cart-item-img">
+                    ${item.imageData ? `<img src="${item.imageData}">` : '<i class="fas fa-tshirt"></i>'}
+                </div>
+                <div class="cart-item-details">
+                    <div class="cart-item-name">${item.name || 'Uploaded T-Shirt'}</div>
+                    <div class="cart-item-price">₹${item.price}</div>
+                    <div class="cart-item-variant">Size: ${item.size} • ${item.category || ''}</div>
+                    <div class="cart-qty-control">
+                        <button class="cart-qty-dec" data-index="${idx}">-</button>
+                        <span>${item.quantity}</span>
+                        <button class="cart-qty-inc" data-index="${idx}">+</button>
+                        <button class="cart-item-remove" data-index="${idx}">Remove</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    });
+    
+    document.getElementById('cartSubtotal').innerHTML = `₹${subtotal}`;
+    
+    // Event listeners for cart buttons
+    document.querySelectorAll('.cart-qty-dec').forEach(btn => {
+        btn.onclick = () => {
+            const idx = parseInt(btn.dataset.index);
+            if (cart[idx].quantity > 1) cart[idx].quantity--;
+            else cart.splice(idx, 1);
+            saveCart();
+            updateCartUI();
+            showToast('Cart updated');
+        };
+    });
+    
+    document.querySelectorAll('.cart-qty-inc').forEach(btn => {
+        btn.onclick = () => {
+            const idx = parseInt(btn.dataset.index);
+            cart[idx].quantity++;
+            saveCart();
+            updateCartUI();
+            showToast('Quantity increased');
+        };
+    });
+    
+    document.querySelectorAll('.cart-item-remove').forEach(btn => {
+        btn.onclick = () => {
+            cart.splice(parseInt(btn.dataset.index), 1);
+            saveCart();
+            updateCartUI();
+            showToast('Item removed');
+        };
+    });
+}
+
+// ============================================================
+// 10. ADD TO CART
 // ============================================================
 function addToCart() {
     if (!analysisResult) {
@@ -623,35 +764,68 @@ function addToCart() {
         return;
     }
     
-    // Cart Data
+    const price = getPrice(sizeKey);
+    
     const cartItem = {
         id: Date.now(),
-        type: 'dtf_analyzer',
-        garmentSize: sizeKey,
+        name: 'Uploaded T-Shirt 🖼️',
+        size: sizeKey,
+        price: price,
         dtfWidth: analysisResult.dtfWidth,
         dtfHeight: analysisResult.dtfHeight,
         category: analysisResult.category,
         imageData: uploadedImageDataURL,
-        price: parseInt(document.getElementById('finalPrice').innerText.replace('₹', '')),
+        quantity: 1,
         timestamp: Date.now()
     };
     
-    // LocalStorage में Save
-    let cart = JSON.parse(localStorage.getItem('vedanta_analyzer_cart') || '[]');
     cart.push(cartItem);
-    localStorage.setItem('vedanta_analyzer_cart', JSON.stringify(cart));
-    
+    saveCart();
     showToast('✅ Added to cart!');
 }
 
 // ============================================================
-// 10. EVENT LISTENERS
+// 11. BUY NOW (Direct Checkout)
+// ============================================================
+function buyNow() {
+    if (!analysisResult) {
+        showToast('❌ Please analyze the design first!', true);
+        return;
+    }
+    const sizeKey = tshirtSizeSelect.value;
+    if (!sizeKey) {
+        showToast('❌ Please select size!', true);
+        return;
+    }
+    
+    const price = getPrice(sizeKey);
+    
+    const orderData = {
+        type: 'dtf_analyzer',
+        size: sizeKey,
+        price: price,
+        dtfWidth: analysisResult.dtfWidth,
+        dtfHeight: analysisResult.dtfHeight,
+        category: analysisResult.category,
+        imageData: uploadedImageDataURL,
+        timestamp: Date.now()
+    };
+    
+    // Save to localStorage for checkout
+    localStorage.setItem('dtfDirectOrder', JSON.stringify(orderData));
+    localStorage.removeItem('vedanta_dtf_cart');
+    
+    // Redirect to checkout
+    window.location.href = 'secure-checkout2.html';
+}
+
+// ============================================================
+// 12. EVENT LISTENERS
 // ============================================================
 
-// Upload Click
+// Upload
 uploadZone.addEventListener('click', () => fileInput.click());
 
-// Drag & Drop
 uploadZone.addEventListener('dragover', (e) => {
     e.preventDefault();
     uploadZone.classList.add('dragover');
@@ -668,7 +842,6 @@ uploadZone.addEventListener('drop', (e) => {
     }
 });
 
-// File Input Change
 fileInput.addEventListener('change', (e) => {
     if (e.target.files.length) {
         handleFileUpload(e.target.files[0]);
@@ -696,7 +869,7 @@ function handleFileUpload(file) {
     reader.readAsDataURL(file);
 }
 
-// Auto-Analyze on Size Change (अगर पहले से Image Uploaded है)
+// Auto-Analyze on Size Change
 tshirtSizeSelect.addEventListener('change', () => {
     if (uploadedImageDataURL) {
         analyzeTShirt();
@@ -706,12 +879,31 @@ tshirtSizeSelect.addEventListener('change', () => {
 // Buttons
 document.getElementById('resetBtn').addEventListener('click', resetAll);
 document.getElementById('addToCartBtn').addEventListener('click', addToCart);
+document.getElementById('buyNowBtn').addEventListener('click', buyNow);
+
+// Cart Sidebar
+document.getElementById('cartIconBtn').addEventListener('click', () => {
+    document.getElementById('cartSidebar').classList.add('open');
+});
+document.getElementById('closeCartBtn').addEventListener('click', () => {
+    document.getElementById('cartSidebar').classList.remove('open');
+});
+document.getElementById('cartCheckoutBtn').addEventListener('click', () => {
+    if (cart.length === 0) {
+        showToast('Cart is empty', true);
+        return;
+    }
+    localStorage.setItem('dtfCartCheckout', JSON.stringify(cart));
+    localStorage.removeItem('vedanta_dtf_cart');
+    window.location.href = 'secure-checkout2.html';
+});
 
 // ============================================================
-// 11. INIT - Clear any stale data
+// 13. INIT
 // ============================================================
-localStorage.removeItem('vedanta_analyzer_cart');
+loadCart();
 console.log('✅ DTF Size Analyzer ready!');
+console.log('💰 Pricing: S/M/L/XL = ₹599 | XXL/3XL = ₹650');
 </script>
 </body>
 </html>
