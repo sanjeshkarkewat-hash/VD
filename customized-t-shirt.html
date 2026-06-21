@@ -75,19 +75,19 @@
         }
 
         /* ============================================================ */
-        /* 🔥 BIG UPLOAD YOUR T-SHIRT BUTTON - HERO SECTION */
+        /* 🔥 HERO SECTION - BIG "UPLOAD YOUR T-SHIRT WITH DESIGN" BUTTON */
         /* ============================================================ */
         .hero-upload-section {
             text-align: center;
-            padding: 50px 20px 40px 20px;
+            padding: 60px 20px 50px 20px;
             background: radial-gradient(ellipse at center, rgba(212,175,55,0.08) 0%, transparent 70%);
             border-bottom: 1px solid rgba(212,175,55,0.1);
         }
         .hero-upload-section h1 {
-            font-size: 32px;
+            font-size: 36px;
             font-weight: 700;
             color: #FFFFFF;
-            margin-bottom: 8px;
+            margin-bottom: 10px;
         }
         .hero-upload-section h1 span {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -97,23 +97,26 @@
         }
         .hero-upload-section p {
             color: #888;
-            font-size: 15px;
-            margin-bottom: 30px;
+            font-size: 16px;
+            margin-bottom: 35px;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
-        /* 🚀 The Main Big Button */
+        /* 🚀 The Main Big Button - SIRF BUTTON, KOI UPLOAD NAHI */
         .upload-tshirt-hero {
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 18px;
-            padding: 24px 55px;
+            gap: 20px;
+            padding: 28px 60px;
             background: linear-gradient(135deg, #D4AF37, #FF8C00, #D4AF37);
             background-size: 200% 200%;
             border: none;
             border-radius: 80px;
             color: #050508;
-            font-size: 28px;
+            font-size: 30px;
             font-weight: 800;
             cursor: pointer;
             transition: all 0.5s ease;
@@ -136,7 +139,7 @@
             animation: shine 4s ease-in-out infinite;
         }
         .upload-tshirt-hero i {
-            font-size: 38px;
+            font-size: 40px;
             animation: bounce-icon 2s ease-in-out infinite;
         }
         .upload-tshirt-hero .sub-text {
@@ -144,7 +147,7 @@
             font-size: 14px;
             font-weight: 400;
             opacity: 0.8;
-            margin-top: 2px;
+            margin-top: 4px;
         }
         .upload-tshirt-hero:hover {
             transform: scale(1.06) translateY(-4px);
@@ -162,7 +165,7 @@
         }
         @keyframes float {
             0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
+            50% { transform: translateY(-10px); }
             100% { transform: translateY(0px); }
         }
         @keyframes shine {
@@ -171,106 +174,10 @@
         }
         @keyframes bounce-icon {
             0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-6px); }
+            50% { transform: translateY(-8px); }
         }
 
-        /* Hidden file input */
-        #tshirtFileInputHero {
-            display: none;
-        }
-
-        /* Upload Preview Section */
-        .upload-preview-area {
-            display: none;
-            text-align: center;
-            padding: 20px;
-            margin-top: 20px;
-            background: rgba(15,15,22,0.6);
-            border-radius: 20px;
-            border: 2px solid rgba(212,175,55,0.2);
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        .upload-preview-area.show {
-            display: block;
-        }
-        .upload-preview-area img {
-            max-width: 100%;
-            max-height: 350px;
-            border-radius: 16px;
-            border: 1px solid rgba(212,175,55,0.2);
-        }
-        .upload-preview-area .preview-actions {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 15px;
-            flex-wrap: wrap;
-        }
-        .upload-preview-area .btn-sm {
-            padding: 10px 24px;
-            border-radius: 40px;
-            font-weight: 700;
-            font-size: 14px;
-            cursor: pointer;
-            border: none;
-            transition: 0.3s;
-        }
-        .upload-preview-area .btn-sm.analyze {
-            background: linear-gradient(135deg, #D4AF37, #FF8C00);
-            color: #050508;
-        }
-        .upload-preview-area .btn-sm.reset {
-            background: rgba(212,175,55,0.15);
-            border: 1px solid #D4AF37;
-            color: #D4AF37;
-        }
-        .upload-preview-area .btn-sm:hover {
-            transform: scale(1.05);
-        }
-
-        /* Analysis Result */
-        .analysis-result-hero {
-            display: none;
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(0,0,0,0.5);
-            border-radius: 16px;
-            border: 1px solid rgba(212,175,55,0.2);
-            max-width: 500px;
-            margin-left: auto;
-            margin-right: auto;
-            text-align: left;
-        }
-        .analysis-result-hero.show {
-            display: block;
-        }
-        .analysis-result-hero .big-size {
-            font-size: 28px;
-            font-weight: 800;
-            color: #D4AF37;
-            text-align: center;
-            padding: 10px 0;
-        }
-        .analysis-result-hero .row {
-            display: flex;
-            justify-content: space-between;
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.06);
-            font-size: 14px;
-        }
-        .analysis-result-hero .row:last-child {
-            border-bottom: none;
-        }
-        .analysis-result-hero .label {
-            color: #aaa;
-        }
-        .analysis-result-hero .value {
-            color: #D4AF37;
-            font-weight: 600;
-        }
-
+        /* Rest of the page - Design Tools etc. */
         .designer-container {
             width: 100%;
             margin: 0;
@@ -751,37 +658,28 @@
 
         @media (max-width: 768px) {
             .hero-upload-section {
-                padding: 30px 15px 25px 15px;
+                padding: 40px 15px 30px 15px;
             }
             .hero-upload-section h1 {
-                font-size: 22px;
+                font-size: 24px;
             }
             .hero-upload-section p {
-                font-size: 13px;
+                font-size: 14px;
+                padding: 0 10px;
             }
             .upload-tshirt-hero {
-                padding: 18px 30px;
+                padding: 20px 30px;
                 font-size: 20px;
-                gap: 12px;
+                gap: 14px;
                 width: 100%;
                 max-width: 100%;
+                flex-wrap: wrap;
             }
             .upload-tshirt-hero i {
                 font-size: 28px;
             }
             .upload-tshirt-hero .sub-text {
                 font-size: 12px;
-            }
-            .upload-preview-area {
-                max-width: 100%;
-                padding: 15px;
-            }
-            .analysis-result-hero {
-                max-width: 100%;
-                padding: 15px;
-            }
-            .analysis-result-hero .big-size {
-                font-size: 22px;
             }
 
             .style-section {
@@ -1023,46 +921,20 @@
 </div>
 
 <!-- ============================================================== -->
-<!-- 🔥 HERO SECTION - SIRF EK BADA BUTTON -->
+<!-- 🔥 HERO SECTION - SIRF EK BADA BUTTON (KOI UPLOAD NAHI) -->
 <!-- ============================================================== -->
 <div class="hero-upload-section">
     <h1>📸 Upload Your <span>T-Shirt</span></h1>
     <p>Upload a photo of your T-Shirt with the design already on it.<br>We'll detect the exact print size automatically!</p>
     
-    <!-- 🚀 BIG UPLOAD BUTTON -->
-    <button class="upload-tshirt-hero" id="uploadTshirtHeroBtn">
+    <!-- 🚀 BIG BUTTON - SIRF LINK, KOI UPLOAD NAHI -->
+    <a href="custom-studio.html" class="upload-tshirt-hero">
         <i class="fas fa-cloud-upload-alt"></i>
         <span>
-            Upload Your T-Shirt
+            Upload Your T-Shirt With Design
             <span class="sub-text">📐 Get Exact DTF Size &amp; Price</span>
         </span>
-    </button>
-    
-    <input type="file" id="tshirtFileInputHero" accept="image/*">
-    
-    <!-- Preview Area -->
-    <div class="upload-preview-area" id="uploadPreviewArea">
-        <img id="uploadPreviewImg" src="" alt="T-Shirt Preview">
-        <div class="preview-actions">
-            <button class="btn-sm analyze" id="analyzeHeroBtn"><i class="fas fa-ruler-combined"></i> Analyze Size</button>
-            <button class="btn-sm reset" id="resetHeroBtn"><i class="fas fa-redo"></i> Reset</button>
-        </div>
-    </div>
-    
-    <!-- Analysis Result -->
-    <div class="analysis-result-hero" id="analysisResultHero">
-        <div class="big-size" id="heroDtfSize">📐 0″ × 0″</div>
-        <div class="row"><span class="label">📏 Print Width</span><span class="value" id="heroWidth">--</span></div>
-        <div class="row"><span class="label">📐 Print Height</span><span class="value" id="heroHeight">--</span></div>
-        <div class="row"><span class="label">⬅️ Left Margin</span><span class="value" id="heroLeftMargin">--</span></div>
-        <div class="row"><span class="label">⬆️ Top Margin</span><span class="value" id="heroTopMargin">--</span></div>
-        <div class="row"><span class="label">📦 Category</span><span class="value" id="heroCategory">--</span></div>
-        <div class="row" style="border-bottom:none; padding-top:10px;">
-            <span class="label" style="font-weight:700;">💰 Price</span>
-            <span class="value" style="font-size:20px;" id="heroPrice">₹0</span>
-        </div>
-        <button class="btn-sm analyze" style="width:100%; margin-top:12px;" id="heroAddToCart"><i class="fas fa-cart-plus"></i> Add to Cart</button>
-    </div>
+    </a>
 </div>
 
 <div class="loading-overlay" id="globalLoadingOverlay">
@@ -1360,214 +1232,6 @@ const db = firebase.firestore(); const storage = firebase.storage(); const stora
 auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = "";
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 849, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 799, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 949, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 1299, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
-
-// ============================================================
-// HERO UPLOAD LOGIC
-// ============================================================
-const heroBtn = document.getElementById('uploadTshirtHeroBtn');
-const heroFileInput = document.getElementById('tshirtFileInputHero');
-const previewArea = document.getElementById('uploadPreviewArea');
-const previewImg = document.getElementById('uploadPreviewImg');
-const analyzeBtn = document.getElementById('analyzeHeroBtn');
-const resetBtn = document.getElementById('resetHeroBtn');
-const resultBox = document.getElementById('analysisResultHero');
-let uploadedHeroDataURL = null;
-let heroAnalyzedData = null;
-
-heroBtn.onclick = () => heroFileInput.click();
-
-heroFileInput.onchange = (e) => {
-    if (e.target.files.length) {
-        const file = e.target.files[0];
-        if (!file.type.startsWith('image/')) {
-            showToast('❌ Please upload an image!', true);
-            return;
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            showToast('❌ Max 5MB allowed!', true);
-            return;
-        }
-        const reader = new FileReader();
-        reader.onload = (ev) => {
-            uploadedHeroDataURL = ev.target.result;
-            previewImg.src = uploadedHeroDataURL;
-            previewArea.classList.add('show');
-            resultBox.classList.remove('show');
-            heroAnalyzedData = null;
-            showToast('✅ Image uploaded! Click "Analyze Size"');
-        };
-        reader.readAsDataURL(file);
-    }
-};
-
-resetBtn.onclick = () => {
-    uploadedHeroDataURL = null;
-    heroAnalyzedData = null;
-    previewArea.classList.remove('show');
-    resultBox.classList.remove('show');
-    heroFileInput.value = '';
-    showToast('🔄 Reset');
-};
-
-function detectDTFSizeFromImage(imageDataURL) {
-    return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = function() {
-            const canvas = document.createElement('canvas');
-            const ctx = canvas.getContext('2d');
-            canvas.width = img.width;
-            canvas.height = img.height;
-            ctx.drawImage(img, 0, 0);
-            
-            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-            const data = imageData.data;
-            const w = canvas.width;
-            const h = canvas.height;
-            
-            let minX = w, minY = h, maxX = 0, maxY = 0;
-            let foundPixels = 0;
-            
-            for (let y = 0; y < h; y++) {
-                for (let x = 0; x < w; x++) {
-                    const idx = (y * w + x) * 4;
-                    const r = data[idx];
-                    const g = data[idx + 1];
-                    const b = data[idx + 2];
-                    const brightness = (r + g + b) / 3;
-                    
-                    if (brightness < 220) {
-                        if (x < minX) minX = x;
-                        if (x > maxX) maxX = x;
-                        if (y < minY) minY = y;
-                        if (y > maxY) maxY = y;
-                        foundPixels++;
-                    }
-                }
-            }
-            
-            if (foundPixels === 0 || maxX - minX < 10 || maxY - minY < 10) {
-                minX = 0; minY = 0; maxX = w; maxY = h;
-            }
-            
-            const designWidthPx = maxX - minX;
-            const designHeightPx = maxY - minY;
-            const canvasWidthPx = w;
-            const canvasHeightPx = h;
-            
-            const garmentW = 22;
-            const garmentH = 28;
-            
-            let dtfWidth = (designWidthPx / canvasWidthPx) * garmentW;
-            let dtfHeight = (designHeightPx / canvasHeightPx) * garmentH;
-            
-            const marginLeft = (garmentW - dtfWidth) / 2;
-            const marginTop = (garmentH - dtfHeight) / 2;
-            
-            let category = '';
-            const area = dtfWidth * dtfHeight;
-            if (dtfWidth > garmentW * 0.85 && dtfHeight > garmentH * 0.85) {
-                category = '🟢 Full Cover';
-            } else if (dtfWidth > garmentW * 0.5 || dtfHeight > garmentH * 0.5) {
-                category = '🟡 Half Cover / Custom';
-            } else if (dtfWidth < 5 && dtfHeight < 5) {
-                category = '🔵 Small (Pocket/Logo)';
-            } else if (Math.abs(dtfWidth - 8.27) < 1 && Math.abs(dtfHeight - 11.69) < 1) {
-                category = '📄 A4 Size';
-            } else {
-                category = '🟠 Custom Size';
-            }
-            
-            dtfWidth = Math.round(dtfWidth * 10) / 10;
-            dtfHeight = Math.round(dtfHeight * 10) / 10;
-            
-            resolve({
-                dtfWidth,
-                dtfHeight,
-                marginLeft: Math.round(marginLeft * 10) / 10,
-                marginTop: Math.round(marginTop * 10) / 10,
-                marginRight: Math.round(((garmentW - dtfWidth) / 2) * 10) / 10,
-                marginBottom: Math.round(((garmentH - dtfHeight) / 2) * 10) / 10,
-                category,
-                garmentW,
-                garmentH
-            });
-        };
-        img.src = imageDataURL;
-    });
-}
-
-function calculatePrice(dtfWidth, dtfHeight) {
-    const area = dtfWidth * dtfHeight;
-    const basePrice = 699;
-    let dtfCost = 120;
-    if (area > 350) dtfCost = 200;
-    else if (area > 200) dtfCost = 160;
-    else if (area > 100) dtfCost = 130;
-    else dtfCost = 100;
-    const shipping = 120;
-    const packaging = 50;
-    const margin = 199;
-    return basePrice + dtfCost + shipping + packaging + margin;
-}
-
-analyzeBtn.onclick = async () => {
-    if (!uploadedHeroDataURL) {
-        showToast('❌ Please upload a T-Shirt photo first!', true);
-        return;
-    }
-    showLoading("🔍 Analyzing...");
-    try {
-        const result = await detectDTFSizeFromImage(uploadedHeroDataURL);
-        heroAnalyzedData = result;
-        
-        document.getElementById('heroDtfSize').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
-        document.getElementById('heroWidth').innerHTML = `${result.dtfWidth}″`;
-        document.getElementById('heroHeight').innerHTML = `${result.dtfHeight}″`;
-        document.getElementById('heroLeftMargin').innerHTML = `${result.marginLeft}″`;
-        document.getElementById('heroTopMargin').innerHTML = `${result.marginTop}″`;
-        document.getElementById('heroCategory').innerHTML = result.category;
-        document.getElementById('heroPrice').innerHTML = `₹${calculatePrice(result.dtfWidth, result.dtfHeight)}`;
-        
-        resultBox.classList.add('show');
-        showToast('✅ Analysis complete!');
-    } catch (e) {
-        console.error(e);
-        showToast('❌ Analysis failed', true);
-    } finally {
-        hideLoading();
-    }
-};
-
-document.getElementById('heroAddToCart').onclick = () => {
-    if (!heroAnalyzedData) {
-        showToast('❌ Please analyze first!', true);
-        return;
-    }
-    const price = calculatePrice(heroAnalyzedData.dtfWidth, heroAnalyzedData.dtfHeight);
-    cart.push({
-        id: Date.now(),
-        styleName: 'Uploaded T-Shirt 🖼️',
-        price: price,
-        frontDesignImage: uploadedHeroDataURL,
-        isCustomized: true,
-        size: 'L',
-        printMethod: 'transparent',
-        selectedColor: 'White',
-        quantity: 1,
-        isUploaded: true
-    });
-    saveCart();
-    showToast('✅ Added to cart!');
-    resultBox.classList.remove('show');
-    previewArea.classList.remove('show');
-    heroFileInput.value = '';
-    uploadedHeroDataURL = null;
-    heroAnalyzedData = null;
-};
-
-// ============================================================
-// EXISTING CODE - Fabric, Firebase, Cart, etc.
-// ============================================================
 
 function clearCheckoutPendingData() {
     localStorage.removeItem('customCheckoutData');
@@ -2069,7 +1733,7 @@ function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.
 function saveCart(){localStorage.setItem('vedanta_custom_cart',JSON.stringify(cart)); updateCartCount(); updateCartUI();}
 function loadCart(){const s=localStorage.getItem('vedanta_custom_cart'); if(s){try{cart=JSON.parse(s);updateCartUI();updateCartCount();}catch(e){cart=[];}}}
 function updateCartCount(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.quantity,0);}
-function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ${it.isUploaded ? '🖼️' : '✨ Custom'}</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
+function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ✨ Custom</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
 function resizeCanvas() {
     if (!fabricCanvas) return;
     const container = document.querySelector('.canvas-container');
