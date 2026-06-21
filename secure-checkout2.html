@@ -212,6 +212,94 @@ gtag('event', 'begin_checkout');
     return null;
   }
 
+  // ============================================================
+  // 🔥 DTF ANALYZER DATA LOAD - ADDED
+  // ============================================================
+  function loadDTFData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const orderType = urlParams.get('type');
+    const orderId = urlParams.get('orderId');
+    
+    // Check if this is a DTF analyzer order
+    if (orderType === 'dtf' || orderType === 'dtf_analyzer') {
+      // First try to get data from dtfDirectOrder
+      const dtfData = localStorage.getItem('dtfDirectOrder');
+      if (dtfData) {
+        try {
+          const data = JSON.parse(dtfData);
+          if (data && data.size) {
+            // Create cart item from DTF data
+            const dtfCartItem = {
+              id: 'dtf_' + Date.now(),
+              name: 'DTF Analyzed T-Shirt 🖼️',
+              price: data.price || 599,
+              quantity: 1,
+              size: data.size || 'L',
+              selectedColor: 'White',
+              imageData: data.imageData || data.imageUrl || null,
+              dtfWidth: data.dtfWidth || 0,
+              dtfHeight: data.dtfHeight || 0,
+              category: data.category || '',
+              isDTF: true,
+              isCustomized: false
+            };
+            cart = [dtfCartItem];
+            cartTotal = dtfCartItem.price;
+            
+            // Show DTF badge in order summary
+            document.getElementById('customDesignPreviewContainer').style.display = 'block';
+            document.querySelector('#customDesignPreviewContainer .custom-badge').innerHTML = 
+              '<i class="fas fa-ruler-combined"></i> DTF ANALYZED DESIGN';
+            
+            // If there's an image, show it
+            if (data.imageData || data.imageUrl) {
+              const imgSrc = data.imageData || data.imageUrl;
+              document.getElementById('frontDesignPreview').src = imgSrc;
+              document.getElementById('frontDesignPreview').style.display = 'block';
+              document.querySelector('#customDesignPreviewContainer .custom-preview-item:first-child p').innerHTML = 
+                `📐 ${data.dtfWidth || 0}″ × ${data.dtfHeight || 0}″`;
+            }
+            
+            // Clean up
+            localStorage.removeItem('dtfDirectOrder');
+            return true;
+          }
+        } catch(e) { console.error('Error loading DTF data:', e); }
+      }
+      
+      // Fallback: try to get from dtfCartCheckout
+      const dtfCartData = localStorage.getItem('dtfCartCheckout');
+      if (dtfCartData) {
+        try {
+          const items = JSON.parse(dtfCartData);
+          if (items && items.length > 0) {
+            cart = items.map(item => ({
+              ...item,
+              isDTF: true,
+              isCustomized: false
+            }));
+            cartTotal = cart.reduce((s, i) => s + (i.price * i.quantity), 0);
+            
+            // Show DTF badge
+            document.getElementById('customDesignPreviewContainer').style.display = 'block';
+            document.querySelector('#customDesignPreviewContainer .custom-badge').innerHTML = 
+              '<i class="fas fa-ruler-combined"></i> DTF ANALYZED DESIGN';
+            
+            if (items[0].imageData) {
+              document.getElementById('frontDesignPreview').src = items[0].imageData;
+            }
+            localStorage.removeItem('dtfCartCheckout');
+            return true;
+          }
+        } catch(e) { console.error('Error loading DTF cart:', e); }
+      }
+    }
+    return false;
+  }
+
+  // ============================================================
+  // 🔥 MODIFIED loadCustomData - Added DTF support
+  // ============================================================
   function loadCustomData() {
     isLoadingFromStorage = true;
     
@@ -223,6 +311,12 @@ gtag('event', 'begin_checkout');
     
     // Hide custom preview by default
     document.getElementById('customDesignPreviewContainer').style.display = 'none';
+    
+    // STEP 0: Check for DTF Analyzer data first
+    if (loadDTFData()) {
+      isLoadingFromStorage = false;
+      return;
+    }
     
     // STEP 1: Check URL parameters first (highest priority - most reliable)
     const urlParams = new URLSearchParams(window.location.search);
@@ -402,22 +496,31 @@ gtag('event', 'begin_checkout');
     isLoadingFromStorage = false;
   }
 
+  // ============================================================
+  // 🔥 MODIFIED renderOrderItems - DTF support
+  // ============================================================
   async function renderOrderItems() {
     const container = document.getElementById('orderItemsList');
     if (!container) return;
     container.innerHTML = '';
+    
     for (const item of cart) {
       const div = document.createElement('div'); div.className = 'order-item';
       const imgDiv = document.createElement('div'); imgDiv.className = 'order-item-img';
       const infoDiv = document.createElement('div'); infoDiv.className = 'order-item-info';
       const priceDiv = document.createElement('div'); priceDiv.className = 'order-item-price';
       priceDiv.innerText = `₹${(item.price * item.quantity).toLocaleString()}`;
+      
       let imageUrl = null, designBadge = '';
       const isCustom = item.isCustomized === true;
+      const isDTF = item.isDTF === true;
       
       if (isCustom) {
         imageUrl = frontDesignImageURL || item.frontDesignImage || backDesignImageURL || item.backDesignImage;
         designBadge = '<div class="design-preview-badge"><i class="fas fa-palette"></i> Custom Design</div>';
+      } else if (isDTF) {
+        imageUrl = item.imageData || item.imageUrl || null;
+        designBadge = `<div class="design-preview-badge"><i class="fas fa-ruler-combined"></i> DTF Analyzed ${item.dtfWidth ? '📐' + item.dtfWidth + '″ × ' + item.dtfHeight + '″' : ''}</div>`;
       } else {
         imageUrl = getProductImageUrl(item.name, item.id, item.selectedColor);
         if (!imageUrl && item.productImage) imageUrl = item.productImage;
@@ -438,9 +541,15 @@ gtag('event', 'begin_checkout');
         printMethodText = ` | Print: ${item.printMethod === 'transparent' ? 'Transparent' : 'Full BG'}`;
       }
       
+      let sizeText = item.size || 'M';
+      let dtfInfo = '';
+      if (isDTF) {
+        dtfInfo = ` | DTF: ${item.dtfWidth || 0}″ × ${item.dtfHeight || 0}″`;
+      }
+      
       infoDiv.innerHTML = `<h4>${escapeHtml(item.name)}</h4>
         <p>Qty: ${item.quantity} × ₹${item.price.toLocaleString()}</p>
-        <p>Size: ${item.size || 'M'} | Color: ${item.selectedColor || 'Black'}${printMethodText}</p>
+        <p>Size: ${sizeText} | Color: ${item.selectedColor || 'Black'}${printMethodText}${dtfInfo}</p>
         ${designBadge}`;
       div.appendChild(imgDiv); div.appendChild(infoDiv); div.appendChild(priceDiv);
       container.appendChild(div);
@@ -971,6 +1080,7 @@ gtag('event', 'begin_checkout');
     if (!selectedAddress) { showToast('Please add shipping address', true); return false; }
     
     const isCustomOrder = isCustomizedOrder || (cart[0]?.isCustomized === true);
+    const isDTFOrder = cart[0]?.isDTF === true;
     const orderPrintMethod = isCustomOrder ? (cart[0]?.printMethod || 'transparent') : null;
     
     const itemsForDb = cart.map(i => ({ 
@@ -980,10 +1090,12 @@ gtag('event', 'begin_checkout');
       size: i.size || 'M', 
       selectedColor: i.selectedColor || 'Black',
       ...(i.isCustomized === true ? { printMethod: i.printMethod || 'transparent' } : {}),
+      ...(i.isDTF === true ? { dtfWidth: i.dtfWidth || 0, dtfHeight: i.dtfHeight || 0, category: i.category || '' } : {}),
       frontDesignImage: i.frontDesignImage || frontDesignImageURL, 
       backDesignImage: i.backDesignImage || backDesignImageURL, 
       isCustomized: i.isCustomized === true || isCustomOrder,
-      productImage: getProductImageUrl(i.name, i.id, i.selectedColor)
+      isDTF: i.isDTF === true || isDTFOrder,
+      productImage: getProductImageUrl(i.name, i.id, i.selectedColor) || i.imageData || null
     }));
     
     const finalTotal = (paymentMethod === 'razorpay' && discountAmount) ? discountedTotal : cartTotal;
@@ -1011,9 +1123,18 @@ gtag('event', 'begin_checkout');
       orderDate: new Date().toISOString(), 
       userId: currentUser?.uid, 
       isCustomized: isCustomOrder,
+      isDTF: isDTFOrder,
       frontDesignImage: frontDesignImageURL, 
       backDesignImage: backDesignImageURL
     };
+    
+    // Add DTF specific fields
+    if (isDTFOrder && cart[0]) {
+      orderData.dtfWidth = cart[0].dtfWidth || 0;
+      orderData.dtfHeight = cart[0].dtfHeight || 0;
+      orderData.dtfCategory = cart[0].category || '';
+      orderData.dtfImage = cart[0].imageData || null;
+    }
     
     if (isCustomOrder && orderPrintMethod) {
       orderData.printMethod = orderPrintMethod;
@@ -1041,6 +1162,8 @@ gtag('event', 'begin_checkout');
       localStorage.removeItem('customCheckoutData');
       localStorage.removeItem('customCheckoutTimestamp');
       localStorage.removeItem('regularCartTimestamp');
+      localStorage.removeItem('dtfDirectOrder');
+      localStorage.removeItem('dtfCartCheckout');
       setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
     } else { 
       showToast('Order failed', true); 
@@ -1072,6 +1195,8 @@ gtag('event', 'begin_checkout');
           localStorage.removeItem('customCheckoutData');
           localStorage.removeItem('customCheckoutTimestamp');
           localStorage.removeItem('regularCartTimestamp');
+          localStorage.removeItem('dtfDirectOrder');
+          localStorage.removeItem('dtfCartCheckout');
           setTimeout(()=> window.location.href=`order-success.html?orderId=${res.orderId}`,1500); 
         } else { 
           showToast('Order save issue', true); 
