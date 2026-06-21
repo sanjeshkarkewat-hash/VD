@@ -12,7 +12,7 @@
 </script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>VEDANTA | Custom T-Shirt Designer</title>
+    <title>VEDANTA | Design Studio</title>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Playfair+Display&family=Montserrat&family=Dancing+Script&family=Pacifico&family=Oswald&family=Raleway&family=Lobster&family=Bebas+Neue&family=Great+Vibes&family=Caveat&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
@@ -32,7 +32,7 @@
 
         .header {
             text-align: center;
-            padding: 20px 15px;
+            padding: 15px 15px 10px 15px;
             border-bottom: 1px solid rgba(212,175,55,0.2);
             position: relative;
             background: #050508;
@@ -51,13 +51,76 @@
             color: #D4AF37;
             margin-top: 4px;
         }
+
+        /* ========== NAVIGATION LINKS ========== */
+        .nav-links {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 10px 0 8px 0;
+            flex-wrap: wrap;
+        }
+        .nav-link {
+            color: #888;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 6px 20px;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border: 1.5px solid transparent;
+        }
+        .nav-link:hover {
+            color: #D4AF37;
+            border-color: rgba(212,175,55,0.25);
+            background: rgba(212,175,55,0.05);
+        }
+        .nav-link.active {
+            color: #D4AF37;
+            background: rgba(212,175,55,0.12);
+            border-color: rgba(212,175,55,0.35);
+            box-shadow: 0 0 20px rgba(212,175,55,0.05);
+        }
+        .nav-link i {
+            font-size: 14px;
+        }
+
+        /* ========== UPLOAD T-SHIRT BUTTON ========== */
+        .upload-tshirt-btn {
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            color: #050508;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 13px;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin: 6px 0 4px 0;
+            border: 1px solid rgba(212,175,55,0.4);
+            box-shadow: 0 0 30px rgba(212,175,55,0.1);
+        }
+        .upload-tshirt-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(212,175,55,0.3);
+        }
+        .upload-tshirt-btn i {
+            font-size: 14px;
+        }
+
         .cart-icon-header {
             position: absolute;
             right: 15px;
-            top: 18px;
+            top: 12px;
             cursor: pointer;
             background: rgba(212,175,55,0.15);
-            padding: 8px 14px;
+            padding: 6px 14px;
             border-radius: 40px;
             border: 1px solid rgba(212,175,55,0.4);
             display: flex;
@@ -72,6 +135,178 @@
             padding: 2px 8px;
             font-size: 12px;
             font-weight: bold;
+        }
+
+        /* ========== T-SHIRT UPLOAD MODAL ========== */
+        .tshirt-upload-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 25000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+        }
+        .tshirt-upload-modal.open {
+            display: flex;
+        }
+        .tshirt-upload-content {
+            background: rgba(15,15,22,0.98);
+            border-radius: 28px;
+            padding: 35px;
+            max-width: 550px;
+            width: 92%;
+            text-align: center;
+            border: 1px solid rgba(212,175,55,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+        }
+        .tshirt-upload-content h2 {
+            color: #D4AF37;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        .tshirt-upload-content p {
+            color: #aaa;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .close-modal-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 28px;
+            cursor: pointer;
+            color: #888;
+            transition: 0.3s;
+            background: none;
+            border: none;
+        }
+        .close-modal-btn:hover {
+            color: #D4AF37;
+        }
+        .upload-zone-modal {
+            border: 2.5px dashed rgba(212,175,55,0.4);
+            border-radius: 20px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(0,0,0,0.3);
+        }
+        .upload-zone-modal:hover {
+            border-color: #D4AF37;
+            background: rgba(212,175,55,0.08);
+        }
+        .upload-zone-modal i {
+            font-size: 48px;
+            color: #D4AF37;
+            margin-bottom: 12px;
+        }
+        .upload-zone-modal p {
+            color: #ccc;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+        .upload-zone-modal .small {
+            color: #666;
+            font-size: 12px;
+        }
+        .upload-zone-modal.dragover {
+            border-color: #FF8C00;
+            background: rgba(212,175,55,0.15);
+        }
+        .preview-modal-img {
+            margin-top: 20px;
+            max-width: 100%;
+            max-height: 300px;
+            border-radius: 16px;
+            border: 1px solid rgba(212,175,55,0.2);
+            display: none;
+        }
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+        .modal-actions .btn-primary {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 40px;
+            color: #050508;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-actions .btn-secondary {
+            flex: 1;
+            padding: 12px;
+            background: rgba(212,175,55,0.15);
+            border: 1px solid #D4AF37;
+            border-radius: 40px;
+            color: #D4AF37;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .modal-actions .btn-secondary:hover {
+            background: rgba(212,175,55,0.25);
+        }
+        .modal-actions .btn-danger {
+            flex: 0.5;
+            padding: 12px;
+            background: rgba(200,50,50,0.2);
+            border: 1px solid #F44336;
+            border-radius: 40px;
+            color: #F44336;
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .analysis-result-box {
+            display: none;
+            margin-top: 15px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 14px;
+            padding: 15px;
+            border: 1px solid rgba(212,175,55,0.2);
+        }
+        .analysis-result-box.show {
+            display: block;
+        }
+        .analysis-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            font-size: 14px;
+        }
+        .analysis-row:last-child {
+            border-bottom: none;
+        }
+        .analysis-label {
+            color: #aaa;
+        }
+        .analysis-value {
+            color: #D4AF37;
+            font-weight: 700;
+        }
+        .analysis-value.green {
+            color: #4CAF50;
+        }
+        .analysis-big {
+            font-size: 24px;
+            font-weight: 800;
+            color: #D4AF37;
+            text-align: center;
+            padding: 10px 0;
         }
 
         .designer-container {
@@ -172,6 +407,7 @@
             font-weight: 600;
             font-size: 13px;
             color: #aaa;
+            cursor: pointer;
         }
         .side-btn.active {
             background: linear-gradient(135deg, #D4AF37, #FF8C00);
@@ -372,7 +608,6 @@
             text-align: center;
         }
         
-        /* Curved Text Panel Styles */
         .curve-panel {
             background: rgba(0,0,0,0.5);
             border-radius: 12px;
@@ -462,8 +697,8 @@
         .cart-item-img { width: 50px; height: 50px; background: #1a1a2e; border-radius: 10px; display: flex; align-items: center; justify-content: center; }
         .cart-item-details { flex: 1; }
         .cart-qty-control { display: flex; align-items: center; gap: 8px; margin-top: 5px; }
-        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; }
-        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; }
+        .cart-qty-control button { background: rgba(212,175,55,0.2); border: none; width: 24px; height: 24px; border-radius: 6px; color: #D4AF37; cursor: pointer; }
+        .cart-item-remove { background: rgba(200,50,50,0.3); border: none; padding: 4px 8px; border-radius: 6px; color: #ff8888; cursor: pointer; }
         .cart-total { padding: 15px; border-top: 1px solid rgba(212,175,55,0.3); }
         .checkout-btn { width: 100%; padding: 12px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 35px; font-weight: bold; cursor: pointer; color: #050508; }
         .toast {
@@ -535,7 +770,6 @@
         .close-modal { position: absolute; top: 12px; right: 20px; font-size: 24px; cursor: pointer; color: white; }
         .cors-warning { background: rgba(255,100,0,0.2); padding: 8px; margin-bottom: 0; font-size: 10px; text-align: center; width: 100%; }
         
-        /* Glow effect styles */
         .glow-control-panel {
             background: rgba(0,0,0,0.5);
             padding: 10px;
@@ -543,7 +777,6 @@
             margin-top: 10px;
         }
         
-        /* Design validation warning */
         .design-warning {
             background: rgba(255,100,0,0.2);
             border: 1px solid #FF9800;
@@ -553,28 +786,6 @@
             font-size: 12px;
             color: #FF9800;
             text-align: center;
-        }
-        
-        @media (min-width: 768px) {
-            .style-section {
-                overflow-x: visible;
-                overflow-y: visible;
-            }
-            .style-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 12px;
-                width: 100%;
-            }
-            .style-card {
-                width: 100%;
-            }
-            .style-img {
-                width: 100%;
-                height: auto;
-                aspect-ratio: 1/1;
-            }
-            .designer-container { max-width: 1200px; margin: 0 auto; }
         }
 
         @media (max-width: 767px) {
@@ -598,16 +809,10 @@
                 width: 80px;
                 height: 80px;
             }
-            .style-name {
-                font-size: 10px;
-            }
-            .style-price {
-                font-size: 9px;
-            }
+            .style-name { font-size: 10px; }
+            .style-price { font-size: 9px; }
             
-            .design-tools-box {
-                display: none;
-            }
+            .design-tools-box { display: none; }
             
             .mobile-toolbar {
                 display: block;
@@ -624,20 +829,9 @@
                 white-space: nowrap;
                 padding: 12px;
             }
-            
-            .toolbar-scroll::-webkit-scrollbar {
-                height: 3px;
-            }
-            
-            .toolbar-scroll::-webkit-scrollbar-track {
-                background: rgba(212,175,55,0.1);
-                border-radius: 10px;
-            }
-            
-            .toolbar-scroll::-webkit-scrollbar-thumb {
-                background: #D4AF37;
-                border-radius: 10px;
-            }
+            .toolbar-scroll::-webkit-scrollbar { height: 3px; }
+            .toolbar-scroll::-webkit-scrollbar-track { background: rgba(212,175,55,0.1); border-radius: 10px; }
+            .toolbar-scroll::-webkit-scrollbar-thumb { background: #D4AF37; border-radius: 10px; }
             
             .toolbar-items {
                 display: inline-flex;
@@ -658,11 +852,7 @@
                 gap: 6px;
                 white-space: nowrap;
             }
-            
-            .tool-btn i {
-                font-size: 14px;
-            }
-            
+            .tool-btn i { font-size: 14px; }
             .tool-btn.active {
                 background: linear-gradient(135deg, #D4AF37, #FF8C00);
                 color: #050508;
@@ -676,18 +866,13 @@
                 margin: 0 12px 12px 12px;
                 border-radius: 16px;
             }
-            
-            .tool-panel.open {
-                display: block;
-            }
-            
+            .tool-panel.open { display: block; }
             .panel-title {
                 font-size: 13px;
                 color: #D4AF37;
                 margin-bottom: 12px;
                 font-weight: 600;
             }
-            
             .mobile-text-input {
                 width: 100%;
                 padding: 10px;
@@ -697,26 +882,22 @@
                 color: white;
                 margin-bottom: 10px;
             }
-            
             .mobile-color-grid {
                 display: grid;
                 grid-template-columns: repeat(5, 1fr);
                 gap: 10px;
             }
-            
             .mobile-color-swatch {
                 aspect-ratio: 1/1;
                 border-radius: 50%;
                 cursor: pointer;
                 border: 2px solid rgba(255,255,255,0.2);
             }
-            
             .mobile-font-grid {
                 display: grid;
                 grid-template-columns: repeat(2, 1fr);
                 gap: 8px;
             }
-            
             .mobile-font-option {
                 background: rgba(0,0,0,0.3);
                 padding: 8px;
@@ -726,23 +907,16 @@
                 font-size: 12px;
                 border: 1px solid transparent;
             }
-            
             .mobile-font-option.active {
                 border-color: #D4AF37;
                 background: rgba(212,175,55,0.15);
             }
-            
-            .mobile-size-slider {
-                width: 100%;
-                margin: 10px 0;
-            }
-            
+            .mobile-size-slider { width: 100%; margin: 10px 0; }
             .mobile-effect-buttons {
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
             }
-            
             .mobile-effect-btn {
                 background: rgba(212,175,55,0.15);
                 border: 1px solid rgba(212,175,55,0.3);
@@ -751,13 +925,11 @@
                 cursor: pointer;
                 font-size: 12px;
             }
-            
             .mobile-transform-buttons {
                 display: flex;
                 gap: 10px;
                 flex-wrap: wrap;
             }
-            
             .mobile-transform-btn {
                 background: rgba(212,175,55,0.15);
                 border: 1px solid rgba(212,175,55,0.3);
@@ -766,7 +938,6 @@
                 cursor: pointer;
                 font-size: 12px;
             }
-            
             .mobile-upload-area {
                 border: 2px dashed rgba(212,175,55,0.4);
                 border-radius: 14px;
@@ -774,256 +945,52 @@
                 text-align: center;
                 cursor: pointer;
             }
-        }
-        
-        @media (max-width: 768px) {
-            body {
-                overflow-x: hidden;
-                width: 100%;
-                position: relative;
+            
+            .nav-links { gap: 8px; margin: 6px 0 4px 0; }
+            .nav-link { font-size: 10px; padding: 4px 12px; }
+            .nav-link i { font-size: 11px; }
+            .upload-tshirt-btn {
+                font-size: 11px;
+                padding: 6px 14px;
             }
-            .designer-container {
-                overflow-x: hidden;
-                width: 100%;
-                padding: 0;
-                margin: 0;
+            .tshirt-upload-content {
+                padding: 20px;
             }
-            .header {
-                padding: 15px 12px;
+            .tshirt-upload-content h2 {
+                font-size: 20px;
             }
-            .logo {
-                font-size: 24px;
+            .upload-zone-modal {
+                padding: 25px 15px;
             }
-            .tagline {
-                font-size: 8px;
-                letter-spacing: 2px;
+            .modal-actions {
+                flex-direction: column;
             }
             .cart-icon-header {
-                padding: 6px 10px;
+                padding: 4px 10px;
                 font-size: 11px;
-                top: 14px;
-                right: 12px;
-            }
-            .cart-count {
-                font-size: 10px;
-                padding: 1px 6px;
-            }
-            .section-title {
-                font-size: 16px;
-                margin-bottom: 12px;
-            }
-            .selected-tshirt-area {
-                padding: 0 12px 0 12px;
-                padding-bottom: 0;
-            }
-            .side-switcher {
-                gap: 10px;
-                margin-bottom: 12px;
-                margin-top: 12px;
-            }
-            .side-btn {
-                padding: 6px 16px;
-                font-size: 12px;
-            }
-            
-            .canvas-container {
-                width: 100%;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                line-height: 0;
-                height: auto;
-                min-height: 0;
-                overflow: visible;
-                text-align: center;
-                position: relative;
-            }
-            
-            #tshirtCanvas {
-                max-width: 100%;
-                display: block;
-                margin: 0 auto;
-                position: relative;
-            }
-            
-            .canvas-container canvas {
-                display: block;
-                margin: 0 auto;
-                position: relative;
-            }
-            
-            .canvas-container .lower-canvas,
-            .canvas-container .upper-canvas {
-                display: block;
-                margin: 0 auto;
-                position: relative;
-            }
-            
-            .color-selector-section {
-                margin-top: 0px;
-                padding: 10px;
-            }
-            .color-selector-title {
-                font-size: 12px;
-                margin-bottom: 8px;
-            }
-            .color-options {
-                gap: 8px;
-            }
-            .color-option {
-                padding: 4px 6px;
-            }
-            .color-swatch-circle {
-                width: 28px;
-                height: 28px;
-            }
-            .color-option-name {
-                font-size: 9px;
-            }
-            .instruction-text {
-                font-size: 9px;
-                margin-top: 10px;
-            }
-            .material-tools-box, .order-panel {
-                padding: 14px;
-            }
-            .box-title {
-                font-size: 14px;
-                margin-bottom: 12px;
-                padding-bottom: 6px;
-            }
-            .tool-group {
-                margin-bottom: 14px;
-                padding-bottom: 10px;
-            }
-            .tool-group label {
-                font-size: 11px;
-                margin-bottom: 5px;
-            }
-            .tool-group input, .tool-group select {
-                padding: 7px 9px;
-                font-size: 11px;
-            }
-            .order-panel h3 {
-                font-size: 14px;
-            }
-            .order-detail {
-                padding: 8px 0;
-                font-size: 12px;
-            }
-            .order-total {
-                padding: 12px 0;
-                font-size: 18px;
-            }
-            .action-buttons {
-                gap: 8px;
-                margin-top: 12px;
-            }
-            .btn-add, .btn-buy {
-                padding: 10px;
-                font-size: 12px;
-            }
-            .cart-sidebar {
-                width: 90%;
-                max-width: 320px;
-            }
-            .cart-header {
-                padding: 14px;
-            }
-            .cart-header h3 {
-                font-size: 16px;
-            }
-            .cart-items {
-                padding: 12px;
-                max-height: 65vh;
-            }
-            .cart-item {
-                padding: 10px;
-                gap: 8px;
-            }
-            .cart-item-img {
-                width: 45px;
-                height: 45px;
-            }
-            .cart-item-details {
-                font-size: 11px;
-            }
-            .cart-qty-control button {
-                width: 22px;
-                height: 22px;
-                font-size: 12px;
-            }
-            .cart-total {
-                padding: 12px;
-            }
-            .checkout-btn {
-                padding: 10px;
-                font-size: 13px;
-            }
-            .modal-content {
-                padding: 20px;
-                max-width: 300px;
-            }
-            .modal-content h3 {
-                font-size: 18px;
-            }
-            .modal-content input {
-                padding: 8px;
-                font-size: 14px;
-            }
-            .toast {
-                padding: 8px 16px;
-                font-size: 12px;
-                white-space: normal;
-                text-align: center;
-                max-width: 90%;
-            }
-            .loading-spinner {
-                width: 40px;
-                height: 40px;
-            }
-            .loading-text {
-                font-size: 13px;
-            }
-            .cors-warning {
-                font-size: 9px;
-                padding: 6px;
-            }
-            .design-warning {
-                font-size: 10px;
-                padding: 8px;
+                top: 10px;
+                right: 10px;
             }
         }
-        
-        @media (max-width: 480px) {
-            .style-card {
-                width: 90px;
+
+        @media (min-width: 768px) {
+            .style-section {
+                overflow-x: visible;
+                overflow-y: visible;
             }
+            .style-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 12px;
+                width: 100%;
+            }
+            .style-card { width: 100%; }
             .style-img {
-                width: 70px;
-                height: 70px;
+                width: 100%;
+                height: auto;
+                aspect-ratio: 1/1;
             }
-            .style-name {
-                font-size: 9px;
-            }
-            .style-price {
-                font-size: 8px;
-            }
-            .color-options {
-                gap: 6px;
-            }
-            .color-swatch-circle {
-                width: 24px;
-                height: 24px;
-            }
-            .btn-add, .btn-buy {
-                padding: 9px;
-                font-size: 11px;
-            }
-            .tool-btn {
-                padding: 8px 14px;
-                font-size: 11px;
-            }
+            .designer-container { max-width: 1200px; margin: 0 auto; }
         }
     </style>
 </head>
@@ -1032,8 +999,78 @@
 <div class="header">
     <div class="logo">VEDANTA</div>
     <div class="tagline">✦ CUSTOM T-SHIRT STUDIO ✦</div>
+    
+    <!-- ====== NAVIGATION LINKS ====== -->
+    <div class="nav-links">
+        <a href="custom-studio.html" class="nav-link active">
+            <i class="fas fa-paint-brush"></i> Design Studio
+        </a>
+        <a href="dtf-analyzer.html" class="nav-link">
+            <i class="fas fa-ruler-combined"></i> DTF Analyzer
+        </a>
+    </div>
+    
+    <!-- ====== UPLOAD YOUR T-SHIRT BUTTON ====== -->
+    <button class="upload-tshirt-btn" id="uploadTshirtBtn">
+        <i class="fas fa-upload"></i> Upload Your T-Shirt
+    </button>
+    
     <div class="cart-icon-header" id="cartIconBtn">
         <i class="fas fa-shopping-cart"></i> Cart <span class="cart-count" id="cartCount">0</span>
+    </div>
+</div>
+
+<!-- ====== T-SHIRT UPLOAD MODAL ====== -->
+<div class="tshirt-upload-modal" id="tshirtUploadModal">
+    <div class="tshirt-upload-content">
+        <button class="close-modal-btn" id="closeTshirtModal">&times;</button>
+        <h2><i class="fas fa-tshirt"></i> Upload Your T-Shirt</h2>
+        <p>Upload a photo of the T-Shirt with the design already on it.<br>We'll detect the exact print size automatically!</p>
+        
+        <div class="upload-zone-modal" id="uploadZoneModal">
+            <i class="fas fa-cloud-upload-alt"></i>
+            <p><strong>Click or drag &amp; drop</strong> your T-Shirt photo</p>
+            <p class="small">Supports JPG, PNG, WEBP • Max 5MB</p>
+            <input type="file" id="tshirtFileInput" accept="image/*" style="display:none">
+        </div>
+        
+        <img id="tshirtPreview" class="preview-modal-img" alt="T-Shirt Preview">
+        
+        <div class="modal-actions">
+            <button class="btn-secondary" id="resetTshirtBtn"><i class="fas fa-redo"></i> Reset</button>
+            <button class="btn-primary" id="analyzeTshirtBtn"><i class="fas fa-ruler-combined"></i> Analyze Size</button>
+        </div>
+        
+        <div class="analysis-result-box" id="analysisResultBox">
+            <div class="analysis-big" id="dtfSizeDisplay">📐 0″ × 0″</div>
+            <div class="analysis-row">
+                <span class="analysis-label">📏 Print Width</span>
+                <span class="analysis-value" id="resultWidth">--</span>
+            </div>
+            <div class="analysis-row">
+                <span class="analysis-label">📐 Print Height</span>
+                <span class="analysis-value" id="resultHeight">--</span>
+            </div>
+            <div class="analysis-row">
+                <span class="analysis-label">⬅️ Left Margin</span>
+                <span class="analysis-value" id="resultLeftMargin">--</span>
+            </div>
+            <div class="analysis-row">
+                <span class="analysis-label">⬆️ Top Margin</span>
+                <span class="analysis-value" id="resultTopMargin">--</span>
+            </div>
+            <div class="analysis-row">
+                <span class="analysis-label">📦 Print Category</span>
+                <span class="analysis-value green" id="resultCategory">--</span>
+            </div>
+            <div class="analysis-row" style="border-bottom: none; padding-top: 12px;">
+                <span class="analysis-label" style="font-weight:700;">💰 Estimated Price</span>
+                <span class="analysis-value" style="font-size:20px;" id="resultPrice">₹0</span>
+            </div>
+            <button class="btn-primary" style="width:100%; margin-top:12px;" id="addAnalyzedToCart">
+                <i class="fas fa-cart-plus"></i> Add to Cart
+            </button>
+        </div>
     </div>
 </div>
 
@@ -1070,7 +1107,6 @@
         <div class="design-tools-box">
             <div class="box-title"><i class="fas fa-magic"></i> DESIGN TOOLS</div>
             
-            <!-- IMAGE UPLOAD -->
             <div class="tool-group">
                 <label>🖼️ Upload Image</label>
                 <div class="upload-area" id="uploadArea">
@@ -1080,14 +1116,12 @@
                 </div>
             </div>
             
-            <!-- TEXT ADD -->
             <div class="tool-group">
                 <label>📝 Add Text</label>
                 <input type="text" id="textInput" placeholder="Enter your text...">
                 <button class="btn-icon" id="addTextBtn"><i class="fas fa-plus"></i> Add Text</button>
             </div>
             
-            <!-- CURVED TEXT TOOL -->
             <div class="tool-group">
                 <label>⭕ Curved Text</label>
                 <button class="btn-icon" id="curveTextBtn" style="width:100%; margin-bottom:8px;">
@@ -1336,13 +1370,296 @@ auth.useDeviceLanguage(); window.recaptchaVerifier = null; const IMAGE_PATH = ""
 const tshirtStyles = [ { id: 'sweatshirt', name: 'sweatshirt', displayName: 'Sweatshirt', price: 999, previewImg: 'sweatshirt white color frunt t shirt.jpeg', colors: ['white','warm grey','cream','black'] }, { id: 'regularfit', name: 'regular fit', displayName: 'Regular Fit', price: 699, previewImg: 'regular fit white color frunt t shirt.jpg', colors: ['white','grey','cream','blue','black'] }, { id: 'polo', name: 'polo', displayName: 'Polo', price: 849, previewImg: 'polo white color frunt t shirt.jpeg', colors: ['white','grey','blue','black'] }, { id: 'oversized', name: 'oversized', displayName: 'Oversized', price: 799, previewImg: 'oversized white color frunt t shirt.jpg', colors: ['white','warm grey','cream','black'] }, { id: 'acidwash', name: 'acid wash', displayName: 'Acid Wash', price: 949, previewImg: 'acid wash green color frunt t shirt.jpeg', colors: ['green','black'] }, { id: 'hoodie', name: 'hoodie', displayName: 'Hoodie', price: 1299, previewImg: 'hoodie olive green color frunt t shirt.jpg', colors: ['olive green','dark brown','blue','black'] } ];
 let currentStyle = tshirtStyles[0], currentSize = null, currentPrintMethod = null, fabricCanvas = null, pendingBuyAfterLogin = false, imageCache = {}, glowActive=false, roundedActive=false, borderActive=false, cart=[], currentSide='front', frontDesignJSON=null, backDesignJSON=null, selectedColor='white', selectedColorDisplay='White', globalConfirmationResult=null;
 
-// Clear all checkout-related localStorage data to prevent stale data
+// ============================================================
+// T-SHIRT UPLOAD MODAL LOGIC
+// ============================================================
+
+const tshirtUploadModal = document.getElementById('tshirtUploadModal');
+const uploadTshirtBtn = document.getElementById('uploadTshirtBtn');
+const closeTshirtModal = document.getElementById('closeTshirtModal');
+const uploadZoneModal = document.getElementById('uploadZoneModal');
+const tshirtFileInput = document.getElementById('tshirtFileInput');
+const tshirtPreview = document.getElementById('tshirtPreview');
+const resetTshirtBtn = document.getElementById('resetTshirtBtn');
+const analyzeTshirtBtn = document.getElementById('analyzeTshirtBtn');
+const analysisResultBox = document.getElementById('analysisResultBox');
+let uploadedTshirtDataURL = null;
+let analyzedData = null;
+
+// Open Modal
+uploadTshirtBtn.onclick = () => {
+    tshirtUploadModal.classList.add('open');
+    resetTshirtUpload();
+};
+
+// Close Modal
+closeTshirtModal.onclick = () => {
+    tshirtUploadModal.classList.remove('open');
+    resetTshirtUpload();
+};
+
+// Click on modal background to close
+tshirtUploadModal.onclick = (e) => {
+    if (e.target === tshirtUploadModal) {
+        tshirtUploadModal.classList.remove('open');
+        resetTshirtUpload();
+    }
+};
+
+// Upload Zone Click
+uploadZoneModal.onclick = () => tshirtFileInput.click();
+
+// Drag & Drop
+uploadZoneModal.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    uploadZoneModal.classList.add('dragover');
+});
+uploadZoneModal.addEventListener('dragleave', () => {
+    uploadZoneModal.classList.remove('dragover');
+});
+uploadZoneModal.addEventListener('drop', (e) => {
+    e.preventDefault();
+    uploadZoneModal.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+        handleTshirtFile(e.dataTransfer.files[0]);
+    }
+});
+
+// File Input Change
+tshirtFileInput.onchange = (e) => {
+    if (e.target.files.length) {
+        handleTshirtFile(e.target.files[0]);
+    }
+};
+
+function handleTshirtFile(file) {
+    if (!file.type.startsWith('image/')) {
+        showToast('❌ Please upload an image file!', true);
+        return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+        showToast('❌ File too large! Max 5MB.', true);
+        return;
+    }
+    
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        uploadedTshirtDataURL = e.target.result;
+        tshirtPreview.src = uploadedTshirtDataURL;
+        tshirtPreview.style.display = 'block';
+        analysisResultBox.classList.remove('show');
+        showToast('✅ T-Shirt photo uploaded! Click "Analyze Size"');
+    };
+    reader.readAsDataURL(file);
+}
+
+function resetTshirtUpload() {
+    uploadedTshirtDataURL = null;
+    analyzedData = null;
+    tshirtPreview.src = '';
+    tshirtPreview.style.display = 'none';
+    tshirtFileInput.value = '';
+    analysisResultBox.classList.remove('show');
+}
+
+resetTshirtBtn.onclick = resetTshirtUpload;
+
+// ============================================================
+// ANALYZE T-SHIRT (DTF Size Detection)
+// ============================================================
+
+function detectDTFSizeFromImage(imageDataURL) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = function() {
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            canvas.width = img.width;
+            canvas.height = img.height;
+            ctx.drawImage(img, 0, 0);
+            
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const data = imageData.data;
+            const w = canvas.width;
+            const h = canvas.height;
+            
+            // Detect design area (non-white/colored pixels)
+            let minX = w, minY = h, maxX = 0, maxY = 0;
+            let foundPixels = 0;
+            
+            for (let y = 0; y < h; y++) {
+                for (let x = 0; x < w; x++) {
+                    const idx = (y * w + x) * 4;
+                    const r = data[idx];
+                    const g = data[idx + 1];
+                    const b = data[idx + 2];
+                    const brightness = (r + g + b) / 3;
+                    
+                    // Design pixels (non-white/light)
+                    if (brightness < 220) {
+                        if (x < minX) minX = x;
+                        if (x > maxX) maxX = x;
+                        if (y < minY) minY = y;
+                        if (y > maxY) maxY = y;
+                        foundPixels++;
+                    }
+                }
+            }
+            
+            // If no design found, use whole image
+            if (foundPixels === 0 || maxX - minX < 10 || maxY - minY < 10) {
+                minX = 0; minY = 0; maxX = w; maxY = h;
+            }
+            
+            const designWidthPx = maxX - minX;
+            const designHeightPx = maxY - minY;
+            const canvasWidthPx = w;
+            const canvasHeightPx = h;
+            
+            // Garment size (default L - 22x28 inches)
+            const garmentW = 22;
+            const garmentH = 28;
+            
+            // DTF Size in inches
+            let dtfWidth = (designWidthPx / canvasWidthPx) * garmentW;
+            let dtfHeight = (designHeightPx / canvasHeightPx) * garmentH;
+            
+            // Margins
+            const marginLeft = (garmentW - dtfWidth) / 2;
+            const marginTop = (garmentH - dtfHeight) / 2;
+            
+            // Category
+            let category = '';
+            const area = dtfWidth * dtfHeight;
+            if (dtfWidth > garmentW * 0.85 && dtfHeight > garmentH * 0.85) {
+                category = '🟢 Full Cover';
+            } else if (dtfWidth > garmentW * 0.5 || dtfHeight > garmentH * 0.5) {
+                category = '🟡 Half Cover / Custom';
+            } else if (dtfWidth < 5 && dtfHeight < 5) {
+                category = '🔵 Small (Pocket/Logo)';
+            } else if (Math.abs(dtfWidth - 8.27) < 1 && Math.abs(dtfHeight - 11.69) < 1) {
+                category = '📄 A4 Size';
+            } else {
+                category = '🟠 Custom Size';
+            }
+            
+            // Round to 1 decimal
+            dtfWidth = Math.round(dtfWidth * 10) / 10;
+            dtfHeight = Math.round(dtfHeight * 10) / 10;
+            
+            resolve({
+                dtfWidth,
+                dtfHeight,
+                marginLeft: Math.round(marginLeft * 10) / 10,
+                marginTop: Math.round(marginTop * 10) / 10,
+                marginRight: Math.round(((garmentW - dtfWidth) / 2) * 10) / 10,
+                marginBottom: Math.round(((garmentH - dtfHeight) / 2) * 10) / 10,
+                category,
+                garmentW,
+                garmentH
+            });
+        };
+        img.src = imageDataURL;
+    });
+}
+
+function calculatePrice(dtfWidth, dtfHeight) {
+    const area = dtfWidth * dtfHeight;
+    const basePrice = 699;
+    
+    let dtfCost = 120;
+    if (area > 350) dtfCost = 200;
+    else if (area > 200) dtfCost = 160;
+    else if (area > 100) dtfCost = 130;
+    else dtfCost = 100;
+    
+    const shipping = 120;
+    const packaging = 50;
+    const margin = 199;
+    
+    return basePrice + dtfCost + shipping + packaging + margin;
+}
+
+analyzeTshirtBtn.onclick = async () => {
+    if (!uploadedTshirtDataURL) {
+        showToast('❌ Please upload a T-Shirt photo first!', true);
+        return;
+    }
+    
+    showLoading("🔍 Analyzing T-Shirt Design...");
+    
+    try {
+        const result = await detectDTFSizeFromImage(uploadedTshirtDataURL);
+        analyzedData = result;
+        
+        // Display results
+        document.getElementById('dtfSizeDisplay').innerHTML = `📐 ${result.dtfWidth}″ × ${result.dtfHeight}″`;
+        document.getElementById('resultWidth').innerHTML = `${result.dtfWidth}″`;
+        document.getElementById('resultHeight').innerHTML = `${result.dtfHeight}″`;
+        document.getElementById('resultLeftMargin').innerHTML = `${result.marginLeft}″`;
+        document.getElementById('resultTopMargin').innerHTML = `${result.marginTop}″`;
+        document.getElementById('resultCategory').innerHTML = result.category;
+        
+        const finalPrice = calculatePrice(result.dtfWidth, result.dtfHeight);
+        document.getElementById('resultPrice').innerHTML = `₹${finalPrice}`;
+        
+        analysisResultBox.classList.add('show');
+        showToast('✅ Analysis complete! Exact DTF size detected.');
+        
+    } catch (error) {
+        console.error(error);
+        showToast('❌ Analysis failed. Please try again.', true);
+    } finally {
+        hideLoading();
+    }
+};
+
+// Add Analyzed T-Shirt to Cart
+document.getElementById('addAnalyzedToCart').onclick = () => {
+    if (!analyzedData) {
+        showToast('❌ Please analyze the design first!', true);
+        return;
+    }
+    
+    const cartItem = {
+        id: Date.now(),
+        type: 'uploaded_tshirt',
+        dtfWidth: analyzedData.dtfWidth,
+        dtfHeight: analyzedData.dtfHeight,
+        category: analyzedData.category,
+        imageData: uploadedTshirtDataURL,
+        price: parseInt(document.getElementById('resultPrice').innerText.replace('₹', '')),
+        timestamp: Date.now()
+    };
+    
+    cart.push({
+        id: cartItem.id,
+        styleName: 'Uploaded T-Shirt 🖼️',
+        price: cartItem.price,
+        frontDesignImage: uploadedTshirtDataURL,
+        isCustomized: true,
+        size: 'L',
+        printMethod: 'transparent',
+        selectedColor: 'White',
+        quantity: 1,
+        isUploaded: true
+    });
+    
+    saveCart();
+    showToast('✅ Added to cart!');
+    tshirtUploadModal.classList.remove('open');
+    resetTshirtUpload();
+};
+
+// ============================================================
+// EXISTING CODE (Fabric, Firebase, Cart, etc.)
+// ============================================================
+
 function clearCheckoutPendingData() {
     localStorage.removeItem('customCheckoutData');
     localStorage.removeItem('customCheckoutTimestamp');
 }
 
-// Reset design state when switching products
 function resetDesignState() {
     if (fabricCanvas) {
         fabricCanvas.getObjects().forEach(obj => fabricCanvas.remove(obj));
@@ -1362,14 +1679,12 @@ function resetDesignState() {
     updateDesignWarning();
 }
 
-// FIXED: Check if current side has design (text or image)
 function hasDesignOnSide() {
     if (!fabricCanvas) return false;
     const objects = fabricCanvas.getObjects();
     return objects.length > 0;
 }
 
-// FIXED: Check if at least one side (front or back) has design
 function hasAtLeastOneDesign() {
     const hasFrontDesign = (frontDesignJSON && frontDesignJSON.objects && frontDesignJSON.objects.length > 0) || 
                            (currentSide === 'front' && fabricCanvas && fabricCanvas.getObjects().length > 0);
@@ -1378,7 +1693,6 @@ function hasAtLeastOneDesign() {
     return hasFrontDesign || hasBackDesign;
 }
 
-// FIXED: Update design warning visibility
 function updateDesignWarning() {
     const warningEl = document.getElementById('designWarning');
     if (warningEl) {
@@ -1388,14 +1702,12 @@ function updateDesignWarning() {
             warningEl.style.display = 'none';
         }
     }
-    // Update summary elements
     const hf = (frontDesignJSON?.objects?.length > 0) || (currentSide === 'front' && fabricCanvas && fabricCanvas.getObjects().length > 0);
     const hb = (backDesignJSON?.objects?.length > 0) || (currentSide === 'back' && fabricCanvas && fabricCanvas.getObjects().length > 0);
     document.getElementById('summaryFront').innerHTML = hf ? '✓ Custom' : 'None';
     document.getElementById('summaryBack').innerHTML = hb ? '✓ Custom' : 'None';
 }
 
-// FIXED: Validate all requirements before add/buy
 function validateDesignRequirements() {
     if (!currentSize) {
         showToast('❌ Please select T-Shirt Size first!', true);
@@ -1412,7 +1724,6 @@ function validateDesignRequirements() {
     return true;
 }
 
-// Curved text storage
 let curvedTextData = {};
 
 const loadingOverlay = document.getElementById('globalLoadingOverlay');
@@ -1421,7 +1732,6 @@ function hideLoading(){ loadingOverlay.classList.remove('active'); }
 function getDynamicImagePath(p,c,s){ let n; const pl=p.toLowerCase().trim(), cl=c.toLowerCase().trim(); if(pl==='sweatshirt') n=s==='front'?`sweatshirt ${cl} color frunt t shirt.jpeg`:(cl==='white'?`sweatshirt white color back tt shirt.jpeg`:`sweatshirt ${cl} color back t shirt.jpeg`); else if(pl==='regular fit') n=s==='front'?(cl==='blue'?`regular fit bllue color frunt t shirt.jpg`:`regular fit ${cl} color frunt t shirt.jpg`):`regular fit ${cl} color back t shirt.jpg`; else if(pl==='polo') n=`polo ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='oversized') n=s==='front'?(cl==='warm grey'?`oversized warm grey color frunt t shir.jpg`:`oversized ${cl} color frunt t shirt.jpg`):`oversized ${cl} color back t shirt.jpg`; else if(pl==='acid wash') n=`acid wash ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; else if(pl==='hoodie') n=`hoodie ${cl} color ${s==='front'?'frunt t shirt.jpg':'back t shirt.jpg'}`; else n=`${pl} ${cl} color ${s==='front'?'frunt t shirt.jpeg':'back t shirt.jpeg'}`; return IMAGE_PATH+n.replace(/\s+/g,' ').trim(); }
 function loadImageAsDataURL(src,cb){ if(imageCache[src]){cb(imageCache[src]);return;} const img=new Image(); img.crossOrigin="Anonymous"; img.onload=()=>{const c=document.createElement('canvas');c.width=img.width;c.height=img.height;c.getContext('2d').drawImage(img,0,0);const d=c.toDataURL('image/jpeg');imageCache[src]=d;cb(d);}; img.onerror=()=>cb(null); img.src=src; }
 
-// Function to create curved text
 function createCurvedText(text, fontFamily, fontSize, fillColor, shape, curveAmount, radius, isBold, isItalic, isUnderline) {
     if (!text || text.length === 0) return null;
     
@@ -1776,7 +2086,6 @@ async function saveDesignImageToFirebase(side,designJSON,productName,colorName){
     } 
 }
 
-// FIXED: addCurrentDesignToCart with design validation
 async function addCurrentDesignToCart(){ 
     if(!validateDesignRequirements()) return false;
     showLoading("ADDING TO CART..."); 
@@ -1796,7 +2105,6 @@ async function addCurrentDesignToCart(){
     } catch(e){showToast('Error',true);return false;} finally{hideLoading();} 
 }
 
-// FIXED: buyNow function with design validation and fresh data capture
 async function buyNow(){ 
     const user=auth.currentUser; 
     const storedUser=JSON.parse(localStorage.getItem('vedantaUser')); 
@@ -1805,8 +2113,6 @@ async function buyNow(){
     
     showLoading("PREPARING ORDER..."); 
     try{ 
-        // CRITICAL FIX: Capture current canvas state before saving
-        // This ensures we get the latest design from the current side
         if(currentSide==='front') {
             frontDesignJSON = fabricCanvas.toJSON();
         } else {
@@ -1820,7 +2126,6 @@ async function buyNow(){
         if(hasBack){backURL=await saveDesignImageToFirebase('back',backDesignJSON,currentStyle.name,selectedColor); 
         if(!backURL){showToast('Failed to save back design',true);return;}} 
         
-        // Clear any existing checkout data first to prevent stale data
         clearCheckoutPendingData();
         
         const customData = {
@@ -1850,7 +2155,7 @@ function showToast(m,err=false){ const t=document.getElementById('toastMsg'); t.
 function saveCart(){localStorage.setItem('vedanta_custom_cart',JSON.stringify(cart)); updateCartCount(); updateCartUI();}
 function loadCart(){const s=localStorage.getItem('vedanta_custom_cart'); if(s){try{cart=JSON.parse(s);updateCartUI();updateCartCount();}catch(e){cart=[];}}}
 function updateCartCount(){document.getElementById('cartCount').innerText=cart.reduce((s,i)=>s+i.quantity,0);}
-function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ✨ Custom</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
+function updateCartUI(){const c=document.getElementById('cartItemsList'); if(!c)return; if(cart.length===0){c.innerHTML='<div style="text-align:center; padding:20px;">Cart empty</div>';document.getElementById('cartSubtotal').innerText='₹0';return;} let sub=0; c.innerHTML=''; cart.forEach((it,idx)=>{sub+=it.price*it.quantity; c.innerHTML+=`<div class="cart-item"><div class="cart-item-img">${it.frontDesignImage?`<img src="${it.frontDesignImage}">`:'<i class="fas fa-tshirt"></i>'}</div><div class="cart-item-details"><div class="cart-item-name">${it.styleName} ${it.isUploaded ? '🖼️' : '✨ Custom'}</div><div class="cart-item-price">₹${it.price}</div><div class="cart-item-variant">${it.size||'M'} | ${it.selectedColor||'White'}</div><div class="cart-qty-control"><button class="cart-qty-dec" data-index="${idx}">-</button><span>${it.quantity}</span><button class="cart-qty-inc" data-index="${idx}">+</button><button class="cart-item-remove" data-index="${idx}">Remove</button></div></div></div>`;}); document.getElementById('cartSubtotal').innerHTML=`₹${sub}`; document.querySelectorAll('.cart-qty-dec').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);if(cart[i].quantity>1)cart[i].quantity--;else cart.splice(i,1);saveCart();updateCartUI();showToast('Cart updated');}); document.querySelectorAll('.cart-qty-inc').forEach(b=>b.onclick=()=>{let i=parseInt(b.dataset.index);cart[i].quantity++;saveCart();updateCartUI();showToast('Quantity increased');}); document.querySelectorAll('.cart-item-remove').forEach(b=>b.onclick=()=>{cart.splice(parseInt(b.dataset.index),1);saveCart();updateCartUI();showToast('Item removed');});}
 function resizeCanvas() {
     if (!fabricCanvas) return;
     const container = document.querySelector('.canvas-container');
@@ -1944,7 +2249,6 @@ function renderStyles(){
         const id=c.dataset.id;
         const sel=tshirtStyles.find(t=>t.id===id);
         if(sel){
-            // CRITICAL FIX: Reset design state when switching styles
             resetDesignState();
             currentStyle=sel;
             selectedColor=currentStyle.colors[0];
@@ -2109,7 +2413,6 @@ function openLoginModal(){document.getElementById('loginModal').classList.add('s
 initCanvas(); renderStyles(); renderColorPalette(); renderColorSelectorFull(); updateSummary(); loadCart(); frontDesignJSON=fabricCanvas.toJSON(); backDesignJSON=null; if(window.location.protocol==='file:')document.getElementById('corsWarning').style.display='block'; else document.getElementById('corsWarning').style.display='none';
 setupCurvePanel();
 updateDesignWarning();
-// Clear any stale checkout data on page load
 clearCheckoutPendingData();
 </script>
 </body>
