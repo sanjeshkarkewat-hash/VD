@@ -372,17 +372,17 @@
             <input type="file" id="fileInput" accept="image/*">
         </div>
 
-        <!-- Size Selector -->
+        <!-- Size Selector - ONLY SIZE NAMES -->
         <div class="size-selector">
-            <label for="tshirtSizeSelect"><i class="fas fa-tshirt"></i> Select T-Shirt Size (Real Garment Size)</label>
+            <label for="tshirtSizeSelect"><i class="fas fa-tshirt"></i> Select T-Shirt Size</label>
             <select id="tshirtSizeSelect">
                 <option value="">-- Select Size --</option>
-                <option value="S">S (18″ × 26″)</option>
-                <option value="M">M (20″ × 27″)</option>
-                <option value="L">L (22″ × 28″)</option>
-                <option value="XL">XL (23″ × 29″)</option>
-                <option value="XXL">XXL (24″ × 30″)</option>
-                <option value="3XL">3XL (25″ × 31″)</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+                <option value="3XL">3XL</option>
             </select>
         </div>
 
@@ -455,7 +455,7 @@
 
 <script>
 // ============================================================
-// 1. SIZE CHART (Real Garment Inches)
+// 1. SIZE CHART (Real Garment Inches - Internal Use Only)
 // ============================================================
 const GARMENT_SIZES = {
     'S':  { width: 18, height: 26 },
