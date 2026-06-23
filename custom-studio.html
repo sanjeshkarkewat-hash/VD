@@ -67,28 +67,27 @@
         .btn-secondary:hover:not(:disabled) { background: rgba(212,175,55,0.15); }
         .btn-buy { background: linear-gradient(135deg, #FF4500, #FF8C00); color: white; }
         .btn-buy:hover:not(:disabled) { transform: scale(1.02); }
+        
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #D4AF37; color: #050508; padding: 8px 18px; border-radius: 30px; font-weight: 600; z-index: 10000; display: none; font-size: 12px; box-shadow: 0 8px 30px rgba(0,0,0,0.5); }
         .toast.show { display: block; animation: toastAnim 2.5s ease; }
         .toast.error { background: #F44336; color: white; }
         @keyframes toastAnim { 0% { opacity: 0; transform: translateX(-50%) translateY(15px); } 20% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(15px); } }
-        .note { margin-top: 14px; padding: 10px 14px; background: rgba(255,200,0,0.04); border-radius: 10px; border-left: 2px solid #D4AF37; font-size: 11px; color: #999; }
-        .note strong { color: #D4AF37; }
         
-        /* ===== SIZE SELECTOR AT BOTTOM ===== */
+        /* ===== SIZE SELECTOR - Results ke neeche, Note ke upar ===== */
         .size-section {
-            margin-top: 18px;
-            padding: 16px;
-            background: rgba(0,0,0,0.25);
+            margin-top: 16px;
+            padding: 14px 16px;
+            background: rgba(0,0,0,0.2);
             border-radius: 14px;
             border: 1px solid rgba(212,175,55,0.08);
         }
         .size-section .required-label {
             color: #ff6666;
-            font-size: 11px;
+            font-size: 10px;
             font-weight: 600;
             display: inline-block;
             background: rgba(255,50,50,0.1);
-            padding: 2px 10px;
+            padding: 1px 10px;
             border-radius: 20px;
             margin-left: 6px;
         }
@@ -97,11 +96,11 @@
             color: #D4AF37;
             font-weight: 600;
             font-size: 13px;
-            margin-bottom: 6px;
+            margin-bottom: 5px;
         }
         .size-section select {
             width: 100%;
-            padding: 11px 16px;
+            padding: 10px 14px;
             background: rgba(0,0,0,0.5);
             border: 1px solid rgba(212,175,55,0.2);
             border-radius: 12px;
@@ -120,10 +119,21 @@
         .size-section .hint {
             font-size: 10px;
             color: #666;
-            margin-top: 6px;
+            margin-top: 5px;
             text-align: center;
         }
         .size-section .hint i { color: #D4AF37; }
+
+        .note {
+            margin-top: 14px;
+            padding: 10px 14px;
+            background: rgba(255,200,0,0.04);
+            border-radius: 10px;
+            border-left: 2px solid #D4AF37;
+            font-size: 11px;
+            color: #999;
+        }
+        .note strong { color: #D4AF37; }
 
         /* ===== LOGIN MODAL ===== */
         .login-modal {
@@ -309,6 +319,33 @@
         .checkout-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 30px; font-weight: 700; cursor: pointer; color: #050508; font-size: 14px; margin-top: 6px; }
         .checkout-btn:hover { transform: scale(1.02); }
 
+        .user-bar {
+            background: rgba(212,175,55,0.04);
+            border-radius: 12px;
+            padding: 8px 14px;
+            margin-bottom: 14px;
+            font-size: 11px;
+            color: #D4AF37;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 4px;
+            border: 1px solid rgba(212,175,55,0.04);
+        }
+        .user-bar .login-trigger-btn {
+            background: rgba(212,175,55,0.12);
+            border: 1px solid rgba(212,175,55,0.2);
+            padding: 2px 14px;
+            border-radius: 20px;
+            color: #D4AF37;
+            font-size: 10px;
+            cursor: pointer;
+        }
+        .user-bar .login-trigger-btn:hover {
+            background: rgba(212,175,55,0.2);
+        }
+
         @media (max-width: 600px) {
             .upload-row { grid-template-columns: 1fr; gap: 8px; }
             .container { padding: 0 10px; margin: 10px auto; }
@@ -340,12 +377,13 @@
         <!-- User Status Bar (No Logout) -->
         <div class="user-bar" id="userBar">
             <span><i class="fas fa-user-circle"></i> <span id="displayUser">Guest</span></span>
-            <button class="login-trigger-btn" id="loginTriggerBtn" style="background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.2);padding:2px 14px;border-radius:20px;color:#D4AF37;font-size:10px;cursor:pointer;">Login</button>
+            <button class="login-trigger-btn" id="loginTriggerBtn">Login</button>
         </div>
 
         <div class="card-title"><i class="fas fa-ruler-combined"></i> DTF Size Analyzer</div>
         <div class="card-subtitle">Upload Front &amp; Back → Get exact print size &amp; price</div>
 
+        <!-- Upload Zones -->
         <div class="upload-row">
             <div class="upload-zone" id="frontZone">
                 <i class="fas fa-tshirt"></i><p><strong>Front</strong></p><p class="small">Click or drag</p>
@@ -361,10 +399,12 @@
             </div>
         </div>
 
+        <!-- Preview -->
         <div class="preview-area" id="previewArea">
             <div class="preview-grid"><div class="preview-item"><p>Front</p><img id="frontMain"></div><div class="preview-item"><p>Back</p><img id="backMain"></div></div>
         </div>
 
+        <!-- Results -->
         <div class="results-panel" id="resultsPanel">
             <div class="result-big" id="dtfDisplay">📐 0″ × 0″</div>
             <div class="result-row"><span class="result-label">📏 Width</span><span class="result-value" id="rWidth">—</span></div>
@@ -372,34 +412,36 @@
             <div class="result-row"><span class="result-label">⬅️ Left Margin</span><span class="result-value" id="rLeft">—</span></div>
             <div class="result-row"><span class="result-label">⬆️ Top Margin</span><span class="result-value" id="rTop">—</span></div>
             <div class="result-row"><span class="result-label">📦 Category</span><span class="result-value green" id="rCat">—</span></div>
+            
             <div class="price-display">
                 <div class="label">💰 Final Price</div>
                 <div class="amount" id="finalPrice">₹0</div>
                 <div class="size-info" id="priceInfo">Size: —</div>
             </div>
+
+            <!-- ===== SIZE SELECTOR - Results ke neeche ===== -->
+            <div class="size-section">
+                <label for="sizeSelect">
+                    <i class="fas fa-tshirt"></i> Select T-Shirt Size
+                    <span class="required-label"><i class="fas fa-asterisk" style="font-size:8px;"></i> Required</span>
+                </label>
+                <select id="sizeSelect">
+                    <option value="">— Select Size —</option>
+                    <option value="S">S</option>
+                    <option value="M">M</option>
+                    <option value="L">L</option>
+                    <option value="XL">XL</option>
+                    <option value="XXL">XXL</option>
+                    <option value="3XL">3XL</option>
+                </select>
+                <div class="hint"><i class="fas fa-info-circle"></i> Select size to see the final price</div>
+            </div>
+
             <div class="action-buttons">
                 <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
                 <button class="btn btn-primary" id="addBtn" disabled><i class="fas fa-cart-plus"></i> Cart</button>
                 <button class="btn btn-buy" id="buyBtn" disabled><i class="fas fa-bolt"></i> Buy</button>
             </div>
-        </div>
-
-        <!-- ===== SIZE SELECTOR AT BOTTOM ===== -->
-        <div class="size-section">
-            <label for="sizeSelect">
-                <i class="fas fa-tshirt"></i> Select T-Shirt Size
-                <span class="required-label"><i class="fas fa-asterisk" style="font-size:8px;"></i> Required</span>
-            </label>
-            <select id="sizeSelect">
-                <option value="">— Select Size —</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="XXL">XXL</option>
-                <option value="3XL">3XL</option>
-            </select>
-            <div class="hint"><i class="fas fa-info-circle"></i> Select size to see the final price</div>
         </div>
 
         <div class="note"><i class="fas fa-info-circle" style="color:#D4AF37;"></i> <strong>AI detects</strong> design area → Calculates DTF size → Shows price</div>
@@ -416,7 +458,7 @@
 <!-- Toast -->
 <div class="toast" id="toastMsg"></div>
 
-<!-- ===== LOGIN MODAL ===== -->
+<!-- Login Modal -->
 <div class="login-modal" id="loginModal">
     <div class="login-modal-content">
         <span class="close-modal" id="closeLoginModal">&times;</span>
@@ -629,7 +671,6 @@ verifyOtpBtn.onclick = async () => {
         loggedInUser.innerText = cu.phone || cu.name;
         toast('✅ Login successful!');
         setTimeout(closeLoginModalFn, 1000);
-        // Re-analyze if needed
         if (frontData && sizeSelect.value) setTimeout(analyze, 300);
     } catch (e) {
         verifyOtpBtn.disabled = false;
@@ -645,7 +686,6 @@ resendOtpBtn.onclick = async () => {
         return;
     }
     try {
-        // Re-send OTP
         const phone = loginPhone.value.trim();
         const fullPhone = phone.startsWith('+') ? phone : '+91' + phone;
         const verifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
@@ -1066,7 +1106,6 @@ cleanLocalStorage();
 loadCart();
 console.log('⚡ DTF Analyzer Ready!');
 console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
-console.log('🔐 Login via Phone OTP');
 </script>
 </body>
 </html>
