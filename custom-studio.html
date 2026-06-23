@@ -37,16 +37,14 @@
         .upload-zone.uploaded .remove-btn { display: block; }
         .upload-zone .status { font-size: 9px; color: #4CAF50; display: none; margin-top: 2px; }
         .upload-zone.uploaded .status { display: block; }
-        .size-selector { margin-top: 14px; }
-        .size-selector label { display: block; color: #D4AF37; font-weight: 600; font-size: 12px; margin-bottom: 4px; }
-        .size-selector select { width: 100%; padding: 10px 14px; background: rgba(0,0,0,0.5); border: 1px solid rgba(212,175,55,0.2); border-radius: 12px; color: white; font-size: 14px; font-family: 'Space Grotesk', sans-serif; cursor: pointer; }
-        .size-selector select:focus { outline: none; border-color: #D4AF37; }
+        
         .preview-area { display: none; margin-top: 14px; background: rgba(0,0,0,0.15); border-radius: 14px; padding: 12px; }
         .preview-area.show { display: block; }
         .preview-grid { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
         .preview-item { flex: 1; min-width: 100px; max-width: 200px; text-align: center; }
         .preview-item p { font-size: 9px; color: #888; text-transform: uppercase; letter-spacing: 0.5px; }
         .preview-item img { width: 100%; max-height: 100px; object-fit: contain; border-radius: 10px; background: rgba(0,0,0,0.3); border: 1px solid rgba(212,175,55,0.06); }
+        
         .results-panel { display: none; margin-top: 16px; background: rgba(0,0,0,0.25); border-radius: 16px; padding: 16px; border: 1px solid rgba(212,175,55,0.08); animation: fadeIn 0.3s ease; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
         .results-panel.show { display: block; }
@@ -75,7 +73,218 @@
         @keyframes toastAnim { 0% { opacity: 0; transform: translateX(-50%) translateY(15px); } 20% { opacity: 1; transform: translateX(-50%) translateY(0); } 80% { opacity: 1; transform: translateX(-50%) translateY(0); } 100% { opacity: 0; transform: translateX(-50%) translateY(15px); } }
         .note { margin-top: 14px; padding: 10px 14px; background: rgba(255,200,0,0.04); border-radius: 10px; border-left: 2px solid #D4AF37; font-size: 11px; color: #999; }
         .note strong { color: #D4AF37; }
-        .cart-sidebar { position: fixed; top: 0; right: -100%; width: 85%; max-width: 340px; height: 100vh; background: rgba(8,8,15,0.98); backdrop-filter: blur(20px); border-left: 1px solid rgba(212,175,55,0.12); z-index: 15000; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; }
+        
+        /* ===== SIZE SELECTOR AT BOTTOM ===== */
+        .size-section {
+            margin-top: 18px;
+            padding: 16px;
+            background: rgba(0,0,0,0.25);
+            border-radius: 14px;
+            border: 1px solid rgba(212,175,55,0.08);
+        }
+        .size-section .required-label {
+            color: #ff6666;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+            background: rgba(255,50,50,0.1);
+            padding: 2px 10px;
+            border-radius: 20px;
+            margin-left: 6px;
+        }
+        .size-section label {
+            display: block;
+            color: #D4AF37;
+            font-weight: 600;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+        .size-section select {
+            width: 100%;
+            padding: 11px 16px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 12px;
+            color: white;
+            font-size: 14px;
+            font-family: 'Space Grotesk', sans-serif;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .size-section select:focus {
+            outline: none;
+            border-color: #D4AF37;
+            box-shadow: 0 0 20px rgba(212,175,55,0.05);
+        }
+        .size-section select option { background: #1a1a2e; }
+        .size-section .hint {
+            font-size: 10px;
+            color: #666;
+            margin-top: 6px;
+            text-align: center;
+        }
+        .size-section .hint i { color: #D4AF37; }
+
+        /* ===== LOGIN MODAL ===== */
+        .login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.92);
+            z-index: 50000;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(8px);
+        }
+        .login-modal.open { display: flex; }
+        .login-modal-content {
+            background: rgba(15,15,22,0.98);
+            border-radius: 28px;
+            padding: 32px 28px;
+            max-width: 380px;
+            width: 92%;
+            text-align: center;
+            border: 1px solid rgba(212,175,55,0.15);
+            position: relative;
+        }
+        .login-modal-content .close-modal {
+            position: absolute;
+            top: 12px;
+            right: 18px;
+            font-size: 24px;
+            color: #888;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-modal-content .close-modal:hover { color: #fff; }
+        .login-modal-content h2 {
+            color: #D4AF37;
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+        .login-modal-content p {
+            color: #888;
+            font-size: 13px;
+            margin-bottom: 20px;
+        }
+        .login-modal-content .input-group {
+            position: relative;
+            margin-bottom: 14px;
+        }
+        .login-modal-content .input-group i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #666;
+        }
+        .login-modal-content .input-group input {
+            width: 100%;
+            padding: 13px 14px 13px 44px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            transition: 0.2s;
+        }
+        .login-modal-content .input-group input:focus {
+            outline: none;
+            border-color: #D4AF37;
+        }
+        .login-modal-content .login-btn {
+            width: 100%;
+            padding: 13px;
+            background: linear-gradient(135deg, #D4AF37, #FF8C00);
+            border: none;
+            border-radius: 14px;
+            color: #050508;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .login-modal-content .login-btn:hover { transform: scale(1.02); }
+        .login-modal-content .login-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .login-modal-content .otp-section {
+            display: none;
+            margin-top: 14px;
+        }
+        .login-modal-content .otp-section.show { display: block; }
+        .login-modal-content .otp-section .otp-row {
+            display: flex;
+            gap: 10px;
+        }
+        .login-modal-content .otp-section .otp-row input {
+            flex: 1;
+            padding: 13px 14px;
+            background: rgba(0,0,0,0.5);
+            border: 1px solid rgba(212,175,55,0.2);
+            border-radius: 14px;
+            color: white;
+            font-size: 15px;
+            font-family: 'Space Grotesk', sans-serif;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+        .login-modal-content .otp-section .otp-row input:focus {
+            outline: none;
+            border-color: #D4AF37;
+        }
+        .login-modal-content .otp-section .otp-row button {
+            padding: 13px 20px;
+            background: linear-gradient(135deg, #4CAF50, #45a049);
+            border: none;
+            border-radius: 14px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+        .login-modal-content .otp-section .resend-btn {
+            background: transparent;
+            border: none;
+            color: #D4AF37;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 10px;
+            opacity: 0.7;
+        }
+        .login-modal-content .otp-section .resend-btn:hover { opacity: 1; }
+        .login-modal-content .user-display {
+            display: none;
+            padding: 12px;
+            background: rgba(212,175,55,0.08);
+            border-radius: 14px;
+            margin-bottom: 14px;
+            color: #D4AF37;
+            font-size: 14px;
+        }
+        .login-modal-content .user-display.show { display: block; }
+
+        .cart-sidebar {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 85%;
+            max-width: 340px;
+            height: 100vh;
+            background: rgba(8,8,15,0.98);
+            backdrop-filter: blur(20px);
+            border-left: 1px solid rgba(212,175,55,0.12);
+            z-index: 15000;
+            transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            display: flex;
+            flex-direction: column;
+        }
         .cart-sidebar.open { right: 0; }
         .cart-header { padding: 14px 16px; border-bottom: 1px solid rgba(212,175,55,0.1); display: flex; justify-content: space-between; align-items: center; }
         .cart-header h3 { font-size: 16px; color: #D4AF37; }
@@ -99,10 +308,23 @@
         .cart-total .row { display: flex; justify-content: space-between; font-weight: 600; font-size: 15px; color: #D4AF37; }
         .checkout-btn { width: 100%; padding: 10px; background: linear-gradient(135deg, #D4AF37, #FF8C00); border: none; border-radius: 30px; font-weight: 700; cursor: pointer; color: #050508; font-size: 14px; margin-top: 6px; }
         .checkout-btn:hover { transform: scale(1.02); }
-        .user-bar { background: rgba(212,175,55,0.04); border-radius: 12px; padding: 8px 14px; margin-bottom: 14px; font-size: 11px; color: #D4AF37; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 4px; border: 1px solid rgba(212,175,55,0.04); }
-        .user-bar .logout { background: rgba(255,50,50,0.08); border: 1px solid rgba(255,50,50,0.15); padding: 2px 10px; border-radius: 20px; color: #ff6666; font-size: 9px; cursor: pointer; }
-        .user-bar .logout:hover { background: rgba(255,50,50,0.15); }
-        @media (max-width: 600px) { .upload-row { grid-template-columns: 1fr; gap: 8px; } .container { padding: 0 10px; margin: 10px auto; } .card { padding: 14px; } .card-title { font-size: 17px; } .upload-zone { padding: 12px 8px; min-height: 80px; } .upload-zone i { font-size: 20px; } .result-big { font-size: 20px; } .price-display .amount { font-size: 24px; } .action-buttons { flex-direction: column; gap: 6px; } .btn { padding: 10px; font-size: 12px; } .cart-icon-header { padding: 3px 8px; font-size: 10px; top: 10px; right: 8px; } .user-bar { font-size: 10px; padding: 6px 10px; } .preview-item { min-width: 80px; } }
+
+        @media (max-width: 600px) {
+            .upload-row { grid-template-columns: 1fr; gap: 8px; }
+            .container { padding: 0 10px; margin: 10px auto; }
+            .card { padding: 14px; }
+            .card-title { font-size: 17px; }
+            .upload-zone { padding: 12px 8px; min-height: 80px; }
+            .upload-zone i { font-size: 20px; }
+            .result-big { font-size: 20px; }
+            .price-display .amount { font-size: 24px; }
+            .action-buttons { flex-direction: column; gap: 6px; }
+            .btn { padding: 10px; font-size: 12px; }
+            .cart-icon-header { padding: 3px 8px; font-size: 10px; top: 10px; right: 8px; }
+            .login-modal-content { padding: 24px 18px; }
+            .login-modal-content h2 { font-size: 19px; }
+            .size-section { padding: 12px; }
+        }
     </style>
 </head>
 <body>
@@ -115,7 +337,12 @@
 
 <div class="container">
     <div class="card">
-        <div class="user-bar"><span><i class="fas fa-user-circle"></i> <span id="displayUser">Loading...</span></span><button class="logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button></div>
+        <!-- User Status Bar (No Logout) -->
+        <div class="user-bar" id="userBar">
+            <span><i class="fas fa-user-circle"></i> <span id="displayUser">Guest</span></span>
+            <button class="login-trigger-btn" id="loginTriggerBtn" style="background:rgba(212,175,55,0.12);border:1px solid rgba(212,175,55,0.2);padding:2px 14px;border-radius:20px;color:#D4AF37;font-size:10px;cursor:pointer;">Login</button>
+        </div>
+
         <div class="card-title"><i class="fas fa-ruler-combined"></i> DTF Size Analyzer</div>
         <div class="card-subtitle">Upload Front &amp; Back → Get exact print size &amp; price</div>
 
@@ -134,11 +361,6 @@
             </div>
         </div>
 
-        <div class="size-selector">
-            <label for="sizeSelect"><i class="fas fa-tshirt"></i> Size</label>
-            <select id="sizeSelect"><option value="">— Select —</option><option value="S">S</option><option value="M">M</option><option value="L">L</option><option value="XL">XL</option><option value="XXL">XXL</option><option value="3XL">3XL</option></select>
-        </div>
-
         <div class="preview-area" id="previewArea">
             <div class="preview-grid"><div class="preview-item"><p>Front</p><img id="frontMain"></div><div class="preview-item"><p>Back</p><img id="backMain"></div></div>
         </div>
@@ -150,12 +372,34 @@
             <div class="result-row"><span class="result-label">⬅️ Left Margin</span><span class="result-value" id="rLeft">—</span></div>
             <div class="result-row"><span class="result-label">⬆️ Top Margin</span><span class="result-value" id="rTop">—</span></div>
             <div class="result-row"><span class="result-label">📦 Category</span><span class="result-value green" id="rCat">—</span></div>
-            <div class="price-display"><div class="label">💰 Final Price</div><div class="amount" id="finalPrice">₹0</div><div class="size-info" id="priceInfo">Size: —</div></div>
+            <div class="price-display">
+                <div class="label">💰 Final Price</div>
+                <div class="amount" id="finalPrice">₹0</div>
+                <div class="size-info" id="priceInfo">Size: —</div>
+            </div>
             <div class="action-buttons">
                 <button class="btn btn-secondary" id="resetBtn"><i class="fas fa-redo"></i> Reset</button>
                 <button class="btn btn-primary" id="addBtn" disabled><i class="fas fa-cart-plus"></i> Cart</button>
                 <button class="btn btn-buy" id="buyBtn" disabled><i class="fas fa-bolt"></i> Buy</button>
             </div>
+        </div>
+
+        <!-- ===== SIZE SELECTOR AT BOTTOM ===== -->
+        <div class="size-section">
+            <label for="sizeSelect">
+                <i class="fas fa-tshirt"></i> Select T-Shirt Size
+                <span class="required-label"><i class="fas fa-asterisk" style="font-size:8px;"></i> Required</span>
+            </label>
+            <select id="sizeSelect">
+                <option value="">— Select Size —</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="XXL">XXL</option>
+                <option value="3XL">3XL</option>
+            </select>
+            <div class="hint"><i class="fas fa-info-circle"></i> Select size to see the final price</div>
         </div>
 
         <div class="note"><i class="fas fa-info-circle" style="color:#D4AF37;"></i> <strong>AI detects</strong> design area → Calculates DTF size → Shows price</div>
@@ -171,6 +415,33 @@
 
 <!-- Toast -->
 <div class="toast" id="toastMsg"></div>
+
+<!-- ===== LOGIN MODAL ===== -->
+<div class="login-modal" id="loginModal">
+    <div class="login-modal-content">
+        <span class="close-modal" id="closeLoginModal">&times;</span>
+        <h2><i class="fas fa-user-circle" style="color:#D4AF37;"></i> Login</h2>
+        <p>Enter your phone number to continue</p>
+        
+        <div class="user-display" id="userDisplay"><i class="fas fa-check-circle" style="color:#4CAF50;"></i> Logged in as: <span id="loggedInUser"></span></div>
+        
+        <div class="input-group">
+            <i class="fas fa-phone"></i>
+            <input type="tel" id="loginPhoneInput" placeholder="+91 9876543210" maxlength="15">
+        </div>
+        
+        <button class="login-btn" id="sendOtpBtn"><i class="fas fa-paper-plane"></i> Send OTP</button>
+        
+        <div class="otp-section" id="otpSection">
+            <p style="font-size:12px;color:#888;margin-bottom:10px;">Enter OTP sent to your phone</p>
+            <div class="otp-row">
+                <input type="text" id="otpInput" placeholder="123456" maxlength="6">
+                <button id="verifyOtpBtn">Verify</button>
+            </div>
+            <button class="resend-btn" id="resendOtpBtn"><i class="fas fa-redo"></i> Resend OTP</button>
+        </div>
+    </div>
+</div>
 
 <script>
 // ============================================================
@@ -207,48 +478,33 @@ const frontRem = $('frontRemove'), backRem = $('backRemove');
 const previewArea = $('previewArea'), resultsPanel = $('resultsPanel');
 const sizeSelect = $('sizeSelect'), toastMsg = $('toastMsg');
 const addBtn = $('addBtn'), buyBtn = $('buyBtn'), resetBtn = $('resetBtn');
+const loginModal = $('loginModal');
+const loginPhone = $('loginPhoneInput');
+const sendOtpBtn = $('sendOtpBtn');
+const otpSection = $('otpSection');
+const otpInput = $('otpInput');
+const verifyOtpBtn = $('verifyOtpBtn');
+const resendOtpBtn = $('resendOtpBtn');
+const closeLoginModal = $('closeLoginModal');
+const loginTriggerBtn = $('loginTriggerBtn');
+const displayUser = $('displayUser');
+const userDisplay = $('userDisplay');
+const loggedInUser = $('loggedInUser');
 
 let frontData = null, frontFile = null, backData = null, backFile = null;
 let result = null, cart = [], user = null;
+let confirmationResult = null;
 
 // ============================================================
-// CLEAN LOCALSTORAGE (Fix Quota Error)
+// CLEAN LOCALSTORAGE
 // ============================================================
 function cleanLocalStorage() {
-    // Remove old/stale data
     const keys = ['vedanta_dtf_cart', 'dtfDirectOrder', 'dtfCartCheckout', 'customCheckoutData'];
-    keys.forEach(key => {
-        try { localStorage.removeItem(key); } catch(e) {}
-    });
-    
-    // Check if there's any other large data
-    let totalSize = 0;
-    for (let i = 0; i < localStorage.length; i++) {
-        const key = localStorage.key(i);
-        const val = localStorage.getItem(key);
-        if (val) totalSize += val.length * 2; // approx bytes
-    }
-    
-    // If storage is more than 4MB, clear some old data
-    if (totalSize > 4 * 1024 * 1024) {
-        console.warn('Storage is large, clearing old data...');
-        // Keep only essential data
-        const keepKeys = ['vedantaUser', 'userPhone'];
-        const toRemove = [];
-        for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (!keepKeys.includes(key) && !key.startsWith('firebase:')) {
-                toRemove.push(key);
-            }
-        }
-        toRemove.forEach(key => {
-            try { localStorage.removeItem(key); } catch(e) {}
-        });
-    }
+    keys.forEach(key => { try { localStorage.removeItem(key); } catch(e) {} });
 }
 
 // ============================================================
-// COMPRESS IMAGE (Reduce size for storage)
+// COMPRESS IMAGE
 // ============================================================
 function compressImage(dataURL, maxWidth = 400, maxHeight = 400, quality = 0.5) {
     return new Promise((resolve) => {
@@ -257,10 +513,8 @@ function compressImage(dataURL, maxWidth = 400, maxHeight = 400, quality = 0.5) 
             let w = img.width, h = img.height;
             if (w > maxWidth) { h = h * maxWidth / w; w = maxWidth; }
             if (h > maxHeight) { w = w * maxHeight / h; h = maxHeight; }
-            
             const canvas = document.createElement('canvas');
-            canvas.width = w;
-            canvas.height = h;
+            canvas.width = w; canvas.height = h;
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, w, h);
             resolve(canvas.toDataURL('image/jpeg', quality));
@@ -285,8 +539,15 @@ function toast(msg, err = false) {
 // ============================================================
 function setUser(u) {
     user = u;
-    $('displayUser').innerText = u ? (u.name || u.phone || 'Customer') : 'Guest';
+    if (u) {
+        displayUser.innerText = u.name || u.phone || 'Customer';
+        loginTriggerBtn.style.display = 'none';
+    } else {
+        displayUser.innerText = 'Guest';
+        loginTriggerBtn.style.display = 'inline-block';
+    }
 }
+
 auth.onAuthStateChanged(u => {
     if (u) {
         const cu = { uid: u.uid, phone: u.phoneNumber || '', name: u.displayName || 'Customer' };
@@ -300,14 +561,102 @@ auth.onAuthStateChanged(u => {
 });
 setUser(JSON.parse(localStorage.getItem('vedantaUser')) || null);
 
-$('logoutBtn').onclick = () => {
-    auth.signOut().then(() => {
-        localStorage.removeItem('vedantaUser');
-        localStorage.removeItem('vedanta_dtf_cart');
-        setUser(null);
-        toast('Logged out');
-        setTimeout(() => window.location.href = 'index.html', 500);
-    });
+// ============================================================
+// LOGIN MODAL
+// ============================================================
+function openLoginModal() {
+    loginModal.classList.add('open');
+    loginPhone.value = '';
+    otpInput.value = '';
+    otpSection.classList.remove('show');
+    sendOtpBtn.disabled = false;
+    sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+    userDisplay.classList.remove('show');
+}
+
+function closeLoginModalFn() {
+    loginModal.classList.remove('open');
+}
+
+loginTriggerBtn.onclick = openLoginModal;
+closeLoginModal.onclick = closeLoginModalFn;
+loginModal.onclick = (e) => { if (e.target === loginModal) closeLoginModalFn(); };
+
+// Send OTP
+sendOtpBtn.onclick = async () => {
+    const phone = loginPhone.value.trim();
+    if (!phone || phone.length < 10) {
+        toast('Enter valid phone number', true);
+        return;
+    }
+    const fullPhone = phone.startsWith('+') ? phone : '+91' + phone;
+    sendOtpBtn.disabled = true;
+    sendOtpBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+    
+    try {
+        const verifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
+            size: 'invisible',
+            callback: () => {}
+        });
+        confirmationResult = await auth.signInWithPhoneNumber(fullPhone, verifier);
+        otpSection.classList.add('show');
+        sendOtpBtn.innerHTML = 'OTP Sent';
+        toast('OTP sent to ' + fullPhone);
+    } catch (e) {
+        sendOtpBtn.disabled = false;
+        sendOtpBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Send OTP';
+        toast('Error: ' + e.message, true);
+    }
+};
+
+// Verify OTP
+verifyOtpBtn.onclick = async () => {
+    const otp = otpInput.value.trim();
+    if (!otp || otp.length < 6) {
+        toast('Enter valid OTP', true);
+        return;
+    }
+    verifyOtpBtn.disabled = true;
+    verifyOtpBtn.innerHTML = 'Verifying...';
+    
+    try {
+        const result = await confirmationResult.confirm(otp);
+        const u = result.user;
+        const cu = { uid: u.uid, phone: u.phoneNumber || '', name: u.displayName || 'Customer' };
+        localStorage.setItem('vedantaUser', JSON.stringify(cu));
+        setUser(cu);
+        userDisplay.classList.add('show');
+        loggedInUser.innerText = cu.phone || cu.name;
+        toast('✅ Login successful!');
+        setTimeout(closeLoginModalFn, 1000);
+        // Re-analyze if needed
+        if (frontData && sizeSelect.value) setTimeout(analyze, 300);
+    } catch (e) {
+        verifyOtpBtn.disabled = false;
+        verifyOtpBtn.innerHTML = 'Verify';
+        toast('Invalid OTP', true);
+    }
+};
+
+// Resend OTP
+resendOtpBtn.onclick = async () => {
+    if (!confirmationResult) {
+        toast('Request OTP first', true);
+        return;
+    }
+    try {
+        // Re-send OTP
+        const phone = loginPhone.value.trim();
+        const fullPhone = phone.startsWith('+') ? phone : '+91' + phone;
+        const verifier = new firebase.auth.RecaptchaVerifier('sendOtpBtn', {
+            size: 'invisible',
+            callback: () => {}
+        });
+        confirmationResult = await auth.signInWithPhoneNumber(fullPhone, verifier);
+        toast('OTP resent');
+    } catch (e) {
+        toast('Error resending OTP', true);
+    }
 };
 
 // ============================================================
@@ -364,8 +713,17 @@ function detectSize(dataURL, g) {
 // ============================================================
 async function analyze() {
     const size = sizeSelect.value;
-    if (!size) { toast('Select size first', true); return; }
-    if (!frontData) { toast('Upload Front image', true); return; }
+    if (!size) {
+        toast('Please select size first!', true);
+        resultsPanel.classList.remove('show');
+        addBtn.disabled = true;
+        buyBtn.disabled = true;
+        return;
+    }
+    if (!frontData) {
+        toast('Upload Front image first', true);
+        return;
+    }
     
     addBtn.disabled = true; buyBtn.disabled = true;
     
@@ -451,14 +809,11 @@ function resetAll() {
 }
 
 // ============================================================
-// CART (With Compression)
+// CART
 // ============================================================
 function saveCart() {
     try {
-        // Clean old data first
         cleanLocalStorage();
-        
-        // Compress images before storing
         const cartToSave = cart.map(async item => {
             const newItem = { ...item };
             if (item.front && item.front.startsWith('data:image')) {
@@ -469,51 +824,26 @@ function saveCart() {
             }
             return newItem;
         });
-        
         Promise.all(cartToSave).then(compressedCart => {
             try {
                 localStorage.setItem('vedanta_dtf_cart', JSON.stringify(compressedCart));
                 updateCart();
             } catch (e) {
-                // If still failing, try with even more compression
-                console.warn('Storage full, compressing more...');
                 const minimalCart = compressedCart.map(item => ({
-                    id: item.id,
-                    name: item.name,
-                    size: item.size,
-                    price: item.price,
-                    cat: item.cat,
-                    quantity: item.quantity,
-                    // Store only one image if both are too large
-                    front: item.front || null,
-                    back: item.back || null
+                    id: item.id, name: item.name, size: item.size,
+                    price: item.price, cat: item.cat, quantity: item.quantity,
+                    front: item.front || null, back: item.back || null
                 }));
-                try {
-                    localStorage.setItem('vedanta_dtf_cart', JSON.stringify(minimalCart));
-                    updateCart();
-                } catch (e2) {
-                    toast('Cart full, please clear some items', true);
-                }
+                try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(minimalCart)); updateCart(); } catch(e2) {}
             }
         });
-    } catch (e) {
-        toast('Error saving cart', true);
-    }
+    } catch (e) {}
 }
 
 function loadCart() {
     try {
         const s = localStorage.getItem('vedanta_dtf_cart');
-        if (s) { 
-            cart = JSON.parse(s); 
-            // Convert any old format to new
-            cart = cart.map(item => ({
-                ...item,
-                front: item.front || item.imageData || null,
-                back: item.back || null
-            }));
-            updateCart(); 
-        }
+        if (s) { cart = JSON.parse(s); updateCart(); }
     } catch(e) { cart = []; }
 }
 
@@ -562,11 +892,12 @@ function updateCart() {
 }
 
 // ============================================================
-// 🔥 ADD TO CART (FIXED)
+// ADD TO CART
 // ============================================================
 function addToCart() {
     if (!user) {
         toast('Please login first', true);
+        openLoginModal();
         return;
     }
     if (!result) {
@@ -585,22 +916,16 @@ function addToCart() {
         back: backData,
         quantity: 1
     };
-    
     cart.push(cartItem);
     saveCart();
     toast('✅ Added to cart!');
     
-    // Background Firebase upload (without storing full images)
     if (frontFile && user) {
         const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
         ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
-            if (url) { 
+            if (url) {
                 const idx = cart.findIndex(item => item.id === cartItem.id);
-                if (idx !== -1) { 
-                    cart[idx].front = url; 
-                    try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart)); } catch(e) {}
-                    updateCart(); 
-                }
+                if (idx !== -1) { cart[idx].front = url; try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart)); } catch(e) {} updateCart(); }
             }
         }).catch(() => {});
     }
@@ -609,22 +934,19 @@ function addToCart() {
         ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
             if (url) {
                 const idx = cart.findIndex(item => item.id === cartItem.id);
-                if (idx !== -1) { 
-                    cart[idx].back = url; 
-                    try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart)); } catch(e) {}
-                    updateCart(); 
-                }
+                if (idx !== -1) { cart[idx].back = url; try { localStorage.setItem('vedanta_dtf_cart', JSON.stringify(cart)); } catch(e) {} updateCart(); }
             }
         }).catch(() => {});
     }
 }
 
 // ============================================================
-// 🔥 BUY NOW (FIXED)
+// BUY NOW
 // ============================================================
 function buyNow() {
     if (!user) {
         toast('Please login first', true);
+        openLoginModal();
         return;
     }
     if (!result) {
@@ -635,11 +957,9 @@ function buyNow() {
     const price = getPrice(result.size);
     const orderId = 'DTF' + Date.now() + Math.floor(Math.random() * 999);
     
-    // Compress images before storing in localStorage
     const compressAndStore = async () => {
         let frontCompressed = frontData;
         let backCompressed = backData;
-        
         if (frontData && frontData.startsWith('data:image')) {
             frontCompressed = await compressImage(frontData, 300, 300, 0.4);
         }
@@ -660,63 +980,36 @@ function buyNow() {
             timestamp: Date.now()
         };
         
-        try {
-            localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData));
-        } catch (e) {
-            // If still failing, store only essential data
-            const minimalData = {
-                type: 'dtf_analyzer',
-                orderId: orderId,
-                size: result.size,
-                price: price,
-                dtfWidth: result.dw,
-                dtfHeight: result.dh,
-                category: result.cat,
-                timestamp: Date.now()
-            };
-            localStorage.setItem('dtfDirectOrder', JSON.stringify(minimalData));
+        try { localStorage.setItem('dtfDirectOrder', JSON.stringify(checkoutData)); } catch(e) {
+            localStorage.setItem('dtfDirectOrder', JSON.stringify({
+                type: 'dtf_analyzer', orderId: orderId, size: result.size,
+                price: price, dtfWidth: result.dw, dtfHeight: result.dh,
+                category: result.cat, timestamp: Date.now()
+            }));
         }
         
-        // Firebase order in background
         const orderData = {
-            orderId: orderId,
-            type: 'dtf_analyzer',
-            size: result.size,
-            price: price,
-            dtfWidth: result.dw,
-            dtfHeight: result.dh,
-            category: result.cat,
-            frontImageUrl: frontData,
-            backImageUrl: backData,
-            itemName: 'DTF Analyzed T-Shirt',
-            quantity: 1,
-            totalAmount: price,
-            userId: user.uid,
-            customerPhone: user.phone || '',
-            customerName: user.name || 'Customer',
-            orderDate: new Date().toISOString(),
-            status: 'pending',
-            paymentStatus: 'pending',
-            source: 'dtf_analyzer',
+            orderId: orderId, type: 'dtf_analyzer', size: result.size,
+            price: price, dtfWidth: result.dw, dtfHeight: result.dh,
+            category: result.cat, frontImageUrl: frontData, backImageUrl: backData,
+            itemName: 'DTF Analyzed T-Shirt', quantity: 1, totalAmount: price,
+            userId: user.uid, customerPhone: user.phone || '',
+            customerName: user.name || 'Customer', orderDate: new Date().toISOString(),
+            status: 'pending', paymentStatus: 'pending', source: 'dtf_analyzer',
             createdAt: firebase.firestore.FieldValue.serverTimestamp()
         };
         db.collection('orders').doc(orderId).set(orderData).catch(() => {});
         
-        // Background uploads
         if (frontFile) {
             const ref = storage.ref().child(`dtf_analyzer/${user.uid}/front_${Date.now()}_${frontFile.name}`);
             ref.put(frontFile).then(() => ref.getDownloadURL()).then(url => {
-                if (url) {
-                    db.collection('orders').doc(orderId).update({ frontImageUrl: url }).catch(() => {});
-                }
+                if (url) db.collection('orders').doc(orderId).update({ frontImageUrl: url }).catch(() => {});
             }).catch(() => {});
         }
         if (backFile) {
             const ref = storage.ref().child(`dtf_analyzer/${user.uid}/back_${Date.now()}_${backFile.name}`);
             ref.put(backFile).then(() => ref.getDownloadURL()).then(url => {
-                if (url) {
-                    db.collection('orders').doc(orderId).update({ backImageUrl: url }).catch(() => {});
-                }
+                if (url) db.collection('orders').doc(orderId).update({ backImageUrl: url }).catch(() => {});
             }).catch(() => {});
         }
         
@@ -726,7 +1019,6 @@ function buyNow() {
             window.location.href = 'secure-checkout2.html?type=dtf&orderId=' + orderId;
         }, 400);
     };
-    
     compressAndStore();
 }
 
@@ -772,8 +1064,9 @@ $('cartCheckout').onclick = () => {
 // ============================================================
 cleanLocalStorage();
 loadCart();
-console.log('⚡ DTF Analyzer Ready - Storage Quota Fixed!');
+console.log('⚡ DTF Analyzer Ready!');
 console.log('💰 S/M/L/XL = ₹599 | XXL/3XL = ₹650');
+console.log('🔐 Login via Phone OTP');
 </script>
 </body>
 </html>
